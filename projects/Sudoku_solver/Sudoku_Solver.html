@@ -12,15 +12,26 @@
 		<link rel="stylesheet" href="../../assets/css/main.css" />
 		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
 		<style>
+			p {
+				color: black;
+				font-size:1.15em;
+            	margin: 10px;
+        	}
+			.effect-span {
+				color: black; 
+				font-size: 1.15em; 
+				margin: 10px; 
+        	}
+
 			#home-btn {
 				padding: center;
             	font-size: 15px;
             	cursor: pointer;
-            	position: absolute; /* Position buttons absolutely */
+            	position: absolute;
             	top: 30px;
             	left: 40px;
-				width: 80px;  /* Button width */
-            	height: 50px;  /* Button height */
+				width: 80px;  
+            	height: 50px;  
         	}
 			.content {
 				max-height: 0;
@@ -28,21 +39,35 @@
 				transition: max-height 0.2s ease-out;
 			}
 			.submenu {
-            	font-size: 1.5em; /* Custom size similar to h2 */
-            	font-weight: bold; /* Make text bold */
-				margin-right: 10px; /* Space between the text and the button */
+            	font-size: 1.5em; 
+            	font-weight: bold; 
+				margin-right: 10px; 
         	}
 			.container {
 				display: flex;
-				justify-content: space-between; /* Text on the left, buttons on the right */
-				align-items: center; /* Vertically centers items */
+				justify-content: space-between; 
+				align-items: center; 
         	}
 			.expandable-content {
 				max-height: 0;
 				overflow: hidden;
 				transition: max-height 0.2s ease-out;
         	}
-
+			.video-container {
+				position: relative;
+				padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+				height: 0;
+				overflow: hidden;
+				max-width: 100%;
+				background: #000;
+			}
+			.video-container iframe {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
 		</style>
 	</head>
 	<body class="is-preload">
@@ -64,10 +89,13 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
-							<span class="image main"><img src="../../images/pic13.jpg" alt="" /></span>
+							<div class="video-container">
+								<iframe src="https://www.youtube.com/embed/YTUb_PoP2fk" frameborder="0" allowfullscreen></iframe>
+							</div>
 							<div>
 								<span class="submenu">Description</span>
-								<p>Blah blah blah</p>
+								<p>This is a Python-based Sudoku game that is implemented entirely on TKinter (not pygame) that allows users to solve puzzles, generate new Sudoku boards, and even check the validity of their solutions. The game is interactive, with a graphical user interface (GUI) for ease of use, making it accessible to both beginners and Sudoku enthusiasts.</p>
+								
 							</div>
 
 							<div class="container">
@@ -77,8 +105,12 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="background-content">
-								<p>This is the content for Background. It will be expanded or collapsed when you click the button.</p>
-								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
+								<p>The program employs an algorithm that mimics the penciling strategy used to solve Sudoku puzzles in real life, allowing it to solve any Sudoku board. While this approach is quite effective, it wasn't my original idea.</p>
+								<p>Initially, I tried solving Sudoku using a basic backtracking strategy with simple while loops. After testing it on various input boards, I quickly realized that my algorithm was inefficient, with some basic puzzles taking minutes, or even hours, to solve.</p>
+								<p>I decided to revisit the algorithm, still sticking with the backtracking approach but this time utilizing recursion. Although it was faster than my original attempt, some boards still took several minutes to solve.</p>
+								<p>After more research, I stumbled upon an advanced algorithm called Dancing Links, developed by Professor Donald Knuth. This algorithm can solve any Sudoku board with lightning speed, while also detecting unsolvable boards and identifying multiple solutions when present. A Sudoku solver using this powerful algorithm can be found on this <a href="https://anysudokusolver.com/">website</a>, and its main logic file is available <a href="https://anysudokusolver.com/js/script.js">here</a>.</p>
+								<p>However, implementing the Dancing Links algorithm on my own proved to be quite challenging. I spent many hours trying to grasp its concepts by reading Professor Knuth’s book The Art of Computer Programming (Fascicle 5: Mathematical Preliminaries Redux; Introduction to Backtracking; Dancing Links), but due to time constraints, I couldn&#39;t fully comprehend it.</p>
+								<p>Eventually, I discovered a more accessible algorithm, which I mentioned at the start, from a LeetCode user named &quot;Ov8CfeJ3Su.&quot; Their algorithm is much easier to understand and implement. You can find it <a href="https://leetcode.com/problems/sudoku-solver/solutions/5757508/recursive-backtracking-beats-99/">here</a>. The core logic of my program is based on their work, while the rest of the implementation was done by me.</p>
 							</div>
 
 
@@ -89,9 +121,12 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="features-content">
-								<p>This is the content for Features. It will be expanded or collapsed when you click the button.</p>
-								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
-
+								<ul>
+									<li><strong>Interactive GUI</strong>:<span class="effect-span">Play Sudoku using an intuitive graphical interface.</span></li>
+									<li><strong>Sudoku Board Generation</strong>:<span class="effect-span">Generate new Sudoku boards with varying difficulty levels.</span></li>
+									<li><strong>Solution Checker</strong>:<span class="effect-span">Check if the current board configuration is valid and adheres to Sudoku rules.</span></li>
+								</ul>
+									
 							</div>
 
 							<div class="container">
@@ -101,8 +136,14 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="future-improvment-content">
-								<p>This is the content for Future Improvement. It will be expanded or collapsed when you click the button.</p>
-								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
+								<ul>
+									<li><span class="effect-span">Showing hints when the player is stuck</span></li>
+									<li><span class="effect-span">Timer for tracking how long it takes to solve a puzzle</span></li>
+									<li><span class="effect-span">A leaderboard for tracking top scores</span></li>
+									<li><span class="effect-span">Show in real-time how the algorithm changes each cell using backtracking when solving</span></li>
+									<li><span class="effect-span">Dancing Links implementation + IRL sudoku advanced techniques such as finding <em>Hidden Singles</em>, <em>Hidden Pairs</em>, <em>Swordfish</em>, <em>X-wing</em>, <em>Y-wing</em>, etc. to maxmiize solving runtime</span></li>
+								</ul>
+									
 							</div>
 
 							<div class="container">
@@ -112,7 +153,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="github-content">
-								<a href="https://github.com/vuila9/Sudoku-Solver" target="_blank">GitHub source code</a>
+								<a href="https://github.com/vuila9/Sudoku-Solver" target="_blank"><p>Source code</p></a>
 							</div>
 
 				<!--END-->
@@ -126,6 +167,7 @@
 			<script src="../../assets/js/breakpoints.min.js"></script>
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/marked.min.js"></script>
 			<script>
 				const buttons = document.querySelectorAll('.expand-collapse-button');
 				buttons.forEach(button => {
@@ -151,6 +193,5 @@
 					}
 				}
 			</script>
-
 	</body>
 </html>
