@@ -1,26 +1,34 @@
 <!DOCTYPE HTML>
-<!--
-	Phantom by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
 	<head>
-		<title>Sudoku Solver Project</title>
+		<title>Any Project Template</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="../../assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
 		<style>
+			body {
+				font-size:16.5px;
+			}
+			p {
+				color: black;
+				font-size:1.15em;
+            	margin: 10px;
+        	}
+			.effect-span {
+				color: black;
+				font-size: 1.15em; 
+				margin: 10px; 
+        	}
 			#home-btn {
 				padding: center;
             	font-size: 15px;
             	cursor: pointer;
-            	position: absolute; /* Position buttons absolutely */
+            	position: absolute;
             	top: 30px;
             	left: 40px;
-				width: 80px;  /* Button width */
-            	height: 50px;  /* Button height */
+				width: 80px;  
+            	height: 50px;  
         	}
 			.content {
 				max-height: 0;
@@ -28,21 +36,35 @@
 				transition: max-height 0.2s ease-out;
 			}
 			.submenu {
-            	font-size: 1.5em; /* Custom size similar to h2 */
-            	font-weight: bold; /* Make text bold */
-				margin-right: 10px; /* Space between the text and the button */
+            	font-size: 1.5em; 
+            	font-weight: bold; 
+				margin-right: 10px; 
         	}
 			.container {
 				display: flex;
-				justify-content: space-between; /* Text on the left, buttons on the right */
-				align-items: center; /* Vertically centers items */
+				justify-content: space-between; 
+				align-items: center; 
         	}
 			.expandable-content {
 				max-height: 0;
 				overflow: hidden;
 				transition: max-height 0.2s ease-out;
         	}
-
+			.video-container {
+				position: relative;
+				padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+				height: 0;
+				overflow: hidden;
+				max-width: 100%;
+				background: #000;
+			}
+			.video-container iframe {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
 		</style>
 	</head>
 	<body class="is-preload">
@@ -53,10 +75,10 @@
 					<header id="header">
 						<div class="inner">
 
-							<a href="../../index.html">
+							<a href="../index.html">
 								<button id="home-btn">&lt;&lt;</button>
 							</a> 
-							<a><h1>Sudoku Game</h1></a>
+							<a><h1>Project Template</h1></a>
 							
 						</div>
 					</header>
@@ -64,7 +86,7 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
-							<span class="image main"><img src="../../images/pic13.jpg" alt="" /></span>
+							<span class="image main"><img src="../images/pic13.jpg" alt="" /></span>
 							<div>
 								<span class="submenu">Description</span>
 								<p>Blah blah blah</p>
@@ -91,7 +113,6 @@
 							<div class="expandable-content" id="features-content">
 								<p>This is the content for Features. It will be expanded or collapsed when you click the button.</p>
 								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
-
 							</div>
 
 							<div class="container">
@@ -112,7 +133,8 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="github-content">
-								<a href="https://github.com/vuila9/Sudoku-Solver" target="_blank">GitHub source code</a>
+								<p>This is the content for GitHub. It will be expanded or collapsed when you click the button.</p>
+								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
 							</div>
 
 				<!--END-->
@@ -121,11 +143,11 @@
 			</div>
 
 		<!-- Scripts -->
-			<script src="../../assets/js/jquery.min.js"></script>
-			<script src="../../assets/js/browser.min.js"></script>
-			<script src="../../assets/js/breakpoints.min.js"></script>
-			<script src="../../assets/js/util.js"></script>
-			<script src="../../assets/js/main.js"></script>
+			<script src="../assets/js/jquery.min.js"></script>
+			<script src="../assets/js/browser.min.js"></script>
+			<script src="../assets/js/breakpoints.min.js"></script>
+			<script src="../assets/js/util.js"></script>
+			<script src="../assets/js/main.js"></script>
 			<script>
 				const buttons = document.querySelectorAll('.expand-collapse-button');
 				buttons.forEach(button => {
