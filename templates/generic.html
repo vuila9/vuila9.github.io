@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>
+<!--
+	Phantom by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Any Project Template</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="../assets/css/noscript.css" /></noscript>
+		<style>
+			#home-btn {
+				padding: center;
+            	font-size: 15px;
+            	cursor: pointer;
+            	position: absolute; /* Position buttons absolutely */
+            	top: 30px;
+            	left: 40px;
+				width: 80px;  /* Button width */
+            	height: 50px;  /* Button height */
+        	}
+			.content {
+				max-height: 0;
+				overflow: hidden;
+				transition: max-height 0.2s ease-out;
+			}
+			.submenu {
+            	font-size: 1.5em; /* Custom size similar to h2 */
+            	font-weight: bold; /* Make text bold */
+				margin-right: 10px; /* Space between the text and the button */
+        	}
+			.container {
+				display: flex;
+				justify-content: space-between; /* Text on the left, buttons on the right */
+				align-items: center; /* Vertically centers items */
+        	}
+			.expandable-content {
+				max-height: 0;
+				overflow: hidden;
+				transition: max-height 0.2s ease-out;
+        	}
+
+		</style>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+				
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<a href="../index.html">
+								<button id="home-btn">&lt;&lt;</button>
+							</a> 
+							<a><h1>Project Template</h1></a>
+							
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<span class="image main"><img src="../images/pic13.jpg" alt="" /></span>
+							<div>
+								<span class="submenu">Description</span>
+								<p>Blah blah blah</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Background</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('background-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="background-content">
+								<p>This is the content for Background. It will be expanded or collapsed when you click the button.</p>
+								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
+							</div>
+
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('features-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<p>This is the content for Features. It will be expanded or collapsed when you click the button.</p>
+								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Future Improvment</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('future-improvment-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="future-improvment-content">
+								<p>This is the content for Future Improvement. It will be expanded or collapsed when you click the button.</p>
+								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('github-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<p>This is the content for GitHub. It will be expanded or collapsed when you click the button.</p>
+								<p>Donec eget ex magna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque venenatis dolor imperdiet dolor mattis sagittis. Praesent rutrum sem diam, vitae egestas enim auctor sit amet. Pellentesque leo mauris, consectetur id ipsum sit amet, fergiat. Pellentesque in mi eu massa lacinia malesuada et a elit. Donec urna ex, lacinia in purus ac, pretium pulvinar mauris. Curabitur sapien risus, commodo eget turpis at, elementum convallis elit. Pellentesque enim turpis, hendrerit tristique.</p>
+							</div>
+
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../assets/js/jquery.min.js"></script>
+			<script src="../assets/js/browser.min.js"></script>
+			<script src="../assets/js/breakpoints.min.js"></script>
+			<script src="../assets/js/util.js"></script>
+			<script src="../assets/js/main.js"></script>
+			<script>
+				const buttons = document.querySelectorAll('.expand-collapse-button');
+				buttons.forEach(button => {
+					let toggle = true;
+
+					button.addEventListener('click', function() {
+						if (toggle) {
+							button.textContent = '▲';
+						} else {
+							button.textContent = '▼';
+						}
+						toggle = !toggle;
+					});
+				});
+
+				function toggleContent(contentId) {
+					const content = document.getElementById(contentId);
+					content.classList.toggle('active');
+					if (content.style.maxHeight){
+						content.style.maxHeight = null;
+					} else {
+						content.style.maxHeight = content.scrollHeight + "px";
+					}
+				}
+			</script>
+
+	</body>
+</html>

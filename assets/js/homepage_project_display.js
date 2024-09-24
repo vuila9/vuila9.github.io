@@ -1,0 +1,69 @@
+// A script made to add project dynamically with ease. Only need to add to 'articlesData' for this to work.
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the section where the articles will be added
+    const section = document.querySelector("#main .inner .tiles");
+
+    // Data for the articles
+    const articlesData = [
+        {
+            imageSrc: "images/pic01.jpg",
+            title: "Sudoku Game",
+            description: "A Python-based Sudoku game with a built-in solver, featuring a fully implemented GUI using Tkinter.",
+            link: "projects/Sudoku_Solver/Sudoku_Solver.html"
+        },
+        {
+            imageSrc: "images/pic02.jpg",
+            title: "WIP1",
+            description: "Phasellus convallis elit id urna lorem ipsum amet et veroeros.",
+            link: "templates/generic.html"
+        },
+        {
+            imageSrc: "images/pic03.jpg",
+            title: "WIP2",
+            description: "Phasellus convallis elit id urna lorem ipsum amet et veroeros.",
+            link: "templates/generic.html"
+        }
+    ];
+
+    // Loop through the data to create multiple articles
+    articlesData.forEach(data => {
+        // Create the article element
+        const article = document.createElement("article");
+        article.className = "style1";
+
+        // Create the span with the image
+        const span = document.createElement("span");
+        span.className = "image";
+
+        const img = document.createElement("img");
+        img.src = data.imageSrc;
+        img.alt = "";
+        span.appendChild(img);
+
+        // Create the anchor tag
+        const anchor = document.createElement("a");
+        anchor.href = data.link;
+
+        // Create the h2 element for the title
+        const h2 = document.createElement("h2");
+        h2.textContent = data.title;
+
+        // Create the div with the paragraph for the description
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "content";
+
+        const paragraph = document.createElement("p");
+        paragraph.textContent = data.description;
+        contentDiv.appendChild(paragraph);
+
+        // Append everything together
+        anchor.appendChild(h2);
+        anchor.appendChild(contentDiv);
+        article.appendChild(span);
+        article.appendChild(anchor);
+
+        // Append the article to the section
+        section.appendChild(article);
+    });
+});
