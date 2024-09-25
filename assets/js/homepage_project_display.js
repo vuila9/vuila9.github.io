@@ -14,13 +14,13 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         {
             imageSrc: "images/pic02.jpg",
-            title: "WIP1",
-            description: "Phasellus convallis elit id urna lorem ipsum amet et veroeros.",
-            link: "templates/generic.html"
+            title: "Web-based Restaurant",
+            description: "A web-based online restaurant with user-friendly accounts where users can place orders tied to their account, using MongoDB for order storage.",
+            link: "projects/Web-based_Restaurant/Web-based_Restaurant.html"
         },
         {
             imageSrc: "images/pic03.jpg",
-            title: "WIP2",
+            title: "WIP1",
             description: "Phasellus convallis elit id urna lorem ipsum amet et veroeros.",
             link: "templates/generic.html"
         }
