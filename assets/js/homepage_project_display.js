@@ -15,13 +15,19 @@ document.addEventListener("DOMContentLoaded", function() {
         {
             imageSrc: "images/pic02.jpg",
             title: "Web-based Restaurant",
-            description: "A web-based online restaurant with user-friendly accounts where users can place orders tied to their account, using MongoDB for order storage.",
+            description: "A web-based online restaurant with user-friendly accounts where users can place orders tied to their account, using MongoDB for order storage and Node.js for server hosting.",
             link: "projects/Web-based_Restaurant/Web-based_Restaurant.html"
         },
         {
             imageSrc: "images/pic03.jpg",
-            title: "WIP1",
-            description: "Phasellus convallis elit id urna lorem ipsum amet et veroeros.",
+            title: "Store Application",
+            description: "A Java-based application with a graphical user interface (GUI) that enables users to add or remove items from their shopping cart.",
+            link: "projects/Store_Application/Store_Application.html"
+        },
+        {
+            imageSrc: "images/pic04.jpg",
+            title: "WIP4",
+            description: "A work-in-progress project to be released soon™",
             link: "templates/generic.html"
         }
     ];
