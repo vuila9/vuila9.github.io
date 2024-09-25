@@ -1,0 +1,193 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Web-based Restaurant Project</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="web-based_restaurantlogo.svg" type="image/x-icon">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<style>
+			body {
+				font-size:16.5px;
+			}
+			p {
+				color: black;
+				font-size:1.15em;
+            	margin: 10px;
+        	}
+			.effect-span {
+				color: black;
+				font-size: 1.15em; 
+				margin: 10px; 
+        	}
+			#home-btn {
+				padding: center;
+            	font-size: 15px;
+            	cursor: pointer;
+            	position: absolute;
+            	top: 30px;
+            	left: 40px;
+				width: 80px;  
+            	height: 50px;  
+        	}
+			.content {
+				max-height: 0;
+				overflow: hidden;
+				transition: max-height 0.2s ease-out;
+			}
+			.submenu {
+            	font-size: 1.5em; 
+            	font-weight: bold; 
+				margin-right: 10px; 
+        	}
+			.container {
+				display: flex;
+				justify-content: space-between; 
+				align-items: center; 
+        	}
+			.expandable-content {
+				max-height: 0;
+				overflow: hidden;
+				transition: max-height 0.2s ease-out;
+        	}
+			.video-container {
+				position: relative;
+				padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+				height: 0;
+				overflow: hidden;
+				max-width: 100%;
+				background: #000;
+			}
+			.video-container iframe {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+				
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+
+							<a href="../../index.html">
+								<button id="home-btn">&lt;&lt;</button>
+							</a> 
+							<a><h1>Web-based Restaurant</h1></a>
+							
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<div class="video-container">
+								<iframe src="https://www.youtube.com/embed/ezaQvoaKabY" frameborder="0" allowfullscreen></iframe>
+							</div>
+							<div>
+								<span class="submenu">Description</span>
+								<p>This is a small project in COMP2406-F21 (Carleton University) about an online restaurant with front-end and back-end development using Node.js server and MongoDB database. Designed with REST APIs and features user-account functinality.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Background</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('background-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="background-content">
+								<p>Imagine managing a restaurant where this website becomes your tool to oversee all online orders made by customers. Each customer can easily create an account, allowing them to select and order a variety of meals.</p>
+								<p>Once the order is placed, it is seamlessly tied to their account and stored securely in a MongoDB database. Running on a Node.js server, the site allows you, as the manager, to view all the orders, including the specific meals ordered and their total cost.</p>
+								<p>Designed with functionality in mind, the website focuses on ease of use, intentionally avoiding unnecessary CSS effects.</p>
+							</div>
+
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('features-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<ul>
+									<li><strong>Interactive User Interface</strong>:<span class="effect-span">User can interact with various features on the website.</span></li>
+									<li><strong>User-account</strong>:<span class="effect-span">Allow user to create an account with username and password.</span></li>
+									<li><strong>Order placement</strong>:<span class="effect-span">Users can place orders linked to their accounts, with a privacy mode that hides orders from others while still storing the profile in the database.</span></li>
+									<li><strong>Responsive</strong>:<span class="effect-span">User can add and change their order anytime before it is placed. The website will automaticall adjust the order every time a meal is added or removed from the order.</span></li>
+									<li><strong>Security</strong>:<span class="effect-span">User can only interact with the website via visible buttons and text boxes. Any modification done via the URL will not bypass the system (sort of).</span></li>
+
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Future Improvment</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('future-improvment-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="future-improvment-content">
+								<ul>
+									<li><span class="effect-span">Add CSS effect to make the website looks nicer</span></li>
+									<li><span class="effect-span">Record the time when each order is placed and store it alongside the order details.</span></li>
+									<li><span class="effect-span">Allow user to place the order as a guest without an account</span></li>
+									<li><span class="effect-span">Make it easier to set up and run the program</span></li>
+								
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('github-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<a href="https://github.com/vuila9/Web-Design-with-Nodejs" target="_blank"><p>Source code</p></a>
+
+							</div>
+
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script>
+				const buttons = document.querySelectorAll('.expand-collapse-button');
+				buttons.forEach(button => {
+					let toggle = true;
+
+					button.addEventListener('click', function() {
+						if (toggle) {
+							button.textContent = '▲';
+						} else {
+							button.textContent = '▼';
+						}
+						toggle = !toggle;
+					});
+				});
+
+				function toggleContent(contentId) {
+					const content = document.getElementById(contentId);
+					content.classList.toggle('active');
+					if (content.style.maxHeight){
+						content.style.maxHeight = null;
+					} else {
+						content.style.maxHeight = content.scrollHeight + "px";
+					}
+				}
+			</script>
+
+	</body>
+</html>
