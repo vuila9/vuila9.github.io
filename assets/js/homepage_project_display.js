@@ -1,5 +1,4 @@
 // A script made to add project dynamically with ease. Only need to add to 'articlesData' for this to work.
-
 document.addEventListener("DOMContentLoaded", function() {
     // Get the section where the articles will be added
     const section = document.querySelector("#main .inner .tiles");
@@ -73,3 +72,13 @@ document.addEventListener("DOMContentLoaded", function() {
         section.appendChild(article);
     });
 });
+
+// navigate between sections in homepage HTML
+function scrollToSection(id) {
+    var element = document.getElementById(id);
+    if (element) {
+        element.scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
+}
