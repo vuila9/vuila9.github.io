@@ -50,7 +50,6 @@
 								<p>At the time, I was very proud of finding a solution to this issue. Now, with more experience, it seems less daunting, but it was a defining moment that solidified my passion for Computer Science.</p>
 							</div>
 
-
 							<div class="container">
 								<div class="submenu">Features</div>
 								<div>
@@ -63,7 +62,6 @@
 									<li><b>Item cart</b>:<span class="effect-span">&nbsp;Users can add items from the 'Store Stock' list to their cart. Both the 'Store Stock' list and the cart will accurately reflect any items added or removed by the user.</span></li>
 									<li><b>Most popular items</b>:<span class="effect-span">&nbsp;This section displays items ranked from most popular to least popular. An item's popularity is determined by the quantity sold.</span></li>
 									<li><b>Store Summary</b>:<span class="effect-span">&nbsp;This section provides an overview of total sales, total revenue, and average revenue per sale.</span></li>
-									
 								</ul>
 							</div>
 
@@ -89,7 +87,6 @@
 							</div>
 							<div class="expandable-content" id="github-content">
 								<a href="https://github.com/vuila9/Store-Application" target="_blank"><p>Source code</p></a>
-
 							</div>
 
 				<!--END-->
@@ -103,31 +100,5 @@
 			<script src="../../assets/js/breakpoints.min.js"></script>
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
-			<script>
-				const buttons = document.querySelectorAll('.expand-collapse-button');
-				buttons.forEach(button => {
-					let toggle = true;
-
-					button.addEventListener('click', function() {
-						if (toggle) {
-							button.textContent = '▲';
-						} else {
-							button.textContent = '▼';
-						}
-						toggle = !toggle;
-					});
-				});
-
-				function toggleContent(contentId) {
-					const content = document.getElementById(contentId);
-					content.classList.toggle('active');
-					if (content.style.maxHeight){
-						content.style.maxHeight = null;
-					} else {
-						content.style.maxHeight = content.scrollHeight + "px";
-					}
-				}
-			</script>
-
 	</body>
 </html>
