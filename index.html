@@ -37,10 +37,10 @@
 						<h2>Menu</h2>
 						<ul>
 							<li><a href="#" onclick="scrollToSection('header')">Home</a></li>
-							<li><a href="#main">Projects</a></li>
-							<li><a href="#about-me">About Me</a></li>
-							<li><a href="#experience">Experience</a></li>
-							<li><a href="#contact">Contact</a></li>
+							<li><a href="#" onclick="scrollToSection('main')">Projects</a></li>
+							<li><a href="#" onclick="scrollToSection('about-me')">About Me</a></li>
+							<li><a href="#" onclick="scrollToSection('experience')">Experience</a></li>
+							<li><a href="#" onclick="scrollToSection('contact')">Contact</a></li>
 						</ul>
 					</nav>
 
@@ -98,15 +98,5 @@
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
 			<script src="assets/js/homepage_project_display.js"></script>
-			<script>
-				function scrollToSection(id) {
-					var element = document.getElementById(id);
-					if (element) {
-						element.scrollIntoView({
-							behavior: 'smooth'
-						});
-					}
-				}
-			</script>
 	</body>
 </html>
