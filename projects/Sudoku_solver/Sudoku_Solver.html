@@ -17,12 +17,10 @@
 				<!-- Header -->
 					<header id="header">
 						<div class="inner">
-
 							<a href="../../index.html">
 								<button id="home-btn">&lt;&lt;</button>
 							</a> 
 							<a><h1>Sudoku Game</h1></a>
-							
 						</div>
 					</header>
 
@@ -35,7 +33,6 @@
 							<div>
 								<span class="submenu">Description</span>
 								<p>This is a Python-based Sudoku game that is implemented entirely on TKinter (not pygame) that allows users to solve puzzles, generate new Sudoku boards, and even check the validity of their solutions. The game is interactive, with a graphical user interface (GUI) for ease of use, making it accessible to both beginners and Sudoku enthusiasts.</p>
-								
 							</div>
 
 							<div class="container">
@@ -53,7 +50,6 @@
 								<p>Eventually, I discovered a more accessible algorithm, which I mentioned at the start, from a LeetCode user named &quot;Ov8CfeJ3Su.&quot; Their algorithm is much easier to understand and implement. You can find it <a href="https://leetcode.com/problems/sudoku-solver/solutions/5757508/recursive-backtracking-beats-99/" target="_blank">here</a>. The core logic of my program is based on their work, while the rest of the implementation was done by me.</p>
 							</div>
 
-
 							<div class="container">
 								<div class="submenu">Features</div>
 								<div>
@@ -66,7 +62,6 @@
 									<li><b>Sudoku Board Generation</b>:<span class="effect-span">&nbsp;Generate new Sudoku boards with varying difficulty levels.</span></li>
 									<li><b>Solution Checker</b>:<span class="effect-span">&nbsp;Check if the current board configuration is valid and adheres to Sudoku rules.</span></li>
 								</ul>
-									
 							</div>
 
 							<div class="container">
@@ -108,30 +103,5 @@
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/marked.min.js"></script>
-			<script>
-				const buttons = document.querySelectorAll('.expand-collapse-button');
-				buttons.forEach(button => {
-					let toggle = true;
-
-					button.addEventListener('click', function() {
-						if (toggle) {
-							button.textContent = '▲';
-						} else {
-							button.textContent = '▼';
-						}
-						toggle = !toggle;
-					});
-				});
-
-				function toggleContent(contentId) {
-					const content = document.getElementById(contentId);
-					content.classList.toggle('active');
-					if (content.style.maxHeight){
-						content.style.maxHeight = null;
-					} else {
-						content.style.maxHeight = content.scrollHeight + "px";
-					}
-				}
-			</script>
 	</body>
 </html>
