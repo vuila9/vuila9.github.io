@@ -1,6 +1,13 @@
 
 body {
     font-size:16.5px;
+    background: linear-gradient(to bottom, 
+        rgb(248, 217, 222), /* Lightest Pink */
+        rgb(245, 210, 215), /* Lighter Pink */
+        rgb(240, 205, 210), /* Medium Pink */
+        rgb(230, 200, 205), /* Dark Pink */
+        rgb(220, 190, 200)   /* Darkest Pink */
+    );
 }
 b {
     color: rgba(41, 40, 40, 0.63);
