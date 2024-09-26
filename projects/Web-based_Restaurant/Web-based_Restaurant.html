@@ -17,12 +17,10 @@
 				<!-- Header -->
 					<header id="header">
 						<div class="inner">
-
 							<a href="../../index.html">
 								<button id="home-btn">&lt;&lt;</button>
 							</a> 
 							<a><h1>Web-based Restaurant</h1></a>
-							
 						</div>
 					</header>
 
@@ -49,7 +47,6 @@
 								<p>Designed with functionality in mind, the website focuses on ease of use, intentionally avoiding unnecessary CSS effects.</p>
 							</div>
 
-
 							<div class="container">
 								<div class="submenu">Features</div>
 								<div>
@@ -63,7 +60,6 @@
 									<li><b>Order placement</b>:<span class="effect-span">&nbsp;Users can place orders linked to their accounts, with a privacy mode that hides orders from others while still storing the profile in the database.</span></li>
 									<li><b>Responsive</b>:<span class="effect-span">&nbsp;User can add and change their order anytime before it is placed. The website will automaticall adjust the order every time a meal is added or removed from the order.</span></li>
 									<li><b>Security</b>:<span class="effect-span">&nbsp;User can only interact with the website via visible buttons and text boxes. Any modification done via the URL will not bypass the system (sort of).</span></li>
-
 								</ul>
 							</div>
 
@@ -79,7 +75,6 @@
 									<li><span class="effect-span">Record the time when each order is placed and store it alongside the order details.</span></li>
 									<li><span class="effect-span">Allow user to place the order as a guest without an account</span></li>
 									<li><span class="effect-span">Make it easier to set up and run the program</span></li>
-								
 								</ul>
 							</div>
 
@@ -91,9 +86,8 @@
 							</div>
 							<div class="expandable-content" id="github-content">
 								<a href="https://github.com/vuila9/Web-Design-with-Nodejs" target="_blank"><p>Source code</p></a>
-
 							</div>
-
+							
 				<!--END-->
 						</div>
 					</div>
@@ -105,31 +99,6 @@
 			<script src="../../assets/js/breakpoints.min.js"></script>
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
-			<script>
-				const buttons = document.querySelectorAll('.expand-collapse-button');
-				buttons.forEach(button => {
-					let toggle = true;
-
-					button.addEventListener('click', function() {
-						if (toggle) {
-							button.textContent = '▲';
-						} else {
-							button.textContent = '▼';
-						}
-						toggle = !toggle;
-					});
-				});
-
-				function toggleContent(contentId) {
-					const content = document.getElementById(contentId);
-					content.classList.toggle('active');
-					if (content.style.maxHeight){
-						content.style.maxHeight = null;
-					} else {
-						content.style.maxHeight = content.scrollHeight + "px";
-					}
-				}
-			</script>
-
+			<script src="../../assets/js/marked.min.js"></script>
 	</body>
 </html>
