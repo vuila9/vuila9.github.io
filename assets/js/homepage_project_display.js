@@ -72,13 +72,3 @@ document.addEventListener("DOMContentLoaded", function() {
         section.appendChild(article);
     });
 });
-
-// navigate between sections in homepage HTML
-function scrollToSection(id) {
-    var element = document.getElementById(id);
-    if (element) {
-        element.scrollIntoView({
-            behavior: 'smooth'
-        });
-    }
-}
