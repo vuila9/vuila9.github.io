@@ -2,7 +2,7 @@
 body {
     font-size:16.5px;
     background: linear-gradient(to bottom, 
-        rgb(248, 217, 222), /* Lightest Pink */
+        white,
         rgb(245, 210, 215), /* Lighter Pink */
         rgb(240, 205, 210), /* Medium Pink */
         rgb(230, 200, 205), /* Dark Pink */
