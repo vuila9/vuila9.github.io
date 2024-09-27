@@ -4,7 +4,7 @@ html {
 body {
     font-size:16.5px;
     background: linear-gradient(to bottom, 
-        rgb(248, 217, 222), /* Lightest Pink */
+        white, /* Lightest Pink */
         rgb(239, 199, 209), /* Lighter Pink */
         rgb(219, 179, 189), /* Medium Pink */
         rgb(199, 159, 169), /* Dark Pink */
