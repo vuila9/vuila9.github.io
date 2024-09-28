@@ -1,77 +1,79 @@
-html {
-    scroll-behavior: smooth; /* Enable smooth scrolling */
-}
+// A script made to add project dynamically with ease. Only need to add to 'articlesData' for this to work.
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the section where the articles will be added
+    const section = document.querySelector("#main .inner .tiles");
 
-body {
-    font-size:16.5px;
-    background: linear-gradient(to bottom, 
-        rgb(255, 255, 255),
-        rgb(249, 239, 229), /* Light Pink */
-        rgb(229, 219, 199), /* Medium Pink */
-        rgb(213, 189, 179), /* Dark Pink */
-        rgb(189, 159, 149)   /* Darkest Pink */
-    );
-}
+    // Data for the articles
+    const articlesData = [
+        {
+            imageSrc: "images/pic01.jpg",
+            title: "Sudoku Game",
+            description: "A Python-based Sudoku game with a built-in solver, featuring a fully implemented GUI using Tkinter.",
+            link: "projects/Sudoku_solver/Sudoku_Solver.html"
+        },
+        {
+            imageSrc: "images/pic02.jpg",
+            title: "Web-based Restaurant",
+            description: "A web-based online restaurant with user-friendly accounts where users can place orders tied to their account, using MongoDB for order storage and Node.js for server hosting.",
+            link: "projects/Web-based_Restaurant/Web-based_Restaurant.html"
+        },
+        {
+            imageSrc: "images/pic03.jpg",
+            title: "Store Application",
+            description: "A Java-based application with a graphical user interface (GUI) that enables users to add or remove items from their shopping cart.",
+            link: "projects/Store_Application/Store_Application.html"
+        },
+        {
+            imageSrc: "images/pic04.jpg",
+            title: "WIP4",
+            description: "A work-in-progress project to be released soon™",
+            link: "templates/generic.html"
+        }
+    ];
 
-.cmd-log {
-    color: rgb(242,242,242); 
-    margin: 0; 
-    line-height: 1;
-    font-family: Consolas, monospace;
-    font-size: 16px; 
-    font-weight:100;
-    padding: 0 1px;
-}
-.cmd-log::selection {
-    background: white; /* Background color when selected */
-    color: black;
-}
+    // Loop through the data to create multiple articles
+    articlesData.forEach(data => {
+        // Create the article element
+        const article = document.createElement("article");
+        article.className = "style1";
 
-.cursor {
-    display: inline-block; /* Make the cursor inline */
-    animation: blink 1s step-end infinite; /* Blink effect */
-}
-.cursor::selection {
-    background: transparent; /* Background color when selected */
-}
-/* Keyframes for the blinking effect */
-@keyframes blink {
-    0%, 100% {
-        opacity: 1; /* Fully visible */
-    }
-    50% {
-        opacity: 0; /* Fully invisible */
-    }
-}
+        // Create the span with the image
+        const span = document.createElement("span");
+        span.className = "image";
 
-#command-console {
-    border: 0.5px outset rgb(12, 12, 12); /* Thin border around the entire container */
-    width: 100%; /* Full width of the parent */
-    display: block; /* Block display to occupy full width */
-    box-sizing: border-box; /* Include border in the total width calculation */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
-}
+        const img = document.createElement("img");
+        img.src = data.imageSrc;
+        img.alt = "";
+        span.appendChild(img);
 
-#contact {
-    background-color: rgb(146, 94, 103);
-    color: white;
-    padding: 0em 0 1em 0 ;
-    color: rgba(255, 255, 255, 0.541);
-    .bigger-p{
-        color: rgba(255, 255, 255, 0.541);
-    }
-}
+        // Create the anchor tag
+        const anchor = document.createElement("a");
+        anchor.href = data.link;
 
-.bigger-p {
-    color: rgba(0, 0, 0, 0.8);
-    font-size:1.15em;
-    margin: 10px;
-}
+        // Create the h2 element for the title
+        const h2 = document.createElement("h2");
+        h2.textContent = data.title;
 
-.section {
-    justify-content: center;
-}
+        // Create the div with the paragraph for the description
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "content";
 
-.center-text{
-    text-align: center;
-}
+        const paragraph = document.createElement("p");
+        paragraph.textContent = data.description;
+        contentDiv.appendChild(paragraph);
+
+        // Append everything together
+        anchor.appendChild(h2);
+        anchor.appendChild(contentDiv);
+        article.appendChild(span);
+        article.appendChild(anchor);
+
+        // Append the article to the section
+        section.appendChild(article);
+    });
+});
+
+// Disable right-click for the container
+document.getElementById('cmd-body').addEventListener('contextmenu', function(e) {
+    e.preventDefault(); // Prevent the context menu from appearing
+});
