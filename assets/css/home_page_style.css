@@ -26,6 +26,9 @@ body {
     background: white; /* Background color when selected */
     color: black;
 }
+.cmd-img::selection {
+    background: transparent;
+}
 
 .cursor {
     display: inline-block; /* Make the cursor inline */
