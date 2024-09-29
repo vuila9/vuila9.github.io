@@ -6,7 +6,19 @@ document.addEventListener("DOMContentLoaded", function() {
     // Data for the articles
     const articlesData = [
         {
-            imageSrc: "images/pic01.jpg",
+            imageSrc: "images/pic05.jpg",
+            title: "WIP1",
+            description: "A work-in-progress project to be released soon™",
+            link: "templates/generic.html"
+        },
+        {
+            imageSrc: "images/pic04.jpg",
+            title: "WIP2",
+            description: "A work-in-progress project to be released soon™",
+            link: "templates/generic.html"
+        },
+        {
+            imageSrc: "images/pic03.jpg",
             title: "Sudoku Game",
             description: "A Python-based Sudoku game with a built-in solver, featuring a fully implemented GUI using Tkinter.",
             link: "projects/Sudoku_solver/Sudoku_Solver.html"
@@ -18,16 +30,10 @@ document.addEventListener("DOMContentLoaded", function() {
             link: "projects/Web-based_Restaurant/Web-based_Restaurant.html"
         },
         {
-            imageSrc: "images/pic03.jpg",
+            imageSrc: "images/pic01.jpg",
             title: "Store Application",
             description: "A Java-based application with a graphical user interface (GUI) that enables users to add or remove items from their shopping cart.",
             link: "projects/Store_Application/Store_Application.html"
-        },
-        {
-            imageSrc: "images/pic04.jpg",
-            title: "WIP4",
-            description: "A work-in-progress project to be released soon™",
-            link: "templates/generic.html"
         }
     ];
 
@@ -77,3 +83,15 @@ document.addEventListener("DOMContentLoaded", function() {
 document.getElementById('cmd-body').addEventListener('contextmenu', function(e) {
     e.preventDefault(); // Prevent the context menu from appearing
 });
+
+window.onbeforeunload = function() {
+    localStorage.setItem("scrollPosition", window.scrollY);
+};
+
+// Restore scroll position on page load
+window.onload = function() {
+    const scrollPosition = localStorage.getItem("scrollPosition");
+    if (scrollPosition) {
+        window.scrollTo(0, scrollPosition);
+    }
+};
