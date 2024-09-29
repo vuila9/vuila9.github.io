@@ -92,6 +92,6 @@ window.onbeforeunload = function() {
 window.onload = function() {
     const scrollPosition = localStorage.getItem("scrollPosition");
     if (scrollPosition) {
-        window.scrollTo(0, scrollPosition);
+        window.scrollTo(0, 0);
     }
 };
