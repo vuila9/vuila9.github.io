@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function() {
             imageSrc: "images/pic03.jpg",
             title: "Sudoku Game",
             description: "A Python-based Sudoku game with a built-in solver, featuring a fully implemented GUI using Tkinter.",
-            link: "projects/Sudoku_solver/Sudoku_Solver.html"
+            link: "projects/Sudoku_Solver/Sudoku_Solver.html"
         },
         {
             imageSrc: "images/pic02.jpg",
