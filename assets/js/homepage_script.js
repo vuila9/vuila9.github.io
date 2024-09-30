@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
             imageSrc: "images/pic04.jpg",
             title: "WIP2",
             description: "A work-in-progress project to be released soon™",
-            link: "templates/generic.html"
+            link: "projects/Many_mini-tools/Many_mini-tools.html"
         },
         {
             imageSrc: "images/pic03.jpg",
