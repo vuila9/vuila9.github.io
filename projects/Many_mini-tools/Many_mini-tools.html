@@ -34,6 +34,21 @@
 						</div>
 					</section>
 
+				<!-- Calendar Date Teller -->
+					<section id="calendar-date-teller-tool">
+						<div class="inner">
+							<div class="container">
+								<div class="submenu">Calendar Date Teller</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('calendar-date-teller-body')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="calendar-date-teller-body">
+								<p>Nothing to see here...</p>
+							</div>
+						</div>
+					</section>	
+
 				<!-- RegEx Comparison -->
 					<section id="regex-comparison-tool">
 						<div class="inner">
@@ -44,7 +59,14 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="regex-comparison-body">
-								<p>Nothing to see here...</p>
+								<p>A simple regular expression comparison tool that checks if the input string matches the input pattern.</p>
+								<div class="same-line-block">
+									<input id="regex-comparison-string" style="display: inline" type="text" placeholder="Enter a string" />
+									<input id="regex-comparison-pattern" style="display: inline" type="text" placeholder="Enter a pattern" />
+								</div>
+								<br>
+								<input id="regex-comparison-submit" type="submit" value="Submit" class="primary"/>
+								<p id="regex-comparison-result">&nbsp;</p>
 							</div>
 						</div>
 					</section>
@@ -75,7 +97,6 @@
 							</div>
 						</div>
 					</section>
-
 			</div>
 
 		<!-- Scripts -->
@@ -85,6 +106,6 @@
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_page_layout.js"></script>
-			<script src="./js/text-encrypt-decrypt.js"></script>
+			<script src="./js/loader.js" defer></script>
 	</body>
 </html>
