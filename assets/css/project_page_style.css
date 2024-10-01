@@ -73,7 +73,7 @@ select {
 }
 
 /* TEXT ENCRYPT-DECRYPT TOOL */
-#same-line-block {
+.same-line-block {
     display: flex;          /* Flexbox to align elements in a row */
     align-items: center;    /* Align vertically in the center */
     gap: 10px;              /* Optional gap between elements */
