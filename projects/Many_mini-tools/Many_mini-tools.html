@@ -29,25 +29,53 @@
 						<div class="inner">
 							<div>
 								<span class="submenu">Description</span>
-								<P>This page is a collection of various small-scale projects or tools inspired by everyday ideas and experiences. For instance, while browsing social media, I might come across something interesting that I want to replicate. Whenever a cool idea comes to mind, I make a note of it and plan to code it later. Once completed, I upload it here, with the most recent projects displayed at the top. Click the expand button to explore each one. Think of this page as a fun space to experiment with mini tools, which may or may not be useful to you—though some are designed for my personal use.</P>
+								<p>This page is a collection of various small-scale projects or tools inspired by everyday ideas and experiences. For instance, while browsing social media, I might come across something interesting that I want to replicate. Whenever a cool idea comes to mind, I make a note of it and plan to code it later. Once completed, I upload it here, with the most recent projects displayed at the top. Click the expand button to explore each one. Think of this page as a fun space to experiment with mini tools, which may or may not be useful to you—though some are designed for my personal use.</p>
 							</div>
 						</div>
 					</section>
+
+				<!-- RegEx Comparison -->
+					<section id="regex-comparison-tool">
+						<div class="inner">
+							<div class="container">
+								<div class="submenu">RegEx Comparison</div>
+								<div>
+									<button class="expand-collapse-button" onclick="toggleContent('regex-comparison-body')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="regex-comparison-body">
+								<p>Nothing to see here...</p>
+							</div>
+						</div>
+					</section>
+
+				<!-- Text Encrypt/Decryption -->
 					<section id="text-encrypt-decrypt-tool">
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">Text Encrypt/Decryption</div>
 								<div>
-									<button class="expand-collapse-button" onclick="toggleContent('background-content')">▼</button>
+									<button class="expand-collapse-button" onclick="toggleContent('text-dencrypt-tool-body')">▼</button>
 								</div>
 							</div>
-							<div class="expandable-content" id="background-content">
-								<p>This is a tool to be released soon™</p>
-								<span class="image main"><img src="../../images/pic13.jpg" alt="" /></span>
+							<div class="expandable-content" id="text-dencrypt-tool-body">
+								<p>As the name suggests, please enter a <u>key</u> along with the <u>message</u> you wish to encrypt or decrypt.</p>
+								<p>Ensure that you use the same key for decrypting a ciphertext that you used for encryption.</p>
+								<div id="same-line-block">
+									<select id="text-dencrypt-dropdown" style="width: auto">
+										<option value="encrypt">Encrypt</option>
+										<option value="decrypt">Decrypt</option>
+									</select>
+									<input id="text-dencrypt-key" style="display: inline; width: 100px" type="text" placeholder="key" />
+									<input id="text-dencrypt-input" style="display: inline" type="text" placeholder="message" />
+								</div>
+								<br>
+								<input id="text-dencrypt-submit" type="submit" value="Submit" class="primary"/>
+								<p id="text-dencrypt-result">&nbsp;</p>
 							</div>
 						</div>
 					</section>
-					
+
 			</div>
 
 		<!-- Scripts -->
@@ -57,5 +85,6 @@
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_page_layout.js"></script>
+			<script src="./js/text-encrypt-decrypt.js"></script>
 	</body>
 </html>
