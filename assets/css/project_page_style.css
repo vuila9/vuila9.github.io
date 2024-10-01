@@ -59,3 +59,22 @@ p {
     width: 100%;
     height: 100%;
 }
+
+select {
+    appearance: auto;  /* Ensures the native dropdown arrow is displayed */
+    -webkit-appearance: auto; /* For Safari and Chrome */
+    -moz-appearance: auto; /* For Firefox */
+    border: 1px solid #000;  /* Default border */
+    padding: 5px;    /* Adjust padding as needed */
+    background-color: white; /* Default background color */
+    color: black;    /* Default text color */
+    font: inherit;   /* Inherit font from parent */
+    cursor: pointer; /* Ensure the pointer cursor is maintained */
+}
+
+/* TEXT ENCRYPT-DECRYPT TOOL */
+#same-line-block {
+    display: flex;          /* Flexbox to align elements in a row */
+    align-items: center;    /* Align vertically in the center */
+    gap: 10px;              /* Optional gap between elements */
+}
