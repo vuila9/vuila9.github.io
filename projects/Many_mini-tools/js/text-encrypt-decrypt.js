@@ -1,75 +1,3 @@
-/*
-async function encryptMessage(message, key) {
-    const encoder = new TextEncoder();
-    const encodedMessage = encoder.encode(message);
-    const encodedKey = encoder.encode(key);
-
-    // Import the key for AES encryption
-    const cryptoKey = await window.crypto.subtle.importKey(
-        'raw',
-        encodedKey,
-        { name: 'AES-GCM' },
-        false,
-        ['encrypt']
-    );
-
-    // Generate a random IV (initialization vector)
-    const iv = window.crypto.getRandomValues(new Uint8Array(12)); // AES-GCM recommends 12 bytes
-
-    // Encrypt the message
-    const ciphertext = await window.crypto.subtle.encrypt(
-        {
-            name: 'AES-GCM',
-            iv: iv // Initialization vector
-        },
-        cryptoKey,
-        encodedMessage
-    );
-
-    // Combine IV and ciphertext for transmission
-    const combined = new Uint8Array(iv.length + ciphertext.byteLength);
-    combined.set(iv);
-    combined.set(new Uint8Array(ciphertext), iv.length);
-
-    // Return the result as a base64 string
-    return btoa(String.fromCharCode.apply(null, combined));
-}
-
-
-async function decryptMessage(encryptedMessage, key) {
-    const decoder = new TextDecoder();
-    const encodedKey = new TextEncoder().encode(key);
-    
-    // Convert the base64 encoded message back to a Uint8Array
-    const combined = Uint8Array.from(atob(encryptedMessage), c => c.charCodeAt(0));
-
-    // Extract the IV and ciphertext
-    const iv = combined.slice(0, 12); // First 12 bytes are the IV
-    const ciphertext = combined.slice(12); // Remainder is the ciphertext
-
-    // Import the key for AES decryption
-    const cryptoKey = await window.crypto.subtle.importKey(
-        'raw',
-        encodedKey,
-        { name: 'AES-GCM' },
-        false,
-        ['decrypt']
-    );
-
-    // Decrypt the message
-    const decrypted = await window.crypto.subtle.decrypt(
-        {
-            name: 'AES-GCM',
-            iv: iv
-        },
-        cryptoKey,
-        ciphertext
-    );
-
-    // Convert the decrypted message back to a string
-    return decoder.decode(decrypted);
-} */
-
 async function encryptMessage(message, key) {
     const encoder = new TextEncoder();
     const iv = crypto.getRandomValues(new Uint8Array(12)); // 12 bytes IV for AES-GCM
@@ -199,5 +127,4 @@ document.getElementById("text-dencrypt-submit").onclick = function() {
             }
         });
     });
-    
 };
