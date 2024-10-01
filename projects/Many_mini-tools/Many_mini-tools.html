@@ -45,7 +45,24 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="calendar-date-teller-body">
-								<p>Nothing to see here...</p>
+								<p>Input a date, any date. (WIP)</p>
+								<div class="same-line-block">
+									<label for="day">Day:</label>
+									<select id="day" name="day" style="width: 50px"></select>
+									<label for="month">Month:</label>
+									<select id="month" name="month" style="width: auto"></select>
+									<label for="year">Year:</label>
+									<input id="calendar-date-teller-year" style="display: inline" type="text" />
+									<select id="calendar-date-teller-dropdown" style="width: auto">
+										<option value="days-gap">How many days since then from now?</option>
+										<option value="what-date">What date was it?</option>
+										<option value="special">What event happened on that day?</option>
+									</select>
+								</div>
+								<br>
+								<input id="calendar-date-teller-submit" type="submit" value="Submit" class="primary"/>
+								<p id="calendar-date-teller-result">&nbsp;</p>
+								<br>
 							</div>
 						</div>
 					</section>	
@@ -68,6 +85,7 @@
 								<br>
 								<input id="regex-comparison-submit" type="submit" value="Submit" class="primary"/>
 								<p id="regex-comparison-result">&nbsp;</p>
+								<br>
 							</div>
 						</div>
 					</section>
@@ -95,9 +113,11 @@
 								<br>
 								<input id="text-dencrypt-submit" type="submit" value="Submit" class="primary"/>
 								<p id="text-dencrypt-result">&nbsp;</p>
+								<br>
 							</div>
 						</div>
 					</section>
+
 			</div>
 
 		<!-- Scripts -->
