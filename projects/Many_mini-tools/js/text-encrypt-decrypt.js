@@ -111,7 +111,7 @@ document.getElementById("text-dencrypt-submit").onclick = function() {
     var option = document.getElementById("text-dencrypt-dropdown").value;
     var message = document.getElementById("text-dencrypt-input").value;
     var key = document.getElementById("text-dencrypt-key").value;
-    document.getElementById("text-dencrypt-result").innerHTML = ``;
+    document.getElementById("text-dencrypt-result").innerHTML = `&nbsp;`;
 
     hashKey(key).then(hashedKey => {
         EncryptDecrypt(option, message, hashedKey).then(result => {
