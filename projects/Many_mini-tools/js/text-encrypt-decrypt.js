@@ -106,24 +106,24 @@ async function EncryptDecrypt(option, message, hashedKey) {
 }
 
 // JavaScript to handle the button click
-document.getElementById("text-dencrypt-submit").onclick = function() {
+document.getElementById("TED-button-submit").onclick = function() {
     const MAX_STR_LENGTH = 80;
-    var option = document.getElementById("text-dencrypt-dropdown").value;
-    var message = document.getElementById("text-dencrypt-input").value;
-    var key = document.getElementById("text-dencrypt-key").value;
-    document.getElementById("text-dencrypt-result").innerHTML = `&nbsp;`;
+    var option = document.getElementById("TED-dropdown-prompt").value;
+    var message = document.getElementById("TED-input-message").value;
+    var key = document.getElementById("TED-input-key").value;
+    document.getElementById("TED-text-result").innerHTML = `&nbsp;`;
 
     hashKey(key).then(hashedKey => {
         EncryptDecrypt(option, message, hashedKey).then(result => {
             if (result.length > MAX_STR_LENGTH) {
-                document.getElementById("text-dencrypt-result").innerHTML = `Message processed exceeds the display limit. Please press F12 on your keyboard to view the result in the console window.`;
+                document.getElementById("TED-text-result").innerHTML = `Message processed exceeds the display limit. Please press F12 on your keyboard to view the result in the console window.`;
                 console.log(`Your ${option}ed message is: \n${result}`);
             }
             else {
                 if (result.length != 0) 
-                    document.getElementById("text-dencrypt-result").innerHTML = `Your ${option}ed message is: ${result}`;
+                    document.getElementById("TED-text-result").innerHTML = `Your ${option}ed message is: ${result}`;
                 else
-                    document.getElementById("text-dencrypt-result").innerHTML = `Your ${option}ed message is: null`;
+                    document.getElementById("TED-text-result").innerHTML = `Your ${option}ed message is: null`;
             }
         });
     });
