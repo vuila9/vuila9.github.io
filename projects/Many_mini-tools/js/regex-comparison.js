@@ -39,8 +39,8 @@ var isMatch = function (s, p) {
   return up[up.length - 1]
 }
 
-document.getElementById("regex-comparison-submit").onclick = function() {
-    var string = document.getElementById("regex-comparison-string").value;
-    var pattern = document.getElementById("regex-comparison-pattern").value;
-    document.getElementById("regex-comparison-result").innerHTML = `${isMatch(string, pattern)}`;
+document.getElementById("REC-button-submit").onclick = function() {
+    var string = document.getElementById("REC-input-string").value;
+    var pattern = document.getElementById("REC-input-pattern").value;
+    document.getElementById("REC-text-result").innerHTML = `${isMatch(string, pattern)}`;
 }
