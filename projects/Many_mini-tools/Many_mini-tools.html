@@ -35,25 +35,25 @@
 						</div>
 					</section>
 
-				<!-- Calendar Date Teller -->
+				<!-- Calendar Date Teller (CDT) -->
 					<section id="calendar-date-teller-tool">
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">Calendar Date Teller (WIP)</div>
 								<div>
-									<button class="expand-collapse-button" onclick="toggleContent('calendar-date-teller-body')">▼</button>
+									<button class="expand-collapse-button" onclick="toggleContent('CDT-body')">▼</button>
 								</div>
 							</div>
-							<div class="expandable-content" id="calendar-date-teller-body">
+							<div class="expandable-content" id="CDT-body">
 								<p>Input a date, any date.</p>
 								<div class="same-line-block">
 									<label for="day">Day:</label>
-									<select id="CDT-dropdown-day" style="width: 50px"></select>
+									<select id="CDT-select-day" style="width: 50px"></select>
 									<label for="month">Month:</label>
-									<select id="CDT-dropdown-month" style="width: auto"></select>
+									<select id="CDT-select-month" style="width: auto"></select>
 									<label for="year">Year:</label>
-									<input id="CDT-dropdown-year" style="display: inline" type="text" />
-									<select id="calendar-date-teller-dropdown-prompt" style="width: auto">
+									<input id="CDT-input-year" style="display: inline" type="text" />
+									<select id="CDT-select-prompt" style="width: auto">
 										<option value="days-gap">How many days since then from now?</option>
 										<option value="what-date">What date was it?</option>
 										<option value="special">What event happened on that day?</option>
@@ -67,13 +67,13 @@
 						</div>
 					</section>	
 
-				<!-- RegEx Comparison -->
+				<!-- RegEx Comparison (REC) -->
 					<section id="regex-comparison-tool">
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">RegEx Comparison</div>
 								<div>
-									<button class="expand-collapse-button" onclick="toggleContent('regex-comparison-body')">▼</button>
+									<button class="expand-collapse-button" onclick="toggleContent('REC-body')">▼</button>
 								</div>
 							</div>
 							<div class="expandable-content" id="REC-body">
@@ -90,20 +90,20 @@
 						</div>
 					</section>
 
-				<!-- Text Encrypt/Decryption -->
+				<!-- Text Encrypt/Decryption (TED) -->
 					<section id="text-encrypt-decrypt-tool">
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">Text Encrypt/Decryption</div>
 								<div>
-									<button class="expand-collapse-button" onclick="toggleContent('text-dencrypt-tool-body')">▼</button>
+									<button class="expand-collapse-button" onclick="toggleContent('TED-body')">▼</button>
 								</div>
 							</div>
 							<div class="expandable-content" id="TED-body">
 								<p>As the name suggests, enter a <u>key</u> along with the <u>message</u> you wish to encrypt or decrypt.</p>
 								<p>Ensure that you use the same key for decrypting a ciphertext that you used for encryption.</p>
 								<div class="same-line-block">
-									<select id="TED-dropdown-prompt" style="width: auto">
+									<select id="TED-select-prompt" style="width: auto">
 										<option value="encrypt">Encrypt</option>
 										<option value="decrypt">Decrypt</option>
 									</select>

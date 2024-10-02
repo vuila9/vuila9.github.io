@@ -108,7 +108,7 @@ async function EncryptDecrypt(option, message, hashedKey) {
 // JavaScript to handle the button click
 document.getElementById("TED-button-submit").onclick = function() {
     const MAX_STR_LENGTH = 80;
-    var option = document.getElementById("TED-dropdown-prompt").value;
+    var option = document.getElementById("TED-select-prompt").value;
     var message = document.getElementById("TED-input-message").value;
     var key = document.getElementById("TED-input-key").value;
     document.getElementById("TED-text-result").innerHTML = `&nbsp;`;
