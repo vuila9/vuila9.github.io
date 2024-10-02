@@ -116,7 +116,7 @@ document.getElementById("TED-button-submit").onclick = function() {
     hashKey(key).then(hashedKey => {
         EncryptDecrypt(option, message, hashedKey).then(result => {
             if (result.length > MAX_STR_LENGTH) {
-                document.getElementById("TED-text-result").innerHTML = `Message processed exceeds the display limit. Open your console terminal from inspecting the page and view the full message from there.`;
+                document.getElementById("TED-text-result").innerHTML = `The message processed exceeds the display limit. Please open the console window by inspecting the page to view the full message.`;
                 console.log(`Your ${option}ed message is: \n${result}`);
             }
             else {
