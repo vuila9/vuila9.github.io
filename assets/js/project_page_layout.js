@@ -12,6 +12,7 @@ buttons.forEach(button => {
     });
 });
 
+// This function is made to expand or collapse "expandable-content" <div> element
 function toggleContent(contentId) {
     const content = document.getElementById(contentId);
     content.classList.toggle('active');
