@@ -97,7 +97,7 @@ promptSelect.addEventListener('change', function () {
 function daysGap(day1, day2) {
     console.log(`day1 is ${day1}`);
     console.log(`day2 is ${day2}`);
-
+    console.log("hello");
     return 0;
 }
 
