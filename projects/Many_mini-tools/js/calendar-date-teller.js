@@ -49,5 +49,9 @@ monthsDropdown.addEventListener('change', function () {
 });
 
 document.getElementById("CDT-button-submit").onclick = function() {
-    console.log("for now, this button does nothing.");
+    var day = document.getElementById("CDT-select-day").value;
+    var month = document.getElementById("CDT-select-month").value;
+    var year = document.getElementById("CDT-input-year").value;
+
+    console.log(`Day ${day} Month ${month} Year ${year}`);
 }

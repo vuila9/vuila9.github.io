@@ -113,6 +113,11 @@ document.getElementById("TED-button-submit").onclick = function() {
     var key = document.getElementById("TED-input-key").value;
     document.getElementById("TED-text-result").innerHTML = `&nbsp;`;
 
+    if (key == ""){
+        document.getElementById("TED-text-result").innerHTML = `Please enter a key to use this feature`;
+        return;
+    }
+
     hashKey(key).then(hashedKey => {
         EncryptDecrypt(option, message, hashedKey).then(result => {
             if (result.length > MAX_STR_LENGTH) {
