@@ -14,7 +14,7 @@ const months = [
 ];
 
 // Populate the months dropdown
-const monthsDropdown = document.getElementById('CDT-dropdown-month');
+const monthsDropdown = document.getElementById('CDT-select-month');
 months.forEach((month, index) => {
     const option = document.createElement('option');
     option.value = index;
@@ -23,7 +23,7 @@ months.forEach((month, index) => {
 });
 
 // Populate the days dropdown dynamically based on the month selected
-const daysDropdown = document.getElementById('CDT-dropdown-day');
+const daysDropdown = document.getElementById('CDT-select-day');
 function populateDays(monthIndex) {
     // Get the number of days in the selected month
     let daysInMonth = months[monthIndex].days;
