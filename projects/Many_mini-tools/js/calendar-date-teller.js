@@ -12,6 +12,20 @@ const MONTHS = [
     { name: 'November' , days: 30 },
     { name: 'December' , days: 31 }
 ];
+const MONTHS_ORDER = { 
+    'January'  : 0,
+    'February' : 1,
+    'March'    : 2,
+    'April'    : 3,
+    'May'      : 4,
+    'June'     : 5,
+    'July'     : 6,
+    'August'   : 7,
+    'September': 8,
+    'October'  : 9, 
+    'November' : 10,
+    'December' : 11
+};
 
 const DAY_IN_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -103,34 +117,21 @@ function dayth_in_year(year, month, day) {
             break;
         total_days_current += MONTHS[i].days;
     }
-    if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) // Feb is by default having 29 days, so we subtract 1 day if it's not a leap year now.
+    if (!(year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) && MONTHS_ORDER[month] > 1)) // Feb, by default, has 29 days (dont ask me why), we subtract -1 if it's a leap year AND it's later than Feb
         total_days_current -= 1;
     total_days_current += Number(day);
-    return total_days_current - 1;
+    return total_days_current; 
 }
 
 function is_later(day1, day2) { // ([year1, month1, day1], [year2, month2, day2])
-    const months_order = { 
-        'January'  : 0,
-        'February' : 1,
-        'March'    : 2,
-        'April'    : 3,
-        'May'      : 4,
-        'June'     : 5,
-        'July'     : 6,
-        'August'   : 7,
-        'September': 8,
-        'October'  : 9, 
-        'November' : 10,
-        'December' : 11
-    };
+
     if (day1[0] > day2[0]) // year
         return true;
     else if (day1[0] < day2[0]) // year
         return false;
-    else if (months_order[day1[1]] > months_order[day2[1]]) // month
+    else if (MONTHS_ORDER[day1[1]] > MONTHS_ORDER[day2[1]]) // month
         return true;
-    else if (months_order[day1[1]] < months_order[day2[1]]) // month
+    else if (MONTHS_ORDER[day1[1]] < MONTHS_ORDER[day2[1]]) // month
         return false;
     else if (day1[2] > day2[2]) // day
         return true;
@@ -167,7 +168,7 @@ function days_gap(day1, day2) { // (now, when)
                 total_days_gap +=1;
             }
         }
-        return total_days_gap - days_passed_in_starting_year + days_passed_in_ending_year + 1;
+        return total_days_gap - days_passed_in_starting_year + days_passed_in_ending_year + 1; // +1 because we include end date in the equation
     }
         
 }
@@ -251,11 +252,11 @@ document.getElementById("CDT-button-submit").onclick = function() {
             var dayth_in_week = current_days_gap % 7;
             if (is_later([year_now, month_now, day_now], [year_input.value, MONTHS[month_input].name, day_input])){
                 var temp = (date_now.getDay() - dayth_in_week + 7) % 7;
-                console.log(`It's ${DAY_IN_WEEK[temp]} in year ${year_input.value}, month ${MONTHS[month_input].name}, day ${day_input}`);
+                console.log(`It's ${DAY_IN_WEEK[temp]} in year ${year_input.value}, ${MONTHS[month_input].name} ${day_input}`);
             }
             else {
                 var temp = ((date_now.getDay() + dayth_in_week) % 7)
-                console.log(`It's ${DAY_IN_WEEK[temp]} in year ${year_input.value}, month ${MONTHS[month_input].name}, day ${day_input}`);
+                console.log(`It's ${DAY_IN_WEEK[temp]} in year ${year_input.value}, ${MONTHS[month_input].name} ${day_input}`);
             }
             break;
     }
