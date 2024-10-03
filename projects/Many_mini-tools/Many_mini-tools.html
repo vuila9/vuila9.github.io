@@ -45,12 +45,12 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="CDT-body">
+								<p>This tool was developed using manually built functions, without utilizing any built-in date manipulation functions, except for one to obtain the current date.</p>
 								<p>Input a date, any date.</p>
 								<select id="CDT-select-prompt" style="width: auto">
 									<option value="current-days-gap">How many days from when to now?</option>
-									<option value="selected-days-gap">How many days from when to then?</option>
-									<option value="what-date">What day of the week is then?</option>
-									<option value="special">What event happened on that date?</option>
+									<option value="custom-days-gap">How many days from when to then?</option>
+									<option value="what-date-week">What day of the week is then?</option>
 								</select> <br>
 								<div class="same-line-block">
 									<label for="month">Month:</label>
@@ -71,7 +71,7 @@
 									</div>
 								</div> <br>
 								<input id="CDT-button-submit" type="submit" value="Submit" class="primary"/>
-								<p id="CDT-text-result">&nbsp;</p> <br>
+								<b><p id="CDT-text-result">&nbsp;</p></b> <br> <br>
 							</div>
 						</div>
 					</section>	
@@ -86,7 +86,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="REC-body">
-								<p>A simple regular expression comparison tool that checks if the input string matches the input pattern.</p>
+								<p>A simple regular expression comparison tool that checks if the input string matches the input pattern. Only support "*" and "." for now.</p>
 								<div class="same-line-block">
 									<input id="REC-input-string" style="display: inline" type="text" placeholder="Enter a string" />
 									<input id="REC-input-pattern" style="display: inline" type="text" placeholder="Enter a pattern" />
