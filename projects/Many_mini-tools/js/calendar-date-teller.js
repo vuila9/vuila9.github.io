@@ -115,10 +115,13 @@ function dayth_in_year(year, month, day) {
     for (let i = 0; i < MONTHS.length; i++) {
         if (month == MONTHS[i].name)
             break;
+        if (!is_leap_year(year) && i == 1) {// Feb, by default, has 29 days (dont ask me why), we subtract -1 if it's a leap year AND it's later than Feb
+            console.log(`when did this happen ${year} ${month} ${day}`);
+            total_days_current -= 1;
+        }
         total_days_current += MONTHS[i].days;
     }
-    if (!(year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) && MONTHS_ORDER[month] > 1)) // Feb, by default, has 29 days (dont ask me why), we subtract -1 if it's a leap year AND it's later than Feb
-        total_days_current -= 1;
+    
     total_days_current += Number(day);
     return total_days_current; 
 }
@@ -139,38 +142,48 @@ function is_later(day1, day2) { // ([year1, month1, day1], [year2, month2, day2]
         return false;
 };
 
+function is_leap_year(year) {
+    return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+}
+
 function days_gap(day1, day2) { // (now, when)
     console.log(`is day1 (now) later than day2 (when): ${is_later(day1, day2)}`);
     if (day1[0] == day2[0]) { // same year
         let days_gap = dayth_in_year(day1[0], day1[1], day1[2]) - dayth_in_year(day2[0], day2[1], day2[2]);
         console.log(`How many days since the start of year to ${day1} ${dayth_in_year(day1[0], day1[1], day1[2])}`);
         console.log(`How many days since the start of year to ${day2} ${dayth_in_year(day2[0], day2[1], day2[2])}`);
-        return Math.abs(days_gap);
+        return Math.abs(days_gap) + 1; // +1 because we include the end date
     }
     else {
-        let years_gap = Math.abs(Number(day1[0]) - Number(day2[0]));
+        let years_gap = Math.abs(Number(day1[0]) - Number(day2[0])) - 1; // -1 because we will do the calculation for the starting and ending year separately
         let total_days_gap = years_gap * 365;
-        let target_year = 0;
+        let starting_year = 0;
+        let ending_year = 0;
         let days_passed_in_starting_year = 0;
         let days_passed_in_ending_year = 0;
         if (is_later(day1, day2)) { // (end, start)
-            target_year = Number(day2[0]);
+            starting_year = Number(day2[0]);
             days_passed_in_starting_year = dayth_in_year(day2[0], day2[1], day2[2]);
             days_passed_in_ending_year = dayth_in_year(day1[0], day1[1], day1[2]);
         }
         else { // (start, end)
-            target_year = Number(day1[0]);
+            starting_year = Number(day1[0]);
             days_passed_in_starting_year = dayth_in_year(day1[0], day1[1], day1[2]);
             days_passed_in_ending_year = dayth_in_year(day2[0], day2[1], day2[2]);
         }
-        for (let i = target_year + 1; i < (target_year + years_gap - 1); i += 1) {
-            if (i % 4 == 0 && (i % 100 != 0 || i % 400 == 0)) {
+        ending_year = starting_year + years_gap;
+        for (let year = starting_year + 1; year < ending_year; year += 1) { // as mentioned above, we do calculations for starting year and ending year separately
+            if (is_leap_year(year)) 
                 total_days_gap +=1;
-            }
         }
-        return total_days_gap - days_passed_in_starting_year + days_passed_in_ending_year + 1; // +1 because we include end date in the equation
-    }
+        let days_left_in_starting_year = 0
+        if (is_leap_year(starting_year)) 
+            days_left_in_starting_year = 366 - days_passed_in_starting_year;
+        else
+            days_left_in_starting_year = 365 - days_passed_in_starting_year;
         
+        return total_days_gap + days_left_in_starting_year + days_passed_in_ending_year + 1; // +1 because we include end date in the equation
+    }
 }
 
 function verify_year_input(year, month, day){
@@ -186,7 +199,7 @@ function verify_year_input(year, month, day){
         document.getElementById("CDT-text-result").innerHTML = "The input year is is too large. Only support up to 9 digits.";
         return false;
     }
-    if (year % 4 != 0 && month == 1 && day == 29) {
+    if (!is_leap_year(year) && month == 1 && day == 29) {
         document.getElementById("CDT-text-result").innerHTML = "The input year is not a leap year, so February does not have 29 days.";
         return false;
     }
@@ -219,7 +232,7 @@ document.getElementById("CDT-button-submit").onclick = function() {
             day_now = day_now.replace(',', '');
             var current_days_gap = days_gap([year_now, month_now, day_now], [year_input.value, MONTHS[month_input].name, day_input]); //daysGap(now, when)
             console.log(`The gap is ${current_days_gap} day(s)`);
-            document.getElementById("CDT-text-result").innerHTML = `The gap is ${current_days_gap} day(s) from today.`;
+            document.getElementById("CDT-text-result").innerHTML = `The gap is ${current_days_gap.toLocaleString()} day(s) from today.`;
             break;
 
         case "custom-days-gap":
@@ -228,19 +241,16 @@ document.getElementById("CDT-button-submit").onclick = function() {
             var day_input_hidden = document.getElementById("CDT-select-day-hidden").value;
             var year_input_hidden = document.getElementById("CDT-input-year-hidden");
             document.getElementById("CDT-text-result").innerHTML = "&nbsp;"
-            if (year_input_hidden.value % 4 != 0 && month_input_hidden == 1 && day_input_hidden == 29) {
-                document.getElementById("CDT-text-result").innerHTML = "The input year is not a leap year, so February does not have 29 days.";
-                return;
-            }
             if (!year_input_hidden.value) // if year is not input, assign default year as the current year
                 year_input_hidden.value = formattedDate.slice(-4);
 
             document.getElementById("CDT-text-result").innerHTML = "&nbsp;"
             if (!verify_year_input(year_input_hidden.value, month_input_hidden, day_input_hidden))
                 return;
+
             console.log("hidden day, month, year: ", day_input_hidden, MONTHS[month_input_hidden].name, year_input_hidden.value);
             let custom_days_gap = days_gap([year_input.value, MONTHS[month_input].name, day_input], [year_input_hidden.value, MONTHS[month_input_hidden].name, day_input_hidden]); //daysGap(then, when)
-            document.getElementById("CDT-text-result").innerHTML = `The gap is ${custom_days_gap} day(s)`;
+            document.getElementById("CDT-text-result").innerHTML = `The gap is ${custom_days_gap.toLocaleString()} day(s)`;
             console.log(`The gap is ${custom_days_gap} day(s)`);
             break;
 
@@ -249,7 +259,8 @@ document.getElementById("CDT-button-submit").onclick = function() {
             var [month_now, day_now, year_now] = formattedDate.split(' ');
             day_now = day_now.replace(',', '');
             var current_days_gap = days_gap([year_now, month_now, day_now], [year_input.value, MONTHS[month_input].name, day_input]); //daysGap(now, when)
-            var dayth_in_week = current_days_gap % 7;
+            console.log(`days gap ${current_days_gap}`);
+            var dayth_in_week = (current_days_gap - 1 ) % 7; // -1 because god knows why
             if (is_later([year_now, month_now, day_now], [year_input.value, MONTHS[month_input].name, day_input])){
                 var temp = (date_now.getDay() - dayth_in_week + 7) % 7;
                 console.log(`It's ${DAY_IN_WEEK[temp]} in year ${year_input.value}, ${MONTHS[month_input].name} ${day_input}`);
