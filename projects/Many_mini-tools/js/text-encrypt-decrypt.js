@@ -62,7 +62,7 @@ async function decryptMessage(encryptedMessage, key) {
         // Convert the decrypted message back to a string
         return decoder.decode(decrypted);
     } catch (error) {
-        console.error("Decryption failed:", error);
+        //console.error(`Decryption failed: ${error}, likely wrong key`);
         return null; // Return null or handle the error as appropriate
     }
 }
@@ -87,7 +87,7 @@ async function EncryptDecrypt(option, message, hashedKey) {
             return encryptMessage(message, hashedKey).then(encryptedMessage => {
                 return encryptedMessage;
             }).catch(error => {
-                console.error("Encryption failed:", error);
+                //console.error("Encryption failed:", error);
                 return "";
             });
         
@@ -95,7 +95,7 @@ async function EncryptDecrypt(option, message, hashedKey) {
             return decryptMessage(message, hashedKey).then(decryptedMessage => {
                 return decryptedMessage;
             }).catch(error => {
-                console.error("Decryption failed:", error);
+                //console.error("Decryption failed:", error);
                 return "";
             });
 
@@ -111,7 +111,7 @@ document.getElementById("TED-button-submit").onclick = function() {
     var option = document.getElementById("TED-select-prompt").value;
     var message = document.getElementById("TED-input-message").value;
     var key = document.getElementById("TED-input-key").value;
-    document.getElementById("TED-text-result").innerHTML = `&nbsp;`;
+    PRINT_TO_HTML("TED-text-result", `&nbsp;`);
 
     if (key == ""){
         document.getElementById("TED-text-result").innerHTML = `Please enter a key to use this feature`;
@@ -120,16 +120,21 @@ document.getElementById("TED-button-submit").onclick = function() {
 
     hashKey(key).then(hashedKey => {
         EncryptDecrypt(option, message, hashedKey).then(result => {
+            if (result == null) {
+                PRINT_TO_HTML("TED-text-result", `Wrong key`);
+                return;
+            }
             if (result.length > MAX_STR_LENGTH) {
-                document.getElementById("TED-text-result").innerHTML = `The message processed exceeds the display limit. Please open the console window by inspecting the page to view the full message.`;
+                PRINT_TO_HTML("TED-text-result", `The message processed exceeds the display limit. Please open the console window by inspecting the page to view the full message.`);
                 console.log(`Your ${option}ed message is: \n${result}`);
             }
             else {
                 if (result.length != 0) 
-                    document.getElementById("TED-text-result").innerHTML = `Your ${option}ed message is: ${result}`;
+                    PRINT_TO_HTML("TED-text-result", `Your ${option}ed message is: ${result}`);
                 else
-                    document.getElementById("TED-text-result").innerHTML = `Your ${option}ed message is: null`;
+                    PRINT_TO_HTML("TED-text-result", `Your ${option}ed message might be fake.`);
             }
+            return;
         });
     });
 };

@@ -95,39 +95,22 @@ monthsSelect_hidden.addEventListener('change', function () {
     populate_days_hidden(this.value);  // this.value is the selected month index
 });
 
+// this function will expand the hidden date input if specific option is selected, and will collapse when choosing other option
 const promptSelect = document.getElementById('CDT-select-prompt');
-promptSelect.addEventListener('change', function () {
+promptSelect.addEventListener('change', function () { 
     const selectedPrompt = promptSelect.value;
     const hiddenPrompt_block = document.getElementById("CDT-text-hiddenPrompt");
     if (selectedPrompt == "custom-days-gap") {
-        toggleContent("CDT-text-hiddenPrompt"); // from `root/assets/js/project_page_layout.js`
-        document.getElementById("CDT-text-result").innerHTML = `&nbsp;`;
+        TOGGLE_CONTENT("CDT-text-hiddenPrompt"); // from `root/assets/js/project_page_layout.js`
+        PRINT_TO_HTML("CDT-text-result", `&nbsp;`);
     }
     else {
-        console.log(`you picked ${selectedPrompt}`);
         if ((hiddenPrompt_block.classList.contains("active"))) 
-            toggleContent("CDT-text-hiddenPrompt");
+            TOGGLE_CONTENT("CDT-text-hiddenPrompt");
     }
 });
 
-function dayth_in_year(year, month, day) {
-    var total_days_current = 0;
-    for (let i = 0; i < MONTHS.length; i++) {
-        if (month == MONTHS[i].name)
-            break;
-        if (!is_leap_year(year) && i == 1) {// Feb, by default, has 29 days (dont ask me why), we subtract -1 if it's a leap year AND it's later than Feb
-            console.log(`when did this happen ${year} ${month} ${day}`);
-            total_days_current -= 1;
-        }
-        total_days_current += MONTHS[i].days;
-    }
-    
-    total_days_current += Number(day);
-    return total_days_current; 
-}
-
 function is_later(day1, day2) { // ([year1, month1, day1], [year2, month2, day2])
-
     if (day1[0] > day2[0]) // year
         return true;
     else if (day1[0] < day2[0]) // year
@@ -146,12 +129,43 @@ function is_leap_year(year) {
     return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
 }
 
+function verify_year_input(year, month, day){
+    if (isNaN(year)) {
+        PRINT_TO_HTML("CDT-text-result", `The input year is not a number.`);
+        return false;
+    }
+    if (year < 1) {
+        PRINT_TO_HTML("CDT-text-result", `The input year is less than 1 (BC year is not supported).`);
+        return false;
+    }
+    if (year.length > 9) {
+        PRINT_TO_HTML("CDT-text-result", `The input year is is too large. Only support up to 9 digits.`);
+        return false;
+    }
+    if (!is_leap_year(year) && month == 1 && day == 29) {
+        PRINT_TO_HTML("CDT-text-result", `The input year is not a leap year, so February does not have 29 days.`);
+        return false;
+    }
+    return true;
+}
+
+function dayth_in_year(year, month, day) {
+    var total_days_current = 0;
+    for (let i = 0; i < MONTHS.length; i++) {
+        if (month == MONTHS[i].name)
+            break;
+        if (!is_leap_year(year) && i == 1) {// Feb, by default, has 29 days (dont ask me why), we subtract -1 if it's a leap year AND it's later than Feb
+            total_days_current -= 1;
+        }
+        total_days_current += MONTHS[i].days;
+    }
+    total_days_current += Number(day);
+    return total_days_current; 
+}
+
 function days_gap(day1, day2) { // (now, when)
-    console.log(`is day1 (now) later than day2 (when): ${is_later(day1, day2)}`);
     if (day1[0] == day2[0]) { // same year
         let days_gap = dayth_in_year(day1[0], day1[1], day1[2]) - dayth_in_year(day2[0], day2[1], day2[2]);
-        console.log(`How many days since the start of year to ${day1} ${dayth_in_year(day1[0], day1[1], day1[2])}`);
-        console.log(`How many days since the start of year to ${day2} ${dayth_in_year(day2[0], day2[1], day2[2])}`);
         return Math.abs(days_gap) + 1; // +1 because we include the end date
     }
     else {
@@ -186,26 +200,6 @@ function days_gap(day1, day2) { // (now, when)
     }
 }
 
-function verify_year_input(year, month, day){
-    if (isNaN(year)) {
-        document.getElementById("CDT-text-result").innerHTML = "The input year is not a number.";
-        return false;
-    }
-    if (year < 1) {
-        document.getElementById("CDT-text-result").innerHTML = "The input year is less than 1 (BC year is not supported).";
-        return false;
-    }
-    if (year.length > 9) {
-        document.getElementById("CDT-text-result").innerHTML = "The input year is is too large. Only support up to 9 digits.";
-        return false;
-    }
-    if (!is_leap_year(year) && month == 1 && day == 29) {
-        document.getElementById("CDT-text-result").innerHTML = "The input year is not a leap year, so February does not have 29 days.";
-        return false;
-    }
-    return true;
-}
-
 document.getElementById("CDT-button-submit").onclick = function() {
     var month_input = document.getElementById("CDT-select-month").value;
     var day_input = document.getElementById("CDT-select-day").value;
@@ -218,57 +212,46 @@ document.getElementById("CDT-button-submit").onclick = function() {
     };
     const formattedDate = date_now.toLocaleDateString('en-US', Date_options);
 
+    PRINT_TO_HTML("CDT-text-result", `&nbsp;`);
     if (!year_input.value) // if year is not input, assign default year as the current year
         year_input.value = formattedDate.slice(-4);
-
-    document.getElementById("CDT-text-result").innerHTML = "&nbsp;"
     if (!verify_year_input(year_input.value, month_input, day_input))
         return;
 
     switch (promptSelect.value) {
         case "current-days-gap":
-            console.log(`${promptSelect.value}`);
             var [month_now, day_now, year_now] = formattedDate.split(' ');
             day_now = day_now.replace(',', '');
             var current_days_gap = days_gap([year_now, month_now, day_now], [year_input.value, MONTHS[month_input].name, day_input]); //daysGap(now, when)
-            console.log(`The gap is ${current_days_gap} day(s)`);
-            document.getElementById("CDT-text-result").innerHTML = `The gap is ${current_days_gap.toLocaleString()} day(s) from today.`;
+            PRINT_TO_HTML("CDT-text-result", `The gap is ${current_days_gap.toLocaleString()} day(s) from today.`);
             break;
 
         case "custom-days-gap":
-            console.log(`${promptSelect.value}`);
             var month_input_hidden = document.getElementById("CDT-select-month-hidden").value;
             var day_input_hidden = document.getElementById("CDT-select-day-hidden").value;
             var year_input_hidden = document.getElementById("CDT-input-year-hidden");
-            document.getElementById("CDT-text-result").innerHTML = "&nbsp;"
+
+            PRINT_TO_HTML("CDT-text-result", `&nbsp;`);
             if (!year_input_hidden.value) // if year is not input, assign default year as the current year
                 year_input_hidden.value = formattedDate.slice(-4);
-
-            document.getElementById("CDT-text-result").innerHTML = "&nbsp;"
             if (!verify_year_input(year_input_hidden.value, month_input_hidden, day_input_hidden))
                 return;
 
-            console.log("hidden day, month, year: ", day_input_hidden, MONTHS[month_input_hidden].name, year_input_hidden.value);
             let custom_days_gap = days_gap([year_input.value, MONTHS[month_input].name, day_input], [year_input_hidden.value, MONTHS[month_input_hidden].name, day_input_hidden]); //daysGap(then, when)
-            document.getElementById("CDT-text-result").innerHTML = `The gap is ${custom_days_gap.toLocaleString()} day(s)`;
-            console.log(`The gap is ${custom_days_gap} day(s)`);
+            PRINT_TO_HTML("CDT-text-result", `The gap is ${custom_days_gap.toLocaleString()} day(s)`);
             break;
 
         case "what-date-week":
-            console.log(`${promptSelect.value}`);
             var [month_now, day_now, year_now] = formattedDate.split(' ');
             day_now = day_now.replace(',', '');
             var current_days_gap = days_gap([year_now, month_now, day_now], [year_input.value, MONTHS[month_input].name, day_input]); //daysGap(now, when)
-            console.log(`days gap ${current_days_gap}`);
             var dayth_in_week = (current_days_gap - 1 ) % 7; // -1 because god knows why
-            if (is_later([year_now, month_now, day_now], [year_input.value, MONTHS[month_input].name, day_input])){
-                var temp = (date_now.getDay() - dayth_in_week + 7) % 7;
-                console.log(`It's ${DAY_IN_WEEK[temp]} in year ${year_input.value}, ${MONTHS[month_input].name} ${day_input}`);
-            }
-            else {
-                var temp = ((date_now.getDay() + dayth_in_week) % 7)
-                console.log(`It's ${DAY_IN_WEEK[temp]} in year ${year_input.value}, ${MONTHS[month_input].name} ${day_input}`);
-            }
+            var temp = 0
+            if (is_later([year_now, month_now, day_now], [year_input.value, MONTHS[month_input].name, day_input]))
+                temp = (date_now.getDay() - dayth_in_week + 7) % 7;
+            else 
+                temp = (date_now.getDay() + dayth_in_week) % 7;
+            PRINT_TO_HTML("CDT-text-result", `It's ${DAY_IN_WEEK[temp]} in year ${year_input.value}, ${MONTHS[month_input].name} ${day_input}`);
             break;
     }
 }

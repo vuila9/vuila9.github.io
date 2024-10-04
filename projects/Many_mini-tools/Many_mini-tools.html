@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Store Application Project</title>
+		<title>Many mini-tools</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="../../assets/css/main.css" />
@@ -29,7 +29,7 @@
 						<div class="inner">
 							<div>
 								<span class="submenu">Description</span>
-								<p>This page is a collection of various small-scale projects or tools inspired by everyday ideas and experiences. For instance, while browsing social media, I might come across something interesting that I want to replicate. Whenever a cool idea comes to mind, I make a note of it and plan to code it later. Once completed, I upload it here, with the most recent projects displayed at the top. Click the expand button to explore each one. Think of this page as a fun space to experiment with mini tools, which may or may not be useful to you—though some are designed for my personal use.</p>
+								<p>This page features a collection of small-scale projects or tools inspired by everyday ideas and experiences. For example, I might come across something interesting in real life that I want to replicate. Whenever a cool idea strikes, I take note and plan to code it later. Once completed, I upload it here, with the most recent projects listed at the top. Click the expand button to explore each one. Think of this page as a fun space to experiment with various mini tools, some of which may be useful to you—while others are for my personal use. This collection is ever-growing, with new additions appearing from time to time.</p>
 								<p>The GitHub source code for all of the tools can be found <a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Many_mini-tools" target="_blank">here</a></p>
 							</div>
 						</div>
@@ -41,11 +41,11 @@
 							<div class="container">
 								<div class="submenu">Calendar Date Teller (WIP)</div>
 								<div>
-									<button class="expand-collapse-button" onclick="toggleContent('CDT-body')">▼</button>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('CDT-body')">▼</button>
 								</div>
 							</div>
 							<div class="expandable-content" id="CDT-body">
-								<p>This tool was developed using manually built functions, without utilizing any built-in date manipulation functions, except for one to obtain the current date.</p>
+								<p>This tool was developed using manually built functions, without utilizing any built-in date manipulation functions, except for one to obtain the current date. The result will include the ending date.</p>
 								<p>Input a date, any date.</p>
 								<select id="CDT-select-prompt" style="width: auto">
 									<option value="current-days-gap">How many days from when to now?</option>
@@ -82,7 +82,7 @@
 							<div class="container">
 								<div class="submenu">RegEx Comparison</div>
 								<div>
-									<button class="expand-collapse-button" onclick="toggleContent('REC-body')">▼</button>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('REC-body')">▼</button>
 								</div>
 							</div>
 							<div class="expandable-content" id="REC-body">
@@ -103,12 +103,13 @@
 							<div class="container">
 								<div class="submenu">Text Encrypt/Decryption</div>
 								<div>
-									<button class="expand-collapse-button" onclick="toggleContent('TED-body')">▼</button>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('TED-body')">▼</button>
 								</div>
 							</div>
 							<div class="expandable-content" id="TED-body">
 								<p>As the name suggests, enter a <u>key</u> along with the <u>message</u> you wish to encrypt or decrypt.</p>
 								<p>Ensure that you use the same key for decrypting a ciphertext that you used for encryption.</p>
+								<p>For study purposes, the tool will notify you if the wrong key is used to decrypt an encrypted message.</p>
 								<div class="same-line-block">
 									<select id="TED-select-prompt" style="width: auto">
 										<option value="encrypt">Encrypt</option>

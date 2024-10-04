@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         {
             imageSrc: "images/pic04.jpg",
-            title: "WIP2",
-            description: "A work-in-progress project to be released soon™",
+            title: "Many mini-tools",
+            description: "A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal use.",
             link: "projects/Many_mini-tools/Many_mini-tools.html"
         },
         {

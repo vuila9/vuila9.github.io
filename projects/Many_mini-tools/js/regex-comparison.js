@@ -1,4 +1,4 @@
-var isMatch = function (s, p) {
+function is_match(s, p) {
 	let up = new Array(p.length).fill(null)
 	let down = new Array(s.length).fill(null)
 	up[0] = true
@@ -42,5 +42,5 @@ var isMatch = function (s, p) {
 document.getElementById("REC-button-submit").onclick = function() {
     var string = document.getElementById("REC-input-string").value;
     var pattern = document.getElementById("REC-input-pattern").value;
-    document.getElementById("REC-text-result").innerHTML = `${isMatch(string, pattern)}`;
+    PRINT_TO_HTML("REC-text-result", `${is_match(string, pattern)}`);
 }
