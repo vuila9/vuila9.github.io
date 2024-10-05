@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Many mini-tools</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="Many_mini-tools_icon.svg" type="image/x-icon">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		
+	</head>
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+				
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+							<a href="https://vuila9.github.io/#main">
+								<button id="home-btn">&lt;&lt;</button>
+							</a> 
+							<a><h1>Many mini-tools</h1></a>
+						</div>
+					</header>
+
+				<!-- Main -->
+					<section id="main">
+						<div class="inner">
+							<div>
+								<span class="submenu">Description</span>
+								<p>This page features a collection of small-scale projects or tools inspired by everyday ideas and experiences. For example, I might come across something interesting in real life that I want to replicate. Whenever a cool idea strikes, I take note and plan to code it later. Once completed, I upload it here, with the most recent projects listed at the top. Click the expand button to explore each one. Think of this page as a fun space to experiment with various mini tools, some of which may be useful to you—while others are for my personal use. This collection is ever-growing, with new additions appearing from time to time.</p>
+								<p>The GitHub source code for all of the tools can be found <a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Many_mini-tools" target="_blank">here</a></p>
+							</div>
+						</div>
+					</section>
+
+				<!-- Calendar Date Teller (CDT) -->
+					<section id="calendar-date-teller-tool">
+						<div class="inner">
+							<div class="container">
+								<div class="submenu">Calendar Date Teller (WIP)</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('CDT-body')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="CDT-body">
+								<p>This tool was developed using manually built functions, without utilizing any built-in date manipulation functions, except for one to obtain the current date. The result will include the ending date.</p>
+								<p>Input a date, any date.</p>
+								<select id="CDT-select-prompt" style="width: auto">
+									<option value="current-days-gap">How many days from when to now?</option>
+									<option value="custom-days-gap">How many days from when to then?</option>
+									<option value="what-date-week">What day of the week is then?</option>
+								</select> <br>
+								<div class="same-line-block">
+									<label for="month">Month:</label>
+									<select id="CDT-select-month" style="width: auto"></select>
+									<label for="day">Day:</label>
+									<select id="CDT-select-day" style="width: 50px"></select>
+									<label for="year">Year:</label>
+									<input id="CDT-input-year" style="display: inline; width: 150px" type="text" placeholder="from"/>
+								</div> <br>
+								<div class="expandable-content" id="CDT-text-hiddenPrompt">
+									<div class="same-line-block" >
+										<label for="month">Month:</label>
+										<select id="CDT-select-month-hidden" style="width: auto"></select>
+										<label for="day">Day:</label>
+										<select id="CDT-select-day-hidden" style="width: 50px"></select>
+										<label for="year">Year:</label>
+										<input id="CDT-input-year-hidden" style="display: inline; width: 150px" type="text" placeholder="to"/>
+									</div>
+								</div> <br>
+								<input id="CDT-button-submit" type="submit" value="Submit" class="primary"/>
+								<b><p id="CDT-text-result">&nbsp;</p></b> <br> <br>
+							</div>
+						</div>
+					</section>	
+
+				<!-- RegEx Comparison (REC) -->
+					<section id="regex-comparison-tool">
+						<div class="inner">
+							<div class="container">
+								<div class="submenu">RegEx Comparison</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('REC-body')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="REC-body">
+								<p>A simple regular expression comparison tool that checks if the input string matches the input pattern. Only support "*" and "." for now.</p>
+								<div class="same-line-block">
+									<input id="REC-input-string" style="display: inline" type="text" placeholder="Enter a string" />
+									<input id="REC-input-pattern" style="display: inline" type="text" placeholder="Enter a pattern" />
+								</div> <br>
+								<input id="REC-button-submit" type="submit" value="Submit" class="primary"/>
+								<b><p id="REC-text-result">&nbsp;</p></b> <br>
+							</div>
+						</div>
+					</section>
+
+				<!-- Text Encrypt/Decryption (TED) -->
+					<section id="text-encrypt-decrypt-tool">
+						<div class="inner">
+							<div class="container">
+								<div class="submenu">Text Encrypt/Decryption</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('TED-body')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="TED-body">
+								<p>As the name suggests, enter a <u>key</u> along with the <u>message</u> you wish to encrypt or decrypt.</p>
+								<p>Ensure that you use the same key for decrypting a ciphertext that you used for encryption.</p>
+								<p>For study purposes, the tool will notify you if the wrong key is used to decrypt an encrypted message.</p>
+								<div class="same-line-block">
+									<select id="TED-select-prompt" style="width: auto">
+										<option value="encrypt">Encrypt</option>
+										<option value="decrypt">Decrypt</option>
+									</select>
+									<input id="TED-input-key" style="display: inline; width: 100px" type="text" placeholder="key" />
+									<input id="TED-input-message" style="display: inline" type="text" placeholder="message" />
+								</div> <br>
+								<input id="TED-button-submit" type="submit" value="Submit" class="primary"/>
+								<p id="TED-text-result">&nbsp;</p> <br>
+							</div>
+						</div>
+					</section>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/project_global_function.js"></script>
+			<script src="./js/loader.js" defer></script>
+	</body>
+</html>
