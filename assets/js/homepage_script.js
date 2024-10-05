@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
             imageSrc: "images/pic05.jpg",
             title: "WIP1",
             description: "A work-in-progress project to be released soon™",
-            link: "templates/generic.html"
+            link: "projects/CMD_Simulator/CMD_Simulator.html"
         },
         {
             imageSrc: "images/pic04.jpg",
