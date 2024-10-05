@@ -1,0 +1,45 @@
+.cmd-log {
+    color: rgb(242,242,242); 
+    margin: 0; 
+    line-height: 1;
+    font-family: Consolas, monospace;
+    font-size: 16px; 
+    font-weight:100;
+    padding: 0 1px;
+}
+.cmd-log::selection {
+    background: white; /* Background color when selected */
+    color: black;
+}
+.cmd-img::selection {
+    background: transparent;
+}
+.cursor {
+    display: inline-block; /* Make the cursor inline */
+    animation: blink 1s step-end infinite; /* Blink effect */
+    width: 3px; /* Set the width of the underscore */
+    height: 2px; /* Set the height of the underscore */
+    color: rgb(242,242,242);
+    background-color: rgb(12, 12, 12); /* Color of the underscore */
+    margin-bottom: -1px; /* Optional: Adjusts the vertical position */
+}
+.cursor::selection {
+    background: transparent; /* Background color when selected */
+}
+/* Keyframes for the blinking effect */
+@keyframes blink {
+    0%, 100% {
+        opacity: 1; /* Fully visible */
+    }
+    50% {
+        opacity: 0; /* Fully invisible */
+    }
+}
+
+#command-console {
+    border: 0.5px outset rgb(12, 12, 12); /* Thin border around the entire container */
+    width: 100%; /* Full width of the parent */
+    display: block; /* Block display to occupy full width */
+    box-sizing: border-box; /* Include border in the total width calculation */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
+}

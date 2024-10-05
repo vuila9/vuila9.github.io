@@ -8,7 +8,8 @@
 		<link rel="icon" href="CMD_Simulator.svg" type="image/x-icon">
 		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
 		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
-		
+		<link rel="stylesheet" href="assets/css/effects.css">
+
 	</head>
 	<body class="is-preload">
 		<!-- Wrapper -->
@@ -27,6 +28,18 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
+							<div id="command-console">
+								<div id="cmd-bar" style="background-color: white; width: 100%; height: 31px; padding: 0; margin: 0 auto; position: relative;">
+									<img class="cmd-img" src="assets/img/topleft_cmd_white.png" alt="Left Image" style="float: left; height: 31px;">
+									<img class="cmd-img" src="assets/img/topright_cmd_white.png" alt="Right Image" style="float: right; height: 31px;">
+									<div style="clear: both;"></div>
+								</div>
+								<div id="cmd-body" style="background-color: rgb(12,12,12); width: 100%; height: 500px; padding: 0; margin: 1; overflow: hidden">
+									<p class="cmd-log">Microsoft Windows [Version 10.5.18071.1703]</p>
+									<p class="cmd-log">(c) Microsoft Corporation. All rights reserved.</p>
+									<p class="cmd-log">C:\Users\vuila9><b><span class="cursor">_</span></b></p>
+								</div>
+							</div>
 							<div>
 								<span class="submenu">Description</span>
 								<p>This is a work-in-progress project, nothing to see here...</p>
@@ -84,5 +97,6 @@
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_global_function.js"></script>
+			<script src="assets/js/CMD_Simulator.js"></script>
 	</body>
 </html>

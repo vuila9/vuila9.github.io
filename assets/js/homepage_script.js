@@ -6,31 +6,31 @@ document.addEventListener("DOMContentLoaded", function() {
     // Data for the articles
     const articlesData = [
         {
-            imageSrc: "images/pic05.jpg",
+            imageSrc: "assets/img/pic05.jpg",
             title: "WIP1",
             description: "A work-in-progress project to be released soon™",
             link: "projects/CMD_Simulator/CMD_Simulator.html"
         },
         {
-            imageSrc: "images/pic04.jpg",
+            imageSrc: "assets/img/pic04.jpg",
             title: "Many mini-tools",
             description: "A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal use.",
             link: "projects/Many_mini-tools/Many_mini-tools.html"
         },
         {
-            imageSrc: "images/pic03.jpg",
+            imageSrc: "assets/img/pic03.jpg",
             title: "Sudoku Game",
             description: "A Python-based Sudoku game with a built-in solver, featuring a fully implemented GUI using Tkinter.",
             link: "projects/Sudoku_Solver/Sudoku_Solver.html"
         },
         {
-            imageSrc: "images/pic02.jpg",
+            imageSrc: "assets/img/pic02.jpg",
             title: "Web-based Restaurant",
             description: "A web-based online restaurant with user-friendly accounts where users can place orders tied to their account, using MongoDB for order storage and Node.js for server hosting.",
             link: "projects/Web-based_Restaurant/Web-based_Restaurant.html"
         },
         {
-            imageSrc: "images/pic01.jpg",
+            imageSrc: "assets/img/pic01.jpg",
             title: "Store Application",
             description: "A Java-based application with a graphical user interface (GUI) that enables users to add or remove items from their shopping cart.",
             link: "projects/Store_Application/Store_Application.html"

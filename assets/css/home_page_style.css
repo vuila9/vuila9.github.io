@@ -13,6 +13,27 @@ body {
     );
 }
 
+#footer { /* Override the #footer in main.css */
+    background-color: rgb(146, 94, 103);
+    padding: 0em 0 1em 0 ;
+    color: rgba(255, 255, 255, 0.541);
+    display: flex;
+    .bigger-p{
+        color: rgba(255, 255, 255, 0.541);
+    };
+}
+
+.bigger-p {
+    color: rgba(0, 0, 0, 0.8);
+    font-size:1.15em;
+    margin: 10px;
+}
+
+.center-text{
+    text-align: center;
+}
+
+/* <------------------------CMD EFFECT---------------------------> */
 .cmd-log {
     color: rgb(242,242,242); 
     margin: 0; 
@@ -34,7 +55,7 @@ body {
     animation: blink 1s step-end infinite; /* Blink effect */
     width: 3px; /* Set the width of the underscore */
     height: 2px; /* Set the height of the underscore */
-    background-color: black; /* Color of the underscore */
+    background-color: rgb(12, 12, 12); /* Color of the underscore */
     margin-bottom: -1px; /* Optional: Adjusts the vertical position */
 }
 .cursor::selection {
@@ -56,28 +77,6 @@ body {
     display: block; /* Block display to occupy full width */
     box-sizing: border-box; /* Include border in the total width calculation */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
-}
-
-#footer { /* Override the #footer in main.css */
-    background-color: rgb(146, 94, 103);
-    padding: 0em 0 1em 0 ;
-    color: rgba(255, 255, 255, 0.541);
-    display: flex;
-    .bigger-p{
-        color: rgba(255, 255, 255, 0.541);
-
-    };
-}
-
-.bigger-p {
-    color: rgba(0, 0, 0, 0.8);
-    font-size:1.15em;
-    margin: 10px;
-}
-
-.center-text{
-    text-align: center;
-    
 }
 
 /* <------------------------STICKY NOTE EFFECT---------------------------> */
