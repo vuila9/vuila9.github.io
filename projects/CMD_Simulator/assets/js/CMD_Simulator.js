@@ -4,8 +4,11 @@ let THE_PROMPT = `${DIR}\\>`     // The first part of every COMMAND line
 let COMMAND = '';                // To store user input
 
 // Set initial prompt
-CMD_CONSOLE.innerHTML = '<span></span>';
-CMD_CONSOLE.querySelector('span').innerText = `${THE_PROMPT}`;
+CMD_CONSOLE.innerHTML += '<span></span>';
+//CMD_CONSOLE.querySelector('span').innerText += `${THE_PROMPT}`;
+CMD_CONSOLE.lastChild.innerText += `${THE_PROMPT}`;
+
+//CMD_CONSOLE.querySelectorAll('span')[this.length - 1].innerText += `${THE_PROMPT}`;
 appendCmdCursor()
 
 // Focus on div to capture keypresses
@@ -57,7 +60,7 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-function appendCmdCursor(){
+function appendCmdCursor() {
     const cmd_cursor = document.createElement('span');
     cmd_cursor.id = 'cmd-cursor';
     cmd_cursor.textContent = '_'; // Cursor character
@@ -65,7 +68,7 @@ function appendCmdCursor(){
     cmd_cursor.style.animation = 'blink 1s step-end infinite';
 }
 
-function removeCmdCursor(){
+function removeCmdCursor() {
     const cmd_cursor = document.getElementById('cmd-cursor')
     if (cmd_cursor === null)
         return;
@@ -74,7 +77,7 @@ function removeCmdCursor(){
     }
 }
 
-function command_handler(command){
+function command_handler(command) {
     switch (command){
         case '':
             break;
