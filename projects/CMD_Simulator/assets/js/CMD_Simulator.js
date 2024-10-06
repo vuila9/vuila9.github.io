@@ -84,7 +84,8 @@ function command_handler(command){
             break;
         
         default:
-            CMD_CONSOLE.innerHTML += `<br><span>'${command.split(" ")[0]}' is not recognized as an internal or external command, operable program or batch file.</span>`;
+            CMD_CONSOLE.innerHTML += `<br><span>'${command.split(" ")[0]}' is not recognized as an internal or external command,</span>`;
+            CMD_CONSOLE.innerHTML += `<br><span>operable program or batch file.</span><br>`;
             break;
     }
 }
