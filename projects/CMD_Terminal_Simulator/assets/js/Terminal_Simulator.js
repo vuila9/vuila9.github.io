@@ -48,7 +48,7 @@ function START_UBUNTU_TERMINAL() {
             if (flag) {
                 COMMAND = COMMAND.slice(0, CURSOR_POS-1) +  COMMAND.slice(CURSOR_POS);
                 CURSOR_POS--;
-                CURSOR_POS = (CURSOR_POS < 0) ? 0 : CURSOR_POS;
+                CURSOR_POS = (CURSOR_POS <= 0) ? 0 : CURSOR_POS;
             }
         }
         else if (event.key === 'Delete') { // Handle delete
@@ -58,7 +58,7 @@ function START_UBUNTU_TERMINAL() {
 
             if (flag) {
                 COMMAND = COMMAND.slice(0, CURSOR_POS) +  COMMAND.slice(CURSOR_POS+1);
-                CURSOR_POS = (CURSOR_POS < 0) ? 0 : CURSOR_POS;
+                CURSOR_POS = (CURSOR_POS <= 0) ? 0 : CURSOR_POS;
             }
         }
 

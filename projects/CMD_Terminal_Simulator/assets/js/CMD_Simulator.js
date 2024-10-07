@@ -10,7 +10,7 @@ function START_WINDOW_CMD() {
     CMD_CONSOLE.innerHTML += '<span></span>';
     CMD_CONSOLE.lastChild.innerText += `${THE_PROMPT}`;
 
-    appendCursor()
+    appendCursor('last')
 
     // Focus on div to capture keypresses
     CMD_CONSOLE.focus();
@@ -19,6 +19,7 @@ function START_WINDOW_CMD() {
     CMD_CONSOLE.addEventListener('keydown', (event) => {
         let arrow_keys = ['ArrowLeft', 'ArrowRight'];
         removeCursor();
+
         if (event.key === 'Enter') {
             // Extract the user input
             const userInput = COMMAND.trim();
@@ -32,21 +33,33 @@ function START_WINDOW_CMD() {
 
             // Clear the current command
             COMMAND = '';  
+            CURSOR_POS = 0;
             event.preventDefault(); // Prevent default "Enter" behavior
 
             // Scroll to the bottom of the div
             CMD_CONSOLE.scrollTop = CMD_CONSOLE.scrollHeight;  // This ensures the latest line is always visible
         } 
-        else if (event.key === 'Backspace') {
-            // Handle backspace
+        else if (event.key === 'Backspace') { // Handle backspace
+            let flag = true;
             if (COMMAND.length <= 0 || CURSOR_POS <= 0)
-                return;
+                flag = false;
             
-            COMMAND = COMMAND.slice(0, CURSOR_POS-1) +  COMMAND.slice(CURSOR_POS);
-            CURSOR_POS--;
-            if (CURSOR_POS <= 0) 
-                CURSOR_POS = 0;
-        } 
+            if (flag) {
+                COMMAND = COMMAND.slice(0, CURSOR_POS-1) +  COMMAND.slice(CURSOR_POS);
+                CURSOR_POS--;
+                CURSOR_POS = (CURSOR_POS <= 0) ? 0 : CURSOR_POS;
+            }
+        }
+        else if (event.key === 'Delete') { // Handle backspace
+            let flag = true;
+            if (COMMAND.length <= 0 )
+                flag = false;
+            
+            if (flag) {
+                COMMAND = COMMAND.slice(0, CURSOR_POS) +  COMMAND.slice(CURSOR_POS+1);
+                CURSOR_POS = (CURSOR_POS <= 0) ? 0 : CURSOR_POS;
+            }
+        }
         else if (event.key === 'Tab') { // will need to come back to this eventually
             event.preventDefault(); // Prevent the default action (scrolling)
         }
@@ -58,15 +71,18 @@ function START_WINDOW_CMD() {
         }
         else if (event.key === 'ArrowLeft') {
             CURSOR_POS --;
-            if (CURSOR_POS <= 0)
-                CURSOR_POS = 0;
+            CURSOR_POS = (CURSOR_POS < 0) ? 0 : CURSOR_POS;
+            if (CURSOR_POS >= 0)
+                appendCursor('middle');
         }
         else if (event.key === 'ArrowRight') {
             CURSOR_POS ++;
-            if (CURSOR_POS > COMMAND.length)
+            if (CURSOR_POS < COMMAND.length) 
+                appendCursor('middle');
+            else {
                 CURSOR_POS = COMMAND.length;
-            if (CURSOR_POS == COMMAND.length)
-                appendCursor();
+                appendCursor('last');
+            }
         }
         else if (event.key.length === 1) {
             // Capture typed characters
@@ -78,29 +94,37 @@ function START_WINDOW_CMD() {
             }
             CURSOR_POS ++;
         }
-        if (!arrow_keys.includes(event.key)) {
-            // Update the current input line
+        if (!arrow_keys.includes(event.key)) { // Update the current input line
             const inputLine = CMD_CONSOLE.querySelectorAll("span");
             inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
             if (CURSOR_POS == COMMAND.length)
-                appendCursor();
+                appendCursor('last');
+            else
+                appendCursor('middle');
         }
     });
 
-    function appendCursor() {
+    function appendCursor(pos) {
         const cmd_cursor = document.createElement('span');
         cmd_cursor.id = 'cmd-cursor';
         cmd_cursor.textContent = '_'; // Cursor character
-        CMD_CONSOLE.appendChild(cmd_cursor);
-        cmd_cursor.style.animation = 'blink 1s step-end infinite';
+        if (pos == 'last')
+            CMD_CONSOLE.appendChild(cmd_cursor);
+        else if (pos == 'middle') {
+            console.log(12)
+            const inputLine = CMD_CONSOLE.querySelectorAll("span");
+            inputLine[inputLine.length - 1].innerHTML = `${THE_PROMPT}${COMMAND.slice(0, CURSOR_POS)}`;
+            inputLine[inputLine.length - 1].innerHTML += `<u id="cmd-cursor-select">${COMMAND[CURSOR_POS]}</u>`;
+            inputLine[inputLine.length - 1].innerHTML += `${COMMAND.slice(CURSOR_POS+1)}`;
+        }
     }
 
     function removeCursor() {
-        const cmd_cursor = document.getElementById('cmd-cursor');
-        if (cmd_cursor === null)
-            return;
-        if (cmd_cursor.parentElement === CMD_CONSOLE) {
-            CMD_CONSOLE.removeChild(cmd_cursor);
+        document.getElementById('cmd-cursor')?.remove();
+        const cmd_cursor_select = document.getElementById('cmd-cursor-select');
+        if (cmd_cursor_select) {
+            CMD_CONSOLE.lastChild.innerHTML = `${THE_PROMPT}${COMMAND}`
+            cmd_cursor_select.remove();
         }
     }
 

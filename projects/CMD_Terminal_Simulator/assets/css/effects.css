@@ -54,13 +54,34 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
 }
 
+@keyframes blink {  /* Keyframes for the blinking effect */
+    0%, 100% {
+        opacity: 1; /* Fully visible */
+    }
+    50% {
+        opacity: 0; /* Fully invisible */
+    }
+}
+
 /* <------------------------Windows CMD effects---------------------------> */
 .cmd-img::selection {
     background: transparent;
 }
 
-#cmd-cursor::selection {
-    background: transparent; /* Background color when selected */
+#cmd-cursor-select {
+    position: relative; /* Positioning context for the pseudo-element */
+    text-decoration: none; /* Remove the default underline */
+}
+
+#cmd-cursor-select::after {
+    content: ""; /* Required for the pseudo-element */
+    position: absolute; /* Position the underline */
+    left: 0; /* Align to the left */
+    bottom: 0; /* Position at the bottom of the text */
+    width: 100%; /* Full width of the text */
+    height: 1px; /* Height of the underline */
+    background-color: rgb(242,242,242);
+    animation: blink 1s infinite; /* Blink effect */
 }
 
 #cmd-cursor {
@@ -74,13 +95,8 @@
     animation: blink 1s step-end infinite;
 }
 
-@keyframes blink {  /* Keyframes for the blinking effect */
-    0%, 100% {
-        opacity: 1; /* Fully visible */
-    }
-    50% {
-        opacity: 0; /* Fully invisible */
-    }
+#cmd-cursor::selection {
+    background: transparent; /* Background color when selected */
 }
 
 #cmd-bar {
