@@ -13,7 +13,7 @@ switchElement.addEventListener('click', function() {
     if (isOn) {
         console.log("Terminal");
         document.getElementById("command-console").innerHTML = '<div id="terminal-bar"><img class="terminal-img" src="assets/img/topleft_terminal_black.png" alt="Left Image" style="float: left; height: 46px"><img class="terminal-img" src="assets/img/topright_terminal_black.png" alt="Right Image" style="float: right; height: 46px"></div><div id="terminal-body" tabindex="0"><span>To run a command as administrator (user "root"), use "sudo &lt;command&gt;".<br>See "man sudo_root" for details.</span></div>';
-        START_LINUX_TERMINAL();
+        START_UBUNTU_TERMINAL();
         
     } else {
         console.log("CMD");

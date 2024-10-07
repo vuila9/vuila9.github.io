@@ -1,3 +1,3 @@
-function START_LINUX_TERMINAL() {
+function START_UBUNTU_TERMINAL() {
     console.log("this function is empty")
 }
