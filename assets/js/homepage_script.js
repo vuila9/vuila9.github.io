@@ -9,12 +9,12 @@ document.addEventListener("DOMContentLoaded", function() {
             imageSrc: "assets/img/pic05.jpg",
             title: "WIP1",
             description: "A work-in-progress project to be released soon™",
-            link: "projects/CMD_Simulator/CMD_Simulator.html"
+            link: "projects/CMD_Simulator/CMD_Terminal_Simulator.html"
         },
         {
             imageSrc: "assets/img/pic04.jpg",
             title: "Many mini-tools",
-            description: "A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal use.",
+            description: "A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal need.",
             link: "projects/Many_mini-tools/Many_mini-tools.html"
         },
         {
