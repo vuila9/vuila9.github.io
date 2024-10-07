@@ -65,7 +65,7 @@
 
 #cmd-cursor {
     display: inline-block;                 /* Make the cursor inline */
-    animation: blink 0.666s step-end infinite; /* Blink effect */
+    /*animation: blink 0.666s step-end infinite;  Blink effect */
     width: 3px;                            /* Set the width of the underscore */
     height: 2px;                           /* Set the height of the underscore */
     color: rgb(242,242,242);
@@ -113,12 +113,12 @@
 
 #cmd-body span::selection {
     background: white !important; 
-    color: black !important;
+    color: black      !important;
 }
 
 #cmd-body br::selection {
-    background: white; 
-    color: black;
+    background: white !important; 
+    color: black      !important;
 }
 
 /* <------------------------Linus Terminal effects---------------------------> */
@@ -130,12 +130,11 @@
 }
 
 #terminal-cursor {
-    height: 17px;
+    display: inline-block;
+    height: 16px;
     width: 8px;
-    background: white;
-    display: block;
-    margin-left: 8px;
-    animation: 2000ms ease infinite alternate blink;
+    background: rgb(48,10,36);
+    color: rgb(242,242,242);
 }
 
 #terminal-cursor::selection {
@@ -143,11 +142,16 @@
 }
 
 #terminal-bar {
-    background-color: rgb(34, 34, 34); 
+    background-color: rgb(34, 34, 34);
+    
+    color: white;
+    font-size: 16px;
+    font-weight: 100;
+    font-family: 'Ubuntu', monospace;
     width: 100%; 
     height: 46px; 
-    padding: 0; 
     margin: 0 auto; 
+    padding: 0; 
     position: relative;
 }
 
@@ -160,9 +164,9 @@
     color: rgb(242,242,242); 
     /* text customize */
     margin: 0; 
-    line-height: 1;
+    line-height: 1.25;
     font-family: 'Ubuntu', monospace;
-    font-size: 16px; 
+    font-size: 17px; 
     font-weight:100;
     padding: 0 1px;
     /* misc effects */
@@ -172,13 +176,13 @@
 }
 
 #terminal-body span::selection {
-    background: white !important; 
-    color: black !important;
+    background: white    !important; 
+    color: rgb(48,10,36) !important;
 }
 
 #terminal-body br::selection {
-    background: white; 
-    color: black;
+    background: white    !important; 
+    color: rgb(48,10,36) !important;
 }
 
 

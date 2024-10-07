@@ -2,20 +2,23 @@ function START_WINDOW_CMD() {
     const CMD_CONSOLE = document.getElementById("cmd-body");
     let DIR = 'C:'                   // Current directory
     let THE_PROMPT = `${DIR}\\>`     // The first part of every COMMAND line
+    let USER = 'vuila9';
     let COMMAND = '';                // To store user input
+    let CURSOR_POS = 0;    // track where the cursor is
 
     // Set initial prompt
     CMD_CONSOLE.innerHTML += '<span></span>';
     CMD_CONSOLE.lastChild.innerText += `${THE_PROMPT}`;
 
-    appendCmdCursor()
+    appendCursor()
 
     // Focus on div to capture keypresses
     CMD_CONSOLE.focus();
 
     // Handle keypresses
     CMD_CONSOLE.addEventListener('keydown', (event) => {
-        removeCmdCursor();
+        let arrow_keys = ['ArrowLeft', 'ArrowRight'];
+        removeCursor();
         if (event.key === 'Enter') {
             // Extract the user input
             const userInput = COMMAND.trim();
@@ -43,26 +46,41 @@ function START_WINDOW_CMD() {
         else if (event.key === 'Tab') { // will need to come back to this eventually
             event.preventDefault(); // Prevent the default action (scrolling)
         }
-        
+        else if (event.key === 'ArrowUp') {
+            event.preventDefault(); // Prevent the default action (scrolling up)
+        }
+        else if (event.key === 'ArrowDown') {
+            event.preventDefault(); // Prevent the default action (scrolling down)
+        }
+        else if (event.key === 'ArrowLeft') {
+            CURSOR_POS --;
+            if (CURSOR_POS <= 0)
+                CURSOR_POS = 0;
+        }
+        else if (event.key === 'ArrowRight') {
+            CURSOR_POS ++;
+            if (CURSOR_POS > COMMAND.length)
+                CURSOR_POS = COMMAND.length;
+        }
         else if (event.key.length === 1) {
             // Capture typed characters
-            COMMAND += event.key;
+            if (CURSOR_POS == COMMAND.length){
+                COMMAND += event.key;
+            }
+            else {
+                COMMAND = COMMAND.slice(0, CURSOR_POS) + event.key + COMMAND.slice(CURSOR_POS);
+            }
+            CURSOR_POS ++;
         }
-        if (event.key !== 'Left' || event.key !== 'Right') {
-        // Update the current input line
-        const inputLine = CMD_CONSOLE.querySelectorAll("span");
-        inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
-        appendCmdCursor();
-        }
-        else if (event.key == 'Left') {
-            console.log("User press left arrow key");
-        }
-        else if (event.key == 'Right') {
-            console.log("User press right arrow key");
+        if (!arrow_keys.includes(event.key)) {
+            // Update the current input line
+            const inputLine = CMD_CONSOLE.querySelectorAll("span");
+            inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
+            appendCursor();
         }
     });
 
-    function appendCmdCursor() {
+    function appendCursor() {
         const cmd_cursor = document.createElement('span');
         cmd_cursor.id = 'cmd-cursor';
         cmd_cursor.textContent = '_'; // Cursor character
@@ -70,8 +88,8 @@ function START_WINDOW_CMD() {
         cmd_cursor.style.animation = 'blink 1s step-end infinite';
     }
 
-    function removeCmdCursor() {
-        const cmd_cursor = document.getElementById('cmd-cursor')
+    function removeCursor() {
+        const cmd_cursor = document.getElementById('cmd-cursor');
         if (cmd_cursor === null)
             return;
         if (cmd_cursor.parentElement === CMD_CONSOLE) {
@@ -87,7 +105,9 @@ function START_WINDOW_CMD() {
             case 'cls':
                 CMD_CONSOLE.innerHTML = '';
                 break;
-            
+            case 'whoami':
+                CMD_CONSOLE.innerHTML += `<br><span>${USER}</span><br>`;
+                break;
             default:
                 CMD_CONSOLE.innerHTML += `<br><span>'${command.split(" ")[0]}' is not recognized as an internal or external command,</span>`;
                 CMD_CONSOLE.innerHTML += `<br><span>operable program or batch file.</span><br>`;
