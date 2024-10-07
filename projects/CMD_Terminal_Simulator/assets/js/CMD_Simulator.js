@@ -39,9 +39,13 @@ function START_WINDOW_CMD() {
         } 
         else if (event.key === 'Backspace') {
             // Handle backspace
-            if (COMMAND.length > 0) {
-            COMMAND = COMMAND.slice(0, -1);
-            }
+            if (COMMAND.length <= 0 || CURSOR_POS <= 0)
+                return;
+            
+            COMMAND = COMMAND.slice(0, CURSOR_POS-1) +  COMMAND.slice(CURSOR_POS);
+            CURSOR_POS--;
+            if (CURSOR_POS <= 0) 
+                CURSOR_POS = 0;
         } 
         else if (event.key === 'Tab') { // will need to come back to this eventually
             event.preventDefault(); // Prevent the default action (scrolling)
@@ -61,6 +65,8 @@ function START_WINDOW_CMD() {
             CURSOR_POS ++;
             if (CURSOR_POS > COMMAND.length)
                 CURSOR_POS = COMMAND.length;
+            if (CURSOR_POS == COMMAND.length)
+                appendCursor();
         }
         else if (event.key.length === 1) {
             // Capture typed characters
@@ -76,7 +82,8 @@ function START_WINDOW_CMD() {
             // Update the current input line
             const inputLine = CMD_CONSOLE.querySelectorAll("span");
             inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
-            appendCursor();
+            if (CURSOR_POS == COMMAND.length)
+                appendCursor();
         }
     });
 

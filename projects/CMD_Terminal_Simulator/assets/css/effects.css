@@ -71,6 +71,7 @@
     color: rgb(242,242,242);
     background-color: rgb(12, 12, 12);   /* Color of the underscore */
     margin-bottom: -1px;                   /* Optional: Adjusts the vertical position */
+    animation: blink 1s step-end infinite;
 }
 
 @keyframes blink {  /* Keyframes for the blinking effect */
@@ -122,11 +123,18 @@
 }
 
 /* <------------------------Linus Terminal effects---------------------------> */
-@import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
-@import url('https://fonts.googleapis.com/css?family=Ubuntu');
-
 .terminal-img::selection {
     background: transparent;
+}
+
+#terminal-cursor-select {
+    display: inline-block;
+    height: 16px;
+    width: 10px;
+    background: rgb(242,242,242);
+    color: rgb(48,10,36);
+    box-shadow: 0px 5px rgb(242,242,242);
+    animation: 1.5s ease infinite alternate blink;
 }
 
 #terminal-cursor {
@@ -135,6 +143,7 @@
     width: 8px;
     background: rgb(48,10,36);
     color: rgb(242,242,242);
+    animation: 1.5s ease infinite alternate blink;
 }
 
 #terminal-cursor::selection {

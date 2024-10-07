@@ -1,5 +1,5 @@
 function START_UBUNTU_TERMINAL() {
-    const TERMINAL_CONSOLE = document.getElementById("terminal-body");
+    const TERMINAL_CONSOLE = document.getElementById('terminal-body');
     let USER = 'vuila9';
     let DIR = `/home/${USER}`; // pwd
     let HOME_DIR_LENGTH = `/home/${USER}`.length;
@@ -10,17 +10,18 @@ function START_UBUNTU_TERMINAL() {
 
     addTitleBar();
     addThePrompt();
-    appendCursor();
+    appendCursor('last');
 
     TERMINAL_CONSOLE.focus();
 
     TERMINAL_CONSOLE.addEventListener('keydown', (event) => {
         let arrow_keys = ['ArrowLeft', 'ArrowRight'];
         removeCursor();
-        if (event.key === 'Enter') {
-            // Extract the user input
+
+        if (event.key === 'Enter') { // Extract the user input
+            
             const userInput = COMMAND.trim();
-            console.log("User Input:", userInput);  // Do something with the input
+            console.log('User Input:', userInput);  // Do something with the input
 
             // THIS IS WHERE YOU DO YOUR COMMAND HANDLER
             command_handler(userInput);
@@ -39,12 +40,28 @@ function START_UBUNTU_TERMINAL() {
             // Scroll to the bottom of the div
             TERMINAL_CONSOLE.scrollTop = TERMINAL_CONSOLE.scrollHeight;  // This ensures the latest line is always visible
         } 
-        else if (event.key === 'Backspace') {
-            // Handle backspace
-            if (COMMAND.length > 0) {
-            COMMAND = COMMAND.slice(0, -1);
+        else if (event.key === 'Backspace') { // Handle backspace
+            let flag = true;
+            if (COMMAND.length <= 0 || CURSOR_POS <= 0)
+                flag = false;
+
+            if (flag) {
+                COMMAND = COMMAND.slice(0, CURSOR_POS-1) +  COMMAND.slice(CURSOR_POS);
+                CURSOR_POS--;
+                CURSOR_POS = (CURSOR_POS < 0) ? 0 : CURSOR_POS;
             }
-        } 
+        }
+        else if (event.key === 'Delete') { // Handle delete
+            let flag = true;
+            if (COMMAND.length <= 0)
+                flag = false;
+
+            if (flag) {
+                COMMAND = COMMAND.slice(0, CURSOR_POS) +  COMMAND.slice(CURSOR_POS+1);
+                CURSOR_POS = (CURSOR_POS < 0) ? 0 : CURSOR_POS;
+            }
+        }
+
         else if (event.key === 'Tab') { // will need to come back to this eventually
             event.preventDefault(); // Prevent the default action (switch focus field)
         }
@@ -56,16 +73,20 @@ function START_UBUNTU_TERMINAL() {
         }
         else if (event.key === 'ArrowLeft') {
             CURSOR_POS --;
-            if (CURSOR_POS <= 0)
-                CURSOR_POS = 0;
+            CURSOR_POS = (CURSOR_POS < 0) ? 0 : CURSOR_POS;
+            if (CURSOR_POS >= 0)
+                appendCursor('middle');
         }
         else if (event.key === 'ArrowRight') {
             CURSOR_POS ++;
-            if (CURSOR_POS > COMMAND.length)
+            if (CURSOR_POS < COMMAND.length) 
+                appendCursor('middle');
+            else {
                 CURSOR_POS = COMMAND.length;
+                appendCursor('last');
+            }
         }
-        else if (event.key.length === 1) {
-            // Capture typed characters
+        else if (event.key.length === 1) {  // Capture typed characters
             if (CURSOR_POS == COMMAND.length){
                 COMMAND += event.key;
             }
@@ -75,29 +96,36 @@ function START_UBUNTU_TERMINAL() {
             CURSOR_POS ++;
         }
 
-        if (!arrow_keys.includes(event.key) ) {
-            // Update the current input line
+        if (!arrow_keys.includes(event.key) ) { // Update the current input line
             const inputLine = TERMINAL_CONSOLE.querySelectorAll("span");
             inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
-            appendCursor();
+            if (CURSOR_POS == COMMAND.length) 
+                appendCursor('last');
+            else 
+                appendCursor('middle');
         }
-
     });
 
-    function appendCursor() {
+    function appendCursor(pos) {
         const terminal_cursor = document.createElement('span');
         terminal_cursor.id = 'terminal-cursor';
-        terminal_cursor.textContent = '█'; // Cursor character ▐▌
-        TERMINAL_CONSOLE.appendChild(terminal_cursor);
-        terminal_cursor.style.animation = '1.5s ease infinite alternate blink';
+        terminal_cursor.textContent = '█'; // Cursor character █
+        if (pos == 'last') 
+            TERMINAL_CONSOLE.appendChild(terminal_cursor);
+        else if (pos == 'middle') {
+            const inputLine = TERMINAL_CONSOLE.querySelectorAll("span");
+            inputLine[inputLine.length - 1].innerHTML = `${COMMAND.slice(0, CURSOR_POS)}`;
+            inputLine[inputLine.length - 1].innerHTML += `<span id="terminal-cursor-select">${COMMAND[CURSOR_POS]}</span>`;
+            inputLine[inputLine.length - 1].innerHTML += `${COMMAND.slice(CURSOR_POS+1)}`;
+        }
     }
 
     function removeCursor() {
-        const terminal_cursor = document.getElementById('terminal-cursor');
-        if (terminal_cursor === null)
-            return;
-        if (terminal_cursor.parentElement === TERMINAL_CONSOLE) {
-            TERMINAL_CONSOLE.removeChild(terminal_cursor);
+        document.getElementById('terminal-cursor')?.remove();
+        const terminal_cursor_select = document.getElementById('terminal-cursor-select');
+        if (terminal_cursor_select) {
+            TERMINAL_CONSOLE.lastChild.innerHTML = `${COMMAND}`
+            terminal_cursor_select.remove();
         }
     }
 
@@ -125,7 +153,6 @@ function START_UBUNTU_TERMINAL() {
 
     function addTitleBar() {
         const terminal_bar = document.getElementById('terminal-bar');
-        //terminal_bar.innerHTML += `${USER}@${DOMAIN}:` + directoryPromptHandler();
         terminal_bar.innerHTML += `<span style="position: absolute; left: 50%; transform: translateX(-50%); margin-top: 8px; font-weight: bold; font-size: 16.5px">${USER}@${DOMAIN}:` + directoryPromptHandler() + `</span>`;
     }
 
