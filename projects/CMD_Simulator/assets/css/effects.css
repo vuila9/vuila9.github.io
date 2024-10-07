@@ -1,5 +1,66 @@
+/* <------------------------Switch effects---------------------------> */
+.switch-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Text labels */
+.label {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    margin: 0 10px; /* Space between label and switch */
+}
+
+.switch {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background-color: #ccc;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* The small circle inside the switch */
+.toggle-btn {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background-color: white;
+    border-radius: 50%;
+    transition: left 0.3s ease;
+}
+
+/* When the switch is active */
+.switch.active {
+    background-color: #4CAF50;
+}
+
+/* Move the circle to the right when active */
+.switch.active .toggle-btn {
+    left: 33px;
+}
+
+
+#command-console {
+    border: 0.5px outset rgb(12, 12, 12);     /* Thin border around the entire container */
+    width: 100%;                                /* Full width of the parent */
+    display: block;                             /* Block display to occupy full width */
+    box-sizing: border-box;                     /* Include border in the total width calculation */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
+}
+
+/* <------------------------Windows CMD effects---------------------------> */
 .cmd-img::selection {
     background: transparent;
+}
+
+#cmd-cursor::selection {
+    background: transparent; /* Background color when selected */
 }
 
 #cmd-cursor {
@@ -12,25 +73,13 @@
     margin-bottom: -1px;                   /* Optional: Adjusts the vertical position */
 }
 
-#cmd-cursor::selection {
-    background: transparent; /* Background color when selected */
-}
-/* Keyframes for the blinking effect */
-@keyframes blink {
+@keyframes blink {  /* Keyframes for the blinking effect */
     0%, 100% {
         opacity: 1; /* Fully visible */
     }
     50% {
         opacity: 0; /* Fully invisible */
     }
-}
-
-#command-console {
-    border: 0.5px outset rgb(12, 12, 12);     /* Thin border around the entire container */
-    width: 100%;                                /* Full width of the parent */
-    display: block;                             /* Block display to occupy full width */
-    box-sizing: border-box;                     /* Include border in the total width calculation */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
 }
 
 #cmd-bar {
@@ -52,7 +101,7 @@
     /* text customize */
     margin: 0; 
     line-height: 1;
-    font-family: Consolas, monospace;
+    font-family: 'Consolas', monospace;
     font-size: 16px; 
     font-weight:100;
     padding: 0 1px;
@@ -71,3 +120,65 @@
     background: white; 
     color: black;
 }
+
+/* <------------------------Linus Terminal effects---------------------------> */
+@import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
+@import url('https://fonts.googleapis.com/css?family=Ubuntu');
+
+.terminal-img::selection {
+    background: transparent;
+}
+
+#terminal-cursor {
+    height: 17px;
+    width: 8px;
+    background: white;
+    display: block;
+    margin-left: 8px;
+    animation: 2000ms ease infinite alternate blink;
+}
+
+#terminal-cursor::selection {
+    background: transparent; /* Background color when selected */
+}
+
+#terminal-bar {
+    background-color: rgb(34, 34, 34); 
+    width: 100%; 
+    height: 46px; 
+    padding: 0; 
+    margin: 0 auto; 
+    position: relative;
+}
+
+#terminal-body {
+    /* fixed size */
+    width: 100%;          
+    height: 485px; 
+    /* color */
+    background-color: rgb(48,10,36); 
+    color: rgb(242,242,242); 
+    /* text customize */
+    margin: 0; 
+    line-height: 1;
+    font-family: 'Ubuntu', monospace;
+    font-size: 16px; 
+    font-weight:100;
+    padding: 0 1px;
+    /* misc effects */
+    white-space: pre-wrap; /* Allows preserving spaces and line breaks */
+    outline: none;         /* Remove outline when focused */
+    overflow-y: auto;      /* Show scroll bar automatically */
+}
+
+#terminal-body span::selection {
+    background: white !important; 
+    color: black !important;
+}
+
+#terminal-body br::selection {
+    background: white; 
+    color: black;
+}
+
+
