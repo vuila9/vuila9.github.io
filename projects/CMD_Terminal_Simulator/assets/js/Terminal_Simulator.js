@@ -157,7 +157,7 @@ function START_UBUNTU_TERMINAL() {
     }
 
     function command_handler(command) {
-        switch (command){
+        switch (command.split(" ")[0]){
             case '':
                 break;
 
