@@ -1,10 +1,12 @@
 function START_UBUNTU_TERMINAL() {
     const TERMINAL_CONSOLE = document.getElementById('terminal-body');
-    let USER = 'vuila9';
-    let DIR = `/home/${USER}`; // pwd
-    let HOME_DIR_LENGTH = `/home/${USER}`.length;
+    const USERS = InitUser();     // Initialize some users
+    const ROOT_DIR = InitFileSystem();
+    let CURRENT_USER = USERS[1];  // default user, vuila9
+    let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
+    let HOME_DIR_LENGTH = `/home/${CURRENT_USER.getUsername()}`.length;
     let DOMAIN = 'github.io';
-    let THE_PROMPT = `${USER}@${DOMAIN}:~$`; // need to make a function to assign this automatically
+    let THE_PROMPT = `${CURRENT_USER.getUsername()}@${DOMAIN}:~$`; // need to make a function to assign this automatically
     let COMMAND = '';
     let CURSOR_POS = 0;    // track where the cursor is
 
@@ -130,11 +132,11 @@ function START_UBUNTU_TERMINAL() {
     }
 
     function addThePrompt() {
-        TERMINAL_CONSOLE.innerHTML += '<span style="color: #87d441; font-weight: bold"></span>';
-        TERMINAL_CONSOLE.lastChild.innerHTML += `${USER}@${DOMAIN}`;
+        TERMINAL_CONSOLE.innerHTML += '<span class="terminal-prompt" style="color: rgb(38,162,105); font-weight: bold"></span>';
+        TERMINAL_CONSOLE.lastChild.innerHTML += `${CURRENT_USER.getUsername()}@${DOMAIN}`;
         TERMINAL_CONSOLE.innerHTML += '<span>:</span';
 
-        TERMINAL_CONSOLE.innerHTML += '<span style="color: #6d85a9"></span>';
+        TERMINAL_CONSOLE.innerHTML += '<span class="terminal-directory" style="color: rgb(18,72,139)"></span>';
         TERMINAL_CONSOLE.lastChild.innerHTML += directoryPromptHandler();
 
         TERMINAL_CONSOLE.innerHTML += '<span></span>';
@@ -143,9 +145,9 @@ function START_UBUNTU_TERMINAL() {
     }
 
     function directoryPromptHandler() {
-        if (DIR === `/home/${USER}`)
+        if (DIR === `/home/${CURRENT_USER.getUsername()}`)
             return `~`
-        else if (DIR.includes(`/home/${USER}`, 0))
+        else if (DIR.includes(`/home/${CURRENT_USER.getUsername()}`, 0))
             return `~${DIR.slice(HOME_DIR_LENGTH)}`;
         else
             return `${DIR}`;
@@ -153,7 +155,7 @@ function START_UBUNTU_TERMINAL() {
 
     function addTitleBar() {
         const terminal_bar = document.getElementById('terminal-bar');
-        terminal_bar.innerHTML += `<span style="position: absolute; left: 50%; transform: translateX(-50%); margin-top: 8px; font-weight: bold; font-size: 16.5px">${USER}@${DOMAIN}:` + directoryPromptHandler() + `</span>`;
+        terminal_bar.innerHTML += `<span id="terminal-title" style="position: absolute; left: 50%; transform: translateX(-50%); margin-top: 8px; font-weight: bold; font-size: 16.5px">${CURRENT_USER.getUsername()}@${DOMAIN}:` + directoryPromptHandler() + `</span>`;
     }
 
     function command_handler(command) {
@@ -166,17 +168,61 @@ function START_UBUNTU_TERMINAL() {
                 CURSOR_POS == 0;
                 break;
 
+            case 'ls':
+                TERMINAL_CONSOLE.innerHTML += '<br><span>I\'m working on it T.T<span>';
+                break;
+            
             case 'pwd':
                 TERMINAL_CONSOLE.innerHTML += `<br><span>${DIR}</span>`;
                 break;
 
             case 'whoami':
-                TERMINAL_CONSOLE.innerHTML += `<br><span>${USER}</span>`;
+                TERMINAL_CONSOLE.innerHTML += `<br><span>${CURRENT_USER.getUsername()}</span>`;
                 break;
 
             default:
                 TERMINAL_CONSOLE.innerHTML += `<br><span>${command.split(" ")[0]}: command not found</span>`;
                 break;
         }
+    }
+
+    // INITIALIZE //
+    function InitUser() {
+        return [new User('root'), new User('vuila9'), new User('ptkv'), new User('guest')];
+    }
+
+    function InitFileSystem() {
+        const root = new Directory('/', 'root', '755');
+        root.addDirectory(new Directory('bin', 'root', '755', root));
+        root.addDirectory(new Directory('home', 'root', '755', root));
+        root.addDirectory(new Directory('home', 'root', '755', root)); // would not add
+        root.addDirectory(new Directory('src', 'root', '755', root));
+
+        const home = root.getChildren('home');
+        home.addDirectory(new Directory('vuila9', 'vuila9', '750', home));
+        home.addDirectory(new Directory('ptkv', 'ptkv', '750', home));
+
+        const vuila9 = home.getChildren('vuila9');
+        vuila9.addDirectory(new Directory('code', 'vuila9', '775', vuila9));
+        vuila9.addFile(new File('GitHub', 'vuila9', '664', vuila9));
+        vuila9.getChildren('GitHub').setFileContent("https://vuila9.github", 'write');
+        vuila9.getChildren('GitHub').setFileContent(".io/", 'append');
+
+
+        const ptkv = home.getChildren('ptkv');
+        ptkv.addDirectory(new Directory('ex', 'ptkv', '775', ptkv));
+        ptkv.getChildren('ex').addDirectory(new Directory('me', 'ptkv', '775', ptkv.getChildren('ex')));
+        ptkv.addFile(new File('MKNQ', 'ptkv', '664', ptkv));
+        ptkv.getChildren('MKNQ').setFileContent("still a mystery...", 'write');
+
+        const code = vuila9.getChildren('code');
+        code.addDirectory(new Directory('is', 'vuila9', '775', code));
+        code.addDirectory(new Directory('is', 'vuila9', '775', code)); // would not add
+        code.addFile(new File('goal', 'vuila9', '664', code));
+        code.addFile(new File('goal', 'vuila9', '664', code));  // would not add
+        code.getChildren('goal').setFileContent("need to ace the Google Interview", 'write');
+
+
+        return root;
     }
 }

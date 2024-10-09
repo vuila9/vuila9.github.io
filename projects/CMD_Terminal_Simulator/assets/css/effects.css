@@ -138,8 +138,12 @@
     color: black      !important;
 }
 
-/* <------------------------Linus Terminal effects---------------------------> */
+/* <------------------------Ubuntu Terminal effects---------------------------> */
 .terminal-img::selection {
+    background: transparent;
+}
+
+#terminal-title::selection {
     background: transparent;
 }
 
@@ -209,8 +213,18 @@
 }
 
 #terminal-body span::selection {
-    background: white    !important; 
+    background: white    ; 
     color: rgb(48,10,36) !important;
+}
+
+.terminal-prompt::selection {
+    background: rgb(38,162,105)  !important;
+    color: rgb(48,10,36) !important; 
+}
+
+.terminal-directory::selection {
+    background: rgb(18,72,139)  !important;
+    color: rgb(48,10,36) !important; 
 }
 
 #terminal-body br::selection {

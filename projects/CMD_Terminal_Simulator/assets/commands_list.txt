@@ -1,0 +1,17 @@
+TERMINAL (to be done):
+- whoami
+- clear
+- cd (file, ., ..)
+- touch
+- echo (>>)
+- cat
+- ls (-a; -l; -la)
+- mkdir
+- file
+
+
+CMD:
+- cls
+- whoami
+
+

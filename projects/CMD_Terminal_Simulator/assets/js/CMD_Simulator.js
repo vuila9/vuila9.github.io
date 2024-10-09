@@ -1,8 +1,9 @@
 function START_WINDOW_CMD() {
     const CMD_CONSOLE = document.getElementById("cmd-body");
+    let USERS = [new User('vuila9'), new User('ptkv'), new User('guest')];   // Initialize some users
     let DIR = 'C:'                   // Current directory
     let THE_PROMPT = `${DIR}\\>`     // The first part of every COMMAND line
-    let USER = 'vuila9';
+    let CURRENT_USER = USERS[0];
     let COMMAND = '';                // To store user input
     let CURSOR_POS = 0;    // track where the cursor is
 
@@ -128,6 +129,10 @@ function START_WINDOW_CMD() {
         }
     }
 
+    function initUser() {
+        return [new User('vuila9'), new User('ptkv'), new User('guest')];
+    }
+
     function command_handler(command) {
         switch (command){
             case '':
@@ -137,7 +142,7 @@ function START_WINDOW_CMD() {
                 CMD_CONSOLE.innerHTML = '';
                 break;
             case 'whoami':
-                CMD_CONSOLE.innerHTML += `<br><span>${USER}</span><br>`;
+                CMD_CONSOLE.innerHTML += `<br><span>${CURRENT_USER.getUsername()}</span><br>`;
                 break;
             default:
                 CMD_CONSOLE.innerHTML += `<br><span>'${command.split(" ")[0]}' is not recognized as an internal or external command,</span>`;
