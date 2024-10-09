@@ -111,7 +111,7 @@ class Directory {
         this.name = name;
         this.children = [];
         this.owner = owner;
-        this.hardlink = 2;
+        this.hardlink = 0;
         this.permission = permission;
         this.size = 4096;
         this.parent = parent;
@@ -140,8 +140,9 @@ class Directory {
     getChildren(name='') {
         if (!name)
             return this.children;
+
         for (let i = 0; i < this.children.length; i++) {
-            if (this.children[i].getName() == name)
+            if (this.children[i].getName() === name)
                 return this.children[i];
         }
         return null;
@@ -176,6 +177,10 @@ class Directory {
         if (this.hasChildren(directory.getName())) {
             return false;
         }
+        directory.getChildren().push(new Directory('.', directory.getOwner(), directory.getPermission(), directory.getParent()));
+        directory.getChildren().push(new Directory('..', directory.getParent().getOwner(), directory.getParent().getPermission(), directory.getParent().getParent()));
+        directory.setDirectoryHardlink(2);
+        directory.getChildren('..').setDirectoryHardlink(2);
         // insert in alphabetical order disregarding case sensitivity and any leading "."s
         const cleanedDirectory = directory.getName().replace(/^[^a-zA-Z]*/, '').toLowerCase();
         let index = this.getChildren().findIndex(item => item.getName().toLowerCase() > cleanedDirectory);
@@ -193,6 +198,7 @@ class Directory {
             directory.setParentPath(this.getParentPath() + directory.getParentPath());
 
         this.hardlink += 1;
+        this.getChildren('.').setDirectoryHardlink(this.hardlink);
         return true;
     }
 

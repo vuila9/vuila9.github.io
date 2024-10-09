@@ -3,8 +3,9 @@ function START_UBUNTU_TERMINAL() {
     const USERS = InitUser();          // Initialize some users
     const ROOT_DIR = InitFileSystem(); // Initialize pre-built file structure that starts at root directory
     let CURRENT_USER = USERS[1];       // default user, vuila9
-    let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
-    let HOME_DIR_LENGTH = `/home/${CURRENT_USER.getUsername()}`.length;
+    //let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
+    let DIR = `/home/vuila9`;
+    let HOME_DIR = `/home/${CURRENT_USER.getUsername()}`;
     let DOMAIN = 'github.io';
     let THE_PROMPT = `${CURRENT_USER.getUsername()}@${DOMAIN}:~$`; // need to make a function to assign this automatically
     let COMMAND = '';
@@ -33,6 +34,7 @@ function START_UBUNTU_TERMINAL() {
                 TERMINAL_CONSOLE.innerHTML += `<br>`;
 
             addThePrompt();
+            addTitleBar(); // change title bar if pwd is changed
 
             // Clear the current command
             COMMAND = '';
@@ -147,16 +149,20 @@ function START_UBUNTU_TERMINAL() {
     }
 
     function directoryPromptHandler() {
+        if (DIR.split('').every(char => char === '/')) // if dir is string of '/'s, treat as '/' aka root
+            return '/';
         if (DIR === `/home/${CURRENT_USER.getUsername()}`)
             return `~`
         else if (DIR.includes(`/home/${CURRENT_USER.getUsername()}`, 0))
-            return `~${DIR.slice(HOME_DIR_LENGTH)}`;
-        else
-            return `${DIR}`;
+            return `~${DIR.slice(HOME_DIR.length)}`;
+        else 
+            return (DIR[DIR.length - 1] == "/") ? DIR.slice(0, DIR.length - 1) : DIR;
+        
     }
 
     function addTitleBar() {
         const terminal_bar = document.getElementById('terminal-bar');
+        document.getElementById("terminal-title")?.remove();
         terminal_bar.innerHTML += `<span id="terminal-title" style="position: absolute; left: 50%; transform: translateX(-50%); margin-top: 8px; font-weight: bold; font-size: 16.5px">${CURRENT_USER.getUsername()}@${DOMAIN}:` + directoryPromptHandler() + `</span>`;
     }
 
@@ -180,20 +186,25 @@ function START_UBUNTU_TERMINAL() {
         // dir = '/path/to/dir' == '/path/to/dir/' 
         // since all dir start with / and either end with / or a dir name, this will generalize the dir into a simple array
         if (dir.split('').every(char => char === '/')) // if dir is string of '/'s, treat as '/' aka root
-            return root;
+            return ROOT_DIR;
     
         dir_arr = dir.slice(1).split('/');
         dir_arr = dir_arr.filter(dir => dir !== '');
         // dir_arr = [path, to, dir]
     
         function recursive(cur_dir, dir_arr) {
-            if (!cur_dir.getChildren(dir_arr[0]))
-                return "No such file or directory";
-            else {
-                if (dir_arr.length == 1)
-                    return cur_dir.getChildren(dir_arr[0]);
-                else 
-                    return recursive(cur_dir.getChildren(dir_arr[0]), dir_arr.slice(1));
+            try {
+                if (!cur_dir.getChildren(dir_arr[0]))
+                    return null;
+                else {
+                    if (dir_arr.length == 1)
+                        return cur_dir.getChildren(dir_arr[0]);
+                    else 
+                        return recursive(cur_dir.getChildren(dir_arr[0]), dir_arr.slice(1));
+                }
+            }
+            catch {
+                return null;
             }
         }
         return recursive(ROOT_DIR, dir_arr);
@@ -225,9 +236,7 @@ function START_UBUNTU_TERMINAL() {
                 if (command_components.includes('--help')) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: -l, -a, -la'</span>`;
                 }
-                else if (command_components[0] == '-a') { // display hidden files
-                    TERMINAL_CONSOLE.innerHTML += `<span class="terminal-directory">.</span><span>  </span>`;
-                    TERMINAL_CONSOLE.innerHTML += `<span class="terminal-directory">..</span><span>  </span>`;
+                else if (command_components[0] == '-a') { // ls - display hidden files
                     for (let i = 0; i < cur_dir.getChildren().length; i++) {
                         const filenode = cur_dir.getChildren()[i];
                         if (filenode instanceof File)
@@ -236,7 +245,9 @@ function START_UBUNTU_TERMINAL() {
                             TERMINAL_CONSOLE.innerHTML += `<span class="terminal-directory">${filenode.getName()}</span><span>  </span>`;
                     }
                 }
-                else if (command.length == command_name.length) { // bare command with no option included
+                else if (command.length == command_name.length) { // ls - bare command with no option included
+                    if (cur_dir.getChildren().length == 2)
+                        TERMINAL_CONSOLE.lastChild.remove();
                     for (let i = 0; i < cur_dir.getChildren().length; i++) {
                         const filenode = cur_dir.getChildren()[i];
                         if (filenode.getName()[0] == ".") continue
@@ -246,8 +257,8 @@ function START_UBUNTU_TERMINAL() {
                             TERMINAL_CONSOLE.innerHTML += `<span class="terminal-directory">${filenode.getName()}</span><span>  </span>`;
                     }
                 }
-                else if (command_components[0].includes('-l')) { // list all visible directories in pwd in a list
-                    if (command_components.length > 1) { // handle when 'ls -l' is used on a directory or a file
+                else if (command_components[0].includes('-l')) { // ls - list all visible directories in pwd in a list
+                    if (command_components.length > 1) { // ls - handle when 'ls -l' is used on a directory or a file
                         for (let i = 1; i < command_components.length; i++) {
                             const filenode = cur_dir.getChildren(command_components[i]);
                             if (!filenode)
@@ -304,7 +315,27 @@ function START_UBUNTU_TERMINAL() {
             case 'cd':
                 if (command_components.includes('--help')) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: does not support any options</span>`;
-                    break;
+                }
+                else if (command_components.length > 1) {
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: too many arguments</span>`;
+                }
+                else if (command.length == command_name.length) // aka just cd
+                    DIR = HOME_DIR;
+                else {
+                    if (command_components[0].split('').every(char => char === '/'))  // cd / or ///... both considered root dir
+                        DIR = "/";
+                    else if (cur_dir.getChildren(command_components[0])) {   // cd in a dir in current directory
+                        DIR += "/" + command_components[0];
+                    }
+                    else if (command_components[0] == "~")
+                        DIR = HOME_DIR;
+                    else if (!goToDir(command_components[0])) // path/to/dir but not exist
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
+                    else if (goToDir(command_components[0]) instanceof File) // path/to/file but it's a file
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Not a directory</span>`;
+                    else { // absolute path
+                        DIR = command_components[0];
+                    }
                 }
                 break
 
@@ -362,17 +393,27 @@ function START_UBUNTU_TERMINAL() {
         // COMMAND HELPER //
 
         // ls //
-        function printFilenodeInfo(filenode, name=filenode.getName(), option=[]){
+        function printFilenodeInfo(filenode, option=[]){
+            let maxUsername_length = 0;
+
+            USERS.forEach(user => {
+                if (user.getUsername().length > maxUsername_length) {
+                    maxUsername_length = user.getUsername().length;
+                }
+            });
             let stringHTML = '';
             stringHTML = (filenode instanceof Directory) ? 'd' : '-';
             stringHTML += octalToReadable(filenode.getPermission());
-            stringHTML += " " + filenode.getHardlink();
-            stringHTML += " " + filenode.getOwner();
+            if (filenode.getName() == "..") 
+                stringHTML += " " + "?".toString().padStart(3, ' '); // I'm so done with this hardlink bs
+            else
+                stringHTML += " " + filenode.getHardlink().toString().padStart(3, ' ');
+            stringHTML += " " + filenode.getOwner().padEnd(maxUsername_length, ' ');
             stringHTML += " " + filenode.getSize().toString().padStart(4, ' ');
             if (filenode instanceof Directory)
-                stringHTML += " " + `<span class="terminal-directory">${name}</span>`;
+                stringHTML += " " + `<span class="terminal-directory">${filenode.getName()}</span>`;
             else 
-                stringHTML += ` ${name}`;
+                stringHTML += ` ${filenode.getName()}`;
 
             return stringHTML;
         }
@@ -382,21 +423,21 @@ function START_UBUNTU_TERMINAL() {
                 TERMINAL_CONSOLE.innerHTML += `<span>ls: unrecognized option '${option}'</span>`;
                 return;
             }
-            let total_size;
-            if (option.includes('a'))
-                total_size = cur_dir.getChildren().reduce((sum, file) => sum + file.getSize(), 0) / 1024; 
-            else
-                total_size = cur_dir.getChildren().reduce((sum, file) => (file.getName()[0] == '.') ? sum + file.getSize() : sum, 0) / 1024;
-
-            TERMINAL_CONSOLE.innerHTML += `<span>total ${Math.floor(total_size)}</span><br>`;
-            if (option.includes('a')) {
-                let as;
-            }
+            let total_size = 0;
             for (let i = 0; i < cur_dir.getChildren().length; i++) {
                 const filenode = cur_dir.getChildren()[i];
-                if (filenode.getName()[0] != "." || option.includes('a')) 
+                if (filenode.getName()[0] != '.' || option.includes('a')) {
+                    total_size += filenode.getSize();
+                }
+            }
+
+            TERMINAL_CONSOLE.innerHTML += `<span>total ${Math.floor(total_size/1024)}</span><br>`;
+            for (let i = 0; i < cur_dir.getChildren().length; i++) {
+                const filenode = cur_dir.getChildren()[i];
+                if (filenode.getName()[0] != '.' || option.includes('a')) {
                     TERMINAL_CONSOLE.innerHTML += `<span>${printFilenodeInfo(filenode)}</span><br>`;
 
+                }
             }
             TERMINAL_CONSOLE.removeChild(TERMINAL_CONSOLE.lastChild); // remove extra <br> tag at the end
         }
@@ -409,7 +450,9 @@ function START_UBUNTU_TERMINAL() {
             manual.push({'whoami':`<br><span>whoami: print effective user name`});
             manual.push({'ls':`<br><span>ls (-a, -l, -la): list directory contents`});
             manual.push({'clear':`<br><span>clear: clear the terminal screen`});
-            manual.push({'mkdir':`<br><span>man: make directories`});
+            manual.push({'mkdir':`<br><span>mkdir: make directories`});
+            manual.push({'cd':`<br><span>cd: change the working directory`});
+
 
             manual.push({'man':`<br><span>man: print the system reference manuals`});
             return manual;
@@ -425,6 +468,8 @@ function START_UBUNTU_TERMINAL() {
 
     function InitFileSystem() {
         const root = new Directory('/', 'root', '755');
+        root.addDirectory(new Directory('.', 'root', '755', root));
+        root.addDirectory(new Directory('..', 'root', '755', root));
         root.addDirectory(new Directory('bin', 'root', '755', root));
         root.addDirectory(new Directory('home', 'root', '755', root));
         root.addDirectory(new Directory('home', 'root', '755', root)); // would not add
