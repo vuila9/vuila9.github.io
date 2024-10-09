@@ -3,13 +3,14 @@ function START_UBUNTU_TERMINAL() {
     const USERS = InitUser();          // Initialize some users
     const ROOT_DIR = InitFileSystem(); // Initialize pre-built file structure that starts at root directory
     let CURRENT_USER = USERS[1];       // default user, vuila9
-    //let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
-    let DIR = `/home/vuila9`;
+    let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
     let HOME_DIR = `/home/${CURRENT_USER.getUsername()}`;
     let DOMAIN = 'github.io';
     let THE_PROMPT = `${CURRENT_USER.getUsername()}@${DOMAIN}:~$`; // need to make a function to assign this automatically
     let COMMAND = '';
     let CURSOR_POS = 0;    // track where the cursor is
+    let HISTORY_POS = 0;   
+    let HISTORY_COMMAND = [];
 
     addTitleBar();
     addThePrompt();
@@ -18,12 +19,14 @@ function START_UBUNTU_TERMINAL() {
     TERMINAL_CONSOLE.focus();
 
     TERMINAL_CONSOLE.addEventListener('keydown', (event) => {
-        let arrow_keys = ['ArrowLeft', 'ArrowRight'];
+        let arrow_keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
         removeCursor();
 
         if (event.key === 'Enter') { // Extract the user input
             
             const userInput = COMMAND.trim();
+            if (COMMAND.length)
+                HISTORY_COMMAND.push(COMMAND);
             console.log('User Input:', userInput);  // Do something with the input
 
             // THIS IS WHERE YOU DO YOUR COMMAND HANDLER
@@ -39,6 +42,7 @@ function START_UBUNTU_TERMINAL() {
             // Clear the current command
             COMMAND = '';
             CURSOR_POS = 0;
+            HISTORY_POS = HISTORY_COMMAND.length;
             event.preventDefault(); // Prevent default "Enter" behavior
         } 
         else if (event.key === 'Backspace') { // Handle backspace
@@ -68,9 +72,30 @@ function START_UBUNTU_TERMINAL() {
         }
         else if (event.key === 'ArrowUp') {
             event.preventDefault(); // Prevent the default action (scrolling up)
+            const inputLine = TERMINAL_CONSOLE.querySelectorAll("span");
+            HISTORY_POS--;
+            HISTORY_POS = (HISTORY_POS < 0) ? 0 : HISTORY_POS;
+            COMMAND = HISTORY_COMMAND[HISTORY_POS];
+            CURSOR_POS = COMMAND.length;
+            inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
+            appendCursor('last');
         }
         else if (event.key === 'ArrowDown') {
             event.preventDefault(); // Prevent the default action (scrolling down)
+            const inputLine = TERMINAL_CONSOLE.querySelectorAll("span");
+            HISTORY_POS++;
+            HISTORY_POS = (HISTORY_POS >= HISTORY_COMMAND.length) ? (HISTORY_COMMAND.length) : HISTORY_POS;
+            COMMAND = HISTORY_COMMAND[HISTORY_POS];
+            if (typeof COMMAND !== 'undefined') {
+                CURSOR_POS = 0;
+                inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
+            }
+            else {
+                CURSOR_POS = 0;
+                COMMAND = '';
+                inputLine[inputLine.length - 1].innerText = '';
+            }
+            appendCursor('last');
         }
         else if (event.key === 'ArrowLeft') {
             if (COMMAND.length == 0) {
@@ -234,7 +259,7 @@ function START_UBUNTU_TERMINAL() {
             case 'ls':
                 TERMINAL_CONSOLE.innerHTML += '<br>';
                 if (command_components.includes('--help')) {
-                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: -l, -a, -la'</span>`;
+                    TERMINAL_CONSOLE.innerHTML += `<span>${command_name}: -l, -a, -la</span>`;
                 }
                 else if (command_components[0] == '-a') { // ls - display hidden files
                     for (let i = 0; i < cur_dir.getChildren().length; i++) {
@@ -301,11 +326,19 @@ function START_UBUNTU_TERMINAL() {
             
             case 'mkdir':
                 if (command_components.includes('--help')) {
-                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: does not support any options</span>`;
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: -m ### (perm) dir</span>`;
+                }
+                else if (command_components.length == 3 && command_components[0] == '-m' && /^[0-7]{3}$/.test(command_components[1])) { // checking for -m ### form
+                    if (!cur_dir.addDirectory(new Directory(command_components[2], CURRENT_USER.getUsername(), command_components[1], cur_dir)))
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
                 }
                 else {
                     for (let i = 0; i < command_components.length; i++) {
                         if (command_components[i][0] == '-') continue;
+                        if (command_components[i].includes("/")){
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create nested directories</span>`;
+                            continue
+                        }
                         if (!cur_dir.addDirectory(new Directory(command_components[i], CURRENT_USER.getUsername(), '775', cur_dir)))
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
                     }
@@ -324,9 +357,21 @@ function START_UBUNTU_TERMINAL() {
                 else {
                     if (command_components[0].split('').every(char => char === '/'))  // cd / or ///... both considered root dir
                         DIR = "/";
-                    else if (cur_dir.getChildren(command_components[0])) {   // cd in a dir in current directory
-                        DIR += "/" + command_components[0];
+
+                    else if (command_components[0] == ".") 
+                        break;
+                    else if (command_components[0] == "..") {
+                        if (DIR != "/")
+                            DIR = cur_dir.getParentPath();
                     }
+                    else if (command_components[0][0] != '/'){
+                        if (!goToDir(DIR + "/" + command_components[0]))
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
+                        else 
+                            DIR += (DIR == "/") ? command_components[0] : "/" + command_components[0];
+                    }
+                    else if (cur_dir.getChildren(command_components[0]))    // cd in a dir in current directory 
+                        DIR += (DIR == "/") ? command_components[0] : "/" + command_components[0];
                     else if (command_components[0] == "~")
                         DIR = HOME_DIR;
                     else if (!goToDir(command_components[0])) // path/to/dir but not exist
@@ -338,6 +383,26 @@ function START_UBUNTU_TERMINAL() {
                     }
                 }
                 break
+
+            case 'history':
+                if (command_components.includes('--help')) {
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: -c, ##</span>`;
+                }
+                else if (command_components[0] == '-c') { // delete history
+                    HISTORY_COMMAND = [];
+                }
+                else if (Number(command_components[0]) || command_components[0] == 0) { // print a fixed amount of lines from the most recent
+                    if (command_components[0] < 0) 
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: invalid option</span>`;
+                    else
+                        printHistory(command_components[0]);
+                }
+                else if (command.length == command_name.length) // just 'history'
+                    printHistory();
+                else 
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: numeric argument required</span>`;
+                
+                break;
 
             case 'pwd':
                 TERMINAL_CONSOLE.innerHTML += `<br><span>${DIR}</span>`;
@@ -442,6 +507,13 @@ function START_UBUNTU_TERMINAL() {
             TERMINAL_CONSOLE.removeChild(TERMINAL_CONSOLE.lastChild); // remove extra <br> tag at the end
         }
 
+        function printHistory(line=HISTORY_COMMAND.length) {
+            let span = HISTORY_COMMAND.length.toString().length;
+            for (let i = HISTORY_COMMAND.length - line; i < HISTORY_COMMAND.length; i++) {
+                TERMINAL_CONSOLE.innerHTML += `<br><span>  ${(i+1).toString().padStart(span, ' ')}  ${HISTORY_COMMAND[i]}</span>`;
+            }
+        }
+
         // man //
         function allAvailableSupportedCommands() {
             let manual = []
@@ -450,9 +522,9 @@ function START_UBUNTU_TERMINAL() {
             manual.push({'whoami':`<br><span>whoami: print effective user name`});
             manual.push({'ls':`<br><span>ls (-a, -l, -la): list directory contents`});
             manual.push({'clear':`<br><span>clear: clear the terminal screen`});
-            manual.push({'mkdir':`<br><span>mkdir: make directories`});
+            manual.push({'mkdir':`<br><span>mkdir (-m ###): make directories`});
             manual.push({'cd':`<br><span>cd: change the working directory`});
-
+            manual.push({'history':`<br><span>history (-c, ##): GNU History Library`});
 
             manual.push({'man':`<br><span>man: print the system reference manuals`});
             return manual;

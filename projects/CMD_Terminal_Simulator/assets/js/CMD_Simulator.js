@@ -6,6 +6,9 @@ function START_WINDOW_CMD() {
     let CURRENT_USER = USERS[0];
     let COMMAND = '';                // To store user input
     let CURSOR_POS = 0;    // track where the cursor is
+    let HISTORY_POS = 0;
+    let HISTORY_COMMAND = [];
+
 
     // Set initial prompt
     CMD_CONSOLE.innerHTML += `<span>${THE_PROMPT}</span>`;
@@ -18,12 +21,14 @@ function START_WINDOW_CMD() {
 
     // Handle keypresses
     CMD_CONSOLE.addEventListener('keydown', (event) => {
-        let arrow_keys = ['ArrowLeft', 'ArrowRight'];
+        let arrow_keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
         removeCursor();
 
         if (event.key === 'Enter') {
             // Extract the user input
             const userInput = COMMAND.trim();
+            if (COMMAND.length)
+                HISTORY_COMMAND.push(COMMAND);
             console.log("User Input:", userInput);  // Do something with the input
 
             // THIS IS WHERE YOU DO YOUR COMMAND HANDLER
@@ -35,6 +40,7 @@ function START_WINDOW_CMD() {
             // Clear the current command
             COMMAND = '';  
             CURSOR_POS = 0;
+            HISTORY_POS = HISTORY_COMMAND.length;
             event.preventDefault(); // Prevent default "Enter" behavior
         } 
         else if (event.key === 'Backspace') { // Handle backspace
@@ -63,9 +69,34 @@ function START_WINDOW_CMD() {
         }
         else if (event.key === 'ArrowUp') {
             event.preventDefault(); // Prevent the default action (scrolling up)
+            const inputLine = CMD_CONSOLE.querySelectorAll("span");
+            HISTORY_POS--;
+            HISTORY_POS = (HISTORY_POS < 0) ? 0 : HISTORY_POS;
+            COMMAND = HISTORY_COMMAND[HISTORY_POS];
+            CURSOR_POS = COMMAND.length;
+            inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
+            appendCursor('last');
         }
         else if (event.key === 'ArrowDown') {
             event.preventDefault(); // Prevent the default action (scrolling down)
+            if (HISTORY_POS === HISTORY_COMMAND.length - 1) {
+                appendCursor('last');
+                return;
+            }
+            const inputLine = CMD_CONSOLE.querySelectorAll("span");
+            HISTORY_POS++;
+            HISTORY_POS = (HISTORY_POS > HISTORY_COMMAND.length) ? (HISTORY_COMMAND.length) : HISTORY_POS;
+            COMMAND = HISTORY_COMMAND[HISTORY_POS];
+            if (typeof COMMAND !== 'undefined') {
+                CURSOR_POS = 0;
+                inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
+            }
+            else {
+                CURSOR_POS = 0;
+                COMMAND = '';
+                inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}`;
+            }
+            appendCursor('last');
         }
         else if (event.key === 'ArrowLeft') {
             if (COMMAND.length == 0) {

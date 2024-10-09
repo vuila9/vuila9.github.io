@@ -11,6 +11,7 @@ TERMINAL (to be done):
 - history
 - ; (pipe)
 - sudo
+- rmdir
 
 
 CMD:
