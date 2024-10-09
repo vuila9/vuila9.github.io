@@ -8,6 +8,9 @@ TERMINAL (to be done):
 - ls (-a; -l; -la)
 - mkdir
 - file
+- history
+- ; (pipe)
+- sudo
 
 
 CMD:

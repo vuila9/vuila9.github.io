@@ -33,12 +33,13 @@ class User {
 }
 
 class File {
-    constructor(name, owner, permission = '744', parent=null){
+    constructor(name, owner, permission, parent=null){
         this.name = name;
         this.owner = owner;
         this.content = "";
         this.permission = permission;
-        this.size = '?';
+        this.hardlink = 1;
+        this.size = 0;
         this.parent = parent;
         this.parent_name = (parent) ? parent.getName() : null;
         this.parent_path = (this.parent_name) ? this.parent_name + "/" : null;
@@ -52,11 +53,20 @@ class File {
         this.name = name;
     }
     
+    getSize() {
+        return this.size;
+    }
+
+    setFileSize(size) {
+        this.size = size;
+    }
+
     setFileContent(content, type) {
         if (type == "write")
             this.content = content;
         else if (type == "append")
             this.content += content;
+        this.setFileSize(this.getFileContent().length + 1);
     }
 
     getFileContent() {
@@ -83,19 +93,27 @@ class File {
         this.parent_path = parent_path;
     }
 
+    getPermission() {
+        return this.permission;
+    }
+
+    getHardlink() {
+        return this.hardlink;
+    }
+
     getOwner() {
         return this.owner;
     }
 }
 
 class Directory {
-    constructor(name, owner, permission = '744', parent=null){
+    constructor(name, owner, permission, parent=null){
         this.name = name;
         this.children = [];
         this.owner = owner;
         this.hardlink = 2;
         this.permission = permission;
-        this.size = '?';
+        this.size = 4096;
         this.parent = parent;
         this.parent_name = (parent) ? parent.getName() : null;
         this.parent_path = (this.parent_name) ? this.parent_name + "/" : null;
@@ -137,20 +155,36 @@ class Directory {
         if (this.hasChildren(file.getName())) {
             return false;
         }
-        this.children.push(file);
+        // insert in alphabetical order disregarding case sensitivity and any leading "."s
+        const cleanedFile = file.getName().replace(/^\.*/, '').toLowerCase();
+        let index = this.getChildren().findIndex(item => item.getName().toLowerCase() > cleanedFile);
+        if (index === -1) {
+            this.getChildren().push(file);
+        } else {
+            this.getChildren().splice(index, 0, file);
+        }
         file.setParentName(this.name);
         if (file.getParentName() == '/') {
             file.setParentPath('/');
         }
         else
             file.setParentPath(this.getParentPath() + file.getParentPath());
+        return true;
     }
 
     addDirectory(directory) {
         if (this.hasChildren(directory.getName())) {
             return false;
         }
-        this.children.push(directory);
+        // insert in alphabetical order disregarding case sensitivity and any leading "."s
+        const cleanedDirectory = directory.getName().replace(/^[^a-zA-Z]*/, '').toLowerCase();
+        let index = this.getChildren().findIndex(item => item.getName().toLowerCase() > cleanedDirectory);
+        if (index === -1) {
+            this.getChildren().push(directory);
+        } else {
+            this.getChildren().splice(index, 0, directory);
+        }
+
         directory.setParentName(this.name);
         if (directory.getParentName() == '/') {
             directory.setParentPath('/');
@@ -159,6 +193,7 @@ class Directory {
             directory.setParentPath(this.getParentPath() + directory.getParentPath());
 
         this.hardlink += 1;
+        return true;
     }
 
     getPath() {
@@ -181,69 +216,23 @@ class Directory {
         this.parent_path = parent_path;
     }
 
+    getSize() {
+        return this.size;
+    }
+
+    getPermission() {
+        return this.permission;
+    }
+
     getOwner() {
         return this.owner;
     }
 
-    getDirectoryHardlink() {
+    getHardlink() {
         return this.hardlink;
     }
 
     setDirectoryHardlink(hardlinks) {
         this.hardlink = hardlinks;
     }
-}
-// CREATE ROOT DIRECTORY AND ADD BIN, HOME, SRC DIR
-const root = new Directory('/', 'root', '755');
-root.addDirectory(new Directory('bin', 'root', '755', root));
-root.addDirectory(new Directory('home', 'root', '755', root));
-root.addDirectory(new Directory('home', 'root', '755', root)); // would not add
-root.addDirectory(new Directory('src', 'root', '755', root));
-
-const home = root.getChildren('home');
-home.addDirectory(new Directory('vuila9', 'vuila9', '750', home));
-home.addDirectory(new Directory('ptkv', 'ptkv', '750', home));
-
-const vuila9 = home.getChildren('vuila9');
-vuila9.addDirectory(new Directory('code', 'vuila9', '775', vuila9));
-vuila9.addFile(new File('GitHub', 'vuila9', '664', vuila9));
-vuila9.getChildren('GitHub').setFileContent("https://vuila9.github", 'write');
-vuila9.getChildren('GitHub').setFileContent(".io/", 'append');
-
-
-const ptkv = home.getChildren('ptkv');
-ptkv.addDirectory(new Directory('ex', 'ptkv', '775', ptkv));
-ptkv.getChildren('ex').addDirectory(new Directory('me', 'ptkv', '775', ptkv.getChildren('ex')));
-ptkv.addFile(new File('MKNQ', 'ptkv', '664', ptkv));
-ptkv.getChildren('MKNQ').setFileContent("still a mystery...", 'write');
-
-const code = vuila9.getChildren('code');
-code.addDirectory(new Directory('is', 'vuila9', '775', code));
-code.addDirectory(new Directory('is', 'vuila9', '775', code)); // would not add
-code.addFile(new File('goal', 'vuila9', '664', code));
-code.addFile(new File('goal', 'vuila9', '664', code));  // would not add
-code.getChildren('goal').setFileContent("need to ace the Google Interview", 'write');
-
-
-function goToDir(dir) {
-    // dir = '/path/to/dir' == '/path/to/dir/' 
-    // since all dir start with / and either end with / or a dir name, this will generalize the dir into a simple array
-    if (dir.split('').every(char => char === '/')) // if dir is string of '/'s, treat as '/' aka root
-        return root;
-
-    dir_arr = dir.slice(1).split('/');
-    dir_arr = dir_arr.filter(dir => dir !== '');
-    // dir_arr = [path, to, dir]
-
-    function recursive(cur_dir, dir_arr) {
-        if (!cur_dir.getChildren(dir_arr[0]))
-            return "No such file or directory";
-        else {
-            if (dir_arr.length == 1)
-                return cur_dir.getChildren(dir_arr[0]);
-            else 
-                return recursive(cur_dir.getChildren(dir_arr[0]), dir_arr.slice(1));
-        }
-    }
-    return recursive(root, dir_arr);
 }

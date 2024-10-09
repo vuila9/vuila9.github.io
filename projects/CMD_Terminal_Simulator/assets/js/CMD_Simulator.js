@@ -8,8 +8,8 @@ function START_WINDOW_CMD() {
     let CURSOR_POS = 0;    // track where the cursor is
 
     // Set initial prompt
-    CMD_CONSOLE.innerHTML += '<span></span>';
-    CMD_CONSOLE.lastChild.innerText += `${THE_PROMPT}`;
+    CMD_CONSOLE.innerHTML += `<span>${THE_PROMPT}</span>`;
+    //CMD_CONSOLE.lastChild.innerText += `${THE_PROMPT}`;
 
     appendCursor('last')
 
@@ -36,9 +36,6 @@ function START_WINDOW_CMD() {
             COMMAND = '';  
             CURSOR_POS = 0;
             event.preventDefault(); // Prevent default "Enter" behavior
-
-            // Scroll to the bottom of the div
-            CMD_CONSOLE.scrollTop = CMD_CONSOLE.scrollHeight;  // This ensures the latest line is always visible
         } 
         else if (event.key === 'Backspace') { // Handle backspace
             let flag = true;
@@ -71,6 +68,10 @@ function START_WINDOW_CMD() {
             event.preventDefault(); // Prevent the default action (scrolling down)
         }
         else if (event.key === 'ArrowLeft') {
+            if (COMMAND.length == 0) {
+                appendCursor('last');
+                return;
+            }
             CURSOR_POS --;
             CURSOR_POS = (CURSOR_POS < 0) ? 0 : CURSOR_POS;
             if (CURSOR_POS >= 0)
@@ -103,6 +104,7 @@ function START_WINDOW_CMD() {
             else
                 appendCursor('middle');
         }
+        CMD_CONSOLE.scrollTop = CMD_CONSOLE.scrollHeight; // scroll all the way down if any key is pressed
     });
 
     function appendCursor(pos) {
@@ -112,7 +114,6 @@ function START_WINDOW_CMD() {
         if (pos == 'last')
             CMD_CONSOLE.appendChild(cmd_cursor);
         else if (pos == 'middle') {
-            console.log(12)
             const inputLine = CMD_CONSOLE.querySelectorAll("span");
             inputLine[inputLine.length - 1].innerHTML = `${THE_PROMPT}${COMMAND.slice(0, CURSOR_POS)}`;
             inputLine[inputLine.length - 1].innerHTML += `<u id="cmd-cursor-select">${COMMAND[CURSOR_POS]}</u>`;

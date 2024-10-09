@@ -222,6 +222,11 @@
     color: rgb(48,10,36) !important; 
 }
 
+.terminal-directory {
+    color: rgb(18,72,139) !important; 
+    font-weight: bold;
+}
+
 .terminal-directory::selection {
     background: rgb(18,72,139)  !important;
     color: rgb(48,10,36) !important; 
