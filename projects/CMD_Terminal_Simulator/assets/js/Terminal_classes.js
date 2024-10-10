@@ -183,11 +183,11 @@ class Directory {
         directory.getChildren('..').setDirectoryHardlink(2);
         // insert in alphabetical order disregarding case sensitivity and any leading "."s
         const cleanedDirectory = directory.getName().replace(/^[^a-zA-Z]*/, '').toLowerCase();
-        let index = this.getChildren().findIndex(item => item.getName().toLowerCase() > cleanedDirectory);
+        let index = this.getChildren().slice(2).findIndex(item => item.getName().toLowerCase() > cleanedDirectory);
         if (index === -1) {
             this.getChildren().push(directory);
         } else {
-            this.getChildren().splice(index, 0, directory);
+            this.getChildren().splice(index + 2, 0, directory);
         }
 
         directory.setParentName(this.name);

@@ -2,7 +2,7 @@ function START_UBUNTU_TERMINAL() {
     const TERMINAL_CONSOLE = document.getElementById('terminal-body');
     const USERS = InitUser();          // Initialize some users
     const ROOT_DIR = InitFileSystem(); // Initialize pre-built file structure that starts at root directory
-    let CURRENT_USER = USERS[1];       // default user, vuila9
+    let CURRENT_USER = USERS[2];       // default user, vuila9
     let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
     let HOME_DIR = `/home/${CURRENT_USER.getUsername()}`;
     let DOMAIN = 'github.io';
@@ -257,56 +257,65 @@ function START_UBUNTU_TERMINAL() {
                 break;
 
             case 'ls':
-                TERMINAL_CONSOLE.innerHTML += '<br>';
                 if (command_components.includes('--help')) {
                     TERMINAL_CONSOLE.innerHTML += `<span>${command_name}: -l, -a, -la</span>`;
                 }
                 else if (command_components[0] == '-a') { // ls - display hidden files
+                    let stringHTML = '';
                     for (let i = 0; i < cur_dir.getChildren().length; i++) {
                         const filenode = cur_dir.getChildren()[i];
                         if (filenode instanceof File)
-                            TERMINAL_CONSOLE.innerHTML += `<span>${filenode.getName()}</span></span><span>  </span>`;
+                            stringHTML += `<span>${filenode.getName()}</span></span><span>  </span>`;
                         else if (filenode instanceof Directory)
-                            TERMINAL_CONSOLE.innerHTML += `<span class="terminal-directory">${filenode.getName()}</span><span>  </span>`;
+                            stringHTML += `<span class="terminal-directory">${filenode.getName()}</span><span>  </span>`;
                     }
+                    if (stringHTML)
+                        TERMINAL_CONSOLE.innerHTML += '<br>';
+                    TERMINAL_CONSOLE.innerHTML += stringHTML;
                 }
                 else if (command.length == command_name.length) { // ls - bare command with no option included
-                    if (cur_dir.getChildren().length == 2)
-                        TERMINAL_CONSOLE.lastChild.remove();
+                    var stringHTML = '';
                     for (let i = 0; i < cur_dir.getChildren().length; i++) {
                         const filenode = cur_dir.getChildren()[i];
                         if (filenode.getName()[0] == ".") continue
                         if (filenode instanceof File)
-                            TERMINAL_CONSOLE.innerHTML += `<span>${filenode.getName()}</span></span><span>  </span>`;
+                            stringHTML += `<span>${filenode.getName()}</span></span><span>  </span>`;
                         else if (filenode instanceof Directory)
-                            TERMINAL_CONSOLE.innerHTML += `<span class="terminal-directory">${filenode.getName()}</span><span>  </span>`;
+                            stringHTML += `<span class="terminal-directory">${filenode.getName()}</span><span>  </span>`;
                     }
+                    if (stringHTML)
+                        TERMINAL_CONSOLE.innerHTML += '<br>';
+                    TERMINAL_CONSOLE.innerHTML += stringHTML;
+
                 }
                 else if (command_components[0].includes('-l')) { // ls - list all visible directories in pwd in a list
+                    TERMINAL_CONSOLE.innerHTML += '<br>';
                     if (command_components.length > 1) { // ls - handle when 'ls -l' is used on a directory or a file
+                        let stringHTML = '';
                         for (let i = 1; i < command_components.length; i++) {
                             const filenode = cur_dir.getChildren(command_components[i]);
                             if (!filenode)
-                                TERMINAL_CONSOLE.innerHTML += `<span>${command_name}: cannot access '${command_components[i]}': No such file or directory</span>`;
+                                stringHTML += `<span>${command_name}: cannot access '${command_components[i]}': No such file or directory</span>`;
                             else {
                                 if (filenode instanceof Directory)
-                                    TERMINAL_CONSOLE.innerHTML += `<span>Feature not supported, to view content of a directory, cd into it</span>`;
+                                    stringHTML += `<span>Feature not supported, to view content of a directory, cd into it</span>`;
                                 else if (filenode instanceof File) {
-                                    TERMINAL_CONSOLE.innerHTML += `<span>${printFilenodeInfo(filenode)}</span>`;
+                                    stringHTML += `<span>${printFilenodeInfo(filenode)}</span>`;
                                 }
                             }
-                            if (i < command_components.length - 1) 
+                            TERMINAL_CONSOLE.innerHTML += stringHTML;
+                            if (i < command_components.length - 1) // print newline <br> for every item except the last one
                                 TERMINAL_CONSOLE.innerHTML += `<br>`;
                         }
                     }
-                    else {
+                    else 
                         printFilenodeInfoList(cur_dir, command_components[0]); // list all available directories in pwd in a list
-                    }
                 }
                 else if (command_components[0].includes('-')) { // all invalid options
-                    TERMINAL_CONSOLE.innerHTML += `<span>${command_name}: unrecognized option '${command_components[0]}'</span>`;
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: unrecognized option '${command_components[0]}'</span>`;
                 }
                 else { // handle when 'ls' is used on a directory or a file
+                    TERMINAL_CONSOLE.innerHTML += '<br>';
                     for (let i = 0; i < command_components.length; i++) {
                         const filenode = cur_dir.getChildren(command_components[i]);
                         if (!filenode)
@@ -468,10 +477,10 @@ function START_UBUNTU_TERMINAL() {
                 }
             });
             let stringHTML = '';
-            stringHTML = (filenode instanceof Directory) ? 'd' : '-';
+            stringHTML = (filenode instanceof Directory) ? 'd' : '-'; // file type '-' for file, 'd' for directory
             stringHTML += octalToReadable(filenode.getPermission());
             if (filenode.getName() == "..") 
-                stringHTML += " " + "?".toString().padStart(3, ' '); // I'm so done with this hardlink bs
+                stringHTML += " " + "?".toString().padStart(3, ' ');  // I'm so done with this hardlink bs
             else
                 stringHTML += " " + filenode.getHardlink().toString().padStart(3, ' ');
             stringHTML += " " + filenode.getOwner().padEnd(maxUsername_length, ' ');
@@ -547,6 +556,9 @@ function START_UBUNTU_TERMINAL() {
         root.addDirectory(new Directory('home', 'root', '755', root));
         root.addDirectory(new Directory('home', 'root', '755', root)); // would not add
         root.addDirectory(new Directory('src', 'root', '755', root));
+        root.getChildren('src').addDirectory(new Directory('.?', 'root', '755', root));
+        root.getChildren('src').getChildren('.?').addFile(new File('trust_me_bro', 'root', '755', root));
+        root.getChildren('src').getChildren('.?').getChildren('trust_me_bro').setFileContent('trust him bro', 'write');
 
         const home = root.getChildren('home');
         home.addDirectory(new Directory('vuila9', 'vuila9', '750', home));
