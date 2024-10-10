@@ -364,16 +364,18 @@ function START_UBUNTU_TERMINAL() {
                         if (DIR != "/")
                             DIR = cur_dir.getParentPath();
                     }
+                    else if (command_components[0] == "~")
+                        DIR = HOME_DIR;
                     else if (command_components[0][0] != '/'){
-                        if (!goToDir(DIR + "/" + command_components[0]))
-                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
-                        else 
+                        if (goToDir(DIR + "/" + command_components[0]))
                             DIR += (DIR == "/") ? command_components[0] : "/" + command_components[0];
+                        else 
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
+
                     }
                     else if (cur_dir.getChildren(command_components[0]))    // cd in a dir in current directory 
                         DIR += (DIR == "/") ? command_components[0] : "/" + command_components[0];
-                    else if (command_components[0] == "~")
-                        DIR = HOME_DIR;
+                    
                     else if (!goToDir(command_components[0])) // path/to/dir but not exist
                         TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
                     else if (goToDir(command_components[0]) instanceof File) // path/to/file but it's a file
@@ -401,7 +403,6 @@ function START_UBUNTU_TERMINAL() {
                     printHistory();
                 else 
                     TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: numeric argument required</span>`;
-                
                 break;
 
             case 'pwd':

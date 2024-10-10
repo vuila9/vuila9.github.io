@@ -111,7 +111,7 @@ class Directory {
         this.name = name;
         this.children = [];
         this.owner = owner;
-        this.hardlink = 0;
+        this.hardlink = (this.name == '/') ? 0 : 2;
         this.permission = permission;
         this.size = 4096;
         this.parent = parent;
