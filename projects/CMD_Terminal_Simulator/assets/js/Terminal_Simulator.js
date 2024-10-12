@@ -419,7 +419,11 @@ function START_UBUNTU_TERMINAL() {
                 break;
 
             case 'whoami':
-                if (command.length > command_name.length) {
+                if (command_components.includes('--help')) {
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: does not support any options</span>`;
+                    break;
+                }
+                else if (command.length > command_name.length) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: extra operand '${command_components[1]}'</span>`;
                     break;
                 }

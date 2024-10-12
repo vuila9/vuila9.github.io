@@ -157,12 +157,12 @@ class Directory {
             return false;
         }
         // insert in alphabetical order disregarding case sensitivity and any leading "."s
-        const cleanedFile = file.getName().replace(/^\.*/, '').toLowerCase();
-        let index = this.getChildren().findIndex(item => item.getName().toLowerCase() > cleanedFile);
+        const cleanedFile = file.getName().replace(/^[^a-zA-Z]*/, '').toLowerCase();
+        let index = this.getChildren().slice(2).findIndex(item => item.getName().toLowerCase() > cleanedFile);
         if (index === -1) {
             this.getChildren().push(file);
         } else {
-            this.getChildren().splice(index, 0, file);
+            this.getChildren().splice(index + 2, 0, file);
         }
         file.setParentName(this.name);
         if (file.getParentName() == '/') {
