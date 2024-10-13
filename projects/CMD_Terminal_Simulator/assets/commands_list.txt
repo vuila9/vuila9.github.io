@@ -6,7 +6,7 @@ TERMINAL (to be done):
 - echo (>>)
 - cat
 - ls (-a; -l; -la)
-- mkdir
+- mkdirs
 - file
 - history
 - ; (pipe)
@@ -17,5 +17,12 @@ TERMINAL (to be done):
 CMD:
 - cls
 - whoami
+
+
+
+known issue or goal (either ignored or being worked on): 
+ls file1 file2 dir1 dir2: will group files and dirs separately, but will not print out in a sorted order
+disable ctrl -a inside the the div
+
 
 

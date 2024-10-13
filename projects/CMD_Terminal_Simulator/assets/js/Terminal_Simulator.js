@@ -1,11 +1,15 @@
 function START_UBUNTU_TERMINAL() {
     const TERMINAL_CONSOLE = document.getElementById('terminal-body');
+    const UMASK = '0002'               // default umask
+    const Dir_Perm = 777 - Number(UMASK);
+    const File_Perm = 666 - Number(UMASK);
     const USERS = InitUser();          // Initialize some users
     const ROOT_DIR = InitFileSystem(); // Initialize pre-built file structure that starts at root directory
     let CURRENT_USER = USERS[1];       // default user, vuila9
     let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
     let HOME_DIR = `/home/${CURRENT_USER.getUsername()}`;
     let DOMAIN = 'github.io';
+    
     let THE_PROMPT = `${CURRENT_USER.getUsername()}@${DOMAIN}:~$`; // need to make a function to assign this automatically
     let COMMAND = '';
     let CURSOR_POS = 0;    // track where the cursor is
@@ -33,7 +37,7 @@ function START_UBUNTU_TERMINAL() {
             command_handler(userInput);
 
             // Append the user input and move to the next line
-            if (TERMINAL_CONSOLE.innerHTML.length > 0) 
+            if (TERMINAL_CONSOLE.lastElementChild && TERMINAL_CONSOLE.lastElementChild.tagName != 'BR')
                 TERMINAL_CONSOLE.innerHTML += `<br>`;
 
             addThePrompt();
@@ -74,8 +78,8 @@ function START_UBUNTU_TERMINAL() {
             event.preventDefault(); // Prevent the default action (scrolling up)
             const inputLine = TERMINAL_CONSOLE.querySelectorAll("span");
             HISTORY_POS--;
-            HISTORY_POS = (HISTORY_POS < 0) ? 0 : HISTORY_POS;
-            COMMAND = HISTORY_COMMAND[HISTORY_POS];
+            HISTORY_POS = (HISTORY_POS <= 0) ? 0 : HISTORY_POS;
+            COMMAND = (HISTORY_COMMAND[HISTORY_POS]) ? HISTORY_COMMAND[HISTORY_POS] : '';
             CURSOR_POS = COMMAND.length;
             inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
             appendCursor('last');
@@ -86,15 +90,14 @@ function START_UBUNTU_TERMINAL() {
             HISTORY_POS++;
             HISTORY_POS = (HISTORY_POS >= HISTORY_COMMAND.length) ? (HISTORY_COMMAND.length) : HISTORY_POS;
             COMMAND = HISTORY_COMMAND[HISTORY_POS];
-            if (typeof COMMAND !== 'undefined') {
-                CURSOR_POS = 0;
-                inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
-            }
+
+            if (typeof COMMAND !== 'undefined') 
+                CURSOR_POS = COMMAND.length;
             else {
                 CURSOR_POS = 0;
                 COMMAND = '';
-                inputLine[inputLine.length - 1].innerText = '';
             }
+            inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
             appendCursor('last');
         }
         else if (event.key === 'ArrowLeft') {
@@ -182,7 +185,6 @@ function START_UBUNTU_TERMINAL() {
             return `~${DIR.slice(HOME_DIR.length)}`;
         else 
             return (DIR[DIR.length - 1] == "/") ? DIR.slice(0, DIR.length - 1) : DIR;
-        
     }
 
     function addTitleBar() {
@@ -196,7 +198,7 @@ function START_UBUNTU_TERMINAL() {
         const permissionMap = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx'];
         
         // Convert the octal number to a string and pad it to ensure it's three digits
-        let octalStr = permission.padStart(3, '0');
+        let octalStr = permission.toString().padStart(3, '0');
         
         // Translate each octal digit to its corresponding permission
         let readablePermission = '';
@@ -205,6 +207,36 @@ function START_UBUNTU_TERMINAL() {
         }
         
         return readablePermission;
+    }
+
+    // this function will normalize the . and .. components.
+    // it will resolve the path relative to the current directory DIR
+    function pathInterpreter(dir, relativePath) {
+        if (relativePath === '/') { // root
+            return '/';
+        }
+        // Split the current directory and relative path into parts
+        let dirParts = dir.split('/');
+        let pathParts = relativePath.split('/');
+    
+        // Traverse through the relative path parts
+        for (let part of pathParts) {
+            if (part === '.' || part === '') {
+                // Do nothing for current directory (.)
+                continue;
+            } else if (part === '..') {
+                // Go up one directory for (..)
+                if (dirParts.length > 1) {
+                    dirParts.pop(); // Remove the last directory in DIR
+                }
+            } else {
+                // Add new directory or file to the path
+                dirParts.push(part);
+            }
+        }
+    
+        // Join the parts back into a valid path and return
+        return dirParts.join('/');
     }
 
     function goToDir(dir) {
@@ -235,9 +267,16 @@ function START_UBUNTU_TERMINAL() {
         return recursive(ROOT_DIR, dir_arr);
     }
 
+    // This replaces all occurrences of two or more repeated 'character' with a single 'character'.
+    function filterExcessiveCharacter(string, character) {
+        let regex = new RegExp(character + '{2,}', 'g'); // Dynamically create the regex
+        string = string.replace(regex, character);  
+        return string; 
+    }
+
     function command_handler(command) {
         if (command.split(' ')[0] != 'echo' && !command.split(' ').includes(">>"))
-            command = command.replace(/ {2,}/g, ' '); // replace any excess amount for every " " occurence
+            command = filterExcessiveCharacter(command, ' ');
         const command_components = command.split(" ").slice(1);
         const command_name = command.split(" ")[0];
         const cur_dir = goToDir(DIR);
@@ -269,53 +308,23 @@ function START_UBUNTU_TERMINAL() {
                         printFileNodeNameMulti(command_components.slice(1), '-a');
                 }
                 else if (command_components[0] == null || command_components[0][0] != '-') { // ls - naked command with no option included
-                    if (!command_components.length) 
+                    if (!command_components.length) {
                         printFileNodeName(cur_dir);
-                    else
-                        printFileNodeNameMulti(command_components);
-                }
-                else if (command_components[0].includes('-l')) { // ls - list all visible directories in pwd in a list
-                    TERMINAL_CONSOLE.innerHTML += '<br>';
-                    if (command_components.length > 1) { // ls - handle when 'ls -l' is used on a directory or a file
-                        let stringHTML = '';
-                        for (let i = 1; i < command_components.length; i++) {
-                            const filenode = cur_dir.getChildren(command_components[i]);
-                            if (!filenode)
-                                stringHTML += `<span>${command_name}: cannot access '${command_components[i]}': No such file or directory</span>`;
-                            else {
-                                if (filenode instanceof Directory)
-                                    stringHTML += `<span>Feature not supported, to view content of a directory, cd into it</span>`;
-                                else if (filenode instanceof File) {
-                                    stringHTML += `<span>${printFilenodeInfo(filenode)}</span>`;
-                                }
-                            }
-                            TERMINAL_CONSOLE.innerHTML += stringHTML;
-                            if (i < command_components.length - 1) // print newline <br> for every item except the last one
-                                TERMINAL_CONSOLE.innerHTML += `<br>`;
-                        }
                     }
-                    else 
-                        printFilenodeInfoList(cur_dir, command_components[0]); // list all available directories in pwd in a list
+                    else {
+                        printFileNodeNameMulti(command_components);
+                    }
+                }
+                else if (command_components[0].includes('-l') || command_components[0].includes('-a')) { // ls - list all visible directories in pwd in a list
+                    if (!command_components.slice(1).length) {
+                        printFilenodeInfoList(cur_dir, command_components[0]);
+                    }
+                    else {
+                        printFileNodeNameMulti(command_components.slice(1), command_components[0]);
+                    }
                 }
                 else if (command_components[0].includes('-')) { // all invalid options
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: unrecognized option '${command_components[0]}'</span>`;
-                }
-                else { // handle when 'ls' is used on a directory or a file
-                    TERMINAL_CONSOLE.innerHTML += '<br>';
-                    for (let i = 0; i < command_components.length; i++) {
-                        const filenode = cur_dir.getChildren(command_components[i]);
-                        if (!filenode)
-                            TERMINAL_CONSOLE.innerHTML += `<span>${command_name}: cannot access '${command_components[i]}': No such file or directory</span>`;
-                        else {
-                            if (filenode instanceof Directory)
-                                TERMINAL_CONSOLE.innerHTML += `<span>Feature not supported, to view content of a directory, cd into it</span>`;
-                            else if (filenode instanceof File) {
-                                TERMINAL_CONSOLE.innerHTML += `<span>${filenode.getName()}</span>`;
-                            }
-                        }
-                        if (i < command_components.length - 1) 
-                            TERMINAL_CONSOLE.innerHTML += `<br>`;
-                    }
                 }
                 break;
             
@@ -327,6 +336,9 @@ function START_UBUNTU_TERMINAL() {
                     if (!cur_dir.addDirectory(new Directory(command_components[2], CURRENT_USER.getUsername(), command_components[1], cur_dir)))
                         TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
                 }
+                else if (command_components[0] == "~") {
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${HOME_DIR}': File eixists'</span>`;
+                }
                 else {
                     for (let i = 0; i < command_components.length; i++) {
                         if (command_components[i][0] == '-') continue;
@@ -334,11 +346,56 @@ function START_UBUNTU_TERMINAL() {
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create nested directories</span>`;
                             continue
                         }
-                        if (!cur_dir.addDirectory(new Directory(command_components[i], CURRENT_USER.getUsername(), '775', cur_dir)))
+                        if (!cur_dir.addDirectory(new Directory(command_components[i], CURRENT_USER.getUsername(), Dir_Perm, cur_dir)))
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
                     }
                 }
                 break;
+
+            // case 'touch':
+            //     if (command_components.includes('--help')) {
+            //         TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: does not support any options. Cannot be used alone</span>`;
+            //     }
+            //     else if (command_components.length == 0) {
+            //         TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: missing file operand</span>`;
+            //     }
+            //     else {
+            //         for (let i = 0; i < command_components.length; i++) {
+            //             if (command_components[i][0] == '-') continue;
+            //             let temp_components = command_components[i].split('/');
+            //             let flag = (temp_components.length == 1); 
+            //             let file_name = temp_components.pop();
+            //             if (temp_components.length == 0) { // file in current dir
+            //                 if (!cur_dir.addFile(new File(file_name, CURRENT_USER.getUsername(), File_Perm, cur_dir)))
+            //                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+            //             }
+            //             else if (temp_components.length == 1) {
+            //                 let temp_dir;
+            //                 if (temp_components)
+            //             }
+            //             else { 
+            //                 let temp_dir;
+            //                 temp_components = temp_components.join('/');
+            //                 if (temp_components[0] != '/') { // not absolute path
+            //                     if (temp_dir = goToDir(DIR + '/' + temp_components)) {
+            //                         if (!temp_dir.addFile(new File(file_name, CURRENT_USER.getUsername(), File_Perm, temp_dir)))
+            //                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+            //                     }
+            //                 }
+            //                 else {
+            //                     if (temp_dir = goToDir(pathInterpreter(DIR, temp_components))
+            //                 }
+            //             }
+
+
+            //             if (command_components[i].includes("/")){
+            //                 TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create nested directories</span>`;
+            //                 continue
+            //             }
+            //             if (!cur_dir.addDirectory(new Directory(command_components[i], CURRENT_USER.getUsername(), Dir_Perm, cur_dir)))
+            //                 TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+            //         }
+            //     }
 
             case 'cd':
                 if (command_components.includes('--help')) {
@@ -350,31 +407,15 @@ function START_UBUNTU_TERMINAL() {
                 else if (command.length == command_name.length) // aka just cd
                     DIR = HOME_DIR;
                 else {
-                    const filtered_command_components = command_components[0].replace(/\/{2,}/g, '/'); // replace any excess amount for every "/" occurence
-                    if (filtered_command_components == '/') 
-                        DIR = "/";
-                    else if (command_components[0] == ".") 
-                        break;
-                    else if (command_components[0] == "..") {
-                        if (DIR != "/")
-                            DIR = cur_dir.getParentPath();
+                    let temp_filenode;
+                    if (temp_filenode = goToDir(pathInterpreter(DIR, command_components[0]))){
+                        if (temp_filenode instanceof File)
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Not a directory</span>`;
+                        else
+                            DIR = pathInterpreter(DIR, command_components[0]);
                     }
-                    else if (command_components[0] == "~")
-                        DIR = HOME_DIR;
-                    else if (command_components[0][0] != '/'){
-                        if (goToDir(DIR + "/" + filtered_command_components))
-                            DIR += (DIR == "/") ? filtered_command_components : "/" + filtered_command_components;
-                        else 
-                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
-                    }
-                    else if (cur_dir.getChildren(command_components[0]))    // cd in a dir in current directory 
-                        DIR += (DIR == "/") ? filtered_command_components : "/" + filtered_command_components;
-                    else if (!goToDir(filtered_command_components)) // path/to/dir but not exist
+                    else 
                         TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
-                    else if (goToDir(filtered_command_components) instanceof File) // path/to/file but it's a file
-                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Not a directory</span>`;
-                    else  // absolute path
-                        DIR = filtered_command_components;
                 }
                 break
 
@@ -451,18 +492,17 @@ function START_UBUNTU_TERMINAL() {
                 TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: command not found</span>`;
                 break;
         }
-
+        
         // COMMAND HELPER //
 
         // ls //
         function printFileNodeName(cur_dir, option='') {
-            console.log(cur_dir)
             var stringHTML = '';
             for (let i = 0; i < cur_dir.getChildren().length; i++) {
                 const filenode = cur_dir.getChildren()[i];
-                if (option != '-a' && filenode.getName()[0] == ".") continue
+                if (!option.includes('a') && filenode.getName()[0] == ".") continue
                 if (filenode instanceof File)
-                    stringHTML += `<span>${filenode.getName()}</span></span><span>  </span>`;
+                    stringHTML += `<span>${filenode.getName()}</span><span>  </span>`;
                 else if (filenode instanceof Directory)
                     stringHTML += `<span class="terminal-directory">${filenode.getName()}</span><span>  </span>`;
             }
@@ -471,48 +511,58 @@ function START_UBUNTU_TERMINAL() {
             }
             TERMINAL_CONSOLE.innerHTML += stringHTML;
         }
-
+        //ls
         function printFileNodeNameMulti(dir_arr, option='') {
             const bad_dir = [];
             const good_dir_obj = [];
             const good_dir_name = [];
             for (let i = 0; i < dir_arr.length; i++) {
-                if (dir_arr[i] == '.') {
-                    good_dir_obj.push(goToDir(DIR));
-                    good_dir_name.push(dir_arr[i]);
-                }
-                else if (dir_arr[i] == '~') {
+                if (dir_arr[i].includes('~')) {
+                    //if (dir_arr[i][0] != '~')
                     good_dir_obj.push(goToDir(HOME_DIR));
                     good_dir_name.push(HOME_DIR);
+                    continue;
                 }
-                else if (dir_arr[i][0] == '/') {
-                    const temp_dir = goToDir(dir_arr[i]);
-                    (temp_dir) ? (good_dir_obj.push(temp_dir),  good_dir_name.push(dir_arr[i])): bad_dir.push(dir_arr[i]);
-                }
-                else {
-                    if (dir_arr[i].includes('/')) {
-                        const temp_dir = goToDir(DIR + '/' + dir_arr[i]);
-                        (temp_dir) ? (good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i])) : bad_dir.push(dir_arr[i]);
-                    }
-                    else {
-                        console.log("hello world")
-                        const temp_dir = goToDir(DIR).getChildren(dir_arr[i]);
-                        (temp_dir) ? (good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i])) : bad_dir.push(dir_arr[i]);
-                    }
-                }
+                const temp_dir = goToDir(pathInterpreter(DIR, dir_arr[i]));
+                (temp_dir) ? (good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i])) : bad_dir.push(dir_arr[i]);
             }
             for (let i = 0; i < bad_dir.length; i++) {
                 TERMINAL_CONSOLE.innerHTML += `<br><span>ls: cannot access '${bad_dir[i]}': No such file or directory</span>`;
             }
-            let flag = (good_dir_obj.length > 1);
+            let flag_file = true;
+            for (let i = 0; i < good_dir_obj.length; i++) { // loop only File objects
+                if (good_dir_obj[i] instanceof File)  {
+                    if (flag_file ) TERMINAL_CONSOLE.innerHTML += `<br>`;
+                    if (!option.includes('l')) {
+                        TERMINAL_CONSOLE.innerHTML += `<span>${good_dir_name[i]}  </span>`;
+                    }
+                    else 
+                        TERMINAL_CONSOLE.innerHTML += `<span>${printFilenodeInfo(good_dir_obj[i], good_dir_name[i])}</span><br>`;
+                    flag_file = false;
+                }
+            }
+                
+            let flag_dir = (good_dir_obj.length > 1);
             for (let i = 0; i < good_dir_obj.length; i++) {
-                if (flag) TERMINAL_CONSOLE.innerHTML += `<br><span>${good_dir_name[i]}:<span>`;
-                printFileNodeName(good_dir_obj[i], option);
-                if (flag && i != good_dir_obj.length - 1) TERMINAL_CONSOLE.innerHTML += `<br>`;
+                if (good_dir_obj[i] instanceof Directory) {
+                    if (!option.includes('l')) {
+                        if (flag_file && bad_dir.length == 0 && good_dir_obj.length > 1 && i == 0) // god forgive me for making this if statement
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${good_dir_name[i]}:</span>`;
+                        else if (flag_dir || bad_dir.length > 0) 
+                            TERMINAL_CONSOLE.innerHTML += `<br><br><span>${good_dir_name[i]}:</span>`;
+                        
+                        printFileNodeName(good_dir_obj[i], option);
+                    }
+                    else {
+                        if (flag_dir || bad_dir.length > 0) 
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${good_dir_name[i]}:`;
+                        printFilenodeInfoList(good_dir_obj[i], option);
+                    }
+                }
             }
         }
-
-        function printFilenodeInfo(filenode, option=[]){
+        //ls
+        function printFilenodeInfo(filenode, customized_name=''){
             let maxUsername_length = 0;
 
             USERS.forEach(user => {
@@ -524,22 +574,23 @@ function START_UBUNTU_TERMINAL() {
             stringHTML = (filenode instanceof Directory) ? 'd' : '-'; // file type '-' for file, 'd' for directory
             stringHTML += octalToReadable(filenode.getPermission());
             if (filenode.getName() == "..") 
-                stringHTML += " " + "?".toString().padStart(3, ' ');  // I'm so done with this hardlink bs
+                stringHTML += " " + "?".toString().padStart(3, ' ');  // I'm so done with this hardlink bs for '..'
             else
                 stringHTML += " " + filenode.getHardlink().toString().padStart(3, ' ');
             stringHTML += " " + filenode.getOwner().padEnd(maxUsername_length, ' ');
             stringHTML += " " + filenode.getSize().toString().padStart(4, ' ');
             if (filenode instanceof Directory)
-                stringHTML += " " + `<span class="terminal-directory">${filenode.getName()}</span>`;
+                stringHTML += ` <span class="terminal-directory">${filenode.getName()}</span>`;
             else 
-                stringHTML += ` ${filenode.getName()}`;
+                (customized_name) ? stringHTML += ` ${customized_name}` : stringHTML += ` ${filenode.getName()}`;
 
             return stringHTML;
         }
-
+        //ls
         function printFilenodeInfoList(cur_dir, option) {
-            if (option.length > 3) {
-                TERMINAL_CONSOLE.innerHTML += `<span>ls: unrecognized option '${option}'</span>`;
+            let stringHTML = '';
+            if (option.length > 3) { // only support up to '-la'
+                stringHTML += `<span>ls: unrecognized option '${option}'</span>`;
                 return;
             }
             let total_size = 0;
@@ -550,15 +601,14 @@ function START_UBUNTU_TERMINAL() {
                 }
             }
 
-            TERMINAL_CONSOLE.innerHTML += `<span>total ${Math.floor(total_size/1024)}</span><br>`;
+            TERMINAL_CONSOLE.innerHTML += `<br><span>total ${Math.floor(total_size/1024)}</span><br>`;
             for (let i = 0; i < cur_dir.getChildren().length; i++) {
                 const filenode = cur_dir.getChildren()[i];
                 if (filenode.getName()[0] != '.' || option.includes('a')) {
-                    TERMINAL_CONSOLE.innerHTML += `<span>${printFilenodeInfo(filenode)}</span><br>`;
-
+                    stringHTML += `<span>${printFilenodeInfo(filenode)}</span><br>`;
                 }
             }
-            TERMINAL_CONSOLE.removeChild(TERMINAL_CONSOLE.lastChild); // remove extra <br> tag at the end
+            TERMINAL_CONSOLE.innerHTML += stringHTML;
         }
 
         function printHistory(line=HISTORY_COMMAND.length) {
@@ -570,7 +620,7 @@ function START_UBUNTU_TERMINAL() {
 
         // man //
         function allAvailableSupportedCommands() {
-            let manual = []
+            const manual = []
             manual.push({'help': `<br><span>--help: add anywhere after the command to see available options`});
             manual.push({'pwd':`<br><span>pwd: print name of current/working directory`});
             manual.push({'whoami':`<br><span>whoami: print effective user name`});
@@ -609,34 +659,34 @@ function START_UBUNTU_TERMINAL() {
         home.addDirectory(new Directory('ptkv', 'ptkv', '750', home));
 
         const vuila9 = home.getChildren('vuila9');
-        vuila9.addDirectory(new Directory('code', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('this', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('..abc', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('fun', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('...is', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('just', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('..for', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('.-.for', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('.testing', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('I', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('.will', 'vuila9', '775', vuila9));
-        vuila9.addDirectory(new Directory('.delete', 'vuila9', '775', vuila9));
-        vuila9.addFile(new File('later', 'vuila9', '664', vuila9));
-        vuila9.addFile(new File('GitHub', 'vuila9', '664', vuila9));
+        vuila9.addDirectory(new Directory('code', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('this', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('..abc', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('fun', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('...is', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('just', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('..for', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('.-.for', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('.testing', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('I', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('.will', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addDirectory(new Directory('.delete', 'vuila9', Dir_Perm, vuila9));
+        vuila9.addFile(new File('later', 'vuila9', File_Perm, vuila9));
+        vuila9.addFile(new File('GitHub', 'vuila9', File_Perm, vuila9));
         vuila9.getChildren('GitHub').setFileContent("https://vuila9.github", 'write');
         vuila9.getChildren('GitHub').setFileContent(".io/", 'append');
 
         const ptkv = home.getChildren('ptkv');
-        ptkv.addDirectory(new Directory('ex', 'ptkv', '775', ptkv));
-        ptkv.getChildren('ex').addDirectory(new Directory('me', 'ptkv', '775', ptkv.getChildren('ex')));
-        ptkv.addFile(new File('MKNQ', 'ptkv', '664', ptkv));
+        ptkv.addDirectory(new Directory('ex', 'ptkv', Dir_Perm, ptkv));
+        ptkv.getChildren('ex').addDirectory(new Directory('me', 'ptkv', Dir_Perm, ptkv.getChildren('ex')));
+        ptkv.addFile(new File('MKNQ', 'ptkv', File_Perm, ptkv));
         ptkv.getChildren('MKNQ').setFileContent("still a mystery...", 'write');
 
         const code = vuila9.getChildren('code');
-        code.addDirectory(new Directory('is', 'vuila9', '775', code));
-        code.addDirectory(new Directory('is', 'vuila9', '775', code)); // would not add
-        code.addFile(new File('goal', 'vuila9', '664', code));
-        code.addFile(new File('goal', 'vuila9', '664', code));         // would not add
+        code.addDirectory(new Directory('is', 'vuila9', Dir_Perm, code));
+        code.addDirectory(new Directory('is', 'vuila9', Dir_Perm, code)); // would not add
+        code.addFile(new File('goal', 'vuila9', File_Perm, code));
+        code.addFile(new File('goal', 'vuila9', File_Perm, code));         // would not add
         code.getChildren('goal').setFileContent("need to ace the Google Interview", 'write');
 
         return root;

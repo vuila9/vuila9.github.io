@@ -72,7 +72,7 @@ function START_WINDOW_CMD() {
             const inputLine = CMD_CONSOLE.querySelectorAll("span");
             HISTORY_POS--;
             HISTORY_POS = (HISTORY_POS < 0) ? 0 : HISTORY_POS;
-            COMMAND = HISTORY_COMMAND[HISTORY_POS];
+            COMMAND = (HISTORY_COMMAND[HISTORY_POS]) ? HISTORY_COMMAND[HISTORY_POS] : '';
             CURSOR_POS = COMMAND.length;
             inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
             appendCursor('last');
@@ -88,7 +88,7 @@ function START_WINDOW_CMD() {
             HISTORY_POS = (HISTORY_POS > HISTORY_COMMAND.length) ? (HISTORY_COMMAND.length) : HISTORY_POS;
             COMMAND = HISTORY_COMMAND[HISTORY_POS];
             if (typeof COMMAND !== 'undefined') {
-                CURSOR_POS = 0;
+                CURSOR_POS = COMMAND.length;
                 inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
             }
             else {
