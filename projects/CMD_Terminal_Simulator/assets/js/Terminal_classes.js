@@ -1,9 +1,9 @@
 let USER_COUNT = 0
 
 class User {
-    constructor(username) {
+    constructor(username, password=username) {
         this.username = username;
-        this.password = username;
+        this.password = password;
         if (USER_COUNT == 0) {
             this.uid = '0';
             this.gid = '0';

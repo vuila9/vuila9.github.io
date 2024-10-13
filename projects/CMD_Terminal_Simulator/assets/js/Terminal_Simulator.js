@@ -18,12 +18,13 @@ function START_UBUNTU_TERMINAL() {
 
     addTitleBar();
     addThePrompt();
-    appendCursor('last');
+    appendCursor();
 
     TERMINAL_CONSOLE.focus();
 
     TERMINAL_CONSOLE.addEventListener('keydown', (event) => {
         let arrow_keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+        let tab_count = 0;
         removeCursor();
 
         if (event.key === 'Enter') { // Extract the user input
@@ -70,9 +71,61 @@ function START_UBUNTU_TERMINAL() {
                 CURSOR_POS = (CURSOR_POS <= 0) ? 0 : CURSOR_POS;
             }
         }
+        else if (event.key === 'Home') {
+            event.preventDefault(); // Prevent the default action (whatever it is)
+            CURSOR_POS = 0;
+        }
+        else if (event.key === 'End') {
+            event.preventDefault(); // Prevent the default action (whatever it is)
+            CURSOR_POS = COMMAND.length;
+        }
+        else if (event.key === 'Tab') {
+            event.preventDefault(); // Prevent the default action (whatever it is)
+            let temp_command = COMMAND.trim();
+            if ((temp_command.slice(0,2) != 'cd' && temp_command.slice(0,2) != 'ls') || temp_command.length == 2) {
+                appendCursor();
+                return;
+            }
+            // console.log("hello there")
+            // let dir_arr = temp_command.split(' ').slice(1);
+            // for (let i = 0; i < dir_arr.length; i++) {
+            //     if (dir_arr[i] == '~') {
+            //         continue;
+            //     }
+            //     //goToDir(pathInterpreter(DIR, dir_arr[i]));
+            //     console.log(autocomplete(goToDir(pathInterpreter(DIR, dir_arr[i])), temp_command.slice(0,2)))
+            // }
+            // if (dir_arr[i] == '~') {
+            //     good_dir_obj.push(goToDir(HOME_DIR));
+            //     good_dir_name.push(HOME_DIR);
+            //     continue;
+            // }
+            // const temp_dir = goToDir(pathInterpreter(DIR, dir_arr[i]));
+            // (temp_dir) ? (good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i])) : bad_dir.push(dir_arr[i]);
+            // let command_components = COMMAND.split(' ');
+            // console.log("command is", COMMAND)
+            // if (command_components.length != 2) return;
+            // if (command_components[0] != 'ls' || command_components[0] != 'cd') return;
 
-        else if (event.key === 'Tab') { // will need to come back to this eventually
-            event.preventDefault(); // Prevent the default action (switch focus field)
+            // let maxDirname_length = 0;
+            // cur_dir.getChildren().forEach(dir => {
+            //     if (dir instanceof Directory && dir.getName().length > maxDirname_length) {
+            //         maxDirname_length = dir.getName().length;
+            //     }
+            // });
+            // let stringHTML = '<br>';
+            // console.log(command_components)
+            // if (command_components[0] == 'cd') {
+            //     for (let i = 0; i < cur_dir.getChildren().length; i++) {
+            //         const filenode = cur_dir.getChildren()[i];
+            //         if (filenode instanceof Directory) {
+            //             stringHTML += `<span>${filenode.getName().padStart(maxDirname_length, ' ')} </span>`;
+            //             //TERMINAL_CONSOLE.innerHTML += `<br><span>  ${(i+1).toString().padStart(span, ' ')}  ${HISTORY_COMMAND[i]}</span>`;
+            //         }
+            //     }
+            //     console.log(stringHTML);
+            //     TERMINAL_CONSOLE.innerHTML += stringHTML;
+            // }
         }
         else if (event.key === 'ArrowUp') {
             event.preventDefault(); // Prevent the default action (scrolling up)
@@ -82,7 +135,7 @@ function START_UBUNTU_TERMINAL() {
             COMMAND = (HISTORY_COMMAND[HISTORY_POS]) ? HISTORY_COMMAND[HISTORY_POS] : '';
             CURSOR_POS = COMMAND.length;
             inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
-            appendCursor('last');
+            appendCursor();
         }
         else if (event.key === 'ArrowDown') {
             event.preventDefault(); // Prevent the default action (scrolling down)
@@ -98,11 +151,11 @@ function START_UBUNTU_TERMINAL() {
                 COMMAND = '';
             }
             inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
-            appendCursor('last');
+            appendCursor();
         }
         else if (event.key === 'ArrowLeft') {
             if (COMMAND.length == 0) {
-                appendCursor('last');
+                appendCursor();
                 return;
             }
             CURSOR_POS --;
@@ -116,7 +169,7 @@ function START_UBUNTU_TERMINAL() {
                 appendCursor('middle');
             else {
                 CURSOR_POS = COMMAND.length;
-                appendCursor('last');
+                appendCursor();
             }
         }
         else if (event.key.length === 1) {  // Capture typed characters
@@ -133,14 +186,14 @@ function START_UBUNTU_TERMINAL() {
             const inputLine = TERMINAL_CONSOLE.querySelectorAll("span");
             inputLine[inputLine.length - 1].innerText = `${COMMAND}`;
             if (CURSOR_POS == COMMAND.length) 
-                appendCursor('last');
+                appendCursor();
             else 
                 appendCursor('middle');
         }
         TERMINAL_CONSOLE.scrollTop = TERMINAL_CONSOLE.scrollHeight; // scroll all the way down if any key is pressed
     });
 
-    function appendCursor(pos) {
+    function appendCursor(pos='last') {
         const terminal_cursor = document.createElement('span');
         terminal_cursor.id = 'terminal-cursor';
         terminal_cursor.textContent = '█'; // Cursor character █
@@ -209,11 +262,54 @@ function START_UBUNTU_TERMINAL() {
         return readablePermission;
     }
 
+    function autocomplete(target_filenode, type='') {
+        const dir_obj = target_filenode.getChildren();
+        
+        let exactMatch = null;
+        let partialMatches = [];
+    
+        // Traverse through the array to find matches
+        for (let filenode of dir_obj) {
+            if (type == "cd") {
+                if (filenode instanceof Directory && filenode.getName() === target_filenode) {
+                    exactMatch = str;
+                } else if (filenode instanceof Directory && filenode.getName().includes(target_filenode)) {
+                    partialMatches.push(filenode.getName());
+                }
+            }
+            else {
+                if (filenode.getName() === target_filenode) {
+                    exactMatch = str;
+                } else if (filenode.getName().includes(target_filenode)) {
+                    partialMatches.push(filenode.getName());
+                }
+            }
+        }
+    
+        // If there's an exact match, return it
+        if (exactMatch) {
+            return exactMatch;
+        }
+    
+        // If there are multiple partial matches, return the closest one
+        if (partialMatches.length > 0) {
+            // Sort the partial matches by length and return the shortest one
+            partialMatches.sort((a, b) => a.length - b.length);
+            return partialMatches[0];
+        }
+    
+        // If no match is found, return null or an appropriate value
+        return null;
+    }
+
     // this function will normalize the . and .. components.
     // it will resolve the path relative to the current directory DIR
     function pathInterpreter(dir, relativePath) {
         if (relativePath === '/') { // root
             return '/';
+        }
+        if (relativePath[0] === '~') {
+            return relativePath.replace('~', HOME_DIR);
         }
         // Split the current directory and relative path into parts
         let dirParts = dir.split('/');
@@ -234,7 +330,6 @@ function START_UBUNTU_TERMINAL() {
                 dirParts.push(part);
             }
         }
-    
         // Join the parts back into a valid path and return
         return dirParts.join('/');
     }
@@ -301,31 +396,26 @@ function START_UBUNTU_TERMINAL() {
                 if (command_components.includes('--help')) {
                     TERMINAL_CONSOLE.innerHTML += `<span>${command_name}: -l, -a, -la</span>`;
                 }
-                else if (command_components[0] == '-a') { // ls -a 
-                    if (!command_components.slice(1).length)
+                else if (command_components[0] == '-a') {     // ls -a 
+                    if (!command_components.slice(1).length)  // single
                         printFileNodeName(cur_dir, '-a');
-                    else
-                        printFileNodeNameMulti(command_components.slice(1), '-a');
+                    else                                      // multi
+                        printAnyFileNodeInfo(command_components.slice(1), '-a');
                 }
                 else if (command_components[0] == null || command_components[0][0] != '-') { // ls - naked command with no option included
-                    if (!command_components.length) {
+                    if (!command_components.length)          // single
                         printFileNodeName(cur_dir);
-                    }
-                    else {
-                        printFileNodeNameMulti(command_components);
-                    }
+                    else                                     // multi
+                        printAnyFileNodeInfo(command_components);
                 }
                 else if (command_components[0].includes('-l') || command_components[0].includes('-a')) { // ls - list all visible directories in pwd in a list
-                    if (!command_components.slice(1).length) {
+                    if (!command_components.slice(1).length)  // single
                         printFilenodeInfoList(cur_dir, command_components[0]);
-                    }
-                    else {
-                        printFileNodeNameMulti(command_components.slice(1), command_components[0]);
-                    }
+                    else                                      // multi
+                        printAnyFileNodeInfo(command_components.slice(1), command_components[0]);
                 }
-                else if (command_components[0].includes('-')) { // all invalid options
+                else if (command_components[0].includes('-'))  // all invalid options
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: unrecognized option '${command_components[0]}'</span>`;
-                }
                 break;
             
             case 'mkdir':
@@ -511,14 +601,13 @@ function START_UBUNTU_TERMINAL() {
             }
             TERMINAL_CONSOLE.innerHTML += stringHTML;
         }
-        //ls
-        function printFileNodeNameMulti(dir_arr, option='') {
+        //ls MAIN
+        function printAnyFileNodeInfo(dir_arr, option='') {
             const bad_dir = [];
             const good_dir_obj = [];
             const good_dir_name = [];
             for (let i = 0; i < dir_arr.length; i++) {
-                if (dir_arr[i].includes('~')) {
-                    //if (dir_arr[i][0] != '~')
+                if (dir_arr[i] == '~') {
                     good_dir_obj.push(goToDir(HOME_DIR));
                     good_dir_name.push(HOME_DIR);
                     continue;
