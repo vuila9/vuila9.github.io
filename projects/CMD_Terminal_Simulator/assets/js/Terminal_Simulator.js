@@ -5,11 +5,11 @@ function START_UBUNTU_TERMINAL() {
     const File_Perm = 666 - Number(UMASK);
     const USERS = InitUser();          // Initialize some users
     const ROOT_DIR = InitFileSystem(); // Initialize pre-built file structure that starts at root directory
-    let CURRENT_USER = USERS[1];       // default user, vuila9
-    let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
-    let HOME_DIR = `/home/${CURRENT_USER.getUsername()}`;
+    let CURRENT_USER = USERS[1];       // [root, vuila9, ptkv]
+    let DIR = (CURRENT_USER.getUsername() == 'root') ? `/` : `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
+    let HOME_DIR = (CURRENT_USER.getUsername() == 'root') ? `/` : `/home/${CURRENT_USER.getUsername()}`;
     let DOMAIN = 'github.io';
-    let SUDO = false;
+    let SUDO = false || (CURRENT_USER.getUsername() == 'root');
     
     let THE_PROMPT = `${CURRENT_USER.getUsername()}@${DOMAIN}:~$`; // need to make a function to assign this automatically
     let COMMAND = '';
@@ -218,46 +218,6 @@ function START_UBUNTU_TERMINAL() {
         return readablePermission;
     }
 
-    function autocomplete(target_filenode, type='') {
-        const dir_obj = target_filenode.getChildren();
-        
-        let exactMatch = null;
-        let partialMatches = [];
-    
-        // Traverse through the array to find matches
-        for (let filenode of dir_obj) {
-            if (type == "cd") {
-                if (filenode instanceof Directory && filenode.getName() === target_filenode) {
-                    exactMatch = str;
-                } else if (filenode instanceof Directory && filenode.getName().includes(target_filenode)) {
-                    partialMatches.push(filenode.getName());
-                }
-            }
-            else {
-                if (filenode.getName() === target_filenode) {
-                    exactMatch = str;
-                } else if (filenode.getName().includes(target_filenode)) {
-                    partialMatches.push(filenode.getName());
-                }
-            }
-        }
-    
-        // If there's an exact match, return it
-        if (exactMatch) {
-            return exactMatch;
-        }
-    
-        // If there are multiple partial matches, return the closest one
-        if (partialMatches.length > 0) {
-            // Sort the partial matches by length and return the shortest one
-            partialMatches.sort((a, b) => a.length - b.length);
-            return partialMatches[0];
-        }
-    
-        // If no match is found, return null or an appropriate value
-        return null;
-    }
-
     function absolutePathInterpreter(path) {
         if (path[0] === '~') {
             path = path.replace('~', HOME_DIR);
@@ -353,6 +313,10 @@ function START_UBUNTU_TERMINAL() {
         return recursive(ROOT_DIR, dir_arr);
     }
 
+    function setSUDO(flag=false) {
+        SUDO = flag || (CURRENT_USER.getUsername() == 'root');
+    }
+
     // This replaces all occurrences of two or more repeated 'character' with a single 'character'.
     function filterExcessiveCharacter(string, character) {
         let regex = new RegExp(character + '{2,}', 'g'); // Dynamically create the regex
@@ -368,8 +332,20 @@ function START_UBUNTU_TERMINAL() {
     }
 
     function command_handler(command) {
+        if (/^sudo/.test(command)) {
+            console.log("before:", command);
+            setSUDO(true);
+            command = command.replace(/^sudo/, '');
+            console.log("after:", command);
+        }
+        else 
+            setSUDO();
+
+        console.log("SUDO is:", SUDO)
+
         if (command.split(' ')[0] != 'echo' && !command.split(' ').includes(">>"))
             command = filterExcessiveCharacter(command, ' ');
+
         const command_components = command.split(" ").slice(1);
         const command_name = command.split(" ")[0];
         const cur_dir = goToDir(DIR);
@@ -421,8 +397,12 @@ function START_UBUNTU_TERMINAL() {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: -m ### (perm) dir, can only create directories in the current working directory, no nesting allowed</span>`;
                 }
                 else if (command_components.length == 3 && command_components[0] == '-m' && /^[0-7]{3}$/.test(command_components[1])) { // checking for -m ### form
-                    if (!cur_dir.addDirectory(new Directory(command_components[2], CURRENT_USER.getUsername(), command_components[1], cur_dir)))
-                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+                    if (SUDO || permissionCheck(cur_dir, 'w')) {
+                        if (!cur_dir.addDirectory(new Directory(command_components[2], CURRENT_USER.getUsername(), command_components[1], cur_dir)))
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+                    }
+                    else
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': Permission denied'</span>`;
                 }
                 else if (command_components[0] == "~") {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${HOME_DIR}': File eixists'</span>`;
@@ -434,8 +414,12 @@ function START_UBUNTU_TERMINAL() {
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create nested directories</span>`;
                             continue
                         }
-                        if (!cur_dir.addDirectory(new Directory(command_components[i], CURRENT_USER.getUsername(), Dir_Perm, cur_dir)))
-                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+                        if (SUDO || permissionCheck(cur_dir, 'w')) {
+                            if (!cur_dir.addDirectory(new Directory(command_components[i], CURRENT_USER.getUsername(), Dir_Perm, cur_dir)))
+                               TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+                        }
+                        else
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': Permission denied'</span>`;
                     }
                 }
                 break;
@@ -496,26 +480,28 @@ function START_UBUNTU_TERMINAL() {
                     DIR = HOME_DIR;
                 else { 
                     let temp_filenode;
-                    let temp_dir;
-                    if (!command_components[0].slice(2).includes('.') && command_components[0] != '/') {  // any path that starts with . or .. and doesnt include any . or .. in the middle
-                        temp_dir = pathInterpreter(DIR, command_components[0]);
-                        temp_filenode = goToDir(temp_dir);
-                        
+                    let temp_path;
+                    // any path that starts with . or .. and doesnt include any . or .. in the middle
+                    if (/^(\.\.?)$|^(\.\.?)\/[^\.]*$/.test(command_components[0]) && command_components[0] != '/') {
+                        temp_path = pathInterpreter(DIR, command_components[0]);
+                        temp_filenode = goToDir(temp_path);
                     }
-                    else if (command_components[0][0] == '/' || command_components[0][0] == '~') {        // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
-                        temp_dir = absolutePathInterpreter(command_components[0]);
-                        temp_filenode = goToDir(temp_dir);
+                    // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
+                    else if (command_components[0][0] == '/' || command_components[0][0] == '~') {        
+                        temp_path = absolutePathInterpreter(command_components[0]);
+                        temp_filenode = goToDir(temp_path);
                     }
-                    else {                                                                                // any path that starts at the current directory, could also start with . or ..
-                        temp_dir = absolutePathInterpreter(DIR + '/' + command_components[0]);
-                        temp_filenode = goToDir(temp_dir);
+                    // any path that starts at the current directory, could also start with . or ..
+                    else {                                                                                
+                        temp_path = absolutePathInterpreter(DIR + '/' + command_components[0]);
+                        temp_filenode = goToDir(temp_path);
                     }
                     if (temp_filenode){
                         if (temp_filenode instanceof File)
                             TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Not a directory</span>`;
                         else {
                             if (SUDO || permissionCheck(temp_filenode, 'x'))
-                                DIR = temp_dir;
+                                DIR = temp_path;
                             else 
                                 TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Permission denied</span>`;
 
@@ -530,7 +516,7 @@ function START_UBUNTU_TERMINAL() {
                 if (command_components.includes('--help')) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: -c, ##</span>`;
                 }
-                else if (command_components[0] == '-c') { // delete history
+                else if (command_components[0] == '-c') { // delete history 👀
                     HISTORY_COMMAND = [];
                 }
                 else if (Number(command_components[0]) || command_components[0] == 0) { // print a fixed amount of lines from the most recent
@@ -621,6 +607,7 @@ function START_UBUNTU_TERMINAL() {
         //ls MAIN
         function printAnyFileNodeInfo(dir_arr, option='') {
             const bad_dir = [];
+            const denied_dir = [];
             const good_dir_obj = [];
             const good_dir_name = [];
             for (let i = 0; i < dir_arr.length; i++) {
@@ -637,11 +624,21 @@ function START_UBUNTU_TERMINAL() {
                 else                                                             // any path that starts at the current directory, could also start with . or ..
                     temp_dir = goToDir(absolutePathInterpreter(DIR + '/' + dir_arr[i]));
                 
-                (temp_dir) ? (good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i])) : bad_dir.push(dir_arr[i]);
+                if (temp_dir) {
+                    if (SUDO || permissionCheck(temp_dir, 'r')) 
+                        good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i]);
+                    else 
+                        denied_dir.push(dir_arr[i]);
+                }
+                else
+                    bad_dir.push(dir_arr[i]);
             }
-            for (let i = 0; i < bad_dir.length; i++) {
+            for (let i = 0; i < bad_dir.length; i++) 
                 TERMINAL_CONSOLE.innerHTML += `<br><span>ls: cannot access '${bad_dir[i]}': No such file or directory</span>`;
-            }
+            
+            for (let i = 0; i < denied_dir.length; i++) 
+                TERMINAL_CONSOLE.innerHTML += `<br><span>ls: cannot access '${denied_dir[i]}': Permission denied</span>`;
+            
             let flag_file = true;
             for (let i = 0; i < good_dir_obj.length; i++) { // loop only File objects
                 if (good_dir_obj[i] instanceof File)  {
@@ -752,7 +749,7 @@ function START_UBUNTU_TERMINAL() {
 
     // INITIALIZE //
     function InitUser() {
-        return [new User('root'), new User('vuila9'), new User('ptkv'), new User('guest')];
+        return [new User('root'), new User('vuila9'), new User('ptkv')];
     }
 
     function InitFileSystem() {

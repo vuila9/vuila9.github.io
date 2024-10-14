@@ -38,6 +38,21 @@ pwd --> /home/ptkv/ex --> good
 cd ~/../../bin/../home/../bin/../home/ptkv/./////////////./ex/../ex --> pwd /home/ptkv/ex/ -->  good
 cd ~/../../bin/../home/../bin/../home/ptkv/./////////////./ex/../ex/../MKNQ --> good (not a directory)
 
+cd /
+cd home/vuila9/
+pwd --> //home/vuila9 --> good (fixed)
+
+cd /
+cd ../bin/../home/../bin/../bin/../home/vuila9/../ptkv/../.. should take you to '/' --> good
+
+cd /home 
+cd ../bin/../home/../bin/../bin/../home/vuila9/../ptkv/../.. should take you to '/' --> good
+
+cd ~
+cd ../bin/../home/../bin/../bin/../home/vuila9/../ptkv/../.. should give No such file/dir error (~~bad~~ good, false alarm)
+cd: ../bin/../home/../bin/../bin/../home/vuila9/../ptkv/../../ptkv: Permission denied --> good
+
+working on SUDO
 ```
 
 
