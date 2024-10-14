@@ -9,6 +9,7 @@ function START_UBUNTU_TERMINAL() {
     let DIR = `/home/${CURRENT_USER.getUsername()}`; // default current directory, pwd
     let HOME_DIR = `/home/${CURRENT_USER.getUsername()}`;
     let DOMAIN = 'github.io';
+    let SUDO = false;
     
     let THE_PROMPT = `${CURRENT_USER.getUsername()}@${DOMAIN}:~$`; // need to make a function to assign this automatically
     let COMMAND = '';
@@ -192,7 +193,7 @@ function START_UBUNTU_TERMINAL() {
         else if (DIR.includes(`/home/${CURRENT_USER.getUsername()}`, 0))
             return `~${DIR.slice(HOME_DIR.length)}`;
         else 
-            return (DIR[DIR.length - 1] == "/") ? DIR.slice(0, DIR.length - 1) : DIR;
+            return (DIR[DIR.length - 1] == "/") ? DIR.slice(0, -1) : DIR;
     }
 
     function addTitleBar() {
@@ -359,6 +360,13 @@ function START_UBUNTU_TERMINAL() {
         return string; 
     }
 
+    function permissionCheck(filenode, type='') {
+        if (CURRENT_USER.getUsername() == filenode.getOwner())
+            return true;
+        let perm = octalToReadable(filenode.getPermission()).slice(-3); // only look at the last 3 elements, the 'Others' component
+        return perm.includes(type);
+    }
+
     function command_handler(command) {
         if (command.split(' ')[0] != 'echo' && !command.split(' ').includes(">>"))
             command = filterExcessiveCharacter(command, ' ');
@@ -410,7 +418,7 @@ function START_UBUNTU_TERMINAL() {
             
             case 'mkdir':
                 if (command_components.includes('--help')) {
-                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: -m ### (perm) dir</span>`;
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: -m ### (perm) dir, can only create directories in the current working directory, no nesting allowed</span>`;
                 }
                 else if (command_components.length == 3 && command_components[0] == '-m' && /^[0-7]{3}$/.test(command_components[1])) { // checking for -m ### form
                     if (!cur_dir.addDirectory(new Directory(command_components[2], CURRENT_USER.getUsername(), command_components[1], cur_dir)))
@@ -505,8 +513,13 @@ function START_UBUNTU_TERMINAL() {
                     if (temp_filenode){
                         if (temp_filenode instanceof File)
                             TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Not a directory</span>`;
-                        else 
-                            DIR = temp_dir;
+                        else {
+                            if (SUDO || permissionCheck(temp_filenode, 'x'))
+                                DIR = temp_dir;
+                            else 
+                                TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Permission denied</span>`;
+
+                        }
                     }
                     else 
                         TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
