@@ -27,4 +27,18 @@ disable ctrl -a inside the the div
 add command to change home_dir ~
 
 
+```testing log (manual) for cd/ls
+ls /home/vuila9/code --> good
+ls /home/vuila9/.. --> good
+ls ~/../../home/ptkv/../vuila9/code/../../ptkv/ex --> good
+ls /home/vuila9/./../ptkv --> good
+ls ~/../../bin/../home/ptkv/././ex/../ --> ex MKNQ --> good
+cd ~/../../bin/../home/ptkv/././ex/../
+pwd --> /home/ptkv/ex --> good
+cd ~/../../bin/../home/../bin/../home/ptkv/./////////////./ex/../ex --> pwd /home/ptkv/ex/ -->  good
+cd ~/../../bin/../home/../bin/../home/ptkv/./////////////./ex/../ex/../MKNQ --> good (not a directory)
+
+```
+
+
 

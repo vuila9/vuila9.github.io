@@ -64,6 +64,14 @@ function START_WINDOW_CMD() {
                 CURSOR_POS = (CURSOR_POS <= 0) ? 0 : CURSOR_POS;
             }
         }
+        else if (event.key === 'Home') {
+            event.preventDefault(); // Prevent the default action (whatever it is)
+            CURSOR_POS = 0;
+        }
+        else if (event.key === 'End') {
+            event.preventDefault(); // Prevent the default action (whatever it is)
+            CURSOR_POS = COMMAND.length;
+        }
         else if (event.key === 'Tab') { // will need to come back to this eventually
             event.preventDefault(); // Prevent the default action (scrolling)
         }

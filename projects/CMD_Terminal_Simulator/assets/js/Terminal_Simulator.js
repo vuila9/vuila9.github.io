@@ -81,51 +81,6 @@ function START_UBUNTU_TERMINAL() {
         }
         else if (event.key === 'Tab') {
             event.preventDefault(); // Prevent the default action (whatever it is)
-            let temp_command = COMMAND.trim();
-            if ((temp_command.slice(0,2) != 'cd' && temp_command.slice(0,2) != 'ls') || temp_command.length == 2) {
-                appendCursor();
-                return;
-            }
-            // console.log("hello there")
-            // let dir_arr = temp_command.split(' ').slice(1);
-            // for (let i = 0; i < dir_arr.length; i++) {
-            //     if (dir_arr[i] == '~') {
-            //         continue;
-            //     }
-            //     //goToDir(pathInterpreter(DIR, dir_arr[i]));
-            //     console.log(autocomplete(goToDir(pathInterpreter(DIR, dir_arr[i])), temp_command.slice(0,2)))
-            // }
-            // if (dir_arr[i] == '~') {
-            //     good_dir_obj.push(goToDir(HOME_DIR));
-            //     good_dir_name.push(HOME_DIR);
-            //     continue;
-            // }
-            // const temp_dir = goToDir(pathInterpreter(DIR, dir_arr[i]));
-            // (temp_dir) ? (good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i])) : bad_dir.push(dir_arr[i]);
-            // let command_components = COMMAND.split(' ');
-            // console.log("command is", COMMAND)
-            // if (command_components.length != 2) return;
-            // if (command_components[0] != 'ls' || command_components[0] != 'cd') return;
-
-            // let maxDirname_length = 0;
-            // cur_dir.getChildren().forEach(dir => {
-            //     if (dir instanceof Directory && dir.getName().length > maxDirname_length) {
-            //         maxDirname_length = dir.getName().length;
-            //     }
-            // });
-            // let stringHTML = '<br>';
-            // console.log(command_components)
-            // if (command_components[0] == 'cd') {
-            //     for (let i = 0; i < cur_dir.getChildren().length; i++) {
-            //         const filenode = cur_dir.getChildren()[i];
-            //         if (filenode instanceof Directory) {
-            //             stringHTML += `<span>${filenode.getName().padStart(maxDirname_length, ' ')} </span>`;
-            //             //TERMINAL_CONSOLE.innerHTML += `<br><span>  ${(i+1).toString().padStart(span, ' ')}  ${HISTORY_COMMAND[i]}</span>`;
-            //         }
-            //     }
-            //     console.log(stringHTML);
-            //     TERMINAL_CONSOLE.innerHTML += stringHTML;
-            // }
         }
         else if (event.key === 'ArrowUp') {
             event.preventDefault(); // Prevent the default action (scrolling up)
@@ -302,6 +257,38 @@ function START_UBUNTU_TERMINAL() {
         return null;
     }
 
+    function absolutePathInterpreter(path) {
+        if (path[0] === '~') {
+            path = path.replace('~', HOME_DIR);
+        }
+        
+        // Split the input path into parts
+        let pathParts = path.split('/');
+        let resolvedParts = [];
+
+        // Traverse through the path parts
+        for (let part of pathParts) {
+            if (part === '.' || part === '') {
+                // Do nothing for current directory (.) or empty parts
+                continue;
+            } else if (part === '..') {
+                // Go up one directory for (..), but prevent going above the root (empty resolvedParts)
+                if (resolvedParts.length > 0) {
+                    resolvedParts.pop(); // Remove the last directory
+                }
+            } else {
+                // Add new directory or file to the resolved path
+                resolvedParts.push(part);
+            }
+        }
+
+        // Join the parts back into a valid path
+        let resolvedPath = '/' + resolvedParts.join('/');
+
+        // Ensure the result doesn't end with an extra '/' (except for root '/')
+        return resolvedPath === '/' ? resolvedPath : resolvedPath.replace(/\/$/, '');
+    } 
+
     // this function will normalize the . and .. components.
     // it will resolve the path relative to the current directory DIR
     function pathInterpreter(dir, relativePath) {
@@ -331,7 +318,10 @@ function START_UBUNTU_TERMINAL() {
             }
         }
         // Join the parts back into a valid path and return
-        return dirParts.join('/');
+        if (dirParts.length == 1 && dirParts[0] == '')
+            return '/';
+        else
+            return dirParts.join('/');
     }
 
     function goToDir(dir) {
@@ -494,20 +484,34 @@ function START_UBUNTU_TERMINAL() {
                 else if (command_components.length > 1) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: too many arguments</span>`;
                 }
-                else if (command.length == command_name.length) // aka just cd
+                else if (command.length == command_name.length || command_components[0] == '~') // aka just cd
                     DIR = HOME_DIR;
-                else {
+                else { 
                     let temp_filenode;
-                    if (temp_filenode = goToDir(pathInterpreter(DIR, command_components[0]))){
+                    let temp_dir;
+                    if (!command_components[0].slice(2).includes('.') && command_components[0] != '/') {  // any path that starts with . or .. and doesnt include any . or .. in the middle
+                        temp_dir = pathInterpreter(DIR, command_components[0]);
+                        temp_filenode = goToDir(temp_dir);
+                        
+                    }
+                    else if (command_components[0][0] == '/' || command_components[0][0] == '~') {        // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
+                        temp_dir = absolutePathInterpreter(command_components[0]);
+                        temp_filenode = goToDir(temp_dir);
+                    }
+                    else {                                                                                // any path that starts at the current directory, could also start with . or ..
+                        temp_dir = absolutePathInterpreter(DIR + '/' + command_components[0]);
+                        temp_filenode = goToDir(temp_dir);
+                    }
+                    if (temp_filenode){
                         if (temp_filenode instanceof File)
                             TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Not a directory</span>`;
-                        else
-                            DIR = pathInterpreter(DIR, command_components[0]);
+                        else 
+                            DIR = temp_dir;
                     }
                     else 
                         TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
                 }
-                break
+                break;
 
             case 'history':
                 if (command_components.includes('--help')) {
@@ -612,7 +616,14 @@ function START_UBUNTU_TERMINAL() {
                     good_dir_name.push(HOME_DIR);
                     continue;
                 }
-                const temp_dir = goToDir(pathInterpreter(DIR, dir_arr[i]));
+                let temp_dir;
+                if (!dir_arr[i].slice(2).includes('.') && dir_arr[i][0] != '/')  // any path that starts with . or .. and doesnt include any . or .. in the middle
+                    temp_dir = goToDir(pathInterpreter(DIR, dir_arr[i]));
+                else if (dir_arr[i][0] == '/' || dir_arr[i][0] == '~')           // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
+                    temp_dir = goToDir(absolutePathInterpreter(dir_arr[i]));
+                else                                                             // any path that starts at the current directory, could also start with . or ..
+                    temp_dir = goToDir(absolutePathInterpreter(DIR + '/' + dir_arr[i]));
+                
                 (temp_dir) ? (good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i])) : bad_dir.push(dir_arr[i]);
             }
             for (let i = 0; i < bad_dir.length; i++) {
@@ -713,11 +724,11 @@ function START_UBUNTU_TERMINAL() {
             manual.push({'help': `<br><span>--help: add anywhere after the command to see available options`});
             manual.push({'pwd':`<br><span>pwd: print name of current/working directory`});
             manual.push({'whoami':`<br><span>whoami: print effective user name`});
-            manual.push({'ls':`<br><span>ls (-a, -l, -la): list directory contents`});
             manual.push({'clear':`<br><span>clear: clear the terminal screen`});
-            manual.push({'mkdir':`<br><span>mkdir (-m ###): make directories`});
+            manual.push({'ls':`<br><span>ls (-a, -l, -la): list directory contents (show hidden, show as list, show as both)`});
+            manual.push({'mkdir':`<br><span>mkdir (-m ###): make directories (specify permission in octal)`});
             manual.push({'cd':`<br><span>cd: change the working directory`});
-            manual.push({'history':`<br><span>history (-c, ##): GNU History Library`});
+            manual.push({'history':`<br><span>history (-c, ##): GNU History Library (clear list, show amount from bottom up)`});
 
             manual.push({'man':`<br><span>man: print the system reference manuals`});
             return manual;
