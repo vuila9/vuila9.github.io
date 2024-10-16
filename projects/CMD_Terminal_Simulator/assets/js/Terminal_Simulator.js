@@ -507,9 +507,12 @@ function START_UBUNTU_TERMINAL() {
                 }
                 if (!command_components.includes('>') && !command_components.includes('>>')) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_components.join(' ')}</span>`;
+                    break;
                 }
-                else if (/> >>/g.test(command_components.join(' '))) 
+                else if (/> >>/g.test(command_components.join(' '))) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>bash: syntax error near unexpected token '>>'</span>`;
+                    break;
+                }
                 else if (/>> >/g.test(command_components.join(' '))) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>bash: syntax error near unexpected token '>'</span>`;
                     break
