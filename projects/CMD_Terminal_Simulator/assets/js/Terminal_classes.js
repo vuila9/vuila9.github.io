@@ -1,17 +1,17 @@
-let USER_COUNT = 0
+let USER_COUNT = -1
 
 class User {
     constructor(username, password=username) {
         this.username = username;
         this.password = password;
-        if (USER_COUNT == 0) {
+        this.uid   = '100' + USER_COUNT;
+        this.gid   = '100' + USER_COUNT;
+        this.group = '100' + USER_COUNT;
+        if (USER_COUNT == -1) {
             this.uid = '0';
             this.gid = '0';
             this.group = '0';
         }
-        this.uid   = '100' + USER_COUNT;
-        this.gid   = '100' + USER_COUNT;
-        this.group = '100' + USER_COUNT;
         USER_COUNT++;
     }
 
@@ -61,12 +61,16 @@ class File {
         this.size = size;
     }
 
-    setFileContent(content, type) {
-        if (type == "write")
+    setFileContent(content, type='w') {
+        if (type == "w")
             this.content = content;
-        else if (type == "append")
+        else if (type == "a")
             this.content += content;
-        this.setFileSize(this.getFileContent().length + 1);
+        if (this.content.length != '')
+            this.setFileSize(this.content.length + 1);
+        else
+            this.setFileSize(0);
+
     }
 
     getFileContent() {
@@ -93,6 +97,10 @@ class File {
         this.parent_path = parent_path;
     }
 
+    setPermission(permission) {
+        this.permission = permission;
+    }
+    
     getPermission() {
         return this.permission;
     }
@@ -152,6 +160,14 @@ class Directory {
         return this.parent;
     }
 
+    removeFile(file_name) {
+        if (!this.hasChildren(directory_name)) {
+            return false;
+        }
+        this.setChildren(this.getChildren().filter(filenode => filenode.getName() !== file_name));
+        return true;
+    }
+
     addFile(file) {
         if (this.hasChildren(file.getName())) {
             return false;
@@ -170,6 +186,18 @@ class Directory {
         }
         else
             file.setParentPath(this.getParentPath() + file.getParentPath());
+        return true;
+    }
+
+    setChildren(children) {
+        this.children = children;
+    }
+
+    removeFilenode(directory_name) {
+        if (!this.hasChildren(directory_name)) {
+            return false;
+        }
+        this.setChildren(this.getChildren().filter(filenode => filenode.getName() !== directory_name));
         return true;
     }
 
@@ -224,6 +252,10 @@ class Directory {
 
     getSize() {
         return this.size;
+    }
+
+    setPermission(permission) {
+        this.permission = permission;
     }
 
     getPermission() {

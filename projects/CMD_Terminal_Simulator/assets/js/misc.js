@@ -11,12 +11,10 @@ switchElement.addEventListener('click', function() {
 
     // Update the displayed state
     if (isOn) {
-        console.log("Terminal");
         document.getElementById("command-console").innerHTML = '<div id="terminal-bar"><img class="terminal-img" src="assets/img/topleft_terminal_black.png" alt="Left Image" style="float: left; height: 46px"><img class="terminal-img" src="assets/img/topright_terminal_black.png" alt="Right Image" style="float: right; height: 46px"></div><div id="terminal-body" tabindex="0"><span>Welcome to John\'s scuffed Ubuntu terminal simulator.<br>See "man command" for supported commands.<br><br></span></div>';
         START_UBUNTU_TERMINAL();
         
     } else {
-        console.log("CMD");
         document.getElementById("command-console").innerHTML = '<div id="cmd-bar"><img class="cmd-img" src="assets/img/topleft_cmd_white.png" alt="Left Image" style="float: left; height: 31px;"><img class="cmd-img" src="assets/img/topright_cmd_white.png" alt="Right Image" style="float: right; height: 31px;"></div><div id="cmd-body" tabindex="0"><span>Microsoft Windows [Version 10.5.18071.1703]<br>(c) Microsoft Corporation. All rights reserved.<br><br></span></div>';
         START_WINDOW_CMD();
     }

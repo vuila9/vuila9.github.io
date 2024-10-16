@@ -1,17 +1,20 @@
 TERMINAL (to be done):
-- whoami
-- clear
-- cd (file, ., ..)
-- touch
+- whoami (done)
+- clear (done)
+- cd (file, ., ..) (done)
+- touch 
 - echo (>>)
 - cat
-- ls (-a; -l; -la)
-- mkdirs
-- file
-- history
-- ; (pipe)
-- sudo
-- rmdir
+- ls (-a; -l; -la) (done)
+- mkdir (done)
+- file (?)
+- history (done)
+- ; (pipe) ()
+- sudo (done)
+- rmdir (done)
+- rm (-r, -f, -rf) (done)
+- adduser (done)
+- deluser (done)
 
 
 CMD:
@@ -52,8 +55,41 @@ cd ~
 cd ../bin/../home/../bin/../bin/../home/vuila9/../ptkv/../.. should give No such file/dir error (~~bad~~ good, false alarm)
 cd: ../bin/../home/../bin/../bin/../home/vuila9/../ptkv/../../ptkv: Permission denied --> good
 
-working on SUDO
+
+in actual Ubuntu, when you type `cd ../bin/..`, it will check the existence of each file as it traverses
+meaning, it will go back to parent directory .. and check if 'bin' is there, and return an error if not
+however, in my simulator, to simplify the pathing input, I decided to make a function that would read the path as a whole
+and return a new path that is relative to the current working directory (if path starts with . or ..)
+For example, if pwd is '/home/user', typing '../bin/..' would be read as '/home/user/../bin/..' which is equivalent to '/home' to it will change the pwd to '/home'
+instead of saying File not found
+
+working on SUDO (done)
+
+goal:
+change user (su - username)
+add user (sudo adduser username)
+remove user
+
+rmdir
+rm -r
+
+touch
+cat
+echo
+
+chmod
+
+whoami vuila9
+pwd /home/ptkv/ex
+ls ../ex --> should return Permission denied but mine doesnt
+
 ```
 
 
+DOCUMENT note:
+history store all commands (bad and good) (?)
+
+
+future improve:
+filenode timestamps
 

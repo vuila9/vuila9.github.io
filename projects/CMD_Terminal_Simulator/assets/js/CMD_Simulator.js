@@ -14,7 +14,7 @@ function START_WINDOW_CMD() {
     CMD_CONSOLE.innerHTML += `<span>${THE_PROMPT}</span>`;
     //CMD_CONSOLE.lastChild.innerText += `${THE_PROMPT}`;
 
-    appendCursor('last')
+    appendCursor()
 
     // Focus on div to capture keypresses
     CMD_CONSOLE.focus();
@@ -77,18 +77,22 @@ function START_WINDOW_CMD() {
         }
         else if (event.key === 'ArrowUp') {
             event.preventDefault(); // Prevent the default action (scrolling up)
+            if (HISTORY_COMMAND.length == 0){
+                appendCursor();
+                return;
+            }
             const inputLine = CMD_CONSOLE.querySelectorAll("span");
             HISTORY_POS--;
             HISTORY_POS = (HISTORY_POS < 0) ? 0 : HISTORY_POS;
             COMMAND = (HISTORY_COMMAND[HISTORY_POS]) ? HISTORY_COMMAND[HISTORY_POS] : '';
             CURSOR_POS = COMMAND.length;
             inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
-            appendCursor('last');
+            appendCursor();
         }
         else if (event.key === 'ArrowDown') {
             event.preventDefault(); // Prevent the default action (scrolling down)
             if (HISTORY_POS === HISTORY_COMMAND.length - 1) {
-                appendCursor('last');
+                appendCursor();
                 return;
             }
             const inputLine = CMD_CONSOLE.querySelectorAll("span");
@@ -104,11 +108,11 @@ function START_WINDOW_CMD() {
                 COMMAND = '';
                 inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}`;
             }
-            appendCursor('last');
+            appendCursor();
         }
         else if (event.key === 'ArrowLeft') {
             if (COMMAND.length == 0) {
-                appendCursor('last');
+                appendCursor();
                 return;
             }
             CURSOR_POS --;
@@ -122,7 +126,7 @@ function START_WINDOW_CMD() {
                 appendCursor('middle');
             else {
                 CURSOR_POS = COMMAND.length;
-                appendCursor('last');
+                appendCursor();
             }
         }
         else if (event.key.length === 1) {
@@ -139,14 +143,14 @@ function START_WINDOW_CMD() {
             const inputLine = CMD_CONSOLE.querySelectorAll("span");
             inputLine[inputLine.length - 1].innerText = `${THE_PROMPT}${COMMAND}`;
             if (CURSOR_POS == COMMAND.length)
-                appendCursor('last');
+                appendCursor();
             else
                 appendCursor('middle');
         }
         CMD_CONSOLE.scrollTop = CMD_CONSOLE.scrollHeight; // scroll all the way down if any key is pressed
     });
 
-    function appendCursor(pos) {
+    function appendCursor(pos='last') {
         const cmd_cursor = document.createElement('span');
         cmd_cursor.id = 'cmd-cursor';
         cmd_cursor.textContent = '_'; // Cursor character

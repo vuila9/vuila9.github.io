@@ -217,6 +217,11 @@
     color: rgb(48,10,36) !important;
 }
 
+#terminal-body br::selection {
+    background: white    !important; 
+    color: rgb(48,10,36) !important;
+}
+
 .terminal-prompt::selection {
     background: rgb(38,162,105)  !important;
     color: rgb(48,10,36) !important; 
@@ -232,9 +237,12 @@
     color: rgb(48,10,36) !important; 
 }
 
-#terminal-body br::selection {
-    background: white    !important; 
-    color: rgb(48,10,36) !important;
+.terminal-file-exec {
+    color: rgb(38,162,105) !important; 
+    font-weight: bold;
 }
 
-
+.terminal-file-exec::selection {
+    background: rgb(38,162,105)  !important;
+    color: rgb(48,10,36) !important; 
+}
