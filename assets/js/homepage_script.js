@@ -6,9 +6,15 @@ document.addEventListener("DOMContentLoaded", function() {
     // Data for the articles
     const articlesData = [
         {
-            imageSrc: "assets/img/pic05.jpg",
+            imageSrc: "assets/img/pic06.jpg",
             title: "WIP1",
             description: "A work-in-progress project to be released soon™",
+            link: "templates/generic.html"
+        },
+        {
+            imageSrc: "assets/img/pic05.jpg",
+            title: "CMD/Terminal Simulator",
+            description: "A simulator for Windows CMD and Ubuntu Terminal command consoles.",
             link: "projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html"
         },
         {

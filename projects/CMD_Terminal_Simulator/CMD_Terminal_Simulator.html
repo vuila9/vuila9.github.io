@@ -46,7 +46,8 @@
 							</div>
 							<div>
 								<span class="submenu">Description</span>
-								<p>This is a work-in-progress project, nothing to see here...</p>
+								<p>This project is a simulator for both the Windows Command Prompt and Ubuntu Terminal consoles, built entirely with HTML, JavaScript, and CSS. Supported commands will be listed in the Features section. Note that only two commands are available for Windows CMD, as most efforts were focused on the Ubuntu Terminal, so it's recommended to try that instead.</p>
+								<p>This is an ongoing project, and mistakes or bugs are inevitable. While I try to catch as many as possible, it's likely I may miss one or more.</p>
 							</div>
 
 							<div class="container">
@@ -56,7 +57,11 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="background-content">
-								<p>Background</p>
+								<p>I first encountered Linux/Unix/Ubuntu (not sure of the exact common term, but they share the same roots) in my first year at university. Since it was a completely new OS and environment, I mostly learned basic navigation, relying heavily on the GUI (using the mouse). It wasn't until my third year, during an Operating Systems course, that I had to navigate the environment through the terminal. The OS course can get quite complex, but knowing how to navigate the Unix terminal basics is essential for diving deeper.</p>
+								<p>I created this Terminal Simulator, specifically for Unix-based systems, for beginners learning OS concepts. It's designed to help users get familiar with navigating files and directories, creating or deleting file nodes, checking file information, and understanding permissions, ownership, and other file attributes. Learning basic commands and their options/flags is crucial, as they are used frequently in both learning and professional environments.</p>
+								<p>What sets Unix apart is the need to use the terminal to unlock its full potential, unlike Windows, where you can perform most tasks with the mouse. Unix also provides a lot of freedom, allowing you to delete anything, with the consequences entirely on you. To simulate this, I’ve added two self-destruct features that mimic the effects of catastrophic commands in a real Unix OS. While not 100% accurate, it offers a glimpse into the potential damage you could cause, helping you avoid such mistakes on your actual system.</p>
+								<p>I hope this simulator helps you learn and have some fun along the way. I’ve included as many commands as possible, focusing on those most common for beginners. You’d be surprised how complex some of these basic commands can get when you try to code them. As I discovered their unexpected complexity while coding, I had to simplify things for my own sanity. I'm still a beginner, so there's only so much I can simulate.</p>
+								<p>Check back often, as I’ll be adding new commands, features, bug fixes, and optimizations. I hope you enjoy the experience!</p>
 							</div>
 
 							<div class="container">
@@ -66,7 +71,31 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="features-content">
-								<p>Features</p>
+								<p>Windows CMD supported command: whoami, cls</p>
+								<p>Ubuntu Terminal supported command: ls, cd, touch, echo, cat, rm, mkdir, rmdir, sudo, su, adduser, deluser, chmod, pwd, whoami, clear, history, man</p>
+								<ul>
+									<li><span class="effect-span"><b>ls</b>: list directory contents</span></li>
+									<li><span class="effect-span"><b>cd</b>: change working directory</span></li>
+									<li><span class="effect-span"><b>touch</b>: create new file</span></li>
+									<li><span class="effect-span"><b>echo</b>: display a line of text (can redirect the output into a file)</span></li>
+									<li><span class="effect-span"><b>cat</b>: print file content on the standard output</span></li>
+									<li><span class="effect-span"><b>rm</b>: remove files or directories (just dont try to remove '/' 🤫)</span></li>
+									<li><span class="effect-span"><b>mkdir</b>: create new directory</span></li>
+									<li><span class="effect-span"><b>rmdir</b>: remove empty directory</span></li>
+									<li><span class="effect-span"><b>sudo</b>: execute a command as a super (root) user</span></li>
+									<li><span class="effect-span"><b>su</b>: change current active user</span></li>
+									<li><span class="effect-span"><b>adduser</b>: add new user</span></li>
+									<li><span class="effect-span"><b>deluser</b>: remove existing user (just dont try to remove root 👀)</span></li>
+									<li><span class="effect-span"><b>chmod</b>: change file mode (permission)</span></li>
+									<li><span class="effect-span"><b>pwd</b>: show current/working directory</span></li>
+									<li><span class="effect-span"><b>whoami</b>: show current active user</span></li>
+									<li><span class="effect-span"><b>chmod</b>: change file mode (permission)</span></li>
+									<li><span class="effect-span"><b>clear</b>: clear the terminal screen</span></li>
+									<li><span class="effect-span"><b>history</b>: show history of all previous input command</span></li>
+									<li><span class="effect-span"><b>man</b>: show manual to each or all commands</span></li>
+									<li><span class="effect-span"><u>Text navigation feels natural</u>: No HTML input fields were used in this project. Everything was manually built, including text input via EventListener to capture key presses and a custom-built cursor.</span></li>
+								</ul>
+
 							</div>
 
 							<div class="container">
@@ -76,7 +105,14 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="future-improvement-content">
-								<p>improvement</p>									
+								<ul>
+									<li><span class="effect-span">Optimize permission checking for <b>ls</b>, <b>cd</b></span></li>
+									<li><span class="effect-span">Upgrade <b>mkdir</b>, <b>rmdir</b>, <b>rm</b> to allow nesting file path to directory/file</span></li>
+									<li><span class="effect-span">Add feature for command piping</span></li>
+									<li><span class="effect-span">Code optimizations, code reorganization</span></li>
+									<li><span class="effect-span">To be updated</span></li>
+
+								</ul>								
 							</div>
 
 							<div class="container">
@@ -86,7 +122,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="github-content">
-								<p>Source code</p>
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/CMD_Terminal_Simulator" target="_blank"><p>Source code</p></a>
 							</div>
 
 				<!--END-->

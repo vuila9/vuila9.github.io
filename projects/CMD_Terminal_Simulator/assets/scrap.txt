@@ -3,8 +3,8 @@ TERMINAL (to be done):
 - clear (done)
 - cd (file, ., ..) (done)
 - touch 
-- echo (>>)
-- cat
+- echo (>>) (done)
+- cat (done)
 - ls (-a; -l; -la) (done)
 - mkdir (done)
 - file (?)
