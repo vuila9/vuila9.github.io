@@ -15,7 +15,7 @@ TERMINAL (to be done):
 - rm (-r, -f, -rf) (done)
 - adduser (done)
 - deluser (done)
-
+- find
 
 CMD:
 - cls
