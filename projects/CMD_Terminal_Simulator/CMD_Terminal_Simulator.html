@@ -46,7 +46,7 @@
 							</div>
 							<div>
 								<span class="submenu">Description</span>
-								<p>This project is a simulator for both the Windows Command Prompt and Ubuntu Terminal consoles, built entirely with HTML, JavaScript, and CSS. Supported commands will be listed in the Features section. Note that only two commands are available for Windows CMD, as most efforts were focused on the Ubuntu Terminal, so it's recommended to try that instead.</p>
+								<p>This is a console simulator for both the Windows Command Prompt and Ubuntu Terminal, built entirely with HTML, JavaScript, and CSS. Supported commands will be listed in the Features section. Note that only two commands are available for Windows CMD, as most efforts were focused on the Ubuntu Terminal, so it's recommended to try that instead.</p>
 								<p>This is an ongoing project, and mistakes or bugs are inevitable. While I try to catch as many as possible, it's likely I may miss one or more.</p>
 							</div>
 
@@ -93,7 +93,14 @@
 									<li><span class="effect-span"><b>clear</b>: clear the terminal screen</span></li>
 									<li><span class="effect-span"><b>history</b>: show history of all previous input command</span></li>
 									<li><span class="effect-span"><b>man</b>: show manual to each or all commands</span></li>
-									<li><span class="effect-span"><u>Text navigation feels natural</u>: No HTML input fields were used in this project. Everything was manually built, including text input via EventListener to capture key presses and a custom-built cursor.</span></li>
+									<li><span class="effect-span"><u>Natural text navigation</u>:</span></li>
+										<ul>
+											<li><span class="effect-span">No HTML input fields were used, every text navigation/manipulation was manually built</span></li>
+											<li><span class="effect-span">Arrow key left/right: move cursor between text</span></li>
+											<li><span class="effect-span">Arrow key up/down: traversing command history</span></li>
+											<li><span class="effect-span">Home/End key: move cursor to the head/tail of text</span></li>
+											<li><span class="effect-span">Backspace/Del key: remove character to the left/right of cursor of text</span></li>
+										</ul>
 								</ul>
 
 							</div>
@@ -110,8 +117,8 @@
 									<li><span class="effect-span">Upgrade <b>mkdir</b>, <b>rmdir</b>, <b>rm</b> to allow nesting file path to directory/file</span></li>
 									<li><span class="effect-span">Add feature for command piping</span></li>
 									<li><span class="effect-span">Code optimizations, code reorganization</span></li>
+									<li><span class="effect-span">Implementing Tab key: auto-complete file name in during command prompting</span></li>
 									<li><span class="effect-span">To be updated</span></li>
-
 								</ul>								
 							</div>
 

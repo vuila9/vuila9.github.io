@@ -37,7 +37,7 @@ function START_UBUNTU_TERMINAL() {
             const userInput = COMMAND.trim();
             if (COMMAND.length)
                 HISTORY_COMMAND.push(COMMAND);
-            console.log('User Input:', userInput);  // Do something with the input
+            //console.log('User Input:', userInput);  // Do something with the input
 
             // THIS IS WHERE YOU DO YOUR COMMAND HANDLER
             if (!PASSWORD_IN_PROGRESS)
@@ -1177,7 +1177,7 @@ function START_UBUNTU_TERMINAL() {
         const code = vuila9.getChildren('code');
         code.addDirectory(new Directory('is', 'vuila9', DEFAULT_DIR_PERMISSION, code));
         code.addDirectory(new Directory('is', 'vuila9', DEFAULT_DIR_PERMISSION, code));  // would not add
-        code.getChildren('is').addFile(new File('fun', 'vuila9', DEFAULT_DIR_PERMISSION, code.getChildren('is')));
+        code.getChildren('is').addFile(new File('fun', 'vuila9', DEFAULT_FILE_PERMISSION, code.getChildren('is')));
         code.getChildren('is').getChildren('fun').setFileContent("code is fun");
 
         code.addFile(new File('goal', 'vuila9', DEFAULT_FILE_PERMISSION, code));
