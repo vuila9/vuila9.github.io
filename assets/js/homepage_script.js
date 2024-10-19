@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
             imageSrc: "assets/img/pic06.jpg",
             title: "WIP1",
             description: "A work-in-progress project to be released soon™",
-            link: "templates/generic.html"
+            link: "projects/Sudoku_JS/Sudoku_JS.html"
         },
         {
             imageSrc: "assets/img/pic05.jpg",
