@@ -1,14 +1,15 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Sudoku Game Project</title>
+		<title>Sudoku Game (v2) Project</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="../../assets/css/main.css" />
 		<link rel="icon" href="Sudoku_JS_icon.svg" type="image/x-icon">
 		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
 		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
-		
+		<link rel="stylesheet" href="assets/css/effects.css">
+
 	</head>
 	<body class="is-preload">
 		<!-- Wrapper -->
@@ -27,8 +28,23 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
+							<div id="grid-container" class="grid-container"></div>
+							<div class="buttons">
+								<button id="submit" class="button">Submit</button>
+								<button id="check" class="button">Check</button>
+								<button id="solve" class="button">Solve</button>
+							</div>
+							<div class="buttons">
+								<button id="Reset" class="button">Reset</button>
+								<button id="Generate" class="button">Generate</button>
+								<button id="Rules" class="button">Rules</button>
+							</div>
+
+							<!-- LOOK UP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+
 							<div>
 								<span class="submenu">Description</span>
+								<p>This project is being developed, nothing to see here...</p>
 							</div>
 
 							<div class="container">
@@ -38,6 +54,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="background-content">
+								<p>Background</p>
 							</div>
 
 							<div class="container">
@@ -47,8 +64,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="features-content">
-								<ul>
-								</ul>
+								<p>Features</p>
 							</div>
 
 							<div class="container">
@@ -58,9 +74,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="future-improvement-content">
-								<ul>
-								</ul>
-									
+								<p>Improvements</p>
 							</div>
 
 							<div class="container">
@@ -85,5 +99,8 @@
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- projetc specifics -->
+			<script src="assets/js/SudokuJS.js"></script>
 	</body>
 </html>

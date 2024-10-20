@@ -60,8 +60,8 @@ in actual Ubuntu, when you type `cd ../bin/..`, it will check the existence of e
 meaning, it will go back to parent directory .. and check if 'bin' is there, and return an error if not
 however, in my simulator, to simplify the pathing input, I decided to make a function that would read the path as a whole
 and return a new path that is relative to the current working directory (if path starts with . or ..)
-For example, if pwd is '/home/user', typing '../bin/..' would be read as '/home/user/../bin/..' which is equivalent to '/home' to it will change the pwd to '/home'
-instead of saying File not found
+For example, if pwd is '/home/user', typing '../bin/..' would be read as '/home/user/../bin/..' which is equivalent to '/home', and so it will change the pwd to '/home'.
+In actual Ubuntu, it will go to .. from '/home/user' which is now '/home/', check for 'bin', and if 'bin' is not there, it will return an error saying File not found.
 
 working on SUDO (done)
 
