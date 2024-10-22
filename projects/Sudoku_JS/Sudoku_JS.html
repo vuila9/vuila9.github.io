@@ -28,16 +28,16 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
-							<div id="grid-container" class="grid-container"></div>
+							<div id="sudoku-board" class="sudoku-board"></div>
 							<div class="buttons">
-								<button id="submit" class="button">Submit</button>
-								<button id="check" class="button">Check</button>
+								<button id="submit" class="button" onclick="submit()">Submit</button>
+								<button id="check" class="button" onclick="check()">Check</button>
 								<button id="solve" class="button">Solve</button>
 							</div>
 							<div class="buttons">
-								<button id="Reset" class="button">Reset</button>
-								<button id="Generate" class="button">Generate</button>
-								<button id="Rules" class="button">Rules</button>
+								<button id="reset" class="button" onclick="reset()">Reset</button>
+								<button id="generate" class="button">Generate</button>
+								<button id="rules" class="button">Rules</button>
 							</div>
 
 							<!-- LOOK UP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
@@ -101,6 +101,7 @@
 			<script src="../../assets/js/project_global_function.js"></script>
 
 			<!-- projetc specifics -->
+			<script src="assets/js/SudokuJS_helper.js"></script>
 			<script src="assets/js/SudokuJS.js"></script>
 	</body>
 </html>

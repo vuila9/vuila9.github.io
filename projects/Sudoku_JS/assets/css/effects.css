@@ -1,5 +1,5 @@
 /* Style for the grid container */
-.grid-container {
+.sudoku-board {
     justify-content: center;
     display: grid;
     grid-template-columns: repeat(9, 50px); /* 9 columns, each 50px wide */
@@ -50,7 +50,8 @@
     text-align: center;
     border: none;
     background-color: transparent;
-    font-size: 18px;
+    font-size: 25px;
+    font-family: 'Ubuntu', monospace;
 }
 
 /* Remove input field outline */
@@ -70,5 +71,4 @@
     margin-top: 20px;
     margin-bottom: 20px;
     gap: 20px;
-
 }

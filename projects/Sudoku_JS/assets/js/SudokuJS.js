@@ -1,6 +1,8 @@
+const SUDOKU_BOARD = [];
+
 function init() {
     // JavaScript to dynamically generate 9x9 grid with restricted input fields
-    const gridContainer = document.getElementById('grid-container');
+    const gridContainer = document.getElementById('sudoku-board');
 
     // Function to handle input restrictions
     function restrictInput(event) {
@@ -33,4 +35,63 @@ function init() {
 
 window.onload = function() {
     init();
+    setButtonTo('check', false);
+    setButtonTo('solve', false);
 }
+
+function submit() {
+    console.log('Submit button was clicked');
+    const sudoku_board = getSudokuBoard();
+
+    setButtonTo('submit', false);
+    setButtonTo('generate', false);
+
+    if (solvable()) {
+        console.log('Board has been submitted');
+        setButtonTo('solve', true);
+        setButtonTo('check', true);
+    }
+    else {
+        console.log('Board not subbmitted');
+        setButtonTo('solve', false);
+        setButtonTo('check', false);
+    }
+
+    // Output the collected values (e.g., log to the console)
+    console.log(sudoku_board);
+    
+}
+
+function check() {
+    const sudoku_board = getSudokuBoard();
+    if (verifySudoku(sudoku_board)) {
+        console.log('Your solution to this board is correct!');
+        setButtonTo('check', false);
+        setButtonTo('solve', false);
+    }
+    else
+        console.log('Your solution to this board is either incorrect or incomplete.');
+}
+
+function reset() {
+    // # This function will reset the whole board, change all buttons' state to their original state
+    //     for row in range(9):
+    //         for col in range(9):
+    //             self.grid[row][col].config(state='normal')
+    //             self.grid[row][col].delete(0, tk.END)
+    //             self.grid[row][col].config(bg='white')
+
+    //     self.sudoku_board = []
+    //     self.fixed_cells = set()
+    //     self.solvable = False
+    //     self.solve_button['state'] = 'disable'
+    //     self.submit_button['state'] = 'active'
+    //     self.check_button['state'] = 'disable'
+    //     self.generate_button['state'] = 'active'
+    
+    setButtonTo('solve', false);
+    setButtonTo('submit', true);
+    setButtonTo('check', false);
+    setButtonTo('generate', true);
+}
+
