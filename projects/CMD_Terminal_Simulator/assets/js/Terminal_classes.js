@@ -1,13 +1,13 @@
-let USER_COUNT = -1
+let USER_COUNT = 0;
 
 class User {
     constructor(username, password=username) {
         this.username = username;
         this.password = password;
-        this.uid   = '100' + USER_COUNT;
-        this.gid   = '100' + USER_COUNT;
-        this.group = '100' + USER_COUNT;
-        if (USER_COUNT == -1) {
+        this.uid   = '100' + (USER_COUNT - 1);
+        this.gid   = '100' + (USER_COUNT - 1);
+        this.group = '100' + (USER_COUNT - 1);
+        if (USER_COUNT == 0) {
             this.uid = '0';
             this.gid = '0';
             this.group = '0';
