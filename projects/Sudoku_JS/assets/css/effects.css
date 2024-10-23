@@ -64,11 +64,47 @@
     background-color: lightblue; /* Change to any color you prefer */
 }
 
-
 .buttons {
     justify-content: center;
     display: flex;
     margin-top: 20px;
     margin-bottom: 20px;
     gap: 20px;
+}
+
+.popup {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 30%;
+    top: 25%;
+    width: 40%; /* Full width */
+    height: flex; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    flex-direction: column;   /* Stack content vertically */
+    justify-content: center;  /* Center content vertically */
+    align-items: center;      /* Center content horizontally */
+    padding: 20px;            /* Padding inside the popup */
+    text-align: center;       /* Center text alignment */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover,
+        .close:focus {
+            color: #f2849e;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+.body-popup {
+    background-color: #fff9e1;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: flex; /* Could be more or less, depending on screen size */
 }

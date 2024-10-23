@@ -32,19 +32,49 @@
 							<div class="buttons">
 								<button id="submit" class="button" onclick="submit()">Submit</button>
 								<button id="check" class="button" onclick="check()">Check</button>
-								<button id="solve" class="button">Solve</button>
+								<button id="solve" class="button" onclick="solve()">Solve</button>
 							</div>
 							<div class="buttons">
 								<button id="reset" class="button" onclick="reset()">Reset</button>
-								<button id="generate" class="button">Generate</button>
-								<button id="rules" class="button">Rules</button>
+								<button id="generate" class="button" onclick="generate()">Generate</button>
+								<button id="rules" class="button" onclick="rules()">Rules</button>
 							</div>
-
-							<!-- LOOK UP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+							<div id="submit-popup" class="popup">
+								<div class="body-popup">
+									<span class="close">&times;</span>
+									<span></span>
+								</div>
+							</div>
+							<div id="check-popup" class="popup">
+								<div class="body-popup">
+									<span class="close">&times;</span>
+									<span></span>
+								</div>
+							</div>
+							<div id="difficulty-popup" class="popup">
+								<div class="body-popup">
+									<span class="close">&times;</span>
+									<h2>Difficulty</h2>
+									<button class="difficulty-buttons" onclick="generate('EASY')">EASY</button>
+									<button class="difficulty-buttons" onclick="generate('MEDIUM')">MEDIUM</button>
+									<button class="difficulty-buttons" onclick="generate('HARD')">HARD</button>
+									<button class="difficulty-buttons" onclick="generate('EXPERT')">EXPERT</button>
+								</div>
+							</div>
+							<div id="rules-popup" class="popup">
+								<div class="body-popup">
+									<span class="close">&times;</span>
+									<h2>Rules</h2>
+									<p>Rule 1: Each row must contain the numbers from 1 to 9, without repetitions</p>
+									<p>Rule 2: Each column must contain the numbers from 1 to 9, without repetitions</p>
+									<p>Rule 3: The digits can only occur once per block (3x3)</p>
+								</div>
+							</div>
 
 							<div>
 								<span class="submenu">Description</span>
-								<p>This project is being developed, nothing to see here...</p>
+								
+								<p>It's essentially the same <a href="https://vuila9.github.io/projects/Sudoku_Solver/Sudoku_Solver.html" target="_blank">project</a>, but it's now converted from Python to JavaScript, HTML, and CSS.</p>
 							</div>
 
 							<div class="container">
@@ -54,7 +84,9 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="background-content">
-								<p>Background</p>
+								<p>Same background from the previous <a href="https://vuila9.github.io/projects/Sudoku_Solver/Sudoku_Solver.html" target="_blank">project</a> version</p>
+								<p>I want my portfolio to feel like an interactive experience, not just a static showcase. When I first completed the Sudoku project in Python (my go-to language back then), I had no plans for a portfolio. But things changed, and now I have a fully functional one. Originally, using the Python Sudoku program required downloading it from GitHub, which was inconvenient. To make browsing easier for visitors, I decided to port the entire project from Python to JavaScript, HTML, and CSS.</p>
+								<p>The conversion process wasn't too challenging. With the help of forbidden tech, ChatGPT, I managed to translate 80% of the Python code to JavaScript. My main tasks were handling the HTML, CSS, and refining some core logic here and there.</p>
 							</div>
 
 							<div class="container">
@@ -64,7 +96,11 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="features-content">
-								<p>Features</p>
+								<ul>
+									<li><span class="effect-span"><b>Interactive GUI</b>:&nbsp;Play Sudoku using an intuitive graphical interface.</span></li>
+									<li><span class="effect-span"><b>Sudoku Board Generation</b>:&nbsp;Generate new Sudoku boards with varying difficulty levels.</span></li>
+									<li><span class="effect-span"><b>Solution Checker</b>:&nbsp;Check if the current board configuration is valid and adheres to Sudoku rules.</span></li>
+								</ul>
 							</div>
 
 							<div class="container">
@@ -74,7 +110,13 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="future-improvement-content">
-								<p>Improvements</p>
+								<ul>
+									<li><span class="effect-span">Showing hints when the player is stuck</span></li>
+									<li><span class="effect-span">Timer for tracking how long it takes to solve a puzzle</span></li>
+									<li><span class="effect-span">A leaderboard for tracking top scores</span></li>
+									<li><span class="effect-span">Show in real-time how the algorithm changes each cell using backtracking when solving</span></li>
+									<li><span class="effect-span">Dancing Links implementation + IRL sudoku advanced techniques such as finding <em>Hidden Singles</em>, <em>Hidden Pairs</em>, <em>Swordfish</em>, <em>X-wing</em>, <em>Y-wing</em>, etc. to maxmiize solving runtime</span></li>
+								</ul>
 							</div>
 
 							<div class="container">
@@ -84,7 +126,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="github-content">
-								<p>Source code</p>
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Sudoku_JS" target="_blank"><p>Source code</p></a>
 							</div>
 
 				<!--END-->

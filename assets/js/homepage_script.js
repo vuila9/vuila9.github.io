@@ -7,8 +7,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const articlesData = [
         {
             imageSrc: "assets/img/pic06.jpg",
-            title: "WIP1",
-            description: "A work-in-progress project to be released soon™",
+            title: "Sudoku Game (v2)",
+            description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS",
             link: "projects/Sudoku_JS/Sudoku_JS.html"
         },
         {

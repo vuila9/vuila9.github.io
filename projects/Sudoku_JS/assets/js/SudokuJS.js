@@ -1,5 +1,3 @@
-const SUDOKU_BOARD = [];
-
 function init() {
     // JavaScript to dynamically generate 9x9 grid with restricted input fields
     const gridContainer = document.getElementById('sudoku-board');
@@ -35,63 +33,154 @@ function init() {
 
 window.onload = function() {
     init();
-    setButtonTo('check', false);
-    setButtonTo('solve', false);
+    setButton('check', false);
+    setButton('solve', false);
 }
 
 function submit() {
-    console.log('Submit button was clicked');
-    const sudoku_board = getSudokuBoard();
+    const submit_popup = document.getElementById('submit-popup');
+    const submit_body_popup = document.getElementsByClassName('body-popup')[0].lastElementChild;
+    submit_body_popup.innerHTML = '';
+    const [sudoku_board] = getSudokuBoard();
+    const [solvable, msg] = solveSudoku(sudoku_board);
 
-    setButtonTo('submit', false);
-    setButtonTo('generate', false);
+    setButton('submit', false);
+    setButton('generate', false);
 
-    if (solvable()) {
-        console.log('Board has been submitted');
-        setButtonTo('solve', true);
-        setButtonTo('check', true);
+    if (solvable) {
+        submit_body_popup.innerHTML += `<h2>Board Sumitted</h2>`;
+        submit_body_popup.innerHTML += `<p>Board has been submitted!</p>`;
+        setButton('solve', true);
+        setButton('check', true);
     }
     else {
-        console.log('Board not subbmitted');
-        setButtonTo('solve', false);
-        setButtonTo('check', false);
+        submit_body_popup.innerHTML += `<h2>Board Not Sumitted</h2>`;
+        submit_body_popup.innerHTML += `<p>Input board is ${msg}</p>`;
+        setButton('solve', false);
+        setButton('check', false);
     }
-
-    // Output the collected values (e.g., log to the console)
-    console.log(sudoku_board);
-    
+    const span = document.getElementsByClassName("close")[0];
+    submit_popup.style.display = 'block';
+    span.onclick = function() {
+        submit_popup.style.display = "none";
+    }
+    window.onclick = function(event) {
+        if (event.target == submit_popup) {
+            submit_popup.style.display = "none";
+        }
+    }
 }
 
 function check() {
-    const sudoku_board = getSudokuBoard();
+    const check_popup = document.getElementById('check-popup');
+    const check_body_popup = document.getElementsByClassName('body-popup')[1].lastElementChild;
+    check_body_popup.innerHTML = '';
+    const [sudoku_board] = getSudokuBoard(false);
     if (verifySudoku(sudoku_board)) {
-        console.log('Your solution to this board is correct!');
-        setButtonTo('check', false);
-        setButtonTo('solve', false);
+        check_body_popup.innerHTML += `<h2>Congratulation</h2>`;
+        check_body_popup.innerHTML += `<p>Your solution to this board is correct!</p>`;
+        setButton('check', false);
+        setButton('solve', false);
     }
-    else
-        console.log('Your solution to this board is either incorrect or incomplete.');
+    else {
+        check_body_popup.innerHTML += `<h2>Unfortunately</h2>`;
+        check_body_popup.innerHTML += `<p>Your solution to this board is either incorrect or incomplete.</p>`;
+    }
+    const span = document.getElementsByClassName("close")[1];
+    check_popup.style.display = 'block';
+    span.onclick = function() {
+        check_popup.style.display = "none";
+    }
+    window.onclick = function(event) {
+        if (event.target == check_popup) {
+            check_popup.style.display = "none";
+        }
+    }
+}
+
+function solve() {
+    const sudoku_div = document.querySelectorAll('.grid-item input');
+    const [sudoku_board, fixed_cells] = getSudokuBoard();
+    solveSudoku(sudoku_board); // no other way but to recall this, could avoid doing this by using global variable
+    let counter = -1;
+    sudoku_div.forEach((cell) => {
+        if (fixed_cells.includes(++counter)) 
+            return;
+        cell.value = sudoku_board[Math.floor(counter / 9)][counter % 9];
+        cell.disabled = true;
+    });
+
+    setButton('solve', false);
+    setButton('check', false);
+}
+
+function generate(mode=null) {
+    const difficulty_popup = document.getElementById('difficulty-popup');
+    if (!mode) {
+        const span = document.getElementsByClassName("close")[2];
+        difficulty_popup.style.display = 'block';
+        span.onclick = function() {
+            difficulty_popup.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == difficulty_popup) {
+                difficulty_popup.style.display = "none";
+            }
+        }
+    }
+    else {
+        difficulty_popup.style.display = "none";
+        const sudoku_div = document.querySelectorAll('.grid-item input');
+
+        let solvable = false;
+        let sudoku_board;
+        while (!solvable) {
+            const temp = spawn(mode);
+            sudoku_board = JSON.parse(JSON.stringify(temp));
+            [solvable] = solveSudoku(temp);
+        }
+        let counter = -1;
+        sudoku_div.forEach((cell) => {
+            //counter++;
+            if (sudoku_board[Math.floor(++counter / 9)][counter % 9] == 0) 
+                return;
+            cell.value = sudoku_board[Math.floor(counter / 9)][counter % 9];
+            cell.disabled = true;
+            cell.style.background = 'lightblue';
+        });
+        setButton('generate', false);
+        setButton('submit', false);
+        setButton('solve', true);
+        setButton('check', true);
+    }
 }
 
 function reset() {
-    // # This function will reset the whole board, change all buttons' state to their original state
-    //     for row in range(9):
-    //         for col in range(9):
-    //             self.grid[row][col].config(state='normal')
-    //             self.grid[row][col].delete(0, tk.END)
-    //             self.grid[row][col].config(bg='white')
-
-    //     self.sudoku_board = []
-    //     self.fixed_cells = set()
-    //     self.solvable = False
-    //     self.solve_button['state'] = 'disable'
-    //     self.submit_button['state'] = 'active'
-    //     self.check_button['state'] = 'disable'
-    //     self.generate_button['state'] = 'active'
+    const sudoku_div = document.querySelectorAll('.grid-item input');
+    let counter = 0;
+    sudoku_div.forEach((cell) => {
+        cell.value = '';
+        cell.disabled = false;
+        cell.style.background = 'white';
+        counter++;
+    });
     
-    setButtonTo('solve', false);
-    setButtonTo('submit', true);
-    setButtonTo('check', false);
-    setButtonTo('generate', true);
+    setButton('solve', false);
+    setButton('submit', true);
+    setButton('check', false);
+    setButton('generate', true);
 }
 
+function rules() {
+    const rules_popup = document.getElementById('rules-popup');
+    const span = document.getElementsByClassName("close")[3];
+    rules_popup.style.display = 'block';
+    span.onclick = function() {
+        rules_popup.style.display = "none";
+    }
+    window.onclick = function(event) {
+        if (event.target == rules_popup) {
+            rules_popup.style.display = "none";
+        }
+    }
+}
