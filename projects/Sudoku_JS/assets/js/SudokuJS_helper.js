@@ -437,12 +437,12 @@ function getSudokuBoard(highlight=true) {
         if (counter % 9 == 0) 
             sudoku_board.push([]);
 
-        if (cell.value === '') 
+        if (cell.value === '' || cell.value == 0) 
             sudoku_board[sudoku_board.length - 1].push(0);
         else {
             sudoku_board[sudoku_board.length - 1].push(Number(cell.value));
             fixed_cells.push(counter);
-            if (highlight) {            
+            if (highlight) {     
                 cell.disabled = true;
                 cell.style.background = 'lightblue';
             }

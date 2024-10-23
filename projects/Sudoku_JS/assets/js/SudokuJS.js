@@ -65,9 +65,8 @@ function submit() {
         submit_popup.style.display = "none";
     }
     window.onclick = function(event) {
-        if (event.target == submit_popup) {
+        if (event.target == submit_popup) 
             submit_popup.style.display = "none";
-        }
     }
 }
 
@@ -92,22 +91,38 @@ function check() {
         check_popup.style.display = "none";
     }
     window.onclick = function(event) {
-        if (event.target == check_popup) {
+        if (event.target == check_popup) 
             check_popup.style.display = "none";
-        }
     }
 }
 
 function solve() {
     const sudoku_div = document.querySelectorAll('.grid-item input');
-    const [sudoku_board, fixed_cells] = getSudokuBoard();
-    solveSudoku(sudoku_board); // no other way but to recall this, could avoid doing this by using global variable
+    const [sudoku_board, fixed_cells] = getSudokuBoard(false);
+    const [solvable, msg] = solveSudoku(sudoku_board); // no other way but to recall this, could avoid doing this by using global variable
+    if (!solvable) {
+        const solve_popup = document.getElementById('solve-popup');
+        const solve_body_popup = document.getElementsByClassName('body-popup')[2].lastElementChild;
+        solve_body_popup.innerHTML  = '<h2>Error</h2>';
+        solve_body_popup.innerHTML += `<p>Current state of the board is ${msg}</p>`;
+
+        const span = document.getElementsByClassName("close")[2];
+        solve_popup.style.display = 'block';
+        span.onclick = function() {
+            solve_popup.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == solve_popup) 
+                solve_popup.style.display = "none";
+        }
+        return;
+    }
     let counter = -1;
     sudoku_div.forEach((cell) => {
+        cell.disabled = true;
         if (fixed_cells.includes(++counter)) 
             return;
         cell.value = sudoku_board[Math.floor(counter / 9)][counter % 9];
-        cell.disabled = true;
     });
 
     setButton('solve', false);
@@ -117,15 +132,14 @@ function solve() {
 function generate(mode=null) {
     const difficulty_popup = document.getElementById('difficulty-popup');
     if (!mode) {
-        const span = document.getElementsByClassName("close")[2];
+        const span = document.getElementsByClassName("close")[3];
         difficulty_popup.style.display = 'block';
         span.onclick = function() {
             difficulty_popup.style.display = "none";
         }
         window.onclick = function(event) {
-            if (event.target == difficulty_popup) {
+            if (event.target == difficulty_popup) 
                 difficulty_popup.style.display = "none";
-            }
         }
     }
     else {
@@ -173,14 +187,13 @@ function reset() {
 
 function rules() {
     const rules_popup = document.getElementById('rules-popup');
-    const span = document.getElementsByClassName("close")[3];
+    const span = document.getElementsByClassName("close")[4];
     rules_popup.style.display = 'block';
     span.onclick = function() {
         rules_popup.style.display = "none";
     }
     window.onclick = function(event) {
-        if (event.target == rules_popup) {
+        if (event.target == rules_popup) 
             rules_popup.style.display = "none";
-        }
     }
 }
