@@ -9,7 +9,7 @@ class User {
         this.group = '100' + (USER_COUNT - 1);
         if (USER_COUNT == 0) {
             this.uid = '0';
-            this.gid = '0';
+            this.gid = '0';``
             this.group = '0';
         }
         USER_COUNT++;
