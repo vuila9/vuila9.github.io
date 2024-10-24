@@ -171,12 +171,10 @@ function generate(mode=null) {
 
 function reset() {
     const sudoku_div = document.querySelectorAll('.grid-item input');
-    let counter = 0;
     sudoku_div.forEach((cell) => {
         cell.value = '';
         cell.disabled = false;
         cell.style.background = 'white';
-        counter++;
     });
     
     setButton('solve', false);

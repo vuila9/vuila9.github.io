@@ -60,9 +60,9 @@
 }
 
 /* Highlight grid item on hover */
-.grid-item:hover {
-    background-color: lightblue; /* Change to any color you prefer */
-}
+/* .grid-item:hover {
+    background-color: lightblue;
+} */
 
 .buttons {
     justify-content: center;
