@@ -368,7 +368,7 @@ function START_UBUNTU_TERMINAL() {
         let perm = octalToReadable(filenode.getPermission());
 
         if (CURRENT_USER.getUsername() == filenode.getOwner())
-            return perm.slice(0,3).includes(type));    // check for owner permission (first 3 digits)
+            return perm.slice(0,3).includes(type);    // check for owner permission (first 3 digits)
 
         // check for others permisison (last 3 digits)
         return perm.slice(-3).includes(type); 
