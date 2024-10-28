@@ -612,13 +612,13 @@ function START_UBUNTU_TERMINAL() {
                     if (SUDO || permissionCheck(cur_dir, 'w')) {
                         let owner = (SUDO) ? 'root' : CURRENT_USER.getUsername();
                         if (!cur_dir.addDirectory(new Directory(command_components[2], owner, command_components[1], cur_dir)))
-                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File exists'</span>`;
                     }
                     else
                         TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': Permission denied'</span>`;
                 }
                 else if (command_components[0] == "~") {
-                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${HOME_DIR}': File eixists'</span>`;
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${HOME_DIR}': File exists'</span>`;
                 }
                 else {
                     for (let i = 0; i < command_components.length; i++) {
@@ -630,7 +630,7 @@ function START_UBUNTU_TERMINAL() {
                         if (SUDO || permissionCheck(cur_dir, 'w')) {
                             let owner = (SUDO) ? 'root' : CURRENT_USER.getUsername();
                             if (!cur_dir.addDirectory(new Directory(command_components[i], owner, DEFAULT_DIR_PERMISSION, cur_dir)))
-                               TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File eixists'</span>`;
+                               TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File exists'</span>`;
                         }
                         else
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': Permission denied'</span>`;
