@@ -1182,7 +1182,7 @@ function START_UBUNTU_TERMINAL() {
 
         code.addFile(new File('goal', 'vuila9', DEFAULT_FILE_PERMISSION, code));
         code.addFile(new File('goal', 'vuila9', DEFAULT_FILE_PERMISSION, code));         // would not add
-        code.getChildren('goal').setFileContent("need to ace the Google Interview");
+        code.getChildren('goal').setFileContent("need to get a job.");
 
         return root;
     }
