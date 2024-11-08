@@ -5,6 +5,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Data for the articles
     const articlesData = [
+        // {
+        //     imageSrc: "assets/img/pic08.jpg",
+        //     title: "W.I.P",
+        //     description: "A work-in-progress project to be released soon™",
+        //     link: "projects/Project_name/Project_name.html"
+        // },
+        {
+            imageSrc: "assets/img/pic07.jpg",
+            title: "W.I.P",
+            description: "A work-in-progress project to be released soon™",
+            link: "projects/Speech_Recognition/Speech_Recognition.html"
+        },
         {
             imageSrc: "assets/img/pic06.jpg",
             title: "Sudoku Game (v2)",
