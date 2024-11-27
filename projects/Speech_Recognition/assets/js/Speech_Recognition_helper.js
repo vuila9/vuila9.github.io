@@ -24,4 +24,5 @@ imageButton.addEventListener('mouseleave', () => {
 
 window.onload = function() {
     initMicrophone();
+    initSpeechRecognition();
 }
