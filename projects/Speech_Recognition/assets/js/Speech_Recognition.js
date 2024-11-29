@@ -15,7 +15,7 @@ async function initMicrophone() {
 async function startRecording() {
     if (!MEDIA_STREAM) {
         //await initMicrophone(); // Ensure the microphone is initialized
-        document.getElementById('status').textContent = 'Refresh the page and grant permission to use microphone.';
+        document.getElementById('status').textContent = 'Status: Grant permission to use microphone.';
         return;
     }
 
