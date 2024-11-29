@@ -16,8 +16,3 @@ imageButton.addEventListener('mouseup', () => {
 imageButton.addEventListener('mouseleave', () => {
     imageButton.src = originalImage;
 });
-
-window.onload = function() {
-    //initMicrophone();
-    //initSpeechRecognition();
-}
