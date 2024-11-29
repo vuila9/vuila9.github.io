@@ -1,8 +1,9 @@
 // Array of script paths to load
 const scripts = [
-    './js/text-encrypt-decrypt.js',
-    './js/regex-comparison.js',
-    './js/calendar-date-teller.js'
+    './assets/js/text-encrypt-decrypt.js',
+    './assets/js/regex-comparison.js',
+    './assets/js/calendar-date-teller.js',
+    './assets/js/Speech_Recognition_helper.js', './assets/js/Speech_Recognition.js'
 ];
 
 // Function to dynamically load each script

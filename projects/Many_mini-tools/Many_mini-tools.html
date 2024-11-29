@@ -8,8 +8,8 @@
 		<link rel="icon" href="Many_mini-tools_icon.svg" type="image/x-icon">
 		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
 		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
-		
 	</head>
+
 	<body class="is-preload">
 		<!-- Wrapper -->
 			<div id="wrapper">
@@ -34,6 +34,33 @@
 							</div>
 						</div>
 					</section>
+
+				<!-- Microphone Audio Playback (MAP) -->
+					<section id="microphone-audio-playback">
+						<div class="inner">
+							<div class="container">
+								<div class="submenu">Microphone Audio Playback</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('MAP-body')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="MAP-body">
+								<div style="display: flex; align-items: center;">
+									<img id="imageButton" src="./assets/img/green.png" alt="Button Image" width="100" height="100" style="margin-right: 10px">
+									<div style="margin: 0">
+										<br>
+										<p id="status">Status:</p>
+									</div>
+								</div>
+								<br>
+								<input id="MAP-button-play" type="submit" value="Play" class="primary"/>
+
+								<p>Work in progress...</p>
+							</div>
+						</div>
+						
+					</section>
+				
 
 				<!-- Calendar Date Teller (CDT) -->
 					<section id="calendar-date-teller-tool">
@@ -71,7 +98,7 @@
 									</div>
 								</div> <br>
 								<input id="CDT-button-submit" type="submit" value="Submit" class="primary"/>
-								<b><p id="CDT-text-result">&nbsp;</p></b> <br> <br>
+								<b><p id="CDT-text-result">&nbsp;</p></b>  <br><br>
 							</div>
 						</div>
 					</section>	
@@ -132,6 +159,6 @@
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_global_function.js"></script>
-			<script src="./js/loader.js" defer></script>
+			<script src="./assets/js/loader.js" defer></script>
 	</body>
 </html>

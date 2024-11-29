@@ -28,13 +28,13 @@ async function startRecording() {
             audioChunks.push(event.data);
         };
 
-        // mediaRecorder.onstop = function() {
-        //     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-        //     const audioUrl = URL.createObjectURL(audioBlob);
-        //     const audio = new Audio(audioUrl);
-        //     audio.play(); // Play the recorded audio after stopping
-        //     audioChunks = []; // Clear for the next recording
-        // };
+        mediaRecorder.onstop = function() {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.play(); // Play the recorded audio after stopping
+            audioChunks = []; // Clear for the next recording
+        };
     }
 }
 
@@ -46,12 +46,3 @@ function stopRecording() {
     }
     console.log(audioChunks);
 }
-
-document.getElementById("MAP-button-play").onclick = function() {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
-    audio.play(); // Play the recorded audio after stopping
-    audioChunks = []; // Clear for the next recording
-}
-
