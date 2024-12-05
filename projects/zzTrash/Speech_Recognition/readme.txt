@@ -1,0 +1,2 @@
+this project has been scratched and transformed into a small project called "Microphone Audio Tester" with its sole purpose is to test if your microphone works as well as play the recording.
+link to it can be found here: https://vuila9.github.io/projects/Many_mini-tools/Many_mini-tools.html
