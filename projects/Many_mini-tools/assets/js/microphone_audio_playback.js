@@ -2,12 +2,14 @@ let mediaRecorder;
 let audioChunks = [];
 let MEDIA_STREAM = null;
 let isPlaying = false;
+let MicrophoneNotFound = true;
 
 async function initMicrophone() {
     try {               
         MEDIA_STREAM = await navigator.mediaDevices.getUserMedia({ audio: true });
         document.getElementById('status').textContent = 'Status: Microphone access granted. Ready to record.';
         document.getElementById('MAT-button-permission').disabled = true;
+        MicrophoneNotFound = false;
     } catch (err) {
         document.getElementById('status').textContent = 'Status: Error accessing microphone: ' + err;
         console.error('Error accessing the microphone:', err);
