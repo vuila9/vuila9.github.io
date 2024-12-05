@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Cube</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="Cube.svg" type="image/x-icon">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		<link rel="stylesheet" href="assets/css/effects.css">
+	</head>
+	
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+				
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+							<a href="https://vuila9.github.io/#main">
+								<button id="home-btn">&lt;&lt;</button>
+							</a> 
+							<a><h1>Cube</h1></a>
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<div id="ThreeD-model-container"></div>
+							<div>
+								<span class="submenu">Description</span>
+								<p>My first project with a 3D object using ThreeJS and Blender.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Background</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('background-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="background-content">
+								<p>I wanted to create a project featuring an interactive 3D object that users could engage with. However, loading a 3D object onto a website turned out to be more challenging than I anticipated. For now, I’ll upload this project as it is, using it as a foundation for future projects that can build upon this one.</p>
+								<p>I find working with 3D projects both new and refreshing, and I have many ideas for more complex 3D creations. While this project is quite simple on its own, it serves as a stepping stone for developing more advanced 3D projects in the future.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('features-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<ul>
+									<li><span class="effect-span"><b>Mouse left/right click</b>: Move the camera / object</span></li>
+									<li><span class="effect-span"><b>Mouse wheel (click/scroll)</b>: Zoom in/out</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Future Improvements</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('future-improvement-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="future-improvement-content">
+								<ul>
+									<li><span class="effect-span">Add texture</span></li>
+									<li><span class="effect-span">Better lighting</span></li>
+									<li><span class="effect-span">Better background/scene</span></li>
+									<li><span class="effect-span">More interactable features</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('github-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Cube" target="_blank"><p>Source code</p></a>
+							</div>
+
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- project specifics -->
+			<script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/loaders/GLTFLoader.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/controls/OrbitControls.js"></script>
+			<script src="./assets/js/Cube.js"></script>
+	</body>
+</html>
