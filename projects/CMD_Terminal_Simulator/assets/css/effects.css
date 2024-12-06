@@ -45,15 +45,6 @@
     left: 33px;
 }
 
-
-#command-console {
-    border: 0.5px outset rgb(12, 12, 12);     /* Thin border around the entire container */
-    width: 100%;                                /* Full width of the parent */
-    display: block;                             /* Block display to occupy full width */
-    box-sizing: border-box;                     /* Include border in the total width calculation */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
-}
-
 @keyframes blink {  /* Keyframes for the blinking effect */
     0%, 100% {
         opacity: 1; /* Fully visible */
@@ -64,6 +55,14 @@
 }
 
 /* <------------------------Windows CMD effects---------------------------> */
+#command-console {
+    border: 0.5px outset rgb(12, 12, 12);     /* Thin border around the entire container */
+    width: 100%;                                /* Full width of the parent */
+    display: block;                             /* Block display to occupy full width */
+    box-sizing: border-box;                     /* Include border in the total width calculation */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
+}
+
 .cmd-img::selection {
     background: transparent;
 }
