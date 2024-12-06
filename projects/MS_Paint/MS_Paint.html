@@ -1,11 +1,11 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Project Title</title>
+		<title>MS Paint</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="../../assets/css/main.css" />
-		<link rel="icon" href="Icon.svg" type="image/x-icon">
+		<link rel="icon" href="MS_Paint_icon.svg" type="image/x-icon">
 		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
 		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
 		<link rel="stylesheet" href="assets/css/effects.css">
@@ -21,14 +21,21 @@
 							<a href="https://vuila9.github.io/#main">
 								<button id="home-btn">&lt;&lt;</button>
 							</a> 
-							<a><h1>Project Name</h1></a>
+							<a><h1>MS Paint</h1></a>
 						</div>
 					</header>
 
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
-							<div><!-- Project goes here --></div>
+							<div id="ms-paint"><!-- Project goes here -->
+								<div id="mspaint-bar">
+									<img class="paint-img" src="assets/img/topleft_mspaint_grey.png" alt="Left Image" style="float: left; height: 31px;">
+									<img class="paint-img" src="assets/img/topright_mspaint_grey.png" alt="Right Image" style="float: right; height: 31px;">
+									<div style="clear: both;"></div>
+								</div>
+								<div id="mspaint-body"></div>
+							</div>
 							<div>
 								<span class="submenu">Description</span>
 								<p>This is a work-in-progress project, nothing to see here...</p>
@@ -87,6 +94,6 @@
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_global_function.js"></script>
 
-			<!-- projetc specifics -->
+			<!-- project specifics -->
 	</body>
 </html>

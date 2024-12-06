@@ -1,0 +1,34 @@
+#ms-paint {
+    border: 0.5px outset rgb(12, 12, 12);     /* Thin border around the entire container */
+    width: 100%;                                /* Full width of the parent */
+    display: block;                             /* Block display to occupy full width */
+    box-sizing: border-box;                     /* Include border in the total width calculation */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
+}
+
+.paint-img::selection {
+    background: transparent;
+}
+
+#mspaint-bar {
+    background-color: rgb(67,67,67); 
+    width: 100%; 
+    height: 31px; 
+    padding: 0; 
+    margin: 0 auto; 
+    position: relative;
+}
+
+#mspaint-body {
+    /* fixed size */
+    width: 100%;          
+    height: 500px; 
+    /* color */
+    background-color: white; 
+    color: rgb(242,242,242); 
+
+    /* misc effects */
+    white-space: pre-wrap; /* Allows preserving spaces and line breaks */
+    outline: none;         /* Remove outline when focused */
+    overflow-y: auto;      /* Show scroll bar automatically */
+}
