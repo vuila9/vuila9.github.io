@@ -2,6 +2,7 @@ const COLOR = 'red';
 const mspaint_body = document.getElementById('mspaint-body');
 const locations = new Set();
 let isDrawing = false;
+let isMouseInside = false;
 
 document.getElementById('ms-paint').addEventListener('contextmenu', (event) => {
     event.preventDefault(); // Prevent the context menu from showing
@@ -13,19 +14,24 @@ mspaint_body.addEventListener('mousedown', (event) => {
     placePixel(event); // Place a pixel immediately on mousedown
 });
 
-mspaint_body.addEventListener('mousemove', (event) => {
-    if (isDrawing) {
-        placePixel(event); // Place pixels as the mouse moves
+document.addEventListener('mousemove', (event) => {
+    if (isDrawing && isMouseInside) {
+        placePixel(event); // Place pixels only when mouse is inside the canvas
     }
 });
 
-mspaint_body.addEventListener('mouseup', () => {
+document.addEventListener('mouseup', () => {
     isDrawing = false; // Stop drawing when the mouse is released
 });
 
 // Prevent drag issues if the mouse leaves the canvas
 mspaint_body.addEventListener('mouseleave', () => {
-    isDrawing = false;
+    isMouseInside = false;
+});
+
+// Ensure the drawing continues if the mouse enters the canvas again
+mspaint_body.addEventListener('mouseenter', () => {
+    isMouseInside = true;
 });
 
 function placePixel(event) {
