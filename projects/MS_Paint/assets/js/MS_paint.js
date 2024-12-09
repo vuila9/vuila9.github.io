@@ -1,8 +1,34 @@
 const COLOR = 'red';
 const mspaint_body = document.getElementById('mspaint-body');
 const locations = new Set();
+let isDrawing = false;
 
-mspaint_body.addEventListener('click', (event) => {
+document.getElementById('ms-paint').addEventListener('contextmenu', (event) => {
+    event.preventDefault(); // Prevent the context menu from showing
+});
+
+mspaint_body.addEventListener('mousedown', (event) => {
+    if (event.button !== 0) return; // Only trigger if left-click (button 0)
+    isDrawing = true;
+    placePixel(event); // Place a pixel immediately on mousedown
+});
+
+mspaint_body.addEventListener('mousemove', (event) => {
+    if (isDrawing) {
+        placePixel(event); // Place pixels as the mouse moves
+    }
+});
+
+mspaint_body.addEventListener('mouseup', () => {
+    isDrawing = false; // Stop drawing when the mouse is released
+});
+
+// Prevent drag issues if the mouse leaves the canvas
+mspaint_body.addEventListener('mouseleave', () => {
+    isDrawing = false;
+});
+
+function placePixel(event) {
     // Get the bounding rectangle of the white space
     const rect = mspaint_body.getBoundingClientRect();
 
@@ -24,4 +50,8 @@ mspaint_body.addEventListener('click', (event) => {
     mspaint_body.appendChild(pixel);
     locations.add(coor);
     //console.log(location);
-});
+}
+
+function eraseAll() {
+    mspaint_body.innerHTML = '';
+}
