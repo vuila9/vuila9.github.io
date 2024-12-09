@@ -29,6 +29,10 @@
     overflow: hidden;
 }
 
+br, #eraseAll-button {
+    user-select: none;
+}
+
 .pixel {
     width: 5px;
     height: 5px;
