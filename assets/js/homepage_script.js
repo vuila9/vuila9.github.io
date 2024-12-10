@@ -12,6 +12,12 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
+            imageSrc: "assets/img/pic08.jpg",
+            title: "MS Paint",
+            description: "A work-in-progress project to be released soon™",
+            link: "projects/MS_Paint/MS_Paint.html"
+        },
+        {
             imageSrc: "assets/img/pic07.jpg",
             title: "Cube",
             description: "A project featuring a 3D object created using Three.js and Blender.",
@@ -19,15 +25,15 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         {
             imageSrc: "assets/img/pic06.jpg",
-            title: "Sudoku Game (v2)",
-            description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS",
-            link: "projects/Sudoku_JS/Sudoku_JS.html"
-        },
-        {
-            imageSrc: "assets/img/pic05.jpg",
             title: "CMD/Terminal Simulator",
             description: "A simulator for Windows CMD and Ubuntu Terminal command consoles.",
             link: "projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html"
+        },
+        {
+            imageSrc: "assets/img/pic05.jpg",
+            title: "Sudoku Game (v2)",
+            description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS",
+            link: "projects/Sudoku_JS/Sudoku_JS.html"
         },
         {
             imageSrc: "assets/img/pic04.jpg",
