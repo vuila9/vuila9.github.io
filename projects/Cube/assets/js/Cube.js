@@ -3,6 +3,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xfff9e1); // Light sky blue
 const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+let firstload = true;
 
 // Append renderer to the specific container
 const container = document.getElementById('ThreeD-model-container');
@@ -18,14 +19,16 @@ directionalLight.position.set(5, 10, 7.5); // Position
 directionalLight.castShadow = true; // Enable shadows
 scene.add(directionalLight);
 
+let MODEL;
+
 // Load the 3D Model
 const loader = new THREE.GLTFLoader();
 loader.load(
     './assets/models/test.glb', // Path to your model file
     function (gltf) {
-        const model = gltf.scene;
-        scene.add(model);
-        model.position.set(0, 0, 0); // Optional: Adjust position
+        MODEL = gltf.scene;
+        scene.add(MODEL);
+        MODEL.position.set(0, 0, 0); // Optional: Adjust position
     },
     function (xhr) {
         console.log((xhr.loaded / xhr.total * 100) + '% loaded'); // Loading progress
@@ -52,8 +55,16 @@ function resizeRendererToDisplaySize() {
     }
 }
 
+// Function to spin the model slowly
+function spin() {
+    if (MODEL) {
+        MODEL.rotation.y -= 0.005; // Rotate the model on the Y-axis
+    }
+}
+
 const animate = function () {
     requestAnimationFrame(animate);
+    spin();
     resizeRendererToDisplaySize(); // Adjust size dynamically
     renderer.render(scene, camera);
 };
