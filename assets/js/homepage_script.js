@@ -35,12 +35,12 @@ document.addEventListener("DOMContentLoaded", function() {
             description: "A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal need.",
             link: "projects/Many_mini-tools/Many_mini-tools.html"
         },
-        {
-            imageSrc: "assets/img/pic03.jpg",
-            title: "Sudoku Game",
-            description: "A Python-based Sudoku game with a built-in solver, featuring a fully implemented GUI using Tkinter.",
-            link: "projects/Sudoku_Solver/Sudoku_Solver.html"
-        },
+        // {
+        //     imageSrc: "assets/img/pic03.jpg",
+        //     title: "Sudoku Game",
+        //     description: "A Python-based Sudoku game with a built-in solver, featuring a fully implemented GUI using Tkinter.",
+        //     link: "projects/Sudoku_Solver/Sudoku_Solver.html"
+        // },
         {
             imageSrc: "assets/img/pic02.jpg",
             title: "Web-based Restaurant",
