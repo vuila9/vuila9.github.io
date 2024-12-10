@@ -62,6 +62,6 @@ function eraseAll() {
     mspaint_body.innerHTML = '';
 }
 
-window.onload = function() {
-    eraseAll();
-}
+// window.onload = function() {
+//     eraseAll();
+// }
