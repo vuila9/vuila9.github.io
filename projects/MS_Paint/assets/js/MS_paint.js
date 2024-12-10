@@ -61,3 +61,7 @@ function placePixel(event) {
 function eraseAll() {
     mspaint_body.innerHTML = '';
 }
+
+windows.onload = function() {
+    eraseAll();
+}
