@@ -39,9 +39,14 @@
 							<br>
 							<div class="paint-button">
 								<button id="eraseAll-button" class="fa fa-trash" title="Erase all content" onclick="eraseAll()"></button>
-								<button id="eraser" class="	fa fa-eraser" title="Erase content where mouse is, not doing anything for now" ></button> 
+								<button id="eraser" class="fa fa-eraser" title="Eraser is OFF" onclick="eraserON()"></button>
+								<br><br>
+								<button id="color-picker" class="button primary" style="background-color: black">‎ ‎</button>
+								<input id="color-slider-red" type="range" min="0" max="255" value="0" oninput="updateColorRED(this.value)">
+								<input id="color-slider-green" type="range" min="0" max="255" value="0" oninput="updateColorGREEN(this.value)">
+								<input id="color-slider-blue" type="range" min="0" max="255" value="0" oninput="updateColorBLUE(this.value)">
+
 							</div>
-							<br>
 							<div>
 								<span class="submenu">Description</span>
 								<p>This is a work-in-progress project, nothing to see here...</p>

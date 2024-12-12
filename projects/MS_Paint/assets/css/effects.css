@@ -23,20 +23,24 @@
 #mspaint-body {
     width: 100%;          
     height: 500px; 
-    background-color: white; 
-    color: rgb(242,242,242); 
+    background-color: rgb(242,242,242); 
     /* misc effects */
     position: relative;
     overflow: hidden;
 }
 
 .pixel {
-    width: 5px;
-    height: 5px;
     position: absolute;
 }
 
 /* BUTTONS */
 br, .paint-button {
     user-select: none;
+}
+
+input[type="range"] {
+
+    background: #ddd;
+    border-radius: 5px;
+    outline: none;
 }
