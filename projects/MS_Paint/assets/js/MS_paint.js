@@ -12,6 +12,7 @@ let CURRENT_ZOOM_SIZE = 1;
 
 const mspaint_body = document.getElementById('mspaint-body');
 const locations = new Set();
+const draw_record = [[]];
 const fresh_pixels = [];
 let isDrawing = false;
 let isMouseInside = false;
@@ -26,6 +27,8 @@ mspaint_body.addEventListener('mousedown', (event) => {
     //if (event.button !== 0) return; // Only trigger if left-click (button 0)
 
     if (event.button == 2 && !isEraserON) toggleEraser();
+    //draw_record.push(fresh_pixels);
+    draw_record.push([]);
     fresh_pixels.length = 0;
     isDrawing = true;
     placePixel(event); // Place a pixel immediately on mousedown
@@ -40,7 +43,6 @@ mspaint_body.addEventListener('mousemove', (event) => {
 mspaint_body.addEventListener('mouseup', (event) => {
     if (event.button == 2) toggleEraser();
     isDrawing = false; // Stop drawing when the mouse is released
-    console.log(fresh_pixels);
 });
 
 // Prevent drag issues if the mouse leaves the canvas
@@ -77,7 +79,10 @@ function placePixel(event) {
     let currentColor = COLOR;
     pixel.style.backgroundColor = currentColor;
     mspaint_body.appendChild(pixel);
-    if (!isEraserON) fresh_pixels.push(coor);
+    if (!isEraserON) {
+        fresh_pixels.push(coor);
+        draw_record[draw_record.length - 1].push(coor);
+    }
     locations.add(coor);
     //console.log(coor);
 }
@@ -125,7 +130,12 @@ function eraseAll() {
 
 function undo() {
     if (document.getElementsByClassName('pixel').length == 0) return;
-    removeManyPixel(fresh_pixels);
+    if (draw_record.length == 1 && draw_record[draw_record.length - 1] == '') return;
+    let fresh = draw_record.pop();
+    if (draw_record.length == 0) {
+        draw_record.push([]);
+    }
+    removeManyPixel(fresh);
 }
 
 function updatePointerSize(value) {
@@ -173,15 +183,14 @@ Supported:
 - temporary eraser
 - eraser can change in size
 - delete all pixels
+- Undo drawn pixels
+
 
 TODO:
 - Saving feature
-- Undo drawn pixels
 - Undo erased pixels
 - Zoom (magnify)
 - Button hover animation
-
-
 */
 
 
