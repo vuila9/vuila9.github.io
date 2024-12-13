@@ -9,24 +9,28 @@ const locations = new Set();
 let isDrawing = false;
 let isMouseInside = false;
 let isEraserON = false;
+let isRightClick = false;
 
 document.getElementById('ms-paint').addEventListener('contextmenu', (event) => {
     event.preventDefault(); // Prevent the context menu from showing
 });
 
 mspaint_body.addEventListener('mousedown', (event) => {
-    if (event.button !== 0) return; // Only trigger if left-click (button 0)
+    //if (event.button !== 0) return; // Only trigger if left-click (button 0)
+
+    if (event.button == 2 && !isEraserON) toggleEraser();
     isDrawing = true;
     placePixel(event); // Place a pixel immediately on mousedown
 });
 
-document.addEventListener('mousemove', (event) => {
+mspaint_body.addEventListener('mousemove', (event) => {
     if (isDrawing && isMouseInside) {
         placePixel(event); // Place pixels only when mouse is inside the canvas
     }
 });
 
-document.addEventListener('mouseup', () => {
+mspaint_body.addEventListener('mouseup', (event) => {
+    if (event.button == 2) toggleEraser();
     isDrawing = false; // Stop drawing when the mouse is released
 });
 
@@ -50,8 +54,8 @@ function placePixel(event) {
     const y = Math.max(-1, Math.min(event.clientY - rect.top - SIZE/2, 500 - SIZE));
     const coor = `(${Math.floor(x)},${Math.floor(y)})`;
 
-    // Do nothing if (x,y) already exits
-    if (locations.has(coor)) return;
+    // Do nothing if (x,y) already exits, eraser bypass this.
+    if (locations.has(coor) && !isEraserON) return;
 
     // Create a new pixel
     const pixel = document.createElement('div');
@@ -68,7 +72,7 @@ function placePixel(event) {
     //console.log(coor);
 }
 
-function eraserON() {
+function toggleEraser() {
     COLOR = `rgb(242,242,242)`;
     isEraserON = !isEraserON;
 
