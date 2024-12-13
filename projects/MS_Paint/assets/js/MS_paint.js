@@ -46,8 +46,8 @@ function placePixel(event) {
     // Get the bounding rectangle of the white space
     const rect = mspaint_body.getBoundingClientRect();
 
-    const x = Math.max(0, Math.min(event.clientX - rect.left - SIZE/2, 1037.5 - SIZE));
-    const y = Math.max(0, Math.min(event.clientY - rect.top - SIZE/2, 500 - SIZE));
+    const x = Math.max(-1, Math.min(event.clientX - rect.left - SIZE/2, 1037.5 - SIZE));
+    const y = Math.max(-1, Math.min(event.clientY - rect.top - SIZE/2, 500 - SIZE));
     const coor = `(${Math.floor(x)},${Math.floor(y)})`;
 
     // Do nothing if (x,y) already exits
