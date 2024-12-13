@@ -124,6 +124,7 @@ function eraseAll() {
 }
 
 function undo() {
+    if (document.getElementsByClassName('pixel').length == 0) return;
     removeManyPixel(fresh_pixels);
 }
 
@@ -140,18 +141,27 @@ function updatePointerSize(value) {
 function updateColorRED(value) {
     RED = value;
     document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker').title = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-slider-red').title = `Red ${RED}`;
+
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
 
 function updateColorGREEN(value) {
     GREEN = value;
     document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker').title = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-slider-green').title = `Green ${GREEN}`;
+
+
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
 
 function updateColorBLUE(value) {
     BLUE = value;
     document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker').title = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-slider-blue').title = `Blue ${BLUE}`;
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
 
@@ -166,7 +176,8 @@ Supported:
 
 TODO:
 - Saving feature
-- Undo everytime mouse is up
+- Undo drawn pixels
+- Undo erased pixels
 - Zoom (magnify)
 - Button hover animation
 
