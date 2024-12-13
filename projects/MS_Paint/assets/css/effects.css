@@ -50,6 +50,13 @@ br, .paint-button {
 
 .button-row {
     display: flex;
+    justify-content: space-between; /* Push groups to the edges */
+    align-items: center; /* Align buttons vertically (optional) */
+    width: 100%; /* Make sure it spans the width of the parent */
+}
+
+.left-buttons, .right-buttons {
+    display: flex;
     gap: 10px;
 }
 
@@ -76,4 +83,8 @@ input[type="range"] {
     background: #ddd;
     border-radius: 5px;
     outline: none;
+}
+
+#zoom-slider {
+    margin-top: 10px;
 }

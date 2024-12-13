@@ -14,7 +14,6 @@
 	<body class="is-preload">
 		<!-- Wrapper -->
 			<div id="wrapper">
-				
 				<!-- Header -->
 					<header id="header">
 						<div class="inner">
@@ -28,9 +27,11 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
-							<div id="ms-paint"><!-- Project goes here -->
+							<!-- Project goes here -->
+							<div id="ms-paint">
 								<div id="mspaint-bar">
 									<img class="paint-img" src="assets/img/topleft_mspaint_grey.png" alt="Left Image" style="float: left; height: 31px;">
+									<!-- <input class="slider" id="zoom-slider" type="range" min="1" max="5" value="1" oninput="zoom(this.value)"> -->
 									<img class="paint-img" src="assets/img/topright_mspaint_grey.png" alt="Right Image" style="float: right; height: 31px;">
 									<div style="clear: both;"></div>
 								</div>
@@ -39,20 +40,26 @@
 							<br>
 							<div class="paint-button">
 								<div class="button-row">
-									<button id="eraseAll-button" class="fa fa-trash" title="Erase all content" onclick="eraseAll()"></button>
-									<button id="eraser" class="fa fa-eraser" title="Eraser is OFF" onclick="toggleEraser()"></button>
-									<button id="pointer-size" style="width: 50px" title="Pointer size 5px"><div id="pointer-icon">⬚</div></button>
-									<div id="slider-container">
-   										<div id="slider-title"></div>
+									<div class="left-buttons">
+										<button id="undo" class="fas fa-undo" title="Undo last action" onclick="undo()"></button>
+										<button id="eraser" class="fa fa-eraser" title="Eraser is OFF" onclick="toggleEraser()"></button>
+										<button id="pointer-size" style="width: 50px" title="Pointer size 5px"><div id="pointer-icon">⬚</div></button>
+										<div id="slider-title"></div>
 										<input class='slider' id="pointer-slider" type="range" min="1" max="35" value="5" oninput="updatePointerSize(this.value)">
 									</div>
+									<div class="right-buttons">
+										<button id="eraseAll-button" class="fa fa-trash" title="Erase all content" onclick="eraseAll()"></button>
+									</div>
+
 								</div>
 								<br>
 								<div class="button-row">
-									<button id="color-picker" class="button primary" style="background-color: black">‎ ‎</button>
-									<input class='slider' id="color-slider-red" type="range" min="0" max="255" value="0" oninput="updateColorRED(this.value)">
-									<input class='slider' id="color-slider-green" type="range" min="0" max="255" value="0" oninput="updateColorGREEN(this.value)">
-									<input class='slider' id="color-slider-blue" type="range" min="0" max="255" value="0" oninput="updateColorBLUE(this.value)">
+									<div class="left-buttons">
+										<button id="color-picker" class="button primary" style="background-color: black">‎ ‎</button>
+										<input class='slider' id="color-slider-red" type="range" min="0" max="255" value="0" oninput="updateColorRED(this.value)">
+										<input class='slider' id="color-slider-green" type="range" min="0" max="255" value="0" oninput="updateColorGREEN(this.value)">
+										<input class='slider' id="color-slider-blue" type="range" min="0" max="255" value="0" oninput="updateColorBLUE(this.value)">
+									</div>
 								</div>
 							</div>
 							<div>

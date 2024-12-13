@@ -1,11 +1,18 @@
-let COLOR = 'black';
+let COLOR = 'rgb(0,0,0)';
 let RED = 0;
 let GREEN = 0;
 let BLUE = 0;
 let SIZE = 5;
 
+const MAX_CANVAS_WIDTH = 1037.5;
+const MAX_CANVAS_HEIGHT = 500;
+
+const MAX_ZOOM_SIZE = 5;
+let CURRENT_ZOOM_SIZE = 1;
+
 const mspaint_body = document.getElementById('mspaint-body');
 const locations = new Set();
+const fresh_pixels = [];
 let isDrawing = false;
 let isMouseInside = false;
 let isEraserON = false;
@@ -19,6 +26,7 @@ mspaint_body.addEventListener('mousedown', (event) => {
     //if (event.button !== 0) return; // Only trigger if left-click (button 0)
 
     if (event.button == 2 && !isEraserON) toggleEraser();
+    fresh_pixels.length = 0;
     isDrawing = true;
     placePixel(event); // Place a pixel immediately on mousedown
 });
@@ -32,6 +40,7 @@ mspaint_body.addEventListener('mousemove', (event) => {
 mspaint_body.addEventListener('mouseup', (event) => {
     if (event.button == 2) toggleEraser();
     isDrawing = false; // Stop drawing when the mouse is released
+    console.log(fresh_pixels);
 });
 
 // Prevent drag issues if the mouse leaves the canvas
@@ -50,8 +59,8 @@ function placePixel(event) {
     // Get the bounding rectangle of the white space
     const rect = mspaint_body.getBoundingClientRect();
 
-    const x = Math.max(-1, Math.min(event.clientX - rect.left - SIZE/2, 1037.5 - SIZE));
-    const y = Math.max(-1, Math.min(event.clientY - rect.top - SIZE/2, 500 - SIZE));
+    const x = Math.max(-1, Math.min(event.clientX - rect.left - SIZE/2, MAX_CANVAS_WIDTH - SIZE));
+    const y = Math.max(-1, Math.min(event.clientY - rect.top - SIZE/2, MAX_CANVAS_HEIGHT - SIZE));
     const coor = `(${Math.floor(x)},${Math.floor(y)})`;
 
     // Do nothing if (x,y) already exits, eraser bypass this.
@@ -68,8 +77,20 @@ function placePixel(event) {
     let currentColor = COLOR;
     pixel.style.backgroundColor = currentColor;
     mspaint_body.appendChild(pixel);
+    if (!isEraserON) fresh_pixels.push(coor);
     locations.add(coor);
     //console.log(coor);
+}
+
+function removeManyPixel(targets) {
+    const pixels = mspaint_body.getElementsByClassName('pixel');
+    let counter = 0;
+    let size = targets.length
+    while (counter < size) {
+        mspaint_body.removeChild(pixels[pixels.length - 1]);
+        locations.delete(targets.pop())
+        counter++;
+    }
 }
 
 function toggleEraser() {
@@ -102,6 +123,10 @@ function eraseAll() {
     locations.clear();
 }
 
+function undo() {
+    removeManyPixel(fresh_pixels);
+}
+
 function updatePointerSize(value) {
     SIZE = Number(value);
     document.getElementById('pointer-icon').style.fontSize = `${SIZE*1.25}px`;
@@ -129,3 +154,50 @@ function updateColorBLUE(value) {
     document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
+
+/*
+Supported:
+- click, click-and-drag pixels
+- changing drawing color
+- changing pointer size
+- temporary eraser
+- eraser can change in size
+- delete all pixels
+
+TODO:
+- Saving feature
+- Undo everytime mouse is up
+- Zoom (magnify)
+- Button hover animation
+
+
+*/
+
+
+//Benched for now
+// function zoom(value) {
+//     const pixels = document.getElementsByClassName('pixel');
+//     //console.log('old size:', SIZE);
+//     const newSize = SIZE * Number(value);
+//     //console.log('new size:', newSize);
+//     for (let i = 0; i < pixels.length; i++) {
+//         const height = parseFloat(pixels[i].style.height);
+//         const width = parseFloat(pixels[i].style.width);
+//         let x, y;
+//         // Needs work on
+//         if (Number(value) > CURRENT_ZOOM_SIZE) {
+//             x = parseFloat(pixels[i].style.left) - newSize/2;
+//             y = parseFloat(pixels[i].style.top) - newSize/2;
+//         }
+//         else {
+//             x = parseFloat(pixels[i].style.left) + newSize/2;
+//             y = parseFloat(pixels[i].style.top) + newSize/2;
+//         }
+//         pixels[i].style.left = `${x}px`;
+//         pixels[i].style.top = `${y}px`;
+//         pixels[i].style.height = `${height * Number(value) / CURRENT_ZOOM_SIZE}px`;
+//         pixels[i].style.width  = `${width * Number(value) / CURRENT_ZOOM_SIZE}px`;
+//     }
+//     CURRENT_ZOOM_SIZE = Number(value);
+//     //console.log(CURRENT_ZOOM_SIZE);
+// }
