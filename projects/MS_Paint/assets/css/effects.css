@@ -38,8 +38,41 @@ br, .paint-button {
     user-select: none;
 }
 
-input[type="range"] {
+#pointer-size {
+    display: flex; /* Use flexbox */
+    align-items: center; /* Vertically center the content */
+    justify-content: center; /* Horizontally center the content */
+}
 
+#pointer-icon {
+    font-size: 6.25px; /* Adjust icon size, 35 is max */
+}
+
+.button-row {
+    display: flex;
+    gap: 10px;
+}
+
+/* SLIDERS */
+.slider {
+    margin-top: 17px;
+    height: 10px;
+}
+
+#slider-title {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    pointer-events: none; /* Prevent tooltip from interfering with mouse events */
+    transform: translate(-50%, -150%); /* Position above the cursor */
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+input[type="range"] {
     background: #ddd;
     border-radius: 5px;
     outline: none;

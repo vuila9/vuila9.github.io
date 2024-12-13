@@ -38,14 +38,22 @@
 							</div>
 							<br>
 							<div class="paint-button">
-								<button id="eraseAll-button" class="fa fa-trash" title="Erase all content" onclick="eraseAll()"></button>
-								<button id="eraser" class="fa fa-eraser" title="Eraser is OFF" onclick="eraserON()"></button>
-								<br><br>
-								<button id="color-picker" class="button primary" style="background-color: black">‎ ‎</button>
-								<input id="color-slider-red" type="range" min="0" max="255" value="0" oninput="updateColorRED(this.value)">
-								<input id="color-slider-green" type="range" min="0" max="255" value="0" oninput="updateColorGREEN(this.value)">
-								<input id="color-slider-blue" type="range" min="0" max="255" value="0" oninput="updateColorBLUE(this.value)">
-
+								<div class="button-row">
+									<button id="eraseAll-button" class="fa fa-trash" title="Erase all content" onclick="eraseAll()"></button>
+									<button id="eraser" class="fa fa-eraser" title="Eraser is OFF" onclick="eraserON()"></button>
+									<button id="pointer-size" style="width: 50px" title="Pointer size 5px"><div id="pointer-icon">⬚</div></button>
+									<div id="slider-container">
+   										<div id="slider-title"></div>
+										<input class='slider' id="pointer-slider" type="range" min="1" max="35" value="5" oninput="updatePointerSize(this.value)">
+									</div>
+								</div>
+								<br>
+								<div class="button-row">
+									<button id="color-picker" class="button primary" style="background-color: black">‎ ‎</button>
+									<input class='slider' id="color-slider-red" type="range" min="0" max="255" value="0" oninput="updateColorRED(this.value)">
+									<input class='slider' id="color-slider-green" type="range" min="0" max="255" value="0" oninput="updateColorGREEN(this.value)">
+									<input class='slider' id="color-slider-blue" type="range" min="0" max="255" value="0" oninput="updateColorBLUE(this.value)">
+								</div>
 							</div>
 							<div>
 								<span class="submenu">Description</span>
@@ -108,5 +116,6 @@
 
 			<!-- project specifics -->
 			<script src="assets/js/MS_paint.js"></script>
+			<script src="assets/js/MS_paint_misc.js"></script>
 	</body>
 </html>

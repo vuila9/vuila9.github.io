@@ -41,11 +41,13 @@ mspaint_body.addEventListener('mouseenter', () => {
 });
 
 function placePixel(event) {
+    if (isEraserON && locations.size == 0) return;
+
     // Get the bounding rectangle of the white space
     const rect = mspaint_body.getBoundingClientRect();
 
-    const x = Math.max(-1, Math.min(event.clientX - rect.left - 2.5, 1033));
-    const y = Math.min(event.clientY - rect.top, 495);
+    const x = Math.max(0, Math.min(event.clientX - rect.left - SIZE/2, 1037.5 - SIZE));
+    const y = Math.max(0, Math.min(event.clientY - rect.top - SIZE/2, 500 - SIZE));
     const coor = `(${Math.floor(x)},${Math.floor(y)})`;
 
     // Do nothing if (x,y) already exits
@@ -63,7 +65,7 @@ function placePixel(event) {
     pixel.style.backgroundColor = currentColor;
     mspaint_body.appendChild(pixel);
     locations.add(coor);
-    //console.log(location);
+    //console.log(coor);
 }
 
 function eraserON() {
@@ -73,27 +75,37 @@ function eraserON() {
     if (isEraserON) {
         document.getElementById('eraser').className = 'fa fa-eraser button primary';
         document.getElementById('eraser').title = 'Eraser is ON';
-        SIZE = 20;
+        document.getElementById('pointer-size').title = `Eraser size ${SIZE}px`;
+
         document.getElementById('color-slider-red').disabled = true;
         document.getElementById('color-slider-green').disabled = true;
         document.getElementById('color-slider-blue').disabled = true;
-
     }
     else {
         document.getElementById('eraser').className = 'fa fa-eraser';
         document.getElementById('eraser').title = 'Eraser is OFF';
-        SIZE = 5;
+        document.getElementById('pointer-size').title = `Pointer size ${SIZE}px`;
+
         document.getElementById('color-slider-red').disabled = false;
         document.getElementById('color-slider-green').disabled = false;
         document.getElementById('color-slider-blue').disabled = false;
         COLOR = `rgb(${RED},${GREEN},${BLUE})`;
     }
-
 }
 
 function eraseAll() {
     mspaint_body.innerHTML = '';
     locations.clear();
+}
+
+function updatePointerSize(value) {
+    SIZE = Number(value);
+    document.getElementById('pointer-icon').style.fontSize = `${SIZE*1.25}px`;
+    document.getElementById('pointer-slider').title = `${SIZE}px`;
+    if (isEraserON) 
+        document.getElementById('pointer-size').title = `Eraser size ${SIZE}px`;
+    else 
+        document.getElementById('pointer-size').title = `Pointer size ${SIZE}px`;
 }
 
 function updateColorRED(value) {
