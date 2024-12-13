@@ -1,0 +1,16 @@
+Supported:
+- click, click-and-drag pixels
+- changing drawing color
+- changing pointer size
+- temporary eraser
+- eraser can change in size
+- delete all pixels
+- Undo drawn pixels
+
+
+TODO:
+- Saving feature
+- Undo erased pixels
+- Zoom (magnify)
+- Button hover animation
+- Make that scrolling inside painting area increase or decrease pointer size

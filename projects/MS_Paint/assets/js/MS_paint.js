@@ -13,7 +13,6 @@ let CURRENT_ZOOM_SIZE = 1;
 const mspaint_body = document.getElementById('mspaint-body');
 const locations = new Set();
 const draw_record = [[]];
-const fresh_pixels = [];
 let isDrawing = false;
 let isMouseInside = false;
 let isEraserON = false;
@@ -27,9 +26,7 @@ mspaint_body.addEventListener('mousedown', (event) => {
     //if (event.button !== 0) return; // Only trigger if left-click (button 0)
 
     if (event.button == 2 && !isEraserON) toggleEraser();
-    //draw_record.push(fresh_pixels);
     draw_record.push([]);
-    fresh_pixels.length = 0;
     isDrawing = true;
     placePixel(event); // Place a pixel immediately on mousedown
 });
@@ -80,7 +77,6 @@ function placePixel(event) {
     pixel.style.backgroundColor = currentColor;
     mspaint_body.appendChild(pixel);
     if (!isEraserON) {
-        fresh_pixels.push(coor);
         draw_record[draw_record.length - 1].push(coor);
     }
     locations.add(coor);
@@ -174,25 +170,6 @@ function updateColorBLUE(value) {
     document.getElementById('color-slider-blue').title = `Blue ${BLUE}`;
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
-
-/*
-Supported:
-- click, click-and-drag pixels
-- changing drawing color
-- changing pointer size
-- temporary eraser
-- eraser can change in size
-- delete all pixels
-- Undo drawn pixels
-
-
-TODO:
-- Saving feature
-- Undo erased pixels
-- Zoom (magnify)
-- Button hover animation
-*/
-
 
 //Benched for now
 // function zoom(value) {
