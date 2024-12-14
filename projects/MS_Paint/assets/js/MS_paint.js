@@ -12,7 +12,7 @@ let CURRENT_ZOOM_SIZE = 1;
 
 const mspaint_body = document.getElementById('mspaint-body');
 const locations = new Set();
-const draw_record = [[]];
+const PIXEL_TRAIL_HISTORY = [];
 let isDrawing = false;
 let isMouseInside = false;
 let isEraserON = false;
@@ -23,10 +23,8 @@ document.getElementById('ms-paint').addEventListener('contextmenu', (event) => {
 });
 
 mspaint_body.addEventListener('mousedown', (event) => {
-    //if (event.button !== 0) return; // Only trigger if left-click (button 0)
-
     if (event.button == 2 && !isEraserON) toggleEraser();
-    draw_record.push([]);
+    PIXEL_TRAIL_HISTORY.push([]);
     isDrawing = true;
     placePixel(event); // Place a pixel immediately on mousedown
 });
@@ -40,6 +38,7 @@ mspaint_body.addEventListener('mousemove', (event) => {
 mspaint_body.addEventListener('mouseup', (event) => {
     if (event.button == 2) toggleEraser();
     isDrawing = false; // Stop drawing when the mouse is released
+    //console.log(PIXEL_TRAIL_HISTORY);
 });
 
 // Prevent drag issues if the mouse leaves the canvas
@@ -76,9 +75,8 @@ function placePixel(event) {
     let currentColor = COLOR;
     pixel.style.backgroundColor = currentColor;
     mspaint_body.appendChild(pixel);
-    if (!isEraserON) {
-        draw_record[draw_record.length - 1].push(coor);
-    }
+    //if (!isEraserON) 
+        PIXEL_TRAIL_HISTORY[PIXEL_TRAIL_HISTORY.length - 1].push(coor);
     locations.add(coor);
     //console.log(coor);
 }
@@ -86,7 +84,7 @@ function placePixel(event) {
 function removeManyPixel(targets) {
     const pixels = mspaint_body.getElementsByClassName('pixel');
     let counter = 0;
-    let size = targets.length
+    let size = targets.length;
     while (counter < size) {
         mspaint_body.removeChild(pixels[pixels.length - 1]);
         locations.delete(targets.pop())
@@ -121,17 +119,16 @@ function toggleEraser() {
 
 function eraseAll() {
     mspaint_body.innerHTML = '';
+    PIXEL_TRAIL_HISTORY.length = 0;
     locations.clear();
 }
 
 function undo() {
     if (document.getElementsByClassName('pixel').length == 0) return;
-    if (draw_record.length == 1 && draw_record[draw_record.length - 1] == '') return;
-    let fresh = draw_record.pop();
-    if (draw_record.length == 0) {
-        draw_record.push([]);
-    }
+    if (PIXEL_TRAIL_HISTORY.length == 1 && PIXEL_TRAIL_HISTORY[PIXEL_TRAIL_HISTORY.length - 1] == '') return;
+    let fresh = PIXEL_TRAIL_HISTORY.pop();
     removeManyPixel(fresh);
+    //console.log(PIXEL_TRAIL_HISTORY);
 }
 
 function updatePointerSize(value) {
@@ -149,7 +146,6 @@ function updateColorRED(value) {
     document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
     document.getElementById('color-picker').title = `rgb(${RED},${GREEN},${BLUE})`;
     document.getElementById('color-slider-red').title = `Red ${RED}`;
-
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
 
@@ -158,8 +154,6 @@ function updateColorGREEN(value) {
     document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
     document.getElementById('color-picker').title = `rgb(${RED},${GREEN},${BLUE})`;
     document.getElementById('color-slider-green').title = `Green ${GREEN}`;
-
-
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
 

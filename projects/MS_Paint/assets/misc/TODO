@@ -6,11 +6,12 @@ Supported:
 - eraser can change in size
 - delete all pixels
 - Undo drawn pixels
+- Undo erased pixels
 
 
 TODO:
 - Saving feature
-- Undo erased pixels
 - Zoom (magnify)
 - Button hover animation
 - Make that scrolling inside painting area increase or decrease pointer size
+- Add redo feature, make it same button as Undo button, but right-click to use it
