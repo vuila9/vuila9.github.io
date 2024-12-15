@@ -38,18 +38,18 @@ MSPAINT_BODY.addEventListener('mousemove', (event) => {
     }
 });
 
-MSPAINT_BODY.addEventListener('mouseup', (event) => {
+document.addEventListener('mouseup', (event) => {
     if (event.button == 2) toggleEraser();
     isDrawing = false; // Stop drawing when the mouse is released
 });
 
 // Prevent drag issues if the mouse leaves the canvas
-MSPAINT_BODY.addEventListener('mouseleave', () => {
+MSPAINT_BODY.addEventListener('mouseleave', (event) => {
     isMouseInside = false;
 });
 
 // Ensure the drawing continues if the mouse enters the canvas again
-MSPAINT_BODY.addEventListener('mouseenter', () => {
+MSPAINT_BODY.addEventListener('mouseenter', (event) => {
     isMouseInside = true;
 });
 
