@@ -3,66 +3,69 @@ let RED = 0;
 let GREEN = 0;
 let BLUE = 0;
 let SIZE = 5;
+const BACKGROUND_COLOR = 'rgb(242,242,242)';
 
 const MAX_CANVAS_WIDTH = 1037.5;
 const MAX_CANVAS_HEIGHT = 500;
 
 const MAX_ZOOM_SIZE = 5;
-let CURRENT_ZOOM_SIZE = 1;
+//let CURRENT_ZOOM_SIZE = 1;
 
-const mspaint_body = document.getElementById('mspaint-body');
-const locations = new Set();
+const PIXELS_LOCATIONS = new Set();
 const PIXEL_TRAIL_HISTORY = [];
+
+const MSPAINT_BODY = document.getElementById('mspaint-body');
+
 let isDrawing = false;
 let isMouseInside = false;
 let isEraserON = false;
 let isRightClick = false;
 
 document.getElementById('ms-paint').addEventListener('contextmenu', (event) => {
-    event.preventDefault(); // Prevent the context menu from showing
+    event.preventDefault(); // Prevent the default right-click action while inside the canvas
 });
 
-mspaint_body.addEventListener('mousedown', (event) => {
+MSPAINT_BODY.addEventListener('mousedown', (event) => {
     if (event.button == 2 && !isEraserON) toggleEraser();
     PIXEL_TRAIL_HISTORY.push([]);
     isDrawing = true;
     placePixel(event); // Place a pixel immediately on mousedown
 });
 
-mspaint_body.addEventListener('mousemove', (event) => {
+MSPAINT_BODY.addEventListener('mousemove', (event) => {
     if (isDrawing && isMouseInside) {
         placePixel(event); // Place pixels only when mouse is inside the canvas
     }
 });
 
-mspaint_body.addEventListener('mouseup', (event) => {
+MSPAINT_BODY.addEventListener('mouseup', (event) => {
     if (event.button == 2) toggleEraser();
     isDrawing = false; // Stop drawing when the mouse is released
-    //console.log(PIXEL_TRAIL_HISTORY);
 });
 
 // Prevent drag issues if the mouse leaves the canvas
-mspaint_body.addEventListener('mouseleave', () => {
+MSPAINT_BODY.addEventListener('mouseleave', () => {
     isMouseInside = false;
 });
 
 // Ensure the drawing continues if the mouse enters the canvas again
-mspaint_body.addEventListener('mouseenter', () => {
+MSPAINT_BODY.addEventListener('mouseenter', () => {
     isMouseInside = true;
 });
 
 function placePixel(event) {
-    if (isEraserON && locations.size == 0) return;
+    if (!isDrawing) return;
+    if (isEraserON && PIXELS_LOCATIONS.size == 0) return;
 
     // Get the bounding rectangle of the white space
-    const rect = mspaint_body.getBoundingClientRect();
+    const rect = MSPAINT_BODY.getBoundingClientRect();
 
     const x = Math.max(-1, Math.min(event.clientX - rect.left - SIZE/2, MAX_CANVAS_WIDTH - SIZE));
     const y = Math.max(-1, Math.min(event.clientY - rect.top - SIZE/2, MAX_CANVAS_HEIGHT - SIZE));
     const coor = `(${Math.floor(x)},${Math.floor(y)})`;
 
     // Do nothing if (x,y) already exits, eraser bypass this.
-    if (locations.has(coor) && !isEraserON) return;
+    if (PIXELS_LOCATIONS.has(coor) && !isEraserON) return;
 
     // Create a new pixel
     const pixel = document.createElement('div');
@@ -72,28 +75,26 @@ function placePixel(event) {
     pixel.style.width = `${SIZE}px`;
     pixel.style.height = `${SIZE}px`;
 
-    let currentColor = COLOR;
-    pixel.style.backgroundColor = currentColor;
-    mspaint_body.appendChild(pixel);
-    //if (!isEraserON) 
-        PIXEL_TRAIL_HISTORY[PIXEL_TRAIL_HISTORY.length - 1].push(coor);
-    locations.add(coor);
+    pixel.style.backgroundColor = COLOR;
+    MSPAINT_BODY.appendChild(pixel);
+    PIXEL_TRAIL_HISTORY[PIXEL_TRAIL_HISTORY.length - 1].push(coor);
+    PIXELS_LOCATIONS.add(coor);
     //console.log(coor);
 }
 
 function removeManyPixel(targets) {
-    const pixels = mspaint_body.getElementsByClassName('pixel');
+    const pixels = MSPAINT_BODY.getElementsByClassName('pixel');
     let counter = 0;
     let size = targets.length;
     while (counter < size) {
-        mspaint_body.removeChild(pixels[pixels.length - 1]);
-        locations.delete(targets.pop())
+        MSPAINT_BODY.removeChild(pixels[pixels.length - 1]);
+        PIXELS_LOCATIONS.delete(targets.pop())
         counter++;
     }
 }
 
 function toggleEraser() {
-    COLOR = `rgb(242,242,242)`;
+    COLOR = BACKGROUND_COLOR;
     isEraserON = !isEraserON;
 
     if (isEraserON) {
@@ -118,9 +119,9 @@ function toggleEraser() {
 }
 
 function eraseAll() {
-    mspaint_body.innerHTML = '';
+    MSPAINT_BODY.innerHTML = '';
     PIXEL_TRAIL_HISTORY.length = 0;
-    locations.clear();
+    PIXELS_LOCATIONS.clear();
 }
 
 function undo() {
