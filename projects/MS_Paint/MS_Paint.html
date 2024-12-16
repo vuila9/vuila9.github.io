@@ -41,9 +41,9 @@
 							<div class="paint-button">
 								<div class="button-row">
 									<div class="left-buttons">
-										<button id="undo" class="fas fa-undo" title="Undo last action" onclick="undo()"></button>
-										<button id="eraser" class="fa fa-eraser" title="Eraser is OFF" onclick="toggleEraser()"></button>
-										<button id="pointer-size" style="width: 50px" title="Pointer size 5px"><div id="pointer-icon">⬚</div></button>
+										<button id="undo-redo-button" class="fas fa-undo" title="Undo last action (Right-click to redo)"></button>
+										<button id="eraser-button" class="fa fa-eraser" title="Eraser is OFF" onclick="toggleEraser()"></button>
+										<button id="pointer-size-button" style="width: 50px" title="Pointer size 5px"><div id="pointer-icon">⬚</div></button>
 										<div id="slider-title"></div>
 										<input class='slider' id="pointer-slider" type="range" min="1" max="35" value="5" oninput="updatePointerSize(this.value)">
 									</div>
@@ -55,7 +55,7 @@
 								<br>
 								<div class="button-row">
 									<div class="left-buttons">
-										<button id="color-picker" class="button primary" title="rgb(0,0,0)" style="background-color: black">‎ ‎</button>
+										<button id="color-picker-button" class="button primary" title="rgb(0,0,0)" style="background-color: black">‎ ‎</button>
 										<input class='slider' id="color-slider-red" type="range" min="0" max="255" value="0" oninput="updateColorRED(this.value)">
 										<input class='slider' id="color-slider-green" type="range" min="0" max="255" value="0" oninput="updateColorGREEN(this.value)">
 										<input class='slider' id="color-slider-blue" type="range" min="0" max="255" value="0" oninput="updateColorBLUE(this.value)">

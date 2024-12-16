@@ -12,9 +12,11 @@ const MAX_ZOOM_SIZE = 5;
 //let CURRENT_ZOOM_SIZE = 1;
 
 const PIXELS_LOCATIONS = new Set();
-const PIXEL_TRAIL_HISTORY = [];
+const PIXEL_UNDO_HISTORY = [];
+const PIXEL_REDO_HISTORY = [];
 
 const MSPAINT_BODY = document.getElementById('mspaint-body');
+const UNDO_REDO_BUTTON = document.getElementById('undo-redo-button')
 
 let isDrawing = false;
 let isMouseInside = false;
@@ -26,8 +28,8 @@ document.getElementById('ms-paint').addEventListener('contextmenu', (event) => {
 });
 
 MSPAINT_BODY.addEventListener('mousedown', (event) => {
-    if (event.button == 2 && !isEraserON) toggleEraser();
-    PIXEL_TRAIL_HISTORY.push([]);
+    if (event.button == 2 && !isEraserON && isMouseInside) toggleEraser();
+    PIXEL_UNDO_HISTORY.push([]);
     isDrawing = true;
     placePixel(event); // Place a pixel immediately on mousedown
 });
@@ -39,7 +41,7 @@ MSPAINT_BODY.addEventListener('mousemove', (event) => {
 });
 
 document.addEventListener('mouseup', (event) => {
-    if (event.button == 2) toggleEraser();
+    if (event.button == 2 && isMouseInside && isDrawing) toggleEraser();
     isDrawing = false; // Stop drawing when the mouse is released
 });
 
@@ -51,6 +53,34 @@ MSPAINT_BODY.addEventListener('mouseleave', (event) => {
 // Ensure the drawing continues if the mouse enters the canvas again
 MSPAINT_BODY.addEventListener('mouseenter', (event) => {
     isMouseInside = true;
+});
+
+UNDO_REDO_BUTTON.addEventListener('mousedown', (event) => {
+    if (event.button == 0) {
+        UNDO_REDO_BUTTON.className = 'fas fa-undo button primary';
+    }
+    else if (event.button == 2) {
+        UNDO_REDO_BUTTON.className = 'fas fa-redo button primary';
+    }
+});
+
+UNDO_REDO_BUTTON.addEventListener('mouseup', (event) => {
+    if (event.button == 0) {
+        undo();
+        UNDO_REDO_BUTTON.className = 'fas fa-undo';
+    }
+    else if (event.button == 2) {
+        redo();
+        UNDO_REDO_BUTTON.className = 'fas fa-undo';
+    }
+});
+
+UNDO_REDO_BUTTON.addEventListener('mouseleave', (event) => {
+    UNDO_REDO_BUTTON.className = 'fas fa-undo';
+});
+
+UNDO_REDO_BUTTON.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
 });
 
 function placePixel(event) {
@@ -77,7 +107,7 @@ function placePixel(event) {
 
     pixel.style.backgroundColor = COLOR;
     MSPAINT_BODY.appendChild(pixel);
-    PIXEL_TRAIL_HISTORY[PIXEL_TRAIL_HISTORY.length - 1].push(coor);
+    PIXEL_UNDO_HISTORY.at(-1).push(coor);
     PIXELS_LOCATIONS.add(coor);
     //console.log(coor);
 }
@@ -88,9 +118,12 @@ function removeManyPixel(targets) {
     let size = targets.length;
     while (counter < size) {
         MSPAINT_BODY.removeChild(pixels[pixels.length - 1]);
-        PIXELS_LOCATIONS.delete(targets.pop())
+        let pixel = targets.pop()
+        PIXELS_LOCATIONS.delete(pixel);
+        //PIXEL_REDO_HISTORY.at(-1).push(pixel);
         counter++;
     }
+    //PIXEL_REDO_HISTORY.push([]);
 }
 
 function toggleEraser() {
@@ -98,18 +131,18 @@ function toggleEraser() {
     isEraserON = !isEraserON;
 
     if (isEraserON) {
-        document.getElementById('eraser').className = 'fa fa-eraser button primary';
-        document.getElementById('eraser').title = 'Eraser is ON';
-        document.getElementById('pointer-size').title = `Eraser size ${SIZE}px`;
+        document.getElementById('eraser-button').className = 'fa fa-eraser button primary';
+        document.getElementById('eraser-button').title = 'Eraser is ON';
+        document.getElementById('pointer-size-button').title = `Eraser size ${SIZE}px`;
 
         document.getElementById('color-slider-red').disabled = true;
         document.getElementById('color-slider-green').disabled = true;
         document.getElementById('color-slider-blue').disabled = true;
     }
     else {
-        document.getElementById('eraser').className = 'fa fa-eraser';
-        document.getElementById('eraser').title = 'Eraser is OFF';
-        document.getElementById('pointer-size').title = `Pointer size ${SIZE}px`;
+        document.getElementById('eraser-button').className = 'fa fa-eraser';
+        document.getElementById('eraser-button').title = 'Eraser is OFF';
+        document.getElementById('pointer-size-button').title = `Pointer size ${SIZE}px`;
 
         document.getElementById('color-slider-red').disabled = false;
         document.getElementById('color-slider-green').disabled = false;
@@ -120,16 +153,19 @@ function toggleEraser() {
 
 function eraseAll() {
     MSPAINT_BODY.innerHTML = '';
-    PIXEL_TRAIL_HISTORY.length = 0;
+    PIXEL_UNDO_HISTORY.length = 0;
     PIXELS_LOCATIONS.clear();
 }
 
 function undo() {
     if (document.getElementsByClassName('pixel').length == 0) return;
-    if (PIXEL_TRAIL_HISTORY.length == 1 && PIXEL_TRAIL_HISTORY[PIXEL_TRAIL_HISTORY.length - 1] == '') return;
-    let fresh = PIXEL_TRAIL_HISTORY.pop();
-    removeManyPixel(fresh);
-    //console.log(PIXEL_TRAIL_HISTORY);
+    if (PIXEL_UNDO_HISTORY.length == 1 && PIXEL_UNDO_HISTORY.at(-1) == '') return;
+    let removed_pixels = PIXEL_UNDO_HISTORY.pop();
+    removeManyPixel(removed_pixels);
+}
+
+function redo() {
+    if (PIXEL_REDO_HISTORY[0].length == 0) return;
 }
 
 function updatePointerSize(value) {
@@ -137,31 +173,31 @@ function updatePointerSize(value) {
     document.getElementById('pointer-icon').style.fontSize = `${SIZE*1.25}px`;
     document.getElementById('pointer-slider').title = `${SIZE}px`;
     if (isEraserON) 
-        document.getElementById('pointer-size').title = `Eraser size ${SIZE}px`;
+        document.getElementById('pointer-size-button').title = `Eraser size ${SIZE}px`;
     else 
-        document.getElementById('pointer-size').title = `Pointer size ${SIZE}px`;
+        document.getElementById('pointer-size-button').title = `Pointer size ${SIZE}px`;
 }
 
 function updateColorRED(value) {
     RED = value;
-    document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
-    document.getElementById('color-picker').title = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker-button').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker-button').title = `rgb(${RED},${GREEN},${BLUE})`;
     document.getElementById('color-slider-red').title = `Red ${RED}`;
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
 
 function updateColorGREEN(value) {
     GREEN = value;
-    document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
-    document.getElementById('color-picker').title = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker-button').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker-button').title = `rgb(${RED},${GREEN},${BLUE})`;
     document.getElementById('color-slider-green').title = `Green ${GREEN}`;
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }
 
 function updateColorBLUE(value) {
     BLUE = value;
-    document.getElementById('color-picker').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
-    document.getElementById('color-picker').title = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker-button').style.backgroundColor = `rgb(${RED},${GREEN},${BLUE})`;
+    document.getElementById('color-picker-button').title = `rgb(${RED},${GREEN},${BLUE})`;
     document.getElementById('color-slider-blue').title = `Blue ${BLUE}`;
     COLOR = `rgb(${RED},${GREEN},${BLUE})`;
 }

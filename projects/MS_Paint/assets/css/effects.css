@@ -38,7 +38,7 @@ br, .paint-button {
     user-select: none;
 }
 
-#pointer-size {
+#pointer-size-button {
     display: flex; /* Use flexbox */
     align-items: center; /* Vertically center the content */
     justify-content: center; /* Horizontally center the content */
