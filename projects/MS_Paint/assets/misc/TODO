@@ -15,3 +15,5 @@ TODO:
 - Button hover animation
 - Make that scrolling inside painting area increase or decrease pointer size
 - Add redo feature, make it same button as Undo button, but right-click to use it.
+- improve eraser, if its size does not cover any existing pixels, do nothing.
+- 
