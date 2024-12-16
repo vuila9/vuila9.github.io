@@ -116,14 +116,14 @@ function removeManyPixel(targets) {
     const pixels = MSPAINT_BODY.getElementsByClassName('pixel');
     let counter = 0;
     let size = targets.length;
+    PIXEL_REDO_HISTORY.push([]);
     while (counter < size) {
         MSPAINT_BODY.removeChild(pixels[pixels.length - 1]);
         let pixel = targets.pop()
         PIXELS_LOCATIONS.delete(pixel);
-        //PIXEL_REDO_HISTORY.at(-1).push(pixel);
+        PIXEL_REDO_HISTORY.at(-1).push(pixel);
         counter++;
     }
-    //PIXEL_REDO_HISTORY.push([]);
 }
 
 function toggleEraser() {
@@ -165,7 +165,8 @@ function undo() {
 }
 
 function redo() {
-    if (PIXEL_REDO_HISTORY[0].length == 0) return;
+    if (PIXEL_REDO_HISTORY.length == 0) return;
+    
 }
 
 function updatePointerSize(value) {
