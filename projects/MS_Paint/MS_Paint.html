@@ -20,7 +20,7 @@
 							<a href="https://vuila9.github.io/#main">
 								<button id="home-btn">&lt;&lt;</button>
 							</a> 
-							<a><h1>MS Paint</h1></a>
+							<a><h1>Paint</h1></a>
 						</div>
 					</header>
 
@@ -63,10 +63,10 @@
 									</div>
 								</div>
 							</div>
+							<br>
 							<div>
 								<span class="submenu">Description</span>
-								<p>This is a work-in-progress project, nothing to see here...</p>
-								<p>When you draw a whole bunch, do NOT inspect element if you have a weak CPU. You have been warned...</p>
+								<p>Inspired by the Microsoft Paint program that comes pre-installed with every Windows version, this project replicates a similar experience using HTML, JavaScript, and CSS.</p>
 							</div>
 
 							<div class="container">
@@ -76,7 +76,11 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="background-content">
-								<p>Background</p>
+								<p>This program is highly interactive and, for the first time, allows visitors to use their creativity and leave with a finished creation after using it.</p>
+								<p>Users can place individual pixels or draw trails of pixels anywhere on the canvas. The program also offers customizable features, including the ability to change the brush color and size. Additionally, the program supports essential tools such as an eraser, undo, and redo options, as well as a save button that lets users save their completed artwork.</p>
+								<p>Each pixel is represented as a &lt;div&gt; element with attributes like x/y coordinates, size, and background color. While this is easy to implement, the downside is that as the number of pixels on the screen grows—reaching hundreds or even thousands—it results in the same number of &lt;div&gt; elements in the HTML. This can significantly impact performance, causing noticeable slowdowns, especially when users inspect the page's HTML structure.</p>
+								<p>Another factor that reduces performance and causes additional slowdowns is how I implemented the Eraser feature. Logically, the eraser should remove pixels by deleting the corresponding &lt;div&gt; elements. While this concept is easy to understand, implementing it is not as straightforward. The function essentially needs to search for all &lt;div&gt; elements with x/y coordinates located within the eraser's radius upon each mouse click. This results in a significant amount of individual searches for every pixel, which I assume would noticeably impact the program's responsiveness. So, I decided to implement the eraser in the simplest way possible: treating it like a brush but with the same color as the canvas. While this approach saved me a lot of hassle, it doesn’t actually remove &lt;div&gt; elements. Instead, it adds more of them, further increasing the total number of &lt;div&gt; elements and potentially worsening performance issues.</p>
+								<p>Thanksfully, the Undo/Redo features actually does what they're supposed to do: removing &lt;div&gt; pixels (undo) and adding &lt;div&gt; pixels (redo)</p>
 							</div>
 
 							<div class="container">
@@ -86,7 +90,14 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="features-content">
-								<p>Features</p>
+								<ul>
+									<li><span class="effect-span"><b>Undo</b>(right-click): undoing any previous action</span></li>
+									<li><span class="effect-span"><b>Redo</b>(left-click): restoring any undo action</span></li>
+									<li><span class="effect-span"><b>Eraser</b>(right-click or hold left-click): erasing any pixel within the canvas</span></li>
+									<li><span class="effect-span"><b>Brush slider</b>: changing the size of the brush or eraser (1px to 35px)</span></li>
+									<li><span class="effect-span"><b>Color slider</b>: changing the color of the brush</span></li>
+									<li><span class="effect-span"><b>Save</b>: screenshoting the canvas and automatically downloading it</span></li>
+								</ul>
 							</div>
 
 							<div class="container">
@@ -96,7 +107,13 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="future-improvement-content">
-								<p>Improve</p>
+								<ul>
+									<li><span class="effect-span">Zoom (magnify) feature</span></li>
+									<li><span class="effect-span">Better button animation</span></li>
+									<li><span class="effect-span">Add brush/eraser visual area of effect on cursor</span></li>
+									<li><span class="effect-span">Improve eraser</span></li>
+									<li><span class="effect-span">To be updated</span></li>
+								</ul>	
 							</div>
 
 							<div class="container">
@@ -106,7 +123,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="github-content">
-								<p>link</p>
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/MS_Paint" target="_blank"><p>Source code</p></a>
 							</div>
 
 				<!--END-->
