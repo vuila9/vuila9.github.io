@@ -8,11 +8,10 @@ Supported:
 - Undo drawn pixels
 - Undo erased pixels
 - Add redo feature, make it same button as Undo button, but right-click to use it.
-
+- Saving feature
 
 
 TODO:
-- Saving feature
 - Zoom (magnify)
 - Button hover animation
 - Make that scrolling inside painting area increase or decrease pointer size
