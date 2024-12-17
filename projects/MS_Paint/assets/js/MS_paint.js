@@ -182,6 +182,20 @@ function toggleEraser() {
     }
 }
 
+function save() {
+    // Use html2canvas to capture the element
+    html2canvas(MSPAINT_BODY).then(canvas => {
+        // Convert canvas to image
+        const imgData = canvas.toDataURL("image/png");
+
+        // Download the image
+        const link = document.createElement("a");
+        link.href = imgData;
+        link.download = "canvas.png";
+        link.click();
+    });
+}
+
 function eraseAll() {
     MSPAINT_BODY.innerHTML = '';
     PIXEL_UNDO_HISTORY.length = 0;

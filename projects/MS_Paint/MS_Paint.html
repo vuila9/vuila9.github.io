@@ -48,6 +48,7 @@
 										<input class='slider' id="pointer-slider" type="range" min="1" max="35" value="5" oninput="updatePointerSize(this.value)">
 									</div>
 									<div class="right-buttons">
+										<button id="save-button" class="fa fa-save" title="Save canvas" onclick="save()"></button>
 										<button id="eraseAll-button" class="fa fa-trash" title="Erase all content" onclick="eraseAll()"></button>
 									</div>
 
@@ -120,6 +121,7 @@
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_global_function.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 			<!-- project specifics -->
 			<script src="assets/js/MS_paint.js"></script>
