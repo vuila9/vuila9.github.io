@@ -13,14 +13,14 @@ document.addEventListener("DOMContentLoaded", function() {
         // },
         {
             imageSrc: "assets/img/pic08.jpg",
-            title: "MS Paint",
-            description: "A work-in-progress project to be released soon™",
+            title: "Paint",
+            description: "A paint program that allows users to draw",
             link: "projects/MS_Paint/MS_Paint.html"
         },
         {
             imageSrc: "assets/img/pic07.jpg",
             title: "Cube",
-            description: "A project featuring a 3D object created using Three.js and Blender.",
+            description: "A program featuring a 3D object created using Three.js and Blender.",
             link: "projects/Cube/Cube.html"
         },
         {
