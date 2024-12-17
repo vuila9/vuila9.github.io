@@ -12,31 +12,31 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
-            imageSrc: "assets/img/paint.jpg",
+            imageSrc: "assets/img/program_icons/paint_tile.jpg",
             title: "Paint",
             description: "A paint program that allows users to draw.",
             link: "projects/MS_Paint/MS_Paint.html"
         },
         {
-            imageSrc: "assets/img/pic07.jpg",
+            imageSrc: "assets/img/program_icons/cube_tile.jpg",
             title: "Cube",
             description: "A program featuring a 3D object created using Three.js and Blender.",
             link: "projects/Cube/Cube.html"
         },
         {
-            imageSrc: "assets/img/pic06.jpg",
-            title: "CMD/Terminal Simulator",
+            imageSrc: "assets/img/program_icons/terminal_tile.jpg",
+            title: "Terminal Simulator",
             description: "A simulator for Windows CMD and Ubuntu Terminal command consoles.",
             link: "projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html"
         },
         {
-            imageSrc: "assets/img/pic05.jpg",
+            imageSrc: "assets/img/program_icons/sudoku_tile.jpg",
             title: "Sudoku Game (v2)",
             description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS.",
             link: "projects/Sudoku_JS/Sudoku_JS.html"
         },
         {
-            imageSrc: "assets/img/pic04.jpg",
+            imageSrc: "assets/img/program_icons/manytools_tile.jpg",
             title: "Many mini-tools",
             description: "A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal need.",
             link: "projects/Many_mini-tools/Many_mini-tools.html"
@@ -48,13 +48,13 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Sudoku_Solver/Sudoku_Solver.html"
         // },
         {
-            imageSrc: "assets/img/pic02.jpg",
+            imageSrc: "assets/img/program_icons/restaurant_tile.jpg",
             title: "Web-based Restaurant",
             description: "A web-based online restaurant using MongoDB for storing order database and Node.js for server hosting.",
             link: "projects/Web-based_Restaurant/Web-based_Restaurant.html"
         },
         {
-            imageSrc: "assets/img/pic01.jpg",
+            imageSrc: "assets/img/program_icons/storeapp_tile.jpg",
             title: "Store Application",
             description: "A Java-based application with a graphical user interface (GUI).",
             link: "projects/Store_Application/Store_Application.html"
@@ -63,19 +63,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Loop through the data to create multiple articles
     articlesData.forEach(data => {
+        const tile_size = '225px';
+
         // Create the article element
         const article = document.createElement("article");
-        article.style.width = '250px';
-        article.style.height = '250px';
+        article.style.width = tile_size;
+        article.style.height = tile_size;
         //article.className = "style8";
 
         // Create the span with the image
         const span = document.createElement("span");
         span.className = "image";
+        span.style.width = tile_size;
+        span.style.height = tile_size;
+        //span.style.overflow = 'hidden';
 
         const img = document.createElement("img");
         img.src = data.imageSrc;
-        img.alt = "";
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'fill';
         span.appendChild(img);
 
         // Create the anchor tag
@@ -84,6 +91,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         // Create the h2 element for the title
         const h2 = document.createElement("h2");
+        h2.className = 'program_title';
         h2.textContent = data.title;
 
         // Create the div with the paragraph for the description
@@ -92,10 +100,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const paragraph = document.createElement("p");
         paragraph.textContent = data.description;
+        contentDiv.appendChild(h2);
         contentDiv.appendChild(paragraph);
 
         // Append everything together
-        anchor.appendChild(h2);
         anchor.appendChild(contentDiv);
         article.appendChild(span);
         article.appendChild(anchor);
