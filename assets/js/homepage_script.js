@@ -12,9 +12,9 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
-            imageSrc: "assets/img/pic08.jpg",
+            imageSrc: "assets/img/paint.jpg",
             title: "Paint",
-            description: "A paint program that allows users to draw",
+            description: "A paint program that allows users to draw.",
             link: "projects/MS_Paint/MS_Paint.html"
         },
         {
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function() {
         {
             imageSrc: "assets/img/pic05.jpg",
             title: "Sudoku Game (v2)",
-            description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS",
+            description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS.",
             link: "projects/Sudoku_JS/Sudoku_JS.html"
         },
         {
@@ -50,13 +50,13 @@ document.addEventListener("DOMContentLoaded", function() {
         {
             imageSrc: "assets/img/pic02.jpg",
             title: "Web-based Restaurant",
-            description: "A web-based online restaurant with user-friendly accounts where users can place orders tied to their account, using MongoDB for order storage and Node.js for server hosting.",
+            description: "A web-based online restaurant using MongoDB for storing order database and Node.js for server hosting.",
             link: "projects/Web-based_Restaurant/Web-based_Restaurant.html"
         },
         {
             imageSrc: "assets/img/pic01.jpg",
             title: "Store Application",
-            description: "A Java-based application with a graphical user interface (GUI) that enables users to add or remove items from their shopping cart.",
+            description: "A Java-based application with a graphical user interface (GUI).",
             link: "projects/Store_Application/Store_Application.html"
         }
     ];
@@ -65,7 +65,9 @@ document.addEventListener("DOMContentLoaded", function() {
     articlesData.forEach(data => {
         // Create the article element
         const article = document.createElement("article");
-        article.className = "style1";
+        article.style.width = '250px';
+        article.style.height = '250px';
+        //article.className = "style8";
 
         // Create the span with the image
         const span = document.createElement("span");
