@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Snake</title>
+		<title>Snake Game</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="../../assets/css/main.css" />
@@ -21,14 +21,34 @@
 							<a href="https://vuila9.github.io/#main">
 								<button id="home-btn">&lt;&lt;</button>
 							</a> 
-							<a><h1>Snake</h1></a>
+							<a><h1>Snake Game</h1></a>
 						</div>
 					</header>
 
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
-							<div><!-- Project goes here --></div>
+							<div id="snakegame">
+								<!-- Project goes here -->
+								 <div id="game-interface"></div>
+								 <br>
+								 <div id="game-control">
+									<div class="button-row">
+										<button id="button-up" class="fa fa-caret-up"></button>
+									</div>
+									<div class="button-row">
+										<button id="button-left" class="fa fa-caret-left"></button>
+										<button id="button-play" title="Press to play"><div id='button-play-icon' class="fa fa-play" style="font-size: 10px; top:50%;"></div></button>
+
+										<!-- <div style="width:50px"></div> -->
+										<button id="button-right" class="fa fa-caret-right"></button>
+
+									</div>
+									<div class="button-row">
+										<button id="button-down" class="fa fa-caret-down"></button>
+									</div>
+								 </div>
+							</div>
 							<div>
 								<span class="submenu">Description</span>
 								<p>This is a work-in-progress project, nothing to see here...</p>
@@ -87,5 +107,7 @@
 			<script src="../../assets/js/project_global_function.js"></script>
 
 			<!-- project specifics -->
+			<script src="assets/js/Snake.js"></script>
+
 	</body>
 </html>
