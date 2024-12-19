@@ -84,8 +84,7 @@ UNDO_REDO_BUTTON.addEventListener('contextmenu', (event) => {
 });
 
 function placePixel(event, pixel_stat='', redo=false) {
-    //if (!isDrawing) return;
-    if (isEraserON && PIXELS_INFO.size == 0) return;
+    if (isEraserON && PIXELS_INFO.size == 0 && !redo) return;
 
     let x,y, pixel_desc, size, color;
     if (redo) {
