@@ -7,6 +7,8 @@ let LAST_FRAME_TIME;
 let SNAKE_LENGTH = 0;
 let FRUIT_EATEN = true;
 
+
+const TURN_HASHMAP = new Map();
 const SNAKE_BODY = [];
 let TURN_COORDINATE = [];
 
@@ -29,6 +31,30 @@ document.getElementById('button-play').addEventListener('mousedown', (event) => 
         document.getElementById('button-play-icon').className = 'fa fa-play';
         event.target.title = 'Press to play';
     }
+});
+
+document.getElementById('button-up').addEventListener('mousedown', (event) => {
+    console.log('button up clicked');
+    SNAKE_BODY[0]['direction'] = 'up';
+});
+
+document.getElementById('button-down').addEventListener('mousedown', (event) => {
+    console.log('button down clicked');
+    SNAKE_BODY[0]['direction'] = 'down';
+    
+
+});
+
+document.getElementById('button-left').addEventListener('mousedown', (event) => {
+    console.log('button left clicked');
+    SNAKE_BODY[0]['direction'] = 'left';
+
+});
+
+document.getElementById('button-right').addEventListener('mousedown', (event) => {
+    console.log('button right clicked');
+    SNAKE_BODY[0]['direction'] = 'right';
+
 });
 
 function gameLoop(currentTime) {
@@ -76,19 +102,19 @@ function placePixel(x=0, y=0) {
 
 function addPartsToSnake(length=1, option=1) {
     for (let len = 0; len < length; len++) {
-        const snakepart_x = SNAKE_BODY.at(-1).offsetLeft + SNAKE_SIZE + option;
-        const snakepart_y = SNAKE_BODY.at(-1).offsetTop;
+        const snakepart_x = SNAKE_BODY.at(-1)['stat'].offsetLeft + SNAKE_SIZE + option;
+        const snakepart_y = SNAKE_BODY.at(-1)['stat'].offsetTop;
         const snakepart = placePixel(snakepart_x, snakepart_y);
         GAME_INTERFACE.appendChild(snakepart);
-        SNAKE_BODY.push(snakepart);
+        SNAKE_BODY.push([snakepart, SNAKE_BODY.at(-1)[1]]);
     }
 }
 
 window.onload = function () {
     const snakehead = placePixel(Math.floor(MAX_ARENA_WIDTH/2), Math.floor(MAX_ARENA_HEIGHT/2));
     GAME_INTERFACE.appendChild(snakehead);
-    SNAKE_BODY.push(snakehead);
+    SNAKE_BODY.push({'stat': snakehead, 'direction': 'left'});
 
-    addPartsToSnake(15);
+    //addPartsToSnake(15);
     
 }
