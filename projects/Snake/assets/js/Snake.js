@@ -1,10 +1,11 @@
 let GAME_LOOP = false;
 let SNAKE_COLOR = 'rgb(255,0,0)';
-let SNAKE_SIZE = 10;
+let SNAKE_SIZE = 20;
 let GAME_INTERVAL;
 let SNAKE_SPEED = 200;
 let LAST_FRAME_TIME;
-let SNAKE_LENGTH = 1;
+let SNAKE_LENGTH = 0;
+let FRUIT_EATEN = true;
 
 const SNAKE_BODY = [];
 let TURN_COORDINATE = [];
@@ -35,34 +36,59 @@ function gameLoop(currentTime) {
     const elapsedTime = currentTime - LAST_FRAME_TIME;
 
     if (elapsedTime > 16.67) { // Approx 60 FPS (1000ms/60 = ~16.67ms per frame)
-        const snake = document.getElementById('snake-head');
-        const currentLeft = parseInt(snake.style.left || '0', 10);
 
-        // Calculate movement based on elapsed time
-        const pixelsToMove = (elapsedTime / 1000) * SNAKE_SPEED;
-        if (snake.offsetLeft < 0 - SNAKE_SIZE)
-            snake.style.left = (MAX_ARENA_WIDTH + currentLeft - pixelsToMove) + 'px';
-        else
-            snake.style.left = (currentLeft - pixelsToMove) + 'px';
-
+        for (let i = 0; i < SNAKE_LENGTH; i++) {
+            const snake = document.getElementById('snake-body-' + i);
+            const currentLeft = parseInt(snake.style.left || '0', 10);
+    
+            // Calculate movement based on elapsed time
+            const pixelsToMove = (elapsedTime / 1000) * SNAKE_SPEED;
+            if (snake.offsetLeft < 0 - SNAKE_SIZE) {
+                snake.style.left = (MAX_ARENA_WIDTH + currentLeft - pixelsToMove + SNAKE_SIZE) + 'px';
+            }
+            else
+                snake.style.left = (currentLeft - pixelsToMove) + 'px';
+        }
         // Update the last frame time
         LAST_FRAME_TIME = currentTime;
     }
-    
+
     // Schedule the next frame
     requestAnimationFrame(gameLoop);
 }
 
+function placePixel(x=0, y=0) {
+    const pixel = document.createElement('div');
+    pixel.id = 'snake-body-' + SNAKE_LENGTH;
+    SNAKE_LENGTH +=1;
+    pixel.className  = 'pixel';
+    pixel.style.left = `${x}px`;
+    pixel.style.top  = `${y}px`;
+    pixel.style.width  = `${SNAKE_SIZE}px`;
+    pixel.style.height = `${SNAKE_SIZE}px`;
+    if (SNAKE_LENGTH == 1)
+        pixel.style.backgroundColor = 'rgb(0,0,0)';
+    else
+        pixel.style.backgroundColor = SNAKE_COLOR;
+
+    return pixel;
+}
+
+function addPartsToSnake(length=1, option=1) {
+    for (let len = 0; len < length; len++) {
+        const snakepart_x = SNAKE_BODY.at(-1).offsetLeft + SNAKE_SIZE + option;
+        const snakepart_y = SNAKE_BODY.at(-1).offsetTop;
+        const snakepart = placePixel(snakepart_x, snakepart_y);
+        GAME_INTERFACE.appendChild(snakepart);
+        SNAKE_BODY.push(snakepart);
+    }
+}
 
 window.onload = function () {
-    const pixel = document.createElement('div');
-    pixel.id = 'snake-head'
-    pixel.className = 'pixel';
-    pixel.style.left = `${Math.floor(MAX_ARENA_WIDTH/2)}px`;
-    pixel.style.top = `${Math.floor(MAX_ARENA_HEIGHT/2)}px`;
-    pixel.style.width = `${SNAKE_SIZE}px`;
-    pixel.style.height = `${SNAKE_SIZE}px`;
-    pixel.style.backgroundColor = SNAKE_COLOR;
+    const snakehead = placePixel(Math.floor(MAX_ARENA_WIDTH/2), Math.floor(MAX_ARENA_HEIGHT/2));
+    GAME_INTERFACE.appendChild(snakehead);
+    SNAKE_BODY.push(snakehead);
 
-    GAME_INTERFACE.appendChild(pixel);
+    addPartsToSnake(15);
+    
 }
