@@ -35,40 +35,46 @@ document.getElementById('button-play').addEventListener('mousedown', (event) => 
 
 document.getElementById('button-up').addEventListener('mousedown', (event) => {
     console.log('button up clicked');
-    if (!directionHandler('up')) return;
-    SNAKE_BODY[0]['direction'] = 'up';
-    const x = SNAKE_BODY[0]['stat'].offsetLeft;
-    const y = SNAKE_BODY[0]['stat'].offsetTop;
-    TURN_HASHMAP.set(`${x},${y}`, 'up');
+    directionRegistry('up');
 });
 
 document.getElementById('button-down').addEventListener('mousedown', (event) => {
     console.log('button down clicked');
-    if (!directionHandler('down')) return;
-    SNAKE_BODY[0]['direction'] = 'down';
-    const x = SNAKE_BODY[0]['stat'].offsetLeft;
-    const y = SNAKE_BODY[0]['stat'].offsetTop;
-    TURN_HASHMAP.set(`${x},${y}`, 'down');
-
+    directionRegistry('down');
 });
 
 document.getElementById('button-left').addEventListener('mousedown', (event) => {
     console.log('button left clicked');
-    if (!directionHandler('left')) return;
-    SNAKE_BODY[0]['direction'] = 'left';
-    const x = SNAKE_BODY[0]['stat'].offsetLeft;
-    const y = SNAKE_BODY[0]['stat'].offsetTop;
-    TURN_HASHMAP.set(`${x},${y}`, 'left');
+    directionRegistry('left');
 });
 
 document.getElementById('button-right').addEventListener('mousedown', (event) => {
     console.log('button right clicked');
-    if (!directionHandler('right')) return;
-    SNAKE_BODY[0]['direction'] = 'right';
-    const x = SNAKE_BODY[0]['stat'].offsetLeft;
-    const y = SNAKE_BODY[0]['stat'].offsetTop;
-    TURN_HASHMAP.set(`${x},${y}`, 'right');
+    directionRegistry('right');
 });
+
+// Add event listener for keyboard key presses
+document.addEventListener("keydown", (event) => {
+    if (!GAME_LOOP) return;
+    event.preventDefault();
+    switch (event.key) {
+      case "ArrowUp":
+        directionRegistry('up');
+        break;
+      case "ArrowDown":
+        directionRegistry('down');
+        break;
+      case "ArrowLeft":
+        directionRegistry('left');
+        break;
+      case "ArrowRight":
+        directionRegistry('right');
+        break;
+      default:
+        // Ignore other keys
+        break;
+    }
+  });
 
 function directionHandler(direction) {
     const snake_head = SNAKE_BODY[0];
@@ -77,7 +83,14 @@ function directionHandler(direction) {
         return direction == 'left' || direction == 'right';
     else if (current_direction == 'left' || current_direction == 'right')
         return direction == 'up' || direction == 'down';
-    
+}
+
+function directionRegistry(direction) {
+    if (!directionHandler(direction)) return;
+    SNAKE_BODY[0]['direction'] = direction;
+    const x = SNAKE_BODY[0]['stat'].offsetLeft;
+    const y = SNAKE_BODY[0]['stat'].offsetTop;
+    TURN_HASHMAP.set(`${x},${y}`, direction);
 }
 
 function moveSnakePart(pixelsToMove, snakepart, direction) {
@@ -94,19 +107,28 @@ function moveSnakePart(pixelsToMove, snakepart, direction) {
     else if (direction == 'right') {
         currentDirectionMoving = snakepart.offsetLeft;
         if (currentDirectionMoving > MAX_ARENA_WIDTH + SNAKE_SIZE) {
-            snakepart.style.left = Math.ceil((MAX_ARENA_WIDTH - (currentDirectionMoving + pixelsToMove - SNAKE_SIZE/2))) + 'px';
+            snakepart.style.left = Math.floor((MAX_ARENA_WIDTH - (currentDirectionMoving + pixelsToMove - SNAKE_SIZE/2))) + 'px';
         }
         else
-            snakepart.style.left = Math.ceil((currentDirectionMoving + pixelsToMove)) + 'px';
+            snakepart.style.left = Math.floor((currentDirectionMoving + pixelsToMove)) + 'px';
     }
     else if (direction == 'up') {
-        currentDirectionMoving = parseInt(snakepart.style.top || '0', 10);
-
+        currentDirectionMoving = snakepart.offsetTop;
+        if (currentDirectionMoving <= 0 - SNAKE_SIZE) {
+            snakepart.style.top = Math.ceil((MAX_ARENA_HEIGHT + currentDirectionMoving - pixelsToMove + SNAKE_SIZE)) + 'px';
+        }
+        else
+            snakepart.style.top = Math.ceil((currentDirectionMoving - pixelsToMove)) + 'px';
     }
     else if (direction == 'down') {
-        currentDirectionMoving = parseInt(snakepart.style.top || '0', 10);
-
+        currentDirectionMoving = snakepart.offsetTop;
+        if (currentDirectionMoving > MAX_ARENA_HEIGHT + SNAKE_SIZE) {
+            snakepart.style.top = Math.floor((MAX_ARENA_HEIGHT - (currentDirectionMoving + pixelsToMove - SNAKE_SIZE/2))) + 'px';
+        }
+        else
+            snakepart.style.top = Math.floor((currentDirectionMoving + pixelsToMove)) + 'px';
     }
+    console.log(currentDirectionMoving);
 }
 
 function gameLoop(currentTime) {
@@ -159,6 +181,5 @@ window.onload = function () {
     GAME_INTERFACE.appendChild(snakehead);
     SNAKE_BODY.push({'stat': snakehead, 'direction': 'left'});
 
-    addPartsToSnake(15);
-    
+    //addPartsToSnake(5);
 }
