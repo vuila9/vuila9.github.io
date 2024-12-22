@@ -1,8 +1,7 @@
 #game-interface {
     display: grid;
-    grid-template-columns: repeat(70, 15px);
-    grid-template-rows: repeat(35, 15px);
-    background-color: #333; /* For better visibility */
+    height: 525px;
+    width: 100%;
 }
 
 .grid-item {
