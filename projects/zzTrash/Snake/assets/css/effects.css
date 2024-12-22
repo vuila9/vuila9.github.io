@@ -1,0 +1,23 @@
+#game-interface {
+    border: 0.5px outset rgb(12, 12, 12);     /* Thin border around the entire container */
+    width: 100%;                                /* Full width of the parent */
+    display: block;                             /* Block display to occupy full width */
+    box-sizing: border-box;                     /* Include border in the total width calculation */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
+    height: 500px; 
+    background-color: rgb(242,242,242); 
+    /* misc effects */
+    position: relative;
+    overflow: hidden;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center; /* Push groups to the edges */
+    align-items: center; /* Align buttons vertically (optional) */
+    position: relative;
+}
+
+.pixel {
+    position: absolute;
+}
