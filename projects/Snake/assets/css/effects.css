@@ -1,14 +1,25 @@
 #game-interface {
-    border: 0.5px outset rgb(12, 12, 12);     /* Thin border around the entire container */
-    width: 100%;                                /* Full width of the parent */
-    display: block;                             /* Block display to occupy full width */
-    box-sizing: border-box;                     /* Include border in the total width calculation */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
-    height: 500px; 
-    background-color: rgb(242,242,242); 
-    /* misc effects */
-    position: relative;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(70, 15px);
+    grid-template-rows: repeat(35, 15px);
+    background-color: #333; /* For better visibility */
+}
+
+.grid-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #000;
+    padding: 0;
+}
+
+.grid-box {
+    width: 15px;
+    height: 15px;
+    background-color: #fff;
+    border: 1px solid #ccc; /* Visible border */
+    box-sizing: border-box; /* Ensures borders don't affect size */
 }
 
 .button-row {
@@ -16,8 +27,4 @@
     justify-content: center; /* Push groups to the edges */
     align-items: center; /* Align buttons vertically (optional) */
     position: relative;
-}
-
-.pixel {
-    position: absolute;
 }
