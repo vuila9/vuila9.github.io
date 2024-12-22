@@ -9,6 +9,7 @@ let FRUIT_EATEN = true;
 
 
 const TURN_HASHMAP = new Map();
+const TURN_QUEUE = new Queue();
 const SNAKE_BODY = [];
 let TURN_COORDINATE = [];
 
@@ -58,23 +59,23 @@ document.addEventListener("keydown", (event) => {
     if (!GAME_LOOP) return;
     event.preventDefault();
     switch (event.key) {
-      case "ArrowUp":
-        directionRegistry('up');
-        break;
-      case "ArrowDown":
-        directionRegistry('down');
-        break;
-      case "ArrowLeft":
-        directionRegistry('left');
-        break;
-      case "ArrowRight":
-        directionRegistry('right');
-        break;
-      default:
-        // Ignore other keys
-        break;
+        case "ArrowUp":
+            directionRegistry('up');
+            break;
+        case "ArrowDown":
+            directionRegistry('down');
+            break;
+        case "ArrowLeft":
+            directionRegistry('left');
+            break;
+        case "ArrowRight":
+            directionRegistry('right');
+            break;
+        default:
+            // Ignore other keys
+            break;
     }
-  });
+});
 
 function directionHandler(direction) {
     const snake_head = SNAKE_BODY[0];
@@ -90,7 +91,11 @@ function directionRegistry(direction) {
     SNAKE_BODY[0]['direction'] = direction;
     const x = SNAKE_BODY[0]['stat'].offsetLeft;
     const y = SNAKE_BODY[0]['stat'].offsetTop;
-    TURN_HASHMAP.set(`${x},${y}`, direction);
+    //TURN_HASHMAP.set(`${x},${y}`, direction);
+    //TURN_QUEUE.enqueue([`${x},${y}`, direction]);
+    for (let snakepart of SNAKE_BODY) {
+        snakepart['turnqueue'].enqueue([`${x},${y}`, direction])
+    }
 }
 
 function moveSnakePart(pixelsToMove, snakepart, direction) {
@@ -128,7 +133,15 @@ function moveSnakePart(pixelsToMove, snakepart, direction) {
         else
             snakepart.style.top = Math.floor((currentDirectionMoving + pixelsToMove)) + 'px';
     }
+<<<<<<< HEAD
     //console.log(currentDirectionMoving);
+=======
+}
+
+function withinRange(value, target, range=1) {
+    //return value >= target - range || value <= target + range;
+    return value == target;
+>>>>>>> f9b5304c7b72aaccc78e8013fe35a394f63719e0
 }
 
 function gameLoop(currentTime) {
@@ -139,8 +152,15 @@ function gameLoop(currentTime) {
         const pixelsToMove = (elapsedTime / 1000) * SNAKE_SPEED;
         for (let i = 0; i < SNAKE_LENGTH; i++) {
             const snake = document.getElementById('snake-body-' + i);
+            const turnqueue = SNAKE_BODY[i]['turnqueue'];
+            if (!turnqueue.isEmpty()) {
+                const current_xy = turnqueue.peek()[0].split(',');
+                const current_direction = turnqueue.peek()[1];
+                if (withinRange(snake.offsetLeft, Number(current_xy[0])) && withinRange(snake.offsetTop, Number(current_xy[1])))
+                    SNAKE_BODY[i]['direction'] = current_direction;
+                //turnqueue.dequeue();
+            }
             moveSnakePart(pixelsToMove, snake, SNAKE_BODY[i]['direction']);
-            // if (i == SNAKE_LENGTH - 1) console.log(SNAKE_BODY[i]['stat'].offsetLeft);
         }
         LAST_FRAME_TIME = currentTime;
     }
@@ -172,14 +192,14 @@ function addPartsToSnake(length=1, option=1) {
         const snakepart_y = SNAKE_BODY.at(-1)['stat'].offsetTop;
         const snakepart = placePixel(snakepart_x, snakepart_y);
         GAME_INTERFACE.appendChild(snakepart);
-        SNAKE_BODY.push({'stat': snakepart, 'direction': SNAKE_BODY.at(-1)['direction']});
+        SNAKE_BODY.push({'stat': snakepart, 'direction': SNAKE_BODY.at(-1)['direction'], 'turnqueue': new Queue()});
     }
 }
 
 window.onload = function () {
     const snakehead = placePixel(Math.floor(MAX_ARENA_WIDTH/2), Math.floor(MAX_ARENA_HEIGHT/2));
     GAME_INTERFACE.appendChild(snakehead);
-    SNAKE_BODY.push({'stat': snakehead, 'direction': 'left'});
+    SNAKE_BODY.push({'stat': snakehead, 'direction': 'left', 'turnqueue': new Queue()});
 
-    //addPartsToSnake(5);
+    addPartsToSnake(5);
 }
