@@ -2,7 +2,20 @@
     display: grid;
     height: 525px;
     width: 100%;
+    position: relative;
 }
+
+/* #game-interface {
+    border: 0.5px outset rgb(12, 12, 12);   
+    width: 100%;                                
+    display: block;                             
+    box-sizing: border-box;                     
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
+    height: 500px; 
+    background-color: rgb(242,242,242); 
+    position: relative;
+    overflow: hidden;
+} */
 
 .grid-item {
     display: flex;
@@ -19,6 +32,13 @@
     background-color: #fff;
     border: 1px solid #ccc; /* Visible border */
     box-sizing: border-box; /* Ensures borders don't affect size */
+}
+
+.snake-part {
+    width: 15px;
+    height: 15px;
+    background-color: rgb(255,0,0);
+    position: absolute;
 }
 
 .button-row {

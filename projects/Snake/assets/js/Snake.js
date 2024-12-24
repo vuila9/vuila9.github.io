@@ -1,25 +1,103 @@
-function createGridPlayfield() {
+function main() {
     const gameinterface = document.getElementById("game-interface");
-    const max_playfield_width = gameinterface.offsetWidth;
-    const max_playfield_height = gameinterface.offsetHeight;
     const gridsize = 15;
+    const playField = new PlayField(gameinterface, gridsize)
+    playField.init();
 
-    const rows = Math.floor(max_playfield_height / gridsize);
-    const cols = Math.floor(max_playfield_width/ gridsize);
+    const snake = new Snake(Math.floor(playField.getColsNum()/2), Math.floor(playField.getRowsNum()/2) ,'left');
+    playField.placeSnake(snake);
 
-    gameinterface.style.gridTemplateRows = `repeat(${rows}, ${gridsize}px)`
-    gameinterface.style.gridTemplateColumns = `repeat(${cols}, ${gridsize}px)`;
+    let GAME_LOOP = false;
+    document.getElementById('button-play').addEventListener('mousedown', (event) => { 
+        if (event.button == 2) event.preventDefault(); // prevent right-click
+        GAME_LOOP = !GAME_LOOP;
+    
+        if (GAME_LOOP) {
+            document.getElementById('button-play-icon').className = 'fa fa-pause';
+            event.target.title = 'Press to pause';
+            //LAST_FRAME_TIME = performance.now();
+            //gameLoop(LAST_FRAME_TIME);
+        }
+        else {
+            document.getElementById('button-play-icon').className = 'fa fa-play';
+            event.target.title = 'Press to play';
+        }
+    });
 
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-            const box = document.createElement("div");
-            box.classList.add("grid-box");
-            box.id = `${x},${y}`; // Assign an ID based on coordinates
-            gameinterface.appendChild(box);
+    document.getElementById('button-up').addEventListener('mousedown', (event) => {
+        if (!GAME_LOOP) return;
+        console.log('button up clicked');
+        snake.setDirection('up');
+    });
+    
+    document.getElementById('button-down').addEventListener('mousedown', (event) => {
+        if (!GAME_LOOP) return;
+        console.log('button down clicked');
+        snake.setDirection('down');
+    });
+    
+    document.getElementById('button-left').addEventListener('mousedown', (event) => {
+        if (!GAME_LOOP) return;
+        console.log('button left clicked');
+        snake.setDirection('left');
+    });
+    
+    document.getElementById('button-right').addEventListener('mousedown', (event) => {
+        if (!GAME_LOOP) return;
+        console.log('button right clicked');
+        snake.setDirection('right');
+
+    });
+    
+    // Add event listener for keyboard key presses
+    document.addEventListener("keydown", (event) => {
+        if (!GAME_LOOP) return;
+        event.preventDefault();
+        switch (event.key) {
+            case "ArrowUp":
+                snake.setDirection('up');
+                break;
+            case "ArrowDown":
+                snake.setDirection('down');
+                break;
+            case "ArrowLeft":
+                snake.setDirection('left');
+                break;
+            case "ArrowRight":
+                snake.setDirection('right');
+                break;
+            default:
+                // Ignore other keys
+                break;
+        }
+    });
+
+    function gameLoop() {
+        if (!GAME_LOOP) return;
+        console.log("it's on");
+        updateSnake();
+        renderSnake();
+    }
+
+    function updateSnake() {
+        const head_direction = snake.getHead()['direction'];
+        if (head_direction == 'left') {
+
         }
     }
+
+    function renderSnake() {
+
+    }
+
+    setInterval(gameLoop, 250);
 }
 
+function gameLoop(GAME_LOOP) {
+    
+}
+
+
 window.onload = function() {
-    createGridPlayfield();
+    main();
 }
