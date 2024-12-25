@@ -47,3 +47,10 @@
     align-items: center; /* Align buttons vertically (optional) */
     position: relative;
 }
+
+#apple {
+    width: 15px;
+    height: 15px;
+    background-color: rgb(0,255,0);
+    position: absolute;
+}

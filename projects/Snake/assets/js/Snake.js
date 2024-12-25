@@ -1,22 +1,23 @@
 function main() {
-    const gameinterface = document.getElementById("game-interface");
-    const gridsize = 15;
-    const playField = new PlayField(gameinterface, gridsize)
-    playField.init();
+    const DELAY = 100; //miliseconds, increasing makes the game slower, decreasing makes the game faster
+    const GAME_INTERFACE = document.getElementById("game-interface");
+    const GRIDSIZE = 15;
+    const PLAY_FIELD = new PlayField(GAME_INTERFACE, GRIDSIZE)
+    PLAY_FIELD.init();
 
-    const snake = new Snake(Math.floor(playField.getColsNum()/2), Math.floor(playField.getRowsNum()/2) ,'left');
-    playField.placeSnake(snake);
+    const SNAKE = new Snake(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, 'left');
+    PLAY_FIELD.spawnSnake(SNAKE);
+
+    const APPLE = new Apple(1, GRIDSIZE);
+    PLAY_FIELD.spawnApple(APPLE);
 
     let GAME_LOOP = false;
     document.getElementById('button-play').addEventListener('mousedown', (event) => { 
         if (event.button == 2) event.preventDefault(); // prevent right-click
         GAME_LOOP = !GAME_LOOP;
-    
         if (GAME_LOOP) {
             document.getElementById('button-play-icon').className = 'fa fa-pause';
             event.target.title = 'Press to pause';
-            //LAST_FRAME_TIME = performance.now();
-            //gameLoop(LAST_FRAME_TIME);
         }
         else {
             document.getElementById('button-play-icon').className = 'fa fa-play';
@@ -24,28 +25,35 @@ function main() {
         }
     });
 
+    document.getElementById('button-grow').addEventListener('mousedown', (event) => {
+        if (!GAME_LOOP) return;
+        console.log('button up clicked');
+        SNAKE.grow();
+    });
+
+
     document.getElementById('button-up').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
         console.log('button up clicked');
-        snake.setDirection('up');
+        SNAKE.setDirection('up');
     });
     
     document.getElementById('button-down').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
         console.log('button down clicked');
-        snake.setDirection('down');
+        SNAKE.setDirection('down');
     });
     
     document.getElementById('button-left').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
         console.log('button left clicked');
-        snake.setDirection('left');
+        SNAKE.setDirection('left');
     });
     
     document.getElementById('button-right').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
         console.log('button right clicked');
-        snake.setDirection('right');
+        SNAKE.setDirection('right');
 
     });
     
@@ -55,16 +63,16 @@ function main() {
         event.preventDefault();
         switch (event.key) {
             case "ArrowUp":
-                snake.setDirection('up');
+                SNAKE.setDirection('up');
                 break;
             case "ArrowDown":
-                snake.setDirection('down');
+                SNAKE.setDirection('down');
                 break;
             case "ArrowLeft":
-                snake.setDirection('left');
+                SNAKE.setDirection('left');
                 break;
             case "ArrowRight":
-                snake.setDirection('right');
+                SNAKE.setDirection('right');
                 break;
             default:
                 // Ignore other keys
@@ -74,29 +82,42 @@ function main() {
 
     function gameLoop() {
         if (!GAME_LOOP) return;
-        console.log("it's on");
         updateSnake();
         renderSnake();
     }
 
     function updateSnake() {
-        const head_direction = snake.getHead()['direction'];
-        if (head_direction == 'left') {
-
+        SNAKE.updateLastPosition();
+        for (let i = SNAKE.getLength() - 1; i >= 1; i--) {
+            const snakePart = SNAKE.getPartAt(i);
+            snakePart['position'][0] = SNAKE.getPartAt(i-1)['position'][0];
+            snakePart['position'][1] = SNAKE.getPartAt(i-1)['position'][1];
+        }
+        SNAKE.updateHeadPosition(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum());
+        if (SNAKE.eatenFood(APPLE)) {
+            SNAKE.grow();
+            APPLE.spawn(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum());
+            renderApple();
         }
     }
 
     function renderSnake() {
-
+        for (let i = 0; i < SNAKE.getLength(); i++) {
+            const snakePart = SNAKE.getPartAt(i);
+            snakePart['div'].style.left = GRIDSIZE * snakePart['position'][0] + 'px';
+            snakePart['div'].style.top = GRIDSIZE * snakePart['position'][1] + 'px';
+        }
     }
 
-    setInterval(gameLoop, 250);
-}
+    function renderApple() {
+        const apple_div = document.getElementById('apple');
+        const [x,y] = APPLE.getApplePosition();
+        apple_div.style.left = GRIDSIZE * x + 'px';
+        apple_div.style.top = GRIDSIZE * y + 'px';
 
-function gameLoop(GAME_LOOP) {
-    
+    }
+    setInterval(gameLoop, DELAY);
 }
-
 
 window.onload = function() {
     main();
