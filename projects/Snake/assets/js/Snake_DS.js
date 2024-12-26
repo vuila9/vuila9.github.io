@@ -76,6 +76,7 @@ class Snake {
         this.direction = direction;
         this.length = 1;
         this.gridsize = gridsize;
+        this.occupiedGrid = new Set();
     }
 
     setDirection(direction) {
@@ -89,8 +90,26 @@ class Snake {
             this.direction = direction;
     }
 
+    resetOccupiedGrid() {
+        this.occupiedGrid.clear();
+    }
+
+    updateOccupiedGrid(position) {
+        this.occupiedGrid.add(position);
+    }
+
+    getOccupiedGrid() {
+        return this.occupiedGrid;
+    }
+
     getDirection() {
         return this.direction;
+    }
+
+    collideSelf() {
+        const head_x = this.body[0]['position'][0];
+        const head_y = this.body[0]['position'][1];
+        return this.occupiedGrid.has(`${head_x},${head_y}`);
     }
 
     eatenFood(apple) {
@@ -178,9 +197,12 @@ class Apple {
         return [this.apple_x, this.apple_y];
     }
 
-    spawn(rows, cols) {
+    spawn(rows, cols, snake_occupiedgrid=new Set()) {
         this.apple_x = Math.floor(Math.random() * cols);
         this.apple_y = Math.floor(Math.random() * rows);
-        //will need to check for occupied grid
+        while (snake_occupiedgrid.has(`${this.apple_x},${this.apple_y}`)) {
+            this.apple_x = Math.floor(Math.random() * cols);
+            this.apple_y = Math.floor(Math.random() * rows);
+        }
     }
 }

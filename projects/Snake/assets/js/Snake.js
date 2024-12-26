@@ -62,15 +62,22 @@ function main() {
         if (!GAME_LOOP) return;
         event.preventDefault();
         switch (event.key) {
+            case "w":
             case "ArrowUp":
                 SNAKE.setDirection('up');
                 break;
-            case "ArrowDown":
+                
+            case "s":
+            case "ArrowDown" || 'S':
                 SNAKE.setDirection('down');
                 break;
+
+            case "a":
             case "ArrowLeft":
                 SNAKE.setDirection('left');
                 break;
+
+            case "d":
             case "ArrowRight":
                 SNAKE.setDirection('right');
                 break;
@@ -84,19 +91,29 @@ function main() {
         if (!GAME_LOOP) return;
         updateSnake();
         renderSnake();
+        
     }
 
     function updateSnake() {
         SNAKE.updateLastPosition();
+        SNAKE.resetOccupiedGrid();
         for (let i = SNAKE.getLength() - 1; i >= 1; i--) {
             const snakePart = SNAKE.getPartAt(i);
             snakePart['position'][0] = SNAKE.getPartAt(i-1)['position'][0];
             snakePart['position'][1] = SNAKE.getPartAt(i-1)['position'][1];
+            SNAKE.updateOccupiedGrid(`${snakePart['position'][0]},${snakePart['position'][1]}`);
         }
         SNAKE.updateHeadPosition(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum());
+        if (SNAKE.collideSelf()) {
+            console.log('game over');
+            GAME_LOOP = !GAME_LOOP;
+            return;
+        }
+        SNAKE.updateOccupiedGrid(`${SNAKE.getHead()['position'][0]},${SNAKE.getHead()['position'][1]}`);
+
         if (SNAKE.eatenFood(APPLE)) {
             SNAKE.grow();
-            APPLE.spawn(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum());
+            APPLE.spawn(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum(), SNAKE.getOccupiedGrid());
             renderApple();
         }
     }
