@@ -27,34 +27,27 @@ function main() {
 
     document.getElementById('button-grow').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        console.log('button up clicked');
         SNAKE.grow();
     });
 
-
     document.getElementById('button-up').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        console.log('button up clicked');
         SNAKE.setDirection('up');
     });
     
     document.getElementById('button-down').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        console.log('button down clicked');
         SNAKE.setDirection('down');
     });
     
     document.getElementById('button-left').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        console.log('button left clicked');
         SNAKE.setDirection('left');
     });
     
     document.getElementById('button-right').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        console.log('button right clicked');
         SNAKE.setDirection('right');
-
     });
     
     // Add event listener for keyboard key presses

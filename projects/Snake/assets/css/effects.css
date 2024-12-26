@@ -38,6 +38,7 @@
     width: 15px;
     height: 15px;
     background-color: rgb(255,0,0);
+    border: 1px solid #000; /* Visible border */
     position: absolute;
 }
 
