@@ -23,6 +23,12 @@ class PlayField {
         }
     }
 
+    reset() {
+        const snake_parts = document.querySelectorAll('.snake-part');
+        snake_parts.forEach(part => part.remove());
+        document.getElementById('apple').remove();
+    }
+
     getRowsNum() {
         return this.rows;
     }
@@ -63,7 +69,11 @@ class PlayField {
 }
 
 class Snake {
-    constructor(x, y, gridsize=15, direction='left',color='rgb(0,0,0)') {
+    constructor(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
+        this._initialize(x, y, gridsize=15, direction, color='rgb(0,0,0)');
+    }
+
+    _initialize(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
         const snake_div = document.createElement('div');
         snake_div.className = 'snake-part';
         document.getElementById('game-interface').appendChild(snake_div);
@@ -77,6 +87,10 @@ class Snake {
         this.length = 1;
         this.gridsize = gridsize;
         this.occupiedGrid = new Set();
+    }
+
+    reset(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
+        this._initialize(x, y, gridsize=15, direction,color='rgb(0,0,0)');
     }
 
     setDirection(direction) {
@@ -145,11 +159,6 @@ class Snake {
     getLastPosition() {
         return [this.last_x, this.last_y];
     }
-    
-
-    getSnakeDiv() {
-        return this.snake_div;
-    }
 
     getLength() {
         return this.length;
@@ -157,10 +166,6 @@ class Snake {
 
     getHead() {
         return this.body[0];
-    }
-
-    getTail() {
-        return this.body.at(-1);
     }
 
     getPartAt(index) {
@@ -178,11 +183,14 @@ class Snake {
         this.body.push({'div': snake_div, 'position': [this.last_x, this.last_y], 'color': color});
         this.length++;
     }
-
 }
 
 class Apple {
     constructor(score=1, gridsize) {
+        this._initialize(score=1, gridsize)
+    }
+
+    _initialize(score=1, gridsize) {
         this.score = score;
         this.gridsize = gridsize;
         const apple_div = document.createElement('div');
@@ -191,6 +199,10 @@ class Apple {
         document.getElementById('game-interface').appendChild(apple_div);
         this.apple_x = 0;
         this.apple_y = 0;
+    }
+
+    reset(score=1, gridsize) {
+        this._initialize(score=1, gridsize)
     }
 
     getApplePosition() {
