@@ -1,5 +1,7 @@
 function main() {
-    const DELAY = 150; //miliseconds, increasing makes the game slower, decreasing makes the game faster
+    let DELAY = 150; //miliseconds, increasing makes the game slower, decreasing makes the game faster
+    let HASTE = 2;
+    let isHasten = false;
     const GAME_INTERFACE = document.getElementById("game-interface");
     const GRIDSIZE = 15;
     const SCORE_RATIO = 1;
@@ -15,17 +17,9 @@ function main() {
     PLAY_FIELD.spawnApple(APPLE);
 
     let GAME_LOOP = false;
-    document.getElementById('button-play').addEventListener('click', (event) => { 
+    document.getElementById('button-play').addEventListener('click', (event) => { // start / pause the game
         if (event.button == 2) event.preventDefault(); // prevent right-click
-        GAME_LOOP = !GAME_LOOP;
-        if (GAME_LOOP) {
-            document.getElementById('button-play-icon').className = 'fa fa-pause';
-            event.target.title = 'Press to pause';
-        }
-        else {
-            document.getElementById('button-play-icon').className = 'fa fa-play';
-            event.target.title = 'Press to play';
-        }
+        pauseGame(event);
     });
 
     document.getElementById('button-grow').addEventListener('click', (event) => {
@@ -53,7 +47,7 @@ function main() {
         SNAKE.setTempDirection('right');
     });
 
-    document.getElementById('button-reset').addEventListener('click', (event) => {
+    document.getElementById('button-reset').addEventListener('click', (event) => { // reset 
         GAME_LOOP = false;
         PLAY_FIELD.reset();
         SNAKE.reset(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
@@ -66,23 +60,48 @@ function main() {
         document.getElementById('gameover-popup').style.display = 'none';
     });
 
-    document.getElementById('button-grid').addEventListener('click', (event) => {
-        GRID_ENABLED = !GRID_ENABLED; // Toggle the state value
-
-        // Update the displayed state
-        const elements = document.querySelectorAll('.grid-box'); // Select all elements with class 'grid-box'
+    document.getElementById('button-grid').addEventListener('click', (event) => { // toggle grid on/off
+        GRID_ENABLED = !GRID_ENABLED; 
+        const elements = document.querySelectorAll('.grid-box'); 
         if (GRID_ENABLED) {
             document.getElementById('button-grid-icon').className = 'fas fa-border-none';
             event.target.title = 'Press to untoggle grid';
             elements.forEach(element => {
-                element.style.border = '1px solid #ccc'; // Apply the style
+                element.style.border = '1px solid #ccc';
             });
         } else {
             document.getElementById('button-grid-icon').className = 'fas fa-border-all';
             event.target.title = 'Press to toggle grid';
             elements.forEach(element => {
-                element.style.border = 'none'; // Apply the style
+                element.style.border = 'none'; 
             });
+        }
+    });
+
+    document.getElementById('button-haste').addEventListener('mousedown', (event) => { // hasten the snake when mouse is down
+        DELAY /= HASTE;
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === " " && !isHasten) {
+            event.preventDefault();
+            DELAY /= HASTE;
+            isHasten = true;
+        }
+    });
+
+    document.getElementById('button-haste').addEventListener('mouseup', (event) => {   // reset speed to default when mouse is up
+        DELAY *= HASTE;
+    });
+
+    document.addEventListener("keyup", (event) => {
+        if (event.key === " ") {
+            event.preventDefault();
+            DELAY *= HASTE;
+            isHasten = false;
+        }
+        else if (event.key === 'p') {
+            pauseGame(event);
         }
     });
 
@@ -121,6 +140,20 @@ function main() {
         SNAKE.setConfirmedDirection();
         updateSnake();
         renderSnake();
+        setTimeout(gameLoop, DELAY);
+    }
+
+    function pauseGame(event) {
+        GAME_LOOP = !GAME_LOOP;
+        if (GAME_LOOP) {
+            document.getElementById('button-play-icon').className = 'fa fa-pause';
+            event.target.title = 'Press to pause';
+        }
+        else {
+            document.getElementById('button-play-icon').className = 'fa fa-play';
+            event.target.title = 'Press to play';
+        }
+        gameLoop();
     }
 
     function updateSnake() {
@@ -169,7 +202,7 @@ function main() {
         const gameover_popup = document.getElementById('gameover-popup');
         const gameover_body_popup = document.getElementsByClassName('body-popup')[0].lastElementChild;
         gameover_body_popup.innerHTML = "<h3>Game Over</h3>";
-        gameover_body_popup.innerHTML += `Score: ${SNAKE.getLength()}`;
+        gameover_body_popup.innerHTML += `Score: ${SNAKE.getLength() - 1}`;
 
 
         const span = document.getElementsByClassName("close")[0];
@@ -183,7 +216,8 @@ function main() {
         }
     }
 
-    setInterval(gameLoop, DELAY);
+    //setInterval(gameLoop, DELAY);
+    setTimeout(gameLoop, DELAY);
 }
 
 window.onload = function() {
