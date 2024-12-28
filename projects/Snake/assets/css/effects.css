@@ -14,6 +14,7 @@
     box-sizing: border-box; /* Ensures borders don't affect size */
 }
 
+/* BUTTONS */
 .button-row {
     display: flex;
     justify-content: center; /* Push groups to the edges */

@@ -5,7 +5,7 @@ function main() {
     const SCORE_RATIO = 1;
     const DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
     const PLAY_FIELD = new PlayField(GAME_INTERFACE, GRIDSIZE);
-    var DIRECTION_INQUEUE = false;
+    let GRID_ENABLED = true;
     PLAY_FIELD.init();
 
     const SNAKE = new Snake(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
@@ -15,7 +15,7 @@ function main() {
     PLAY_FIELD.spawnApple(APPLE);
 
     let GAME_LOOP = false;
-    document.getElementById('button-play').addEventListener('mousedown', (event) => { 
+    document.getElementById('button-play').addEventListener('click', (event) => { 
         if (event.button == 2) event.preventDefault(); // prevent right-click
         GAME_LOOP = !GAME_LOOP;
         if (GAME_LOOP) {
@@ -28,32 +28,32 @@ function main() {
         }
     });
 
-    document.getElementById('button-grow').addEventListener('mousedown', (event) => {
+    document.getElementById('button-grow').addEventListener('click', (event) => {
         if (!GAME_LOOP) return;
         SNAKE.grow();
     });
 
-    document.getElementById('button-up').addEventListener('mousedown', (event) => {
+    document.getElementById('button-up').addEventListener('click', (event) => {
         if (!GAME_LOOP) return;
         SNAKE.setTempDirection('up');
     });
     
-    document.getElementById('button-down').addEventListener('mousedown', (event) => {
+    document.getElementById('button-down').addEventListener('click', (event) => {
         if (!GAME_LOOP) return;
         SNAKE.setTempDirection('down');
     });
     
-    document.getElementById('button-left').addEventListener('mousedown', (event) => {
+    document.getElementById('button-left').addEventListener('click', (event) => {
         if (!GAME_LOOP) return;
         SNAKE.setTempDirection('left');
     });
     
-    document.getElementById('button-right').addEventListener('mousedown', (event) => {
+    document.getElementById('button-right').addEventListener('click', (event) => {
         if (!GAME_LOOP) return;
         SNAKE.setTempDirection('right');
     });
 
-    document.getElementById('button-reset').addEventListener('mousedown', (event) => {
+    document.getElementById('button-reset').addEventListener('click', (event) => {
         GAME_LOOP = false;
         PLAY_FIELD.reset();
         SNAKE.reset(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
@@ -65,7 +65,27 @@ function main() {
         document.getElementById('button-play').disabled = false;
         document.getElementById('gameover-popup').style.display = 'none';
     });
-    
+
+    document.getElementById('button-grid').addEventListener('click', (event) => {
+        GRID_ENABLED = !GRID_ENABLED; // Toggle the state value
+
+        // Update the displayed state
+        const elements = document.querySelectorAll('.grid-box'); // Select all elements with class 'grid-box'
+        if (GRID_ENABLED) {
+            document.getElementById('button-grid-icon').className = 'fas fa-border-none';
+            event.target.title = 'Press to untoggle grid';
+            elements.forEach(element => {
+                element.style.border = '1px solid #ccc'; // Apply the style
+            });
+        } else {
+            document.getElementById('button-grid-icon').className = 'fas fa-border-all';
+            event.target.title = 'Press to toggle grid';
+            elements.forEach(element => {
+                element.style.border = 'none'; // Apply the style
+            });
+        }
+    });
+
     // Add event listener for keyboard key presses
     document.addEventListener("keydown", (event) => {
         if (!GAME_LOOP) return;
@@ -149,6 +169,8 @@ function main() {
         const gameover_popup = document.getElementById('gameover-popup');
         const gameover_body_popup = document.getElementsByClassName('body-popup')[0].lastElementChild;
         gameover_body_popup.innerHTML = "<h3>Game Over</h3>";
+        gameover_body_popup.innerHTML += `Score: ${SNAKE.getLength()}`;
+
 
         const span = document.getElementsByClassName("close")[0];
         gameover_popup.style.display = 'block';
