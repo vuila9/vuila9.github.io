@@ -69,39 +69,48 @@ class PlayField {
 }
 
 class Snake {
-    constructor(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
-        this._initialize(x, y, gridsize=15, direction, color='rgb(0,0,0)');
-    }
-
     _initialize(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
         const snake_div = document.createElement('div');
         snake_div.className = 'snake-part';
         document.getElementById('game-interface').appendChild(snake_div);
-        this.direction = direction;
         this.body = [{'div': snake_div, 'position': [x,y], 'color': color}];
         this.last_x = x;
         this.last_y = y;
         this.color = color;
         //this.speed = speed;
-        this.direction = direction;
+        this.confirmed_direction = direction;
+        this.temp_direction = direction;
         this.length = 1;
         this.gridsize = gridsize;
         this.occupiedGrid = new Set();
     }
 
-    reset(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
-        this._initialize(x, y, gridsize=15, direction,color='rgb(0,0,0)');
+    constructor(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
+        this._initialize(x, y, gridsize, direction, color);
     }
 
-    setDirection(direction) {
-        let current_direction = this.direction;
+    reset(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
+        this._initialize(x, y, gridsize, direction, color);
+    }
+
+    setTempDirection(direction) {
+        let current_direction = this.temp_direction;
         let valid = false;
         if (current_direction == 'up' || current_direction == 'down')
             valid = direction == 'left' || direction == 'right';
         else if (current_direction == 'left' || current_direction == 'right')
             valid = direction == 'up' || direction == 'down';
         if (valid)
-            this.direction = direction;
+            this.temp_direction = direction;
+    }
+
+    setConfirmedDirection() {
+        const bool1 = !(this.confirmed_direction == 'left' && this.temp_direction == 'right');
+        const bool2 = !(this.confirmed_direction == 'up' && this.temp_direction == 'down');
+        const bool3 = !(this.confirmed_direction == 'right' && this.temp_direction == 'left');
+        const bool4 = !(this.confirmed_direction == 'down' && this.temp_direction == 'up');
+        if (bool1 && bool2 && bool3 && bool4)
+            this.confirmed_direction = this.temp_direction;
     }
 
     resetOccupiedGrid() {
@@ -116,10 +125,6 @@ class Snake {
         return this.occupiedGrid;
     }
 
-    getDirection() {
-        return this.direction;
-    }
-
     collideSelf() {
         const head_x = this.body[0]['position'][0];
         const head_y = this.body[0]['position'][1];
@@ -132,13 +137,14 @@ class Snake {
     }
 
     updateHeadPosition(max_row, max_col) {
-        if (this.direction === 'up')
+        const direction = this.confirmed_direction;
+        if (direction === 'up')
             this.body[0]['position'][1] -= 1;
-        else if (this.direction === 'down') 
+        else if (direction === 'down') 
             this.body[0]['position'][1] += 1;
-        else if (this.direction == 'left')
+        else if (direction == 'left')
             this.body[0]['position'][0] -= 1;
-        else if (this.direction == 'right')
+        else if (direction == 'right')
             this.body[0]['position'][0] += 1;
 
         if (this.body[0]['position'][1] < 0)
@@ -186,10 +192,6 @@ class Snake {
 }
 
 class Apple {
-    constructor(score=1, gridsize) {
-        this._initialize(score=1, gridsize)
-    }
-
     _initialize(score=1, gridsize) {
         this.score = score;
         this.gridsize = gridsize;
@@ -201,8 +203,12 @@ class Apple {
         this.apple_y = 0;
     }
 
+    constructor(score=1, gridsize) {
+        this._initialize(score, gridsize)
+    }
+
     reset(score=1, gridsize) {
-        this._initialize(score=1, gridsize)
+        this._initialize(score, gridsize)
     }
 
     getApplePosition() {

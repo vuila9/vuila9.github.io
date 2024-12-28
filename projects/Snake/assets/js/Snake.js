@@ -1,10 +1,11 @@
 function main() {
-    const DELAY = 100; //miliseconds, increasing makes the game slower, decreasing makes the game faster
+    const DELAY = 150; //miliseconds, increasing makes the game slower, decreasing makes the game faster
     const GAME_INTERFACE = document.getElementById("game-interface");
     const GRIDSIZE = 15;
     const SCORE_RATIO = 1;
     const DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
-    const PLAY_FIELD = new PlayField(GAME_INTERFACE, GRIDSIZE)
+    const PLAY_FIELD = new PlayField(GAME_INTERFACE, GRIDSIZE);
+    var DIRECTION_INQUEUE = false;
     PLAY_FIELD.init();
 
     const SNAKE = new Snake(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
@@ -34,22 +35,22 @@ function main() {
 
     document.getElementById('button-up').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        SNAKE.setDirection('up');
+        SNAKE.setTempDirection('up');
     });
     
     document.getElementById('button-down').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        SNAKE.setDirection('down');
+        SNAKE.setTempDirection('down');
     });
     
     document.getElementById('button-left').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        SNAKE.setDirection('left');
+        SNAKE.setTempDirection('left');
     });
     
     document.getElementById('button-right').addEventListener('mousedown', (event) => {
         if (!GAME_LOOP) return;
-        SNAKE.setDirection('right');
+        SNAKE.setTempDirection('right');
     });
 
     document.getElementById('button-reset').addEventListener('mousedown', (event) => {
@@ -72,22 +73,22 @@ function main() {
         switch (event.key) {
             case "w":
             case "ArrowUp":
-                SNAKE.setDirection('up');
+                SNAKE.setTempDirection('up');
                 break;
                 
             case "s":
-            case "ArrowDown" || 'S':
-                SNAKE.setDirection('down');
+            case "ArrowDown":
+                SNAKE.setTempDirection('down');
                 break;
 
             case "a":
             case "ArrowLeft":
-                SNAKE.setDirection('left');
+                SNAKE.setTempDirection('left');
                 break;
 
             case "d":
             case "ArrowRight":
-                SNAKE.setDirection('right');
+                SNAKE.setTempDirection('right');
                 break;
             default:
                 // Ignore other keys
@@ -97,6 +98,7 @@ function main() {
 
     function gameLoop() {
         if (!GAME_LOOP) return;
+        SNAKE.setConfirmedDirection();
         updateSnake();
         renderSnake();
     }
@@ -142,7 +144,6 @@ function main() {
         apple_div.style.top = GRIDSIZE * y + 'px';
 
     }
-    setInterval(gameLoop, DELAY);
 
     function gameoverPopupHandler() {
         const gameover_popup = document.getElementById('gameover-popup');
@@ -159,6 +160,8 @@ function main() {
                 gameover_popup.style.display = "none";
         }
     }
+
+    setInterval(gameLoop, DELAY);
 }
 
 window.onload = function() {
