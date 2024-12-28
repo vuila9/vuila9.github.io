@@ -12,6 +12,12 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
+            imageSrc: "assets/img/program_icons/snake_tile.jpg",
+            title: "Snake Game",
+            description: "Snake game made using HTML, CSS, JS (ongoing)",
+            link: "projects/Snake/Snake.html"
+        },
+        {
             imageSrc: "assets/img/program_icons/paint_tile.jpg",
             title: "Paint",
             description: "A paint program that allows users to draw.",
