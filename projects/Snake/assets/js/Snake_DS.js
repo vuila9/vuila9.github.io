@@ -29,6 +29,29 @@ class PlayField {
         document.getElementById('apple').remove();
     }
 
+    plainMode() {
+        for (let coor of this.occupiedGrid) {
+            document.getElementById(`grid-${coor}`).style.backgroundColor = '#fff9e1';
+        }
+        this.occupiedGrid.clear();
+    }
+
+    borderMode() {
+        this.plainMode();
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.cols; x++) { 
+                if ((x != 0 && x != this.cols - 1) && (y != 0 && y != this.rows - 1)) continue;
+                const div_grid = document.getElementById(`grid-${x},${y}`);
+                div_grid.style.backgroundColor = 'rgb(255,0,255)';
+                this.occupiedGrid.add(`${x},${y}`);
+            }
+        }
+    }
+
+    getOccupiedGrid() {
+        return this.occupiedGrid;
+    }
+
     getRowsNum() {
         return this.rows;
     }
@@ -58,9 +81,9 @@ class PlayField {
         part_snake['div'].style.backgroundColor = part_snake['color'];
     }
 
-    spawnApple(apple) {
+    spawnApple(apple, snake_occupiedgrid=new Set()) {
         const apple_div = document.getElementById('apple');
-        apple.spawn(this.rows, this.cols);
+        apple.spawn(this.rows, this.cols, snake_occupiedgrid, this.occupiedGrid);
         const [x,y] = apple.getApplePosition();
         apple_div.style.left = this.gridsize * x + 'px';
         apple_div.style.top = this.gridsize * y + 'px';
@@ -83,6 +106,7 @@ class Snake {
         this.length = 1;
         this.gridsize = gridsize;
         this.occupiedGrid = new Set();
+        this.occupiedGrid.add(`${x},${y}`);
     }
 
     constructor(x, y, gridsize=15, direction, color='rgb(0,0,0)') {
@@ -129,6 +153,12 @@ class Snake {
         const head_x = this.body[0]['position'][0];
         const head_y = this.body[0]['position'][1];
         return this.occupiedGrid.has(`${head_x},${head_y}`);
+    }
+
+    collideObstacle(field_occupiedgrid) {
+        const head_x = this.body[0]['position'][0];
+        const head_y = this.body[0]['position'][1];
+        return field_occupiedgrid.has(`${head_x},${head_y}`);
     }
 
     eatenFood(apple) {
@@ -215,10 +245,10 @@ class Apple {
         return [this.apple_x, this.apple_y];
     }
 
-    spawn(rows, cols, snake_occupiedgrid=new Set()) {
+    spawn(rows, cols, snake_occupiedgrid=new Set(), field_occupiedgrid=new Set()) {
         this.apple_x = Math.floor(Math.random() * cols);
         this.apple_y = Math.floor(Math.random() * rows);
-        while (snake_occupiedgrid.has(`${this.apple_x},${this.apple_y}`)) {
+        while (snake_occupiedgrid.has(`${this.apple_x},${this.apple_y}`) || field_occupiedgrid.has(`${this.apple_x},${this.apple_y}`)) {
             this.apple_x = Math.floor(Math.random() * cols);
             this.apple_y = Math.floor(Math.random() * rows);
         }

@@ -35,13 +35,14 @@
 								 <br>
 								 <div class="button-row-farend">
 									<div class="left-buttons">
-								 		<button id="button-grow" title="Press to grow snake" class="fab fa-apple"></button>
-								 		<button id="button-play" title="Press to play"><div id='button-play-icon' class="fa fa-play" style="font-size: 10px; top:50%;"></div></button>
-								 		<button id="button-haste" title="Press and hold to speed up"><div id='button-haste-icon' class="fas fa-angle-double-right" style="font-size: 15px; top:50%;"></div></button>
+								 		<button id="button-grow" title="Grow snake" class="fas fa-apple-alt"></button>
+								 		<button id="button-play" title="Play"><div id='button-play-icon' class="fa fa-play" style="font-size: 10px; top:50%;"></div></button>
+								 		<button id="button-haste" title="Speed up" class="fas fa-angle-double-right"></button>
 									</div>
 									<div class="right-buttons">
-										<button id="button-grid" title="Press to untoggle grid"><div id='button-grid-icon' class="fas fa-border-none" style="font-size: 15px; top:50%;"></div></button>
-										<button id="button-reset" class="fas fa-undo" title="Restart the game"></button>
+										<button id="button-mode" title="Game mode" class="fas fa-cog"></button>
+										<button id="button-grid" title="Untoggle grid"><div id='button-grid-icon' class="fas fa-border-none" style="font-size: 15px; top:50%;"></div></button>
+										<button id="button-reset" title="Restart" class="fas fa-undo" ></button>
 									</div>
 
 								</div>
@@ -59,6 +60,16 @@
 									<div class="body-popup">
 										<span class="close">&times;</span>
 										<span></span>
+									</div>
+								</div>
+								<div id="gamemode-popup" class="popup">
+									<div class="body-popup">
+										<span class="close">&times;</span>
+										<h2>Game Modes</h2>
+										<button id="button-gamemode-plain">Plain</button>
+										<button id="button-gamemode-border">Border</button>
+										<!-- <button id="button-gamemode3">HARD</button>
+										<button id="button-gamemode4">EXPERT</button> -->
 									</div>
 								</div>
 							</div>

@@ -1,13 +1,17 @@
 function main() {
-    let DELAY = 150; //miliseconds, increasing makes the game slower, decreasing makes the game faster
-    let HASTE = 2;
-    let isHasten = false;
     const GAME_INTERFACE = document.getElementById("game-interface");
     const GRIDSIZE = 15;
     const SCORE_RATIO = 1;
+    const SPEED = 150;
     const DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
+
+    let DELAY = SPEED;         //miliseconds, increasing makes the game slower, decreasing makes the game faster
+    let HASTE = 2;             //double the speed by default
+    let isHasten = false;
+    let GRID_ENABLED = true;   //grid enabled by default
+    let GAME_MODE = false;
+
     const PLAY_FIELD = new PlayField(GAME_INTERFACE, GRIDSIZE);
-    let GRID_ENABLED = true;
     PLAY_FIELD.init();
 
     const SNAKE = new Snake(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
@@ -19,7 +23,7 @@ function main() {
     let GAME_LOOP = false;
     document.getElementById('button-play').addEventListener('click', (event) => { // start / pause the game
         if (event.button == 2) event.preventDefault(); // prevent right-click
-        pauseGame(event);
+        pauseGame();
     });
 
     document.getElementById('button-grow').addEventListener('click', (event) => {
@@ -48,16 +52,7 @@ function main() {
     });
 
     document.getElementById('button-reset').addEventListener('click', (event) => { // reset 
-        GAME_LOOP = false;
-        PLAY_FIELD.reset();
-        SNAKE.reset(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
-        PLAY_FIELD.spawnSnake(SNAKE);
-        APPLE.reset(SCORE_RATIO, GRIDSIZE);
-        PLAY_FIELD.spawnApple(APPLE);
-        document.getElementById('button-play-icon').className = 'fa fa-play';
-        document.getElementById('button-play-icon').title = 'Press to play';
-        document.getElementById('button-play').disabled = false;
-        document.getElementById('gameover-popup').style.display = 'none';
+        reset();
     });
 
     document.getElementById('button-grid').addEventListener('click', (event) => { // toggle grid on/off
@@ -65,17 +60,31 @@ function main() {
         const elements = document.querySelectorAll('.grid-box'); 
         if (GRID_ENABLED) {
             document.getElementById('button-grid-icon').className = 'fas fa-border-none';
-            event.target.title = 'Press to untoggle grid';
+            event.target.title = 'Untoggle grid';
             elements.forEach(element => {
                 element.style.border = '1px solid #ccc';
             });
         } else {
             document.getElementById('button-grid-icon').className = 'fas fa-border-all';
-            event.target.title = 'Press to toggle grid';
+            event.target.title = 'Toggle grid';
             elements.forEach(element => {
                 element.style.border = 'none'; 
             });
         }
+    });
+
+    document.getElementById('button-mode').addEventListener('click', (event) => { // toggle grid on/off
+        gamemodePopupHandler();
+    });
+
+    document.getElementById('button-gamemode-plain').addEventListener('click', (event) => { // game mode - PLAIN
+        PLAY_FIELD.plainMode();
+        reset();
+    });
+
+    document.getElementById('button-gamemode-border').addEventListener('click', (event) => { // game mode - BORDER
+        PLAY_FIELD.borderMode();
+        reset();
     });
 
     document.getElementById('button-haste').addEventListener('mousedown', (event) => { // hasten the snake when mouse is down
@@ -100,8 +109,8 @@ function main() {
             DELAY *= HASTE;
             isHasten = false;
         }
-        else if (event.key === 'p') {
-            pauseGame(event);
+        else if (event.key === 'p' && !GAME_MODE) {
+            pauseGame();
         }
     });
 
@@ -143,17 +152,37 @@ function main() {
         setTimeout(gameLoop, DELAY);
     }
 
-    function pauseGame(event) {
+    function pauseGame() {
         GAME_LOOP = !GAME_LOOP;
         if (GAME_LOOP) {
             document.getElementById('button-play-icon').className = 'fa fa-pause';
-            event.target.title = 'Press to pause';
+            document.getElementById('button-play').title = 'Pause';
+            document.getElementById('button-mode').disabled = true;
         }
         else {
             document.getElementById('button-play-icon').className = 'fa fa-play';
-            event.target.title = 'Press to play';
+            document.getElementById('button-play').title = 'Pause';
+            document.getElementById('button-mode').disabled = false;
         }
         gameLoop();
+    }
+
+    function reset() {
+        GAME_LOOP = false;
+        GAME_MODE = false;
+        isHasten = false;
+        DELAY = SPEED; 
+        PLAY_FIELD.reset();
+        SNAKE.reset(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
+        PLAY_FIELD.spawnSnake(SNAKE);
+        APPLE.reset(SCORE_RATIO, GRIDSIZE);
+        PLAY_FIELD.spawnApple(APPLE, SNAKE.getOccupiedGrid());
+        document.getElementById('button-play-icon').className = 'fa fa-play';
+        document.getElementById('button-play-icon').title = 'Play';
+        document.getElementById('button-play').disabled = false;
+        document.getElementById('button-mode').disabled = false;
+        document.getElementById('gameover-popup').style.display = 'none';
+        document.getElementById('gamemode-popup').style.display = 'none';
     }
 
     function updateSnake() {
@@ -166,8 +195,9 @@ function main() {
             SNAKE.updateOccupiedGrid(`${snakePart['position'][0]},${snakePart['position'][1]}`);
         }
         SNAKE.updateHeadPosition(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum());
-        if (SNAKE.collideSelf()) {
-            console.log('game over');
+        if (SNAKE.collideSelf() || SNAKE.collideObstacle(PLAY_FIELD.getOccupiedGrid())) {
+            console.log('GAME OVER');
+            console.log('Score:', SNAKE.getLength() - 1);
             gameoverPopupHandler();
             GAME_LOOP = false;
             document.getElementById('button-play').disabled = true;
@@ -177,7 +207,7 @@ function main() {
 
         if (SNAKE.eatenFood(APPLE)) {
             SNAKE.grow();
-            APPLE.spawn(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum(), SNAKE.getOccupiedGrid());
+            APPLE.spawn(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum(), SNAKE.getOccupiedGrid(), PLAY_FIELD.getOccupiedGrid());
             renderApple();
         }
     }
@@ -195,15 +225,13 @@ function main() {
         const [x,y] = APPLE.getApplePosition();
         apple_div.style.left = GRIDSIZE * x + 'px';
         apple_div.style.top = GRIDSIZE * y + 'px';
-
     }
 
     function gameoverPopupHandler() {
         const gameover_popup = document.getElementById('gameover-popup');
         const gameover_body_popup = document.getElementsByClassName('body-popup')[0].lastElementChild;
-        gameover_body_popup.innerHTML = "<h3>Game Over</h3>";
-        gameover_body_popup.innerHTML += `Score: ${SNAKE.getLength() - 1}`;
-
+        gameover_body_popup.innerHTML = `<h1>GAME OVER</h1>`;
+        gameover_body_popup.innerHTML += `<h2>Score: ${SNAKE.getLength() - 1}</h2>`;
 
         const span = document.getElementsByClassName("close")[0];
         gameover_popup.style.display = 'block';
@@ -213,6 +241,28 @@ function main() {
         window.onclick = function(event) {
             if (event.target == gameover_popup) 
                 gameover_popup.style.display = "none";
+        }
+    }
+
+    function gamemodePopupHandler() {
+        const difficulty_popup = document.getElementById('gamemode-popup');
+        const span = document.getElementsByClassName("close")[1];
+        const button_play = document.getElementById('button-play');
+        button_play.disabled = true;
+        GAME_MODE = true;
+
+        difficulty_popup.style.display = 'block';
+        span.onclick = function() {
+            GAME_MODE = false;
+            button_play.disabled = false;
+            difficulty_popup.style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == difficulty_popup) {
+                GAME_MODE = false;
+                button_play.disabled = false;
+                difficulty_popup.style.display = "none";
+            }
         }
     }
 
