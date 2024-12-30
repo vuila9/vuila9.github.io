@@ -1,10 +1,9 @@
 function main() {
     const GAME_INTERFACE = document.getElementById("game-interface");
-    const SCORE_RATIO = 1;
     const SPEED = 150;                    // base speed
     const DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
 
-    let GRIDSIZE = 15;                    // size of each box, changing this value will affect the entire game size
+    let GRIDSIZE = 10;                    // size of each box, changing this value will affect the entire game size
     let DELAY = Math.floor(SPEED * GRIDSIZE / 15);    // miliseconds, increasing makes the game slower, decreasing makes the game faster
     let HASTE = 2;                        // double the speed by default
     let isHasten = false;
@@ -17,7 +16,7 @@ function main() {
     const SNAKE = new Snake(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
     PLAY_FIELD.spawnSnake(SNAKE);
 
-    const APPLE = new Apple(SCORE_RATIO, GRIDSIZE);
+    const APPLE = new Apple(GRIDSIZE);
     PLAY_FIELD.spawnApple(APPLE);
 
     let GAME_LOOP = false;
@@ -89,6 +88,16 @@ function main() {
 
     document.getElementById('button-gamemode-corners').addEventListener('click', (event) => { // game mode - BORDER
         PLAY_FIELD.cornersMode();
+        reset();
+    });
+
+    document.getElementById('button-gamemode-semiwall').addEventListener('click', (event) => { // game mode - BORDER
+        PLAY_FIELD.semiWallMode();
+        reset();
+    });
+
+    document.getElementById('button-gamemode-heart').addEventListener('click', (event) => { // game mode - BORDER
+        PLAY_FIELD.heartMode();
         reset();
     });
 
@@ -180,7 +189,7 @@ function main() {
         PLAY_FIELD.reset();
         SNAKE.reset(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
         PLAY_FIELD.spawnSnake(SNAKE);
-        APPLE.reset(SCORE_RATIO, GRIDSIZE);
+        APPLE.reset(GRIDSIZE);
         PLAY_FIELD.spawnApple(APPLE, SNAKE.getOccupiedGrid());
         document.getElementById('button-play-icon').className = 'fa fa-play';
         document.getElementById('button-play-icon').title = 'Play';
@@ -202,7 +211,7 @@ function main() {
         SNAKE.updateHeadPosition(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum());
         if (SNAKE.collideSelf() || SNAKE.collideObstacle(PLAY_FIELD.getOccupiedGrid())) {
             console.log('GAME OVER');
-            console.log('Score:', SNAKE.getLength() - 1);
+            console.log('Score:', (SNAKE.getLength() - 1) * PLAY_FIELD.getScoreRatio());
             gameoverPopupHandler();
             GAME_LOOP = false;
             document.getElementById('button-play').disabled = true;
@@ -236,7 +245,7 @@ function main() {
         const gameover_popup = document.getElementById('gameover-popup');
         const gameover_body_popup = document.getElementsByClassName('body-popup')[0].lastElementChild;
         gameover_body_popup.innerHTML = `<h1>GAME OVER</h1>`;
-        gameover_body_popup.innerHTML += `<h2>Score: ${SNAKE.getLength() - 1}</h2>`;
+        gameover_body_popup.innerHTML += `<h2>Score: ${(SNAKE.getLength() - 1) * PLAY_FIELD.getScoreRatio()}</h2>`;
 
         const span = document.getElementsByClassName("close")[0];
         gameover_popup.style.display = 'block';

@@ -7,6 +7,7 @@ class PlayField {
         this.rows = Math.floor(this.max_playfield_height / gridsize);
         this.cols = Math.floor(this.max_playfield_width / gridsize);
         this.occupiedGrid = new Set();
+        this.score_ratio = Math.floor(45 / gridsize);
     }
 
     init() {
@@ -36,6 +37,7 @@ class PlayField {
             document.getElementById(`grid-${coor}`).style.backgroundColor = '#fff9e1';
         }
         this.occupiedGrid.clear();
+        this.setScoreRatio(1)
     }
 
     borderMode() {
@@ -48,6 +50,7 @@ class PlayField {
                 this.occupiedGrid.add(`${x},${y}`);
             }
         }
+        this.setScoreRatio(2)
     }
 
     cornersMode() {
@@ -55,12 +58,13 @@ class PlayField {
         for (let y = 0; y < this.rows; y++) {
             for (let x = 0; x < this.cols; x++) { 
                 if ((x != 0 && x != this.cols - 1) && (y != 0 && y != this.rows - 1)) continue;
-                if ((x < this.cols/4 || x > this.cols * 3/4) && (y < this.rows /4 || y > this.rows * 3/4)) continue;
+                if (!(x < Math.floor(this.cols/4) || x > Math.floor(this.cols * 3/4)) || !(y < Math.floor(this.rows /4) || y > Math.floor(this.rows * 3/4))) continue;
                 const div_grid = document.getElementById(`grid-${x},${y}`);
                 div_grid.style.backgroundColor = 'rgb(255,69,0)';
                 this.occupiedGrid.add(`${x},${y}`);
             }
         }
+        this.setScoreRatio(1.5)
     }
 
     semiWallMode() {
@@ -68,12 +72,45 @@ class PlayField {
         for (let y = 0; y < this.rows; y++) {
             for (let x = 0; x < this.cols; x++) { 
                 if ((x != 0 && x != this.cols - 1) && (y != 0 && y != this.rows - 1)) continue;
-                if ((x < this.cols/4 || x > this.cols * 3/4) && (y < this.rows /4 || y > this.rows * 3/4)) continue;
+                if ((x < Math.floor(this.cols/4) || x > Math.floor(this.cols * 3/4)) && (y < Math.floor(this.rows /4) || y > Math.floor(this.rows * 3/4))) continue;
                 const div_grid = document.getElementById(`grid-${x},${y}`);
                 div_grid.style.backgroundColor = 'rgb(255,69,0)';
                 this.occupiedGrid.add(`${x},${y}`);
             }
         }
+        this.setScoreRatio(1.5)
+    }
+
+    heartMode() {
+        this.plainMode();
+        const centerX = this.cols / 2;
+        const centerY = this.rows / 2;
+        for (let x = 0; x < this.cols; x++) {
+            for (let y = 0; y < this.rows; y++) { 
+                const xPos = (x - centerX) / (this.cols / 4); // Normalize X to scale
+                const yPos = -(y - centerY) / (this.rows / 4); // Normalize Y to scale
+
+                // Hollow Heart shape formula: (x² + y² - 1)³ - x²y³ > 0
+                if (Math.pow(xPos * xPos + yPos * yPos - 1, 3) - xPos * xPos * Math.pow(yPos, 3) > 0) {
+                    const div_grid = document.getElementById(`grid-${x},${y}`);
+                    div_grid.style.backgroundColor = 'rgb(255,69,0)';
+                    this.occupiedGrid.add(`${x},${y}`);
+                }
+            }
+        }
+        this.setScoreRatio(3)
+    }
+
+    setScoreRatio(value) {
+        this.score_ratio =  Math.floor(45 / this.gridsize) * value;
+    }
+
+    getScoreRatio() {
+        return this.score_ratio;
+    }
+
+    setGridSize(size) {
+        this.gridsize = size;
     }
 
     getOccupiedGrid() {
@@ -253,8 +290,7 @@ class Snake {
 }
 
 class Apple {
-    _initialize(score=1, gridsize) {
-        this.score = score;
+    _initialize(gridsize) {
         this.gridsize = gridsize;
         const apple_div = document.createElement('div');
         apple_div.id = 'apple';
@@ -266,12 +302,12 @@ class Apple {
         this.apple_y = 0;
     }
 
-    constructor(score=1, gridsize) {
-        this._initialize(score, gridsize)
+    constructor(gridsize) {
+        this._initialize(gridsize)
     }
 
-    reset(score=1, gridsize) {
-        this._initialize(score, gridsize)
+    reset(gridsize) {
+        this._initialize(gridsize)
     }
 
     getApplePosition() {

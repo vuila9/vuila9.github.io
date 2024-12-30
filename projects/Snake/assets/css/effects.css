@@ -34,6 +34,11 @@
     gap: 10px;
 }
 
+#button-score:hover {
+    cursor: default; /* Keeps the cursor unchanged */
+    width: 50px;
+}
+
 /* GAME ELEMENTS */
 .snake-part {
     width: 15px;
