@@ -189,7 +189,7 @@ function main() {
         }
         else {
             document.getElementById('button-play-icon').className = 'fa fa-play';
-            document.getElementById('button-play').title = 'Pause';
+            document.getElementById('button-play').title = 'Play';
             document.getElementById('button-mode').disabled = false;
             document.getElementById('gridsize-slider').disabled = false;
         }
