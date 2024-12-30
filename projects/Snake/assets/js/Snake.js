@@ -1,14 +1,14 @@
 function main() {
     const GAME_INTERFACE = document.getElementById("game-interface");
-    const GRIDSIZE = 15;
     const SCORE_RATIO = 1;
-    const SPEED = 150;
+    const SPEED = 150;                    // base speed
     const DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
 
-    let DELAY = SPEED;         //miliseconds, increasing makes the game slower, decreasing makes the game faster
-    let HASTE = 2;             //double the speed by default
+    let GRIDSIZE = 15;                    // size of each box, changing this value will affect the entire game size
+    let DELAY = Math.floor(SPEED * GRIDSIZE / 15);    // miliseconds, increasing makes the game slower, decreasing makes the game faster
+    let HASTE = 2;                        // double the speed by default
     let isHasten = false;
-    let GRID_ENABLED = true;   //grid enabled by default
+    let GRID_ENABLED = true;              // grid enabled by default
     let GAME_MODE = false;
 
     const PLAY_FIELD = new PlayField(GAME_INTERFACE, GRIDSIZE);
@@ -84,6 +84,11 @@ function main() {
 
     document.getElementById('button-gamemode-border').addEventListener('click', (event) => { // game mode - BORDER
         PLAY_FIELD.borderMode();
+        reset();
+    });
+
+    document.getElementById('button-gamemode-corners').addEventListener('click', (event) => { // game mode - BORDER
+        PLAY_FIELD.cornersMode();
         reset();
     });
 
@@ -171,7 +176,7 @@ function main() {
         GAME_LOOP = false;
         GAME_MODE = false;
         isHasten = false;
-        DELAY = SPEED; 
+        DELAY =  Math.floor(SPEED * GRIDSIZE / 15); 
         PLAY_FIELD.reset();
         SNAKE.reset(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
         PLAY_FIELD.spawnSnake(SNAKE);

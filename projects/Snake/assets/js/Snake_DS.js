@@ -18,6 +18,8 @@ class PlayField {
                 const box = document.createElement("div");
                 box.classList.add("grid-box");
                 box.id = `grid-${x},${y}`; // Assign an ID based on coordinates
+                box.style.width = this.gridsize + 'px';
+                box.style.height = this.gridsize + 'px';
                 this.gameinterface.appendChild(box);
             }
         }
@@ -42,7 +44,33 @@ class PlayField {
             for (let x = 0; x < this.cols; x++) { 
                 if ((x != 0 && x != this.cols - 1) && (y != 0 && y != this.rows - 1)) continue;
                 const div_grid = document.getElementById(`grid-${x},${y}`);
-                div_grid.style.backgroundColor = 'rgb(255,0,255)';
+                div_grid.style.backgroundColor = 'rgb(255,69,0)';
+                this.occupiedGrid.add(`${x},${y}`);
+            }
+        }
+    }
+
+    cornersMode() {
+        this.plainMode();
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.cols; x++) { 
+                if ((x != 0 && x != this.cols - 1) && (y != 0 && y != this.rows - 1)) continue;
+                if ((x < this.cols/4 || x > this.cols * 3/4) && (y < this.rows /4 || y > this.rows * 3/4)) continue;
+                const div_grid = document.getElementById(`grid-${x},${y}`);
+                div_grid.style.backgroundColor = 'rgb(255,69,0)';
+                this.occupiedGrid.add(`${x},${y}`);
+            }
+        }
+    }
+
+    semiWallMode() {
+        this.plainMode();
+        for (let y = 0; y < this.rows; y++) {
+            for (let x = 0; x < this.cols; x++) { 
+                if ((x != 0 && x != this.cols - 1) && (y != 0 && y != this.rows - 1)) continue;
+                if ((x < this.cols/4 || x > this.cols * 3/4) && (y < this.rows /4 || y > this.rows * 3/4)) continue;
+                const div_grid = document.getElementById(`grid-${x},${y}`);
+                div_grid.style.backgroundColor = 'rgb(255,69,0)';
                 this.occupiedGrid.add(`${x},${y}`);
             }
         }
@@ -73,12 +101,14 @@ class PlayField {
     }
 
     spawnSnake(snake) {
-        const part_snake = snake.getPartAt(0);
-        const part_x = part_snake['position'][0];
-        const part_y = part_snake['position'][1];
-        part_snake['div'].style.left = this.gridsize * part_x + 'px';
-        part_snake['div'].style.top = this.gridsize * part_y + 'px';
-        part_snake['div'].style.backgroundColor = part_snake['color'];
+        const snake_head = snake.getHead();
+        const part_x = snake_head['position'][0];
+        const part_y = snake_head['position'][1];
+        snake_head['div'].style.left = this.gridsize * part_x + 'px';
+        snake_head['div'].style.top = this.gridsize * part_y + 'px';
+        snake_head['div'].style.backgroundColor = snake_head['color'];
+        snake_head['div'].style.width = this.gridsize + "px";
+        snake_head['div'].style.height = this.gridsize + "px";
     }
 
     spawnApple(apple, snake_occupiedgrid=new Set()) {
@@ -100,7 +130,6 @@ class Snake {
         this.last_x = x;
         this.last_y = y;
         this.color = color;
-        //this.speed = speed;
         this.confirmed_direction = direction;
         this.temp_direction = direction;
         this.length = 1;
@@ -213,6 +242,8 @@ class Snake {
         snake_div.className = 'snake-part';
         snake_div.style.left = this.gridsize * this.last_x + 'px';
         snake_div.style.top = this.gridsize * this.last_y + 'px';
+        snake_div.style.width = this.gridsize + 'px';
+        snake_div.style.height = this.gridsize + 'px';
         snake_div.style.backgroundColor = color;
 
         document.getElementById('game-interface').appendChild(snake_div);
@@ -228,6 +259,8 @@ class Apple {
         const apple_div = document.createElement('div');
         apple_div.id = 'apple';
         apple_div.style.visibility = 'hidden';
+        apple_div.style.width = gridsize + 'px';
+        apple_div.style.height = gridsize + 'px';
         document.getElementById('game-interface').appendChild(apple_div);
         this.apple_x = 0;
         this.apple_y = 0;
