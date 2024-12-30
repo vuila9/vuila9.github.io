@@ -28,6 +28,7 @@ function main() {
     document.getElementById('button-grow').addEventListener('click', (event) => {
         if (!GAME_LOOP) return;
         SNAKE.grow();
+        updateScore();
     });
 
     document.getElementById('button-up').addEventListener('click', (event) => {
@@ -191,6 +192,7 @@ function main() {
         PLAY_FIELD.spawnSnake(SNAKE);
         APPLE.reset(GRIDSIZE);
         PLAY_FIELD.spawnApple(APPLE, SNAKE.getOccupiedGrid());
+        updateScore(true);
         document.getElementById('button-play-icon').className = 'fa fa-play';
         document.getElementById('button-play-icon').title = 'Play';
         document.getElementById('button-play').disabled = false;
@@ -222,6 +224,7 @@ function main() {
         if (SNAKE.eatenFood(APPLE)) {
             SNAKE.grow();
             APPLE.spawn(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum(), SNAKE.getOccupiedGrid(), PLAY_FIELD.getOccupiedGrid());
+            updateScore()
             renderApple();
         }
     }
@@ -246,6 +249,7 @@ function main() {
         const gameover_body_popup = document.getElementsByClassName('body-popup')[0].lastElementChild;
         gameover_body_popup.innerHTML = `<h1>GAME OVER</h1>`;
         gameover_body_popup.innerHTML += `<h2>Score: ${(SNAKE.getLength() - 1) * PLAY_FIELD.getScoreRatio()}</h2>`;
+        gameover_body_popup.innerHTML += `<h2>Length: ${(SNAKE.getLength() - 1)}</h2>`;
 
         const span = document.getElementsByClassName("close")[0];
         gameover_popup.style.display = 'block';
@@ -256,6 +260,14 @@ function main() {
             if (event.target == gameover_popup) 
                 gameover_popup.style.display = "none";
         }
+    }
+
+    function updateScore(reset=false) {
+        const score_div = document.getElementById('game-score');
+        if (!reset)
+            score_div.innerHTML = (SNAKE.getLength() - 1) * PLAY_FIELD.getScoreRatio();
+        else
+            score_div.innerHTML = 0;
     }
 
     function gamemodePopupHandler() {
