@@ -1,5 +1,5 @@
 class PlayField {
-    constructor(gameinterface, gridsize) {
+    _initialize(gameinterface, gridsize) {
         this.gameinterface = gameinterface;
         this.max_playfield_width = gameinterface.offsetWidth;
         this.max_playfield_height = gameinterface.offsetHeight;
@@ -7,10 +7,19 @@ class PlayField {
         this.rows = Math.floor(this.max_playfield_height / gridsize);
         this.cols = Math.floor(this.max_playfield_width / gridsize);
         this.occupiedGrid = new Set();
-        this.score_ratio = Math.floor(45 / gridsize);
+        this.score_ratio = Math.floor(gridsize / 5);
     }
 
-    init() {
+    constructor(gameinterface, gridsize) {
+        this._initialize(gameinterface, gridsize);
+    }
+
+    init(resize=false) {
+        if (resize) {
+            const gridbox = document.querySelectorAll('.grid-box');
+            gridbox.forEach(grid => grid.remove());
+        }
+
         this.gameinterface.style.gridTemplateRows = `repeat(${this.rows}, ${this.gridsize}px)`
         this.gameinterface.style.gridTemplateColumns = `repeat(${this.cols}, ${this.gridsize}px)`;
 
@@ -26,7 +35,11 @@ class PlayField {
         }
     }
 
-    reset() {
+    reset(gameinterface, gridsize, resize) {
+        if (resize) {
+            this._initialize(gameinterface, gridsize);
+            this.init(resize);
+        }
         const snake_parts = document.querySelectorAll('.snake-part');
         snake_parts.forEach(part => part.remove());
         document.getElementById('apple').remove();
@@ -37,7 +50,7 @@ class PlayField {
             document.getElementById(`grid-${coor}`).style.backgroundColor = '#fff9e1';
         }
         this.occupiedGrid.clear();
-        this.setScoreRatio(1)
+        this.setScoreRatio(1);
     }
 
     borderMode() {
@@ -50,7 +63,7 @@ class PlayField {
                 this.occupiedGrid.add(`${x},${y}`);
             }
         }
-        this.setScoreRatio(2)
+        this.setScoreRatio(2);
     }
 
     cornersMode() {
@@ -64,7 +77,7 @@ class PlayField {
                 this.occupiedGrid.add(`${x},${y}`);
             }
         }
-        this.setScoreRatio(1.5)
+        this.setScoreRatio(1.5);
     }
 
     semiWallMode() {
@@ -78,7 +91,7 @@ class PlayField {
                 this.occupiedGrid.add(`${x},${y}`);
             }
         }
-        this.setScoreRatio(1.5)
+        this.setScoreRatio(1.5);
     }
 
     heartMode() {
@@ -87,7 +100,7 @@ class PlayField {
         const centerY = this.rows / 2;
         for (let x = 0; x < this.cols; x++) {
             for (let y = 0; y < this.rows; y++) { 
-                const xPos = (x - centerX) / (this.cols / 4); // Normalize X to scale
+                const xPos = (x - centerX) / (this.cols / 4);  // Normalize X to scale
                 const yPos = -(y - centerY) / (this.rows / 4); // Normalize Y to scale
 
                 // Hollow Heart shape formula: (x² + y² - 1)³ - x²y³ > 0
@@ -98,11 +111,11 @@ class PlayField {
                 }
             }
         }
-        this.setScoreRatio(3)
+        this.setScoreRatio(3);
     }
 
     setScoreRatio(value) {
-        this.score_ratio =  Math.floor(45 / this.gridsize) * value;
+        this.score_ratio =  Math.floor(this.gridsize / 5) * value;
     }
 
     getScoreRatio() {

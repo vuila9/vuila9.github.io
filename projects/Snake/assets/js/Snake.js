@@ -1,14 +1,15 @@
 function main() {
     const GAME_INTERFACE = document.getElementById("game-interface");
     const SPEED = 150;                    // base speed
-    const DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
+    let DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
 
-    let GRIDSIZE = 10;                    // size of each box, changing this value will affect the entire game size
+    let GRIDSIZE = 15;                    // size of each box, changing this value will affect the entire game size
     let DELAY = Math.floor(SPEED * GRIDSIZE / 15);    // miliseconds, increasing makes the game slower, decreasing makes the game faster
     let HASTE = 2;                        // double the speed by default
     let isHasten = false;
     let GRID_ENABLED = true;              // grid enabled by default
     let GAME_MODE = false;
+    let GRID_RESIZE = false;
 
     const PLAY_FIELD = new PlayField(GAME_INTERFACE, GRIDSIZE);
     PLAY_FIELD.init();
@@ -118,13 +119,24 @@ function main() {
         DELAY *= HASTE;
     });
 
+    document.getElementById('gridsize-slider').addEventListener('input', (event) => {
+        GRIDSIZE = event.target.value;
+        document.getElementById('gridsize-icon').style.fontSize = event.target.value * 1.25 + 'px';
+        document.getElementById('button-gridsize').title = `Grid size ${event.target.value}px`;
+        GRID_RESIZE = true;
+        if (GRID_RESIZE) {
+            document.getElementById('button-play').disabled = true;
+            document.getElementById('button-mode').disabled = true;
+        }
+    });
+
     document.addEventListener("keyup", (event) => {
         if (event.key === " ") {
             event.preventDefault();
             DELAY *= HASTE;
             isHasten = false;
         }
-        else if (event.key === 'p' && !GAME_MODE) {
+        else if (event.key === 'p' && !GAME_MODE && !GRID_RESIZE) {
             pauseGame();
         }
     });
@@ -173,11 +185,13 @@ function main() {
             document.getElementById('button-play-icon').className = 'fa fa-pause';
             document.getElementById('button-play').title = 'Pause';
             document.getElementById('button-mode').disabled = true;
+            document.getElementById('gridsize-slider').disabled = true;
         }
         else {
             document.getElementById('button-play-icon').className = 'fa fa-play';
             document.getElementById('button-play').title = 'Pause';
             document.getElementById('button-mode').disabled = false;
+            document.getElementById('gridsize-slider').disabled = false;
         }
         gameLoop();
     }
@@ -186,8 +200,10 @@ function main() {
         GAME_LOOP = false;
         GAME_MODE = false;
         isHasten = false;
-        DELAY =  Math.floor(SPEED * GRIDSIZE / 15); 
-        PLAY_FIELD.reset();
+        PLAY_FIELD.reset(GAME_INTERFACE, GRIDSIZE, GRID_RESIZE);
+        GRID_RESIZE = false;
+        DELAY =  Math.floor(SPEED * GRIDSIZE / 15);
+        DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
         SNAKE.reset(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
         PLAY_FIELD.spawnSnake(SNAKE);
         APPLE.reset(GRIDSIZE);
@@ -197,6 +213,7 @@ function main() {
         document.getElementById('button-play-icon').title = 'Play';
         document.getElementById('button-play').disabled = false;
         document.getElementById('button-mode').disabled = false;
+        document.getElementById('gridsize-slider').disabled = false;
         document.getElementById('gameover-popup').style.display = 'none';
         document.getElementById('gamemode-popup').style.display = 'none';
     }
@@ -292,8 +309,45 @@ function main() {
         }
     }
 
+    function slider() {
+        const slider = document.getElementById('gridsize-slider');
+        const tooltip = document.getElementById('slider-title');
+    
+        // Function to update tooltip position and text
+        const updateTooltip = (event) => {
+            const sliderValue = slider.value;
+            tooltip.textContent = `${sliderValue}px`;
+            tooltip.style.left = `${event.pageX}px`;
+            tooltip.style.top = `${event.pageY - 10}px`; // Slightly above the cursor
+        };
+    
+        // Show tooltip on interaction
+        const showTooltip = () => {
+            tooltip.style.opacity = 1;
+        };
+    
+        // Hide tooltip when interaction stops
+        const hideTooltip = () => {
+            tooltip.style.opacity = 0;
+        };
+    
+        // Add event listeners
+        slider.addEventListener('mousedown', showTooltip);
+        slider.addEventListener('mousemove', updateTooltip);
+        slider.addEventListener('mouseup', hideTooltip);
+        slider.addEventListener('touchstart', showTooltip);
+        slider.addEventListener('touchmove', (event) => {
+            // For touch devices, use the first touch point
+            const touch = event.touches[0];
+            updateTooltip(touch);
+        });
+        slider.addEventListener('touchend', hideTooltip);
+    }
+
     //setInterval(gameLoop, DELAY);
-    setTimeout(gameLoop, DELAY);
+    //setTimeout(gameLoop, DELAY);
+    slider();
+    gameLoop();
 }
 
 window.onload = function() {

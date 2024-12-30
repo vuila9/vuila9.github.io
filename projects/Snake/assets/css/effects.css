@@ -34,9 +34,25 @@
     gap: 10px;
 }
 
-#button-score:hover {
+#button-score {
     cursor: default; /* Keeps the cursor unchanged */
-    width: 50px;
+    width: 60px; 
+    position: relative;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+
+#button-gridsize {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: default;
+}
+
+#gridsize-icon {
+    font-size: 18.75px; /* Adjust grid size, 50px * 1.25 is max */
+    margin-bottom: 4px;
 }
 
 /* GAME ELEMENTS */
@@ -52,7 +68,6 @@
     width: 15px;
     height: 15px;
     background-color: rgb(0,255,0);
-    border: 1px solid #ccc; /* Visible border */
     position: absolute;
 }
 
@@ -92,4 +107,29 @@
     padding: 20px;
     border: 1px solid #888;
     width: flex; /* Could be more or less, depending on screen size */
+}
+
+/* SLIDERS */
+.slider {
+    margin-top: 17px;
+    height: 10px;
+}
+
+#slider-title {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    pointer-events: none; /* Prevent tooltip from interfering with mouse events */
+    transform: translate(-50%, -150%); /* Position above the cursor */
+    opacity: 0;
+    transition: opacity 0.1s ease;
+}
+
+input[type="range"] {
+    background: #ddd;
+    border-radius: 5px;
+    outline: none;
 }
