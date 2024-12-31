@@ -96,8 +96,8 @@ class PlayField {
 
     heartMode() {
         this.plainMode();
-        const centerX = this.cols / 2;
-        const centerY = this.rows / 2;
+        const centerX = Math.floor(this.cols / 2);
+        const centerY = Math.floor(this.rows / 2);
         for (let x = 0; x < this.cols; x++) {
             for (let y = 0; y < this.rows; y++) { 
                 const xPos = (x - centerX) / (this.cols / 4);  // Normalize X to scale
