@@ -71,7 +71,7 @@ class PlayField {
         for (let y = 0; y < this.rows; y++) {
             for (let x = 0; x < this.cols; x++) { 
                 if ((x != 0 && x != this.cols - 1) && (y != 0 && y != this.rows - 1)) continue;
-                if (!(x < Math.floor(this.cols/4) || x > Math.floor(this.cols * 3/4)) || !(y < Math.floor(this.rows /4) || y > Math.floor(this.rows * 3/4))) continue;
+                if (!(x < Math.floor(this.cols/4) || x >= this.cols - Math.floor(this.cols/4)) || !(y < Math.floor(this.rows /4) || y >= this.rows - Math.floor(this.rows/4))) continue;
                 const div_grid = document.getElementById(`grid-${x},${y}`);
                 div_grid.style.backgroundColor = 'rgb(255,69,0)';
                 this.occupiedGrid.add(`${x},${y}`);
@@ -85,7 +85,7 @@ class PlayField {
         for (let y = 0; y < this.rows; y++) {
             for (let x = 0; x < this.cols; x++) { 
                 if ((x != 0 && x != this.cols - 1) && (y != 0 && y != this.rows - 1)) continue;
-                if ((x < Math.floor(this.cols/4) || x > Math.floor(this.cols * 3/4)) && (y < Math.floor(this.rows /4) || y > Math.floor(this.rows * 3/4))) continue;
+                if ((x < Math.floor(this.cols/4) || x >= this.cols - Math.floor(this.cols/4)) && (y < Math.floor(this.rows /4) || y >= this.rows - Math.floor(this.rows/4))) continue;
                 const div_grid = document.getElementById(`grid-${x},${y}`);
                 div_grid.style.backgroundColor = 'rgb(255,69,0)';
                 this.occupiedGrid.add(`${x},${y}`);

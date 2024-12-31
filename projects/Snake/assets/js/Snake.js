@@ -79,8 +79,7 @@ function main() {
         if (!GRID_ENABLED) return;
         const elements = document.querySelectorAll('.grid-box'); 
         const css_border_rgb = window.getComputedStyle(elements[0])['border'].match(/\(([^)]+)\)/)[1].split(',');
-        const visibility = (css_border_rgb.length == 4 && Number(css_border_rgb[3]) > 0.2) ? css_border_rgb[3] : 1;
-        console.log(css_border_rgb);
+        const visibility = (Number(css_border_rgb[3]) > 0.2) ? css_border_rgb[3] : 1;
         elements.forEach(element => {
             element.style.border = `1px solid rgba(204, 204, 204, ${visibility / 2})`;
         });
