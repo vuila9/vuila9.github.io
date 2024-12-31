@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
         {
             imageSrc: "assets/img/program_icons/snake_tile.jpg",
             title: "Snake Game",
-            description: "Snake game made using HTML, CSS, JS (ongoing)",
+            description: "Snake game made using HTML, CSS, JS",
             link: "projects/Snake/Snake.html"
         },
         {
