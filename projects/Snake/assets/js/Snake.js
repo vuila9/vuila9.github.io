@@ -63,7 +63,7 @@ function main() {
             document.getElementById('button-grid-icon').className = 'fas fa-border-none';
             event.target.title = 'Untoggle grid';
             elements.forEach(element => {
-                element.style.border = '1px solid #ccc';
+                element.style.border = '1px solid rgba(204, 204, 204, 0.5)';
             });
         } else {
             document.getElementById('button-grid-icon').className = 'fas fa-border-all';
@@ -72,6 +72,18 @@ function main() {
                 element.style.border = 'none'; 
             });
         }
+    });
+
+    document.getElementById('button-grid').addEventListener('contextmenu', (event) => { // reduce grid visibility (cycling)
+        event.preventDefault();
+        if (!GRID_ENABLED) return;
+        const elements = document.querySelectorAll('.grid-box'); 
+        const css_border_rgb = window.getComputedStyle(elements[0])['border'].match(/\(([^)]+)\)/)[1].split(',');
+        const visibility = (css_border_rgb.length == 4 && Number(css_border_rgb[3]) > 0.2) ? css_border_rgb[3] : 1;
+        console.log(css_border_rgb);
+        elements.forEach(element => {
+            element.style.border = `1px solid rgba(204, 204, 204, ${visibility / 2})`;
+        });
     });
 
     document.getElementById('button-mode').addEventListener('click', (event) => { // toggle grid on/off

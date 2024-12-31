@@ -10,7 +10,7 @@
     width: 15px;
     height: 15px;
     background-color: #fff9e1;
-    border: 1px solid #ccc;
+    border: 1px solid rgb(204,204,204,0.5);
     box-sizing: border-box; /* Ensures borders don't affect size */
 }
 
