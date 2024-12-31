@@ -61,7 +61,7 @@ function main() {
         const elements = document.querySelectorAll('.grid-box'); 
         if (GRID_ENABLED) {
             document.getElementById('button-grid-icon').className = 'fas fa-border-none';
-            event.target.title = 'Untoggle grid';
+            event.target.title = 'Untoggle grid (right-click to reduce grid visibility)';
             elements.forEach(element => {
                 element.style.border = '1px solid rgba(204, 204, 204, 0.5)';
             });
