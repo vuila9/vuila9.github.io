@@ -3,7 +3,7 @@ const scripts = [
     './assets/js/text-encrypt-decrypt.js',
     './assets/js/regex-comparison.js',
     './assets/js/calendar-date-teller.js',
-    './assets/js/microphone_audio_playback_helper.js', './assets/js/microphone_audio_playback.js'
+    './assets/js/microphone_audio_tester_helper.js', './assets/js/microphone_audio_tester.js'
 ];
 
 // Function to dynamically load each script
