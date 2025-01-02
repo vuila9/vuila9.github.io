@@ -50,6 +50,27 @@
 						</div>
 					</section> -->
 
+				<!-- Webcam Video Tester (WVT)-->
+					<section id="webcam-video-tester">
+						<div class="inner">
+							<div class="container">
+								<div class="submenu">Webcam Video Tester</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('WVT-body')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="WVT-body">
+								<!-- <div id="webcam-video-area" style="width: 384px; height: 200px; background-color: white;"></div> -->
+								<video id="webcam-video-area" style="height: 200px; background-color: rgb(255,255,255,0);" autoplay playsinline></video>
+								<br>
+								<button id="WVT-button-start" class="button" onclick="initWebcam()">Start</button>
+								<button id="WVT-button-pause" class="button" onclick="pauseWebcam()" disabled>Pause</button>
+								<button id="WVT-button-stop" class="button" onclick="stopWebcam()" disabled>Stop</button>
+
+							</div>
+						</div>
+					</section>
+
 				<!-- Microphone Audio Tester (MAT) -->
 					<section id="microphone-audio-tester">
 						<div class="inner">
