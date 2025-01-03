@@ -34,7 +34,6 @@ function stopWebcam() {
 
         if (pauseButton.textContent == 'Resume') {
             pauseButton.textContent = 'Pause';
-            console.log('helloooo');
         }
     }
 }
