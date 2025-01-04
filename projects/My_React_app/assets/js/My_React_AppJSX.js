@@ -1,11 +1,13 @@
 function TodoApp() {
+    //might need to make these global
     const [todos, setTodos] = React.useState([]);
     const [input, setInput] = React.useState("");
     const [deadlines, setDeadlines] = React.useState("");
 
     const addTodo = () => {
         if (!input.trim()) return;
-        setTodos([...todos, {task: input.trim(), due: deadlines.trim() ? deadlines.trim() : ''}]);
+        //need to convert deadlines into total of seconds
+        setTodos([...todos, {task: input.trim(), due: deadlines.trim() ? deadlines.trim() : '', dateObj: Date.now() + deadlines.trim()}]);
         setInput("");
         setDeadlines("");
     };
@@ -13,12 +15,6 @@ function TodoApp() {
     const removeTodo = (index) => {
         setTodos(todos.filter((_, i) => i !== index));
     };
-
-    const toggleStrikethrough = (index) => {
-        setTodos(todos.map((todo, i) =>
-          i === index ? { ...todo, strikethrough: !todo.strikethrough } : todo
-        ));
-      };
 
     return (
         <div style={{ padding: "20px", maxWidth: "100%", margin: "auto" }}>
@@ -34,7 +30,7 @@ function TodoApp() {
                 type="text"
                 value={deadlines}
                 onChange={(e) => setDeadlines(e.target.value)}
-                placeholder="Set deadline (dd.mm.yy)"
+                placeholder="Set deadline (dd.hh.mm.ss)"
                 style={{ flex: "1", padding: "5px" }}
             />
             <button onClick={addTodo} style={{ width: '60px' }} className="fas fa-plus"></button>
@@ -72,10 +68,16 @@ function TodoApp() {
     );
 }
 
+function updateCounters() {
+    const timers = document.querySelectorAll('.todo-due');
+}
 
 function main() {
     const root = ReactDOM.createRoot(document.getElementById("my-react-app"));
     root.render(<TodoApp/>);
+    // let intervalId;
+    // updateCounters();
+    // intervalId = setInterval(updateCounters, 1000);
 }
 
 main();
