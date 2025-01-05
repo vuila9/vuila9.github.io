@@ -35,14 +35,15 @@
 						</div>
 					</section>
 
+				<!--Stopwatch (STW)-->
+					<section id="stopwatch-tool"></section>
+
 				<!-- Webcam Video Tester (WVT)-->
 					<section id="webcam-video-tester">
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">Webcam Video Tester</div>
-								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('WVT-body')">▼</button>
-								</div>
+								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('WVT-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="WVT-body">
 								<video id="webcam-video-area" style="height: 200px; background-color: rgb(255,255,255,0);" autoplay playsinline></video>
@@ -60,9 +61,7 @@
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">Microphone Audio Tester</div>
-								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('MAT-body')">▼</button>
-								</div>
+								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('MAT-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="MAT-body">
 								<div style="display: flex; align-items: center;">
@@ -85,9 +84,7 @@
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">Calendar Date Teller</div>
-								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('CDT-body')">▼</button>
-								</div>
+								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('CDT-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="CDT-body">
 								<p>This tool was developed using manually built functions, without utilizing any built-in date manipulation functions, except for one to obtain the current date. <u>The result will include the ending date</u>.</p>
@@ -126,9 +123,7 @@
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">RegEx Comparison</div>
-								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('REC-body')">▼</button>
-								</div>
+								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('REC-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="REC-body">
 								<p>A simple regular expression comparison tool that checks if the input string matches the input pattern. Only support "*" and "." for now.</p>
@@ -147,9 +142,7 @@
 						<div class="inner">
 							<div class="container">
 								<div class="submenu">Text Encrypt/Decryption</div>
-								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('TED-body')">▼</button>
-								</div>
+								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('TED-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="TED-body">
 								<p>As the name suggests, enter a <u>key</u> along with the <u>message</u> you wish to encrypt or decrypt.</p>
@@ -177,6 +170,13 @@
 			<script src="../../assets/js/util.js"></script>
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- React & Babel library -->
+			<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+			<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+			<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+			<!-- Tool scripts -->
 			<script src="./assets/js/loader.js" defer></script>
 	</body>
 </html>
