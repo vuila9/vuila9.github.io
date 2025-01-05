@@ -8,6 +8,8 @@
 		<link rel="icon" href="Many_mini-tools_icon.svg" type="image/x-icon">
 		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
 		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Digital-7&display=swap" >
+		<link rel="stylesheet" href="assets/css/effects.css">
 	</head>
 
 	<body class="is-preload">
@@ -43,7 +45,14 @@
 								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('STW-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="STW-body">
-								<p>this is a stopwatch</p>
+								<div id="stopwatch-display">00:00:00</div>
+								<br>
+								<div class="button-row"> 
+									<button id="STW-button-start" class="STW-button" >Start</button>
+									<button id="STW-button-pause" class="STW-button" disabled>Pause</button>
+									<button id="STW-button-reset" class="STW-button" disabled>Stop</button>
+								</div>
+								<br>
 							</div>
 						</div>
 					</section>

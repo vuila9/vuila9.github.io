@@ -1,0 +1,15 @@
+/* STOPWATCH EFFECTS */
+#stopwatch-display {
+	font-family: 'Consolas', monospace;
+	font-size: 48px; /* Adjust the size as needed */
+	text-align: center;
+	display: block;
+	margin: 0 auto; /* Centers the text horizontally */
+}
+
+.button-row {
+    display: flex;
+    justify-content: center; /* Push groups to the edges */
+    align-items: center; /* Align buttons vertically (optional) */
+    position: relative;
+}
