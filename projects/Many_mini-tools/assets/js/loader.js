@@ -5,7 +5,7 @@ const scripts = [
     './assets/js/calendar-date-teller.js',
     './assets/js/microphone_audio_tester_helper.js', './assets/js/microphone_audio_tester.js',
     './assets/js/webcam_video_tester.js',
-    './assets/js/stopwatch.js'
+    './assets/js/stopwatch.js',
 ];
 
 // Function to dynamically load each script
@@ -35,21 +35,3 @@ function loadScripts(scripts, callback) {
 loadScripts(scripts, () => {
     console.log('All scripts loaded');
 });
-
-/**
- <!-- New tool template -->
-					<!-- <section id="new-tool">
-						<div class="inner">
-							<div class="container">
-								<div class="submenu">Tool</div>
-								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('new-tool-body')">▼</button>
-								</div>
-							</div>
-							<div class="expandable-content" id="new-tool-body">
-									<p>Tool body</p>
-							</div>
-						</div>
-					</section> -->
-
- */

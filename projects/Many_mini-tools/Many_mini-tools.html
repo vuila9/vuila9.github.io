@@ -36,7 +36,17 @@
 					</section>
 
 				<!--Stopwatch (STW)-->
-					<section id="stopwatch-tool"></section>
+					<section id="stopwatch-tool">
+						<div class="inner">
+							<div class="container">
+								<div class="submenu">Stopwatch</div>
+								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('STW-body')">▼</button>
+							</div>
+							<div class="expandable-content" id="STW-body">
+								<p>this is a stopwatch</p>
+							</div>
+						</div>
+					</section>
 
 				<!-- Webcam Video Tester (WVT)-->
 					<section id="webcam-video-tester">
@@ -171,12 +181,9 @@
 			<script src="../../assets/js/main.js"></script>
 			<script src="../../assets/js/project_global_function.js"></script>
 
-			<!-- React & Babel library -->
-			<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-			<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-			<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
 			<!-- Tool scripts -->
 			<script src="./assets/js/loader.js" defer></script>
+			<script src="./assets/js/stopwatch.jsx" type="text/babel" ></script>
+
 	</body>
 </html>

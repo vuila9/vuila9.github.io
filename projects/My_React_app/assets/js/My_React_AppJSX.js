@@ -73,8 +73,9 @@ function updateCounters() {
 }
 
 function main() {
-    const root = ReactDOM.createRoot(document.getElementById("my-react-app"));
-    root.render(<TodoApp/>);
+    //const root = ReactDOM.createRoot(document.getElementById("my-react-app"));
+    //root.render(<TodoApp/>);
+    ReactDOM.render(<TodoApp />, document.getElementById("my-react-app"));
     // let intervalId;
     // updateCounters();
     // intervalId = setInterval(updateCounters, 1000);
