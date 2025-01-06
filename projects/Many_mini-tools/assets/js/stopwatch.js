@@ -1,39 +1,60 @@
 function stopwatch() {
     let isRunning = false;
-    let elapsedTime = 0;
+    let elapsedTime = 0;  // in miliseconds
     let intervalIdRef = null;
     let startTimeRef = 0;
 
     const STOPWATCH = document.getElementById('stopwatch-display');
 
-    document.getElementById('button-play').addEventListener('click', (event) => { // start / pause the game
-        if (event.button == 2) event.preventDefault(); // prevent right-click
-        pauseGame();
-    });
+    const start_button = document.getElementById('STW-button-start');
+    const pause_button = document.getElementById('STW-button-pause');
+    const reset_button = document.getElementById('STW-button-reset');
 
-    document.getElementById('STW-button-start').addEventListener('click', (event) => {
+    start_button.addEventListener('click', (event) => {
         isRunning = true;
         let time_now = Date.now();
         let seconds = 0;
-        stopwatch.innerHTML = `${timeFormat(seconds)}`;
+        //stopwatch.innerHTML = `${timeFormat(seconds)}`;
+        start_button.disabled = true;
+        pause_button.disabled = false;
+        reset_button.disabled = false;
+
+        timeLoop();
     });
        
-    document.getElementById('STW-button-pause').addEventListener('click', (event) => {
+    pause_button.addEventListener('click', (event) => {
+        isRunning = !isRunning;
+
+        if (isRunning)
+            event.target.innerHTML = 'Pause';
+        else
+            event.target.innerHTML = 'Resume';
+
+        timeLoop();
+    });
+
+    reset_button.addEventListener('click', (event) => {
         isRunning = false;
+        reset_button.disabled = true;
+        pause_button.disabled = true;
+        start_button.disabled = false;
     });
 
-    document.getElementById('STW-button-reset').addEventListener('click', (event) => {
-
-    });
-
-    function timeFormat(time) {
-        let time_string = '00:00:00';
-        return time_string;
+    function timeFormat() {
+        const minutes = Math.floor(elapsedTime / 1000 / 60);
+        const seconds = Math.floor((elapsedTime - minutes * 1000 * 60) / 1000);
+        const miliseconds = elapsedTime - minutes * 1000 * 60 - seconds * 1000;
+        return `${minutes}:${seconds}:${miliseconds}`;
     }
 
     function timeLoop() {
         if (!isRunning) return;
+        elapsedTime += 1;
+        //STOPWATCH.textContent = `${timeFormat()}`;
+        STOPWATCH.innerHTML = timeFormat();
+        setTimeout(timeLoop, 1);
     }
+    //timeLoop();
 }
 
 window.onload = function() {
