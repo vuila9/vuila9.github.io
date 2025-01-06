@@ -22,9 +22,9 @@ function stopwatch() {
         isRunning = !isRunning;
 
         if (isRunning) 
-            event.target.innerHTML = 'Pause';
+            pause_button.innerHTML = 'Pause';
         else {
-            event.target.innerHTML = 'Resume';
+            pause_button.innerHTML = 'Resume';
             clearInterval(intervalId);
             intervalId = null;
             elapsedTime += Date.now() - startTime;
@@ -39,9 +39,9 @@ function stopwatch() {
         startTime = 0;
         elapsedTime = 0;
         STOPWATCH.innerHTML = '00:00:000';
-
-        reset_button.disabled = true;
+        pause_button.innerHTML = 'Pause';
         pause_button.disabled = true;
+        reset_button.disabled = true;
         start_button.disabled = false;
     });
 
