@@ -6,7 +6,7 @@ const scripts = [
     './assets/js/microphone_audio_tester_helper.js', './assets/js/microphone_audio_tester.js',
     './assets/js/webcam_video_tester.js',
     './assets/js/stopwatch.js',
-    './assets/js/timer.js', './assets/js/timer_helper.js',
+    './assets/js/timer.js', './assets/js/timer_helper.js'
 ];
 
 // Function to dynamically load each script

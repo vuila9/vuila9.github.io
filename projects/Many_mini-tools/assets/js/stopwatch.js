@@ -14,7 +14,6 @@ function stopwatch() {
         start_button.disabled = true;
         pause_button.disabled = false;
         reset_button.disabled = false;
-
         timeLoop();
     });
        
@@ -62,6 +61,4 @@ function stopwatch() {
     }
 }
 
-window.onload = function() {
-    stopwatch();
-}
+stopwatch();

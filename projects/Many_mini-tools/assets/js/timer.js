@@ -63,6 +63,4 @@ function countdown() {
     }
 }
 
-window.onload = function() {
-    countdown();
-}
+countdown();
