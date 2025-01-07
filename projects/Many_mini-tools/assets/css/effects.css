@@ -13,3 +13,34 @@
     align-items: center; /* Align buttons vertically (optional) */
     position: relative;
 }
+
+/* TIMER EFFECTS */
+.TMR-timer-countdown {
+	display: flex;
+	font-family: 'Consolas', monospace;
+	font-size: 20px; /* Adjust the size as needed */
+	margin-right: 10px;
+}
+
+.TMR-timer-container {
+	display: flex;
+    justify-content: space-between; /* Push groups to the edges */
+    align-items: center; 
+    width: 100%;
+	margin-bottom: 15px;
+}
+
+.TMR-timer-label {
+	font-size: 15px;
+	font-weight: bold;
+}
+
+.TMR-timer-utility {
+	display: flex; 
+	align-items: center;
+}
+
+.TMR-timer-start-button, .TMR-timer-reset-button, .TMR-timer-remove-button {
+	font-size: 10px;
+	width: 45px;
+}
