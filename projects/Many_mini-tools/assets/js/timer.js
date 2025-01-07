@@ -31,26 +31,29 @@ function countdown() {
         const start_button = document.createElement('button');
         start_button.id = `TMR-timer-start-button-${timer_id}`;
         start_button.className = `fas fa-play TMR-timer-start-button`;
+        start_button.title = 'start';
 
         const reset_button = document.createElement('button');
         reset_button.id = `TMR-timer-reset-button-${timer_id}`;
         reset_button.className = `fas fa-undo TMR-timer-reset-button`;
+        reset_button.title = 'reset';
 
         const remove_button = document.createElement('button');
         remove_button.id = `TMR-timer-remove-button-${timer_id}`;
         remove_button.className = `fas fa-times TMR-timer-remove-button`;
+        remove_button.title = 'remove';
         remove_button.addEventListener("click", (event) => {
             removeTimer(`TMR-timer-container-${timer_id}`, timer_id);
-        })
-
-        timer_div.appendChild(timer_display_label);
+        });
 
         utility_div.appendChild(timer_display_countdown);
         utility_div.appendChild(start_button);
         utility_div.appendChild(reset_button);
         utility_div.appendChild(remove_button);
 
+        timer_div.appendChild(timer_display_label);
         timer_div.appendChild(utility_div);
+
         TIMERS_DISPLAY.appendChild(timer_div);
         TMR_BODY.style.maxHeight = 46 + (TIMER_MAP.size + 1)*100 + 'px';
         TIMER_MAP.set(timer_id, new Timer(0,0,0, timer_id));
