@@ -29,6 +29,8 @@ const MONTHS_ORDER = {
 
 const DAY_IN_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+const CDT_BODY = document.getElementById('CDT-body');
+
 // Populate the months dropdown
 const monthsSelect = document.getElementById('CDT-select-month');
 MONTHS.forEach((month, index) => {
@@ -103,10 +105,13 @@ promptSelect.addEventListener('change', function () {
     if (selectedPrompt == "custom-days-gap") {
         TOGGLE_CONTENT("CDT-text-hiddenPrompt"); // from `root/assets/js/project_page_layout.js`
         PRINT_TO_HTML("CDT-text-result", `&nbsp;`);
+        CDT_BODY.style.maxHeight = '500px';
     }
     else {
-        if ((hiddenPrompt_block.classList.contains("active"))) 
+        if ((hiddenPrompt_block.classList.contains("active"))) {
             TOGGLE_CONTENT("CDT-text-hiddenPrompt");
+            CDT_BODY.style.maxHeight = '415px';
+        }
     }
 });
 
