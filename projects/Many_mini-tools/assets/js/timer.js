@@ -52,9 +52,7 @@ function countdown() {
 
         timer_div.appendChild(utility_div);
         TIMERS_DISPLAY.appendChild(timer_div);
-        TMR_BODY.style.maxHeight = 46 + (timer_id+ 1)*100 + 'px';
-
-        TIMER_ARRAY.push(new Timer(0,0,0, timer_id));
+        TMR_BODY.style.maxHeight = 46 + (TIMER_MAP.size + 1)*100 + 'px';
         TIMER_MAP.set(timer_id, new Timer(0,0,0, timer_id));
     }
 
