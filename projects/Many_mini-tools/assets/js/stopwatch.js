@@ -4,7 +4,8 @@ function stopwatch() {
     let intervalId = null;
     let startTime = 0;
 
-    const STOPWATCH = document.getElementById('stopwatch-display');
+    const STOPWATCH = document.getElementById('STW-stopwatch-display');
+    const STOPWATCH_name = document.getElementById('STW-tool-name');
     const start_button = document.getElementById('STW-button-start');
     const pause_button = document.getElementById('STW-button-pause');
     const reset_button = document.getElementById('STW-button-reset');

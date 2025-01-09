@@ -30,7 +30,7 @@ function countdown() {
         timer_label_sound.className = 'fas fa-volume-mute TMR-timer-sound';
         timer_label_sound.addEventListener('click', (event) => {
             timerSound(timer_id, event.target);
-        })
+        });
 
         const timer_display_countdown = document.createElement('div');
         timer_display_countdown.innerHTML = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
