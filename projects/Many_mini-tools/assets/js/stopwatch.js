@@ -65,7 +65,7 @@ function stopwatch() {
                 STOPWATCH.textContent = timeFormat(totalElapsed);
                 STOPWATCH_name.textContent = 'Stopwatch';
             }
-        },10);
+        },1);
     }
 }
 
