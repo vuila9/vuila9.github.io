@@ -2,7 +2,8 @@ function countdown() {
     const add_button = document.getElementById('TMR-timer-add-button');
     const TIMERS_DISPLAY = document.getElementById('TMR-timer-display');
     const TMR_BODY = document.getElementById('TMR-body');
-    const tab_title = document.title;
+    const DOC_ICON = document.getElementById('MMT-icon');
+    const originalHREF = DOC_ICON.href;
 
     const TIMER_MAP = new Map();
 
@@ -104,11 +105,12 @@ function countdown() {
                 start_button.className = 'fas fa-play TMR-timer-start-button';
                 const timer_countdown = document.getElementById(`TMR-timer-countdown-${timer_id}`);
                 const timer_tool_name = document.getElementById('TMR-tool-name');
+                
                 let isVisible = true;
                 timer.setIntervalID(setInterval(() => {
                     isVisible = !isVisible;
                     timer_countdown.style.visibility = isVisible ? 'visible' : 'hidden';
-                    document.title = (isVisible) ? tab_title : `${tab_title} 🔔`;
+                    DOC_ICON.href = (isVisible) ? './assets/img/bell.png' : originalHREF;
                     if (getComputedStyle(TMR_BODY).maxHeight == '0px') {
                         timer_tool_name.innerHTML = (isVisible) ? 'Timer 🔔' : 'Timer';
                     } else 
@@ -131,7 +133,7 @@ function countdown() {
         document.getElementById(`TMR-timer-countdown-${timer_id}`).innerHTML = timeFormat(timer.getRemaining());
         document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-play TMR-timer-start-button';
         document.getElementById(`TMR-timer-countdown-${timer_id}`).style.visibility = 'visible';
-        document.title = tab_title;
+        DOC_ICON.href = originalHREF;
     }
 
     function removeTimer(container_id, timer_id) {
@@ -142,7 +144,7 @@ function countdown() {
             timer.setIntervalID(null);
         }
         timer.pauseSound();
-        document.title = tab_title;
+        DOC_ICON.href = originalHREF;
         TIMERS_DISPLAY.removeChild(document.getElementById(container_id));
         TIMER_MAP.delete(timer_id);
         TMR_BODY.style.maxHeight = 46 + (TIMER_MAP.size)*100 + 'px';
