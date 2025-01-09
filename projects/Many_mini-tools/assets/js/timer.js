@@ -23,7 +23,7 @@ function countdown() {
         const timer_display_label = document.createElement('div');
         timer_display_label.id = `TMR-timer-label-${timer_id}`;
         timer_display_label.className = `TMR-timer-label`;
-        timer_display_label.innerHTML = (timer_label.value == '') ? `Timer ${timer_id + 1}` : timer_label.value;
+        timer_display_label.textContent = (timer_label.value == '') ? `Timer ${timer_id + 1}` : timer_label.value;
         timer_label.value = '';
 
         const timer_label_sound = document.createElement('div');
@@ -33,7 +33,7 @@ function countdown() {
         });
 
         const timer_display_countdown = document.createElement('div');
-        timer_display_countdown.innerHTML = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
+        timer_display_countdown.textContent = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
         timer_display_countdown.id = `TMR-timer-countdown-${timer_id}`;
         timer_display_countdown.className = 'TMR-timer-countdown';
 
@@ -112,12 +112,12 @@ function countdown() {
                     timer_countdown.style.visibility = isVisible ? 'visible' : 'hidden';
                     DOC_ICON.href = (isVisible) ? './assets/img/bell.png' : originalHREF;
                     if (getComputedStyle(TMR_BODY).maxHeight == '0px') {
-                        timer_tool_name.innerHTML = (isVisible) ? 'Timer 🔔' : 'Timer';
+                        timer_tool_name.textContent = (isVisible) ? 'Timer 🔔' : 'Timer';
                     } else 
-                        timer_tool_name.innerHTML= 'Timer';
+                        timer_tool_name.textContent= 'Timer';
                 }, 500));
             } else {
-                document.getElementById(`TMR-timer-countdown-${timer_id}`).innerHTML = timeFormat(timer.getRemaining());
+                document.getElementById(`TMR-timer-countdown-${timer_id}`).textContent = timeFormat(timer.getRemaining());
             }
         }), 1000);
     }
@@ -130,7 +130,7 @@ function countdown() {
         clearInterval(timer.getIntervalID());
         timer.setIntervalID(null);
         timer.setRemaining(timer.getDuration());
-        document.getElementById(`TMR-timer-countdown-${timer_id}`).innerHTML = timeFormat(timer.getRemaining());
+        document.getElementById(`TMR-timer-countdown-${timer_id}`).textContent = timeFormat(timer.getRemaining());
         document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-play TMR-timer-start-button';
         document.getElementById(`TMR-timer-countdown-${timer_id}`).style.visibility = 'visible';
         DOC_ICON.href = originalHREF;
