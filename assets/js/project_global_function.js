@@ -19,8 +19,8 @@ buttons.forEach(button => {
 function TOGGLE_CONTENT(contentId) {
     const content = document.getElementById(contentId);
     content.classList.toggle('active');
-    if (content.style.maxHeight){
-        content.style.maxHeight = null;
+    if (getComputedStyle(content).maxHeight != '0px'){
+        content.style.maxHeight = '0px';
     } else {
         content.style.maxHeight = content.scrollHeight + "px";
     }
