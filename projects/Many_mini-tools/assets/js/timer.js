@@ -95,13 +95,20 @@ function countdown() {
             timer.setRemaining(timer.getEndTime() - currentTime);
 
             if (timer.getRemaining() <= 0) { // when timer ends
-                if (timer.isSoundOn()) {
+                if (timer.isSoundOn()) 
                     timer.playSound();
-                }
                 clearInterval(timer.getIntervalID());
                 timer.setIntervalID(null);
                 timer.setRemaining(0);
                 start_button.className = 'fas fa-play TMR-timer-start-button';
+                const timer_label = document.getElementById(`TMR-timer-label-${timer_id}`);
+                const timer_countdown = document.getElementById(`TMR-timer-countdown-${timer_id}`);
+                let isVisible = true;
+                timer.setIntervalID(setInterval(() => {
+                    isVisible = !isVisible;
+                    timer_label.style.visibility = isVisible ? 'visible' : 'hidden';
+                    timer_countdown.style.visibility = isVisible ? 'visible' : 'hidden';
+                }, 500));
             } else {
                 document.getElementById(`TMR-timer-countdown-${timer_id}`).innerHTML = timeFormat(timer.getRemaining());
             }
@@ -127,6 +134,7 @@ function countdown() {
             clearInterval(timer.getIntervalID());
             timer.setIntervalID(null);
         }
+        timer.pauseSound();
         TIMERS_DISPLAY.removeChild(document.getElementById(container_id));
         TIMER_MAP.delete(timer_id);
         TMR_BODY.style.maxHeight = 46 + (TIMER_MAP.size)*100 + 'px';
