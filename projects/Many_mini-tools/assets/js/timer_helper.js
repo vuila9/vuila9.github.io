@@ -1,5 +1,5 @@
 class Timer {
-    constructor (duration, id=0, pause=true, sound=false, audio_source = './assets/misc/audio/mixkit-clock-countdown-bleeps-916.wav') {
+    constructor (duration, id=0, audio_source = './assets/misc/audio/mixkit-clock-countdown-bleeps-916.wav', pause=true, sound=false) {
         this.duration = (duration[0] * 3600 + duration[1] * 60 + duration[2]) * 1000 + 500; //+500 because setInterval() execute function right away so this would make it delay for 500ms when first start
         this.remaining = this.duration;
         this.startTime = 0;
