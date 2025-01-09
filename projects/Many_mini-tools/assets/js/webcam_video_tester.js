@@ -18,7 +18,7 @@ function webcam() {
                 startButton.disabled = true;
                 pauseButton.disabled = false;
                 stopButton.disabled = false;
-                document.getElementById('WVT-tool-name').innerHTML = 'Webcam Video Tester 🔴';
+                document.getElementById('WVT-tool-name').textContent = 'Webcam Video Tester 🔴';
                 intervalID = setInterval(() => {
                     if (WEBCAM_ON && getComputedStyle(document.getElementById('WVT-body')).maxHeight == '0px') {
                         stop();
@@ -50,7 +50,7 @@ function webcam() {
         if (STREAM) {
             // Stop all tracks in the STREAM
             clearInterval(intervalID);
-            document.getElementById('WVT-tool-name').innerHTML = 'Webcam Video Tester';
+            document.getElementById('WVT-tool-name').textContent = 'Webcam Video Tester';
 
 
             STREAM.getTracks().forEach((track) => track.stop());

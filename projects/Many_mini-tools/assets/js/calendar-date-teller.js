@@ -56,7 +56,7 @@ function populate_days(monthIndex) {
     let daysInMonth = MONTHS[monthIndex].days;
 
     // Clear any existing options in the days dropdown
-    daysSelect.innerHTML = '';
+    daysSelect.textContent = '';
 
     // Populate the days dropdown
     for (let i = 1; i <= daysInMonth; i++) {
@@ -73,7 +73,7 @@ function populate_days_hidden(monthIndex) {
     let daysInMonth = MONTHS[monthIndex].days;
 
     // Clear any existing options in the days dropdown
-    daysSelect_hidden.innerHTML = '';
+    daysSelect_hidden.textContent = '';
 
     // Populate the days dropdown
     for (let i = 1; i <= daysInMonth; i++) {
