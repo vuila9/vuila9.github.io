@@ -81,14 +81,14 @@
 						<div class="inner">
 							<div class="container">
 								<div class="submenu" id="WVT-tool-name">Webcam Video Tester</div>
-								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('WVT-body')">▼</button>
+								<button class="expand-collapse-button" id="WVT-expand-button" onclick="TOGGLE_CONTENT('WVT-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="WVT-body">
 								<video id="webcam-video-area" style="height: 200px; background-color: rgb(255,255,255,0);" autoplay playsinline></video>
 								<br>
-								<button id="WVT-button-start" class="button" onclick="initWebcam()">Start</button>
-								<button id="WVT-button-pause" class="button" onclick="pauseWebcam()" disabled>Pause</button>
-								<button id="WVT-button-stop" class="button" onclick="stopWebcam()" disabled>Stop</button>
+								<button id="WVT-button-start" class="button" >Start</button>
+								<button id="WVT-button-pause" class="button" disabled>Pause</button>
+								<button id="WVT-button-stop" class="button" disabled>Stop</button>
 								<br><br>
 							</div>
 						</div>
