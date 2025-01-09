@@ -36,16 +36,16 @@ document.addEventListener("DOMContentLoaded", function() {
             link: "projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html"
         },
         {
-            imageSrc: "assets/img/program_icons/sudoku_tile.jpg",
-            title: "Sudoku Game (v2)",
-            description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS.",
-            link: "projects/Sudoku_JS/Sudoku_JS.html"
-        },
-        {
             imageSrc: "assets/img/program_icons/manytools_tile.jpg",
             title: "Many mini-tools",
             description: "A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal need.",
             link: "projects/Many_mini-tools/Many_mini-tools.html"
+        },
+        {
+            imageSrc: "assets/img/program_icons/sudoku_tile.jpg",
+            title: "Sudoku Game (v2)",
+            description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS.",
+            link: "projects/Sudoku_JS/Sudoku_JS.html"
         },
         // {
         //     imageSrc: "assets/img/pic03.jpg",
