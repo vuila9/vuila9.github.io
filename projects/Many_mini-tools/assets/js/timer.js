@@ -37,7 +37,7 @@ function countdown() {
         start_button.className = `fas fa-play TMR-timer-start-button`;
         start_button.title = 'start';
         start_button.addEventListener("click", (event) => {
-            startTimer(timer_id);
+            startTimer(timer_id)
         });
 
         const reset_button = document.createElement('button');

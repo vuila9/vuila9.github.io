@@ -1,6 +1,6 @@
 class Timer {
     constructor (duration, id=0, pause=true) {
-        this.duration = (duration[0] * 3600 + duration[1] * 60 + duration[2]) * 1000;
+        this.duration = (duration[0] * 3600 + duration[1] * 60 + duration[2]) * 1000 + 500; //+500 because setInterval() execute function right away so this would make it delay for 500ms when first start
         this.remaining = this.duration;
         this.startTime = 0;
         this.endTime = 0;
