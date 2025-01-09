@@ -24,6 +24,12 @@ function countdown() {
         timer_display_label.innerHTML = (timer_label.value == '') ? `Timer ${timer_id + 1}` : timer_label.value;
         timer_label.value = '';
 
+        const timer_label_sound = document.createElement('div');
+        timer_label_sound.className = 'fas fa-volume-mute TMR-timer-sound';
+        timer_label_sound.addEventListener('click', (event) => {
+            timerSound(timer_id, event.target);
+        })
+
         const timer_display_countdown = document.createElement('div');
         timer_display_countdown.innerHTML = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
         timer_display_countdown.id = `TMR-timer-countdown-${timer_id}`;
@@ -37,7 +43,7 @@ function countdown() {
         start_button.className = `fas fa-play TMR-timer-start-button`;
         start_button.title = 'start';
         start_button.addEventListener("click", (event) => {
-            startTimer(timer_id)
+            startTimer(timer_id, event.target)
         });
 
         const reset_button = document.createElement('button');
@@ -61,6 +67,8 @@ function countdown() {
         utility_div.appendChild(reset_button);
         utility_div.appendChild(remove_button);
 
+        timer_display_label.appendChild(timer_label_sound);
+
         timer_div.appendChild(timer_display_label);
         timer_div.appendChild(utility_div);
 
@@ -69,28 +77,31 @@ function countdown() {
         TIMER_MAP.set(timer_id, new Timer([hh,mm,ss], timer_id));
     }
 
-    function startTimer(timer_id) {
+    function startTimer(timer_id, start_button) {
         const timer = TIMER_MAP.get(timer_id);
         if (timer.getRemaining() == 0) return;
         timer.togglePause();
-        document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-play TMR-timer-start-button';
+        start_button.className = 'fas fa-play TMR-timer-start-button';
         if (TIMER_MAP.get(timer_id).isPause()) {
             clearInterval(timer.getIntervalID());
             timer.setIntervalID(null);
             return;
         }
-        document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-pause TMR-timer-start-button';
+        start_button.className = 'fas fa-pause TMR-timer-start-button';
         timer.setStartTime(Date.now());
         timer.setEndTime(timer.getStartTime() + timer.getRemaining()); // target time
         timer.setIntervalID(setInterval(() => {
             const currentTime = Date.now();
             timer.setRemaining(timer.getEndTime() - currentTime);
 
-            if (timer.getRemaining() <= 0) {
+            if (timer.getRemaining() <= 0) { // when timer ends
+                if (timer.isSoundOn()) {
+                    timer.playSound();
+                }
                 clearInterval(timer.getIntervalID());
                 timer.setIntervalID(null);
                 timer.setRemaining(0);
-                document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-play TMR-timer-start-button';
+                start_button.className = 'fas fa-play TMR-timer-start-button';
             } else {
                 document.getElementById(`TMR-timer-countdown-${timer_id}`).innerHTML = timeFormat(timer.getRemaining());
             }
@@ -100,6 +111,7 @@ function countdown() {
     function resetTimer(timer_id) {
         const timer = TIMER_MAP.get(timer_id);
         if (timer.getRemaining() == timer.getDuration()) return;
+        timer.pauseSound();
         timer.setPause(true);
         clearInterval(timer.getIntervalID());
         timer.setIntervalID(null);
@@ -118,6 +130,19 @@ function countdown() {
         TIMERS_DISPLAY.removeChild(document.getElementById(container_id));
         TIMER_MAP.delete(timer_id);
         TMR_BODY.style.maxHeight = 46 + (TIMER_MAP.size)*100 + 'px';
+    }
+
+    function timerSound(timer_id, sound_label) {
+        const timer = TIMER_MAP.get(timer_id);
+        timer.toggleSound();
+        if (timer.isSoundOn()) {
+            sound_label.className = 'fas fa-volume-up TMR-timer-sound';
+        }
+        else {
+            sound_label.className = 'fas fa-volume-mute TMR-timer-sound';
+            if (timer.getRemaining() == 0) 
+                timer.pauseSound();
+        }
     }
 
     function timeFormat(remainingTime) {
