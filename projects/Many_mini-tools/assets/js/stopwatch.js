@@ -6,6 +6,7 @@ function stopwatch() {
 
     const STOPWATCH = document.getElementById('STW-stopwatch-display');
     const STOPWATCH_name = document.getElementById('STW-tool-name');
+    const STW_BODY = document.getElementById('STW-body');
     const start_button = document.getElementById('STW-button-start');
     const pause_button = document.getElementById('STW-button-pause');
     const reset_button = document.getElementById('STW-button-reset');
@@ -22,9 +23,9 @@ function stopwatch() {
         isRunning = !isRunning;
 
         if (isRunning) 
-            pause_button.innerHTML = 'Pause';
+            pause_button.textContent = 'Pause';
         else {
-            pause_button.innerHTML = 'Resume';
+            pause_button.textContent = 'Resume';
             clearInterval(intervalId);
             intervalId = null;
             elapsedTime += Date.now() - startTime;
@@ -38,8 +39,8 @@ function stopwatch() {
         intervalId = null;
         startTime = 0;
         elapsedTime = 0;
-        STOPWATCH.innerHTML = '00:00:000';
-        pause_button.innerHTML = 'Pause';
+        STOPWATCH.textContent = '00:00:000';
+        pause_button.textContent = 'Pause';
         pause_button.disabled = true;
         reset_button.disabled = true;
         start_button.disabled = false;
@@ -57,8 +58,14 @@ function stopwatch() {
         startTime = Date.now();
         intervalId = setInterval(() => {
             const totalElapsed = Date.now() - startTime + elapsedTime;
-            STOPWATCH.innerHTML = timeFormat(totalElapsed);
-        })
+            if (getComputedStyle(STW_BODY).maxHeight == '0px') {
+                STOPWATCH_name.textContent = `Stopwatch (${timeFormat(totalElapsed)})`;
+            }
+            else {
+                STOPWATCH.textContent = timeFormat(totalElapsed);
+                STOPWATCH_name.textContent = 'Stopwatch';
+            }
+        },10);
     }
 }
 
