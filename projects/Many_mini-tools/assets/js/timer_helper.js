@@ -1,8 +1,10 @@
 class Timer {
-    constructor (duration, startTime, endTime, id=0, pause=false) {
-        this.duration = duration;
-        this.startTime = startTime;
-        this.endTime = endTime;
+    constructor (duration, id=0, pause=true) {
+        this.duration = (duration[0] * 3600 + duration[1] * 60 + duration[2]) * 1000;
+        this.remaining = this.duration;
+        this.startTime = 0;
+        this.endTime = 0;
+        this.intervalId = null;
         this.id = id;
         this.pause = pause;
     }
@@ -13,7 +15,15 @@ class Timer {
 
     setEndTime(end) { this.endTime = end; }
 
-    setID(id) { this.id = id; }
+    setRemaining(remaining) { this.remaining = remaining; }
+
+    setTimerID(id) { this.id = id; }
+
+    setIntervalID(intervalId) { this.intervalId = intervalId; }
+
+    setPause(bool) { this.pause = bool; }
+
+    togglePause() { this.pause = !this.pause; }
 
     getDuration() { return this.duration; }
 
@@ -21,7 +31,11 @@ class Timer {
 
     getEndTime() { return this.endTime; }
 
+    getRemaining() { return this.remaining; }
+
     getTimerID() { return this.id; }
+
+    getIntervalID() { return this.intervalId; }
 
     isPause() { return this.pause; }
 }

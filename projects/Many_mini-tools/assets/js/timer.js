@@ -6,6 +6,10 @@ function countdown() {
     const TIMER_MAP = new Map();
 
     add_button.onclick = function() {
+        let [hh,mm,ss] = document.querySelectorAll('.TMR-timer-input');
+        [hh,mm,ss] = durationConverter(hh.value, mm.value, ss.value);
+        if (hh == '00' && mm == '00' && ss == '00') return;
+
         const total_timers_count = document.querySelectorAll('.TMR-timer-container').length;
         const timer_id = (total_timers_count == 0) ? 0 : Number(document.querySelectorAll('.TMR-timer-container')[total_timers_count-1].id.split('-').at(-1)) + 1;
 
@@ -21,7 +25,7 @@ function countdown() {
         timer_label.value = '';
 
         const timer_display_countdown = document.createElement('div');
-        timer_display_countdown.innerHTML = '00:00:00';
+        timer_display_countdown.innerHTML = `${hh.toString().padStart(2, '0')}:${mm.toString().padStart(2, '0')}:${ss.toString().padStart(2, '0')}`;
         timer_display_countdown.id = `TMR-timer-countdown-${timer_id}`;
         timer_display_countdown.className = 'TMR-timer-countdown';
 
@@ -32,11 +36,17 @@ function countdown() {
         start_button.id = `TMR-timer-start-button-${timer_id}`;
         start_button.className = `fas fa-play TMR-timer-start-button`;
         start_button.title = 'start';
+        start_button.addEventListener("click", (event) => {
+            startTimer(timer_id);
+        });
 
         const reset_button = document.createElement('button');
         reset_button.id = `TMR-timer-reset-button-${timer_id}`;
         reset_button.className = `fas fa-undo TMR-timer-reset-button`;
         reset_button.title = 'reset';
+        reset_button.addEventListener("click", (event) => {
+            resetTimer(timer_id);
+        });
 
         const remove_button = document.createElement('button');
         remove_button.id = `TMR-timer-remove-button-${timer_id}`;
@@ -56,13 +66,82 @@ function countdown() {
 
         TIMERS_DISPLAY.appendChild(timer_div);
         TMR_BODY.style.maxHeight = 46 + (TIMER_MAP.size + 1)*100 + 'px';
-        TIMER_MAP.set(timer_id, new Timer(0,0,0, timer_id));
+        TIMER_MAP.set(timer_id, new Timer([hh,mm,ss], timer_id));
+    }
+
+    function startTimer(timer_id) {
+        const timer = TIMER_MAP.get(timer_id);
+        if (timer.getRemaining() == 0) return;
+        timer.togglePause();
+        document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-play TMR-timer-start-button';
+        if (TIMER_MAP.get(timer_id).isPause()) {
+            clearInterval(timer.getIntervalID());
+            timer.setIntervalID(null);
+            return;
+        }
+        document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-pause TMR-timer-start-button';
+        timer.setStartTime(Date.now());
+        timer.setEndTime(timer.getStartTime() + timer.getRemaining()); // target time
+        timer.setIntervalID(setInterval(() => {
+            const currentTime = Date.now();
+            timer.setRemaining(timer.getEndTime() - currentTime);
+
+            if (timer.getRemaining() <= 0) {
+                clearInterval(timer.getIntervalID());
+                timer.setIntervalID(null);
+                timer.setRemaining(0);
+                document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-play TMR-timer-start-button';
+            } else {
+                document.getElementById(`TMR-timer-countdown-${timer_id}`).innerHTML = timeFormat(timer.getRemaining());
+            }
+        }), 1000);
+    }
+
+    function resetTimer(timer_id) {
+        const timer = TIMER_MAP.get(timer_id);
+        if (timer.getRemaining() == timer.getDuration()) return;
+        timer.setPause(true);
+        clearInterval(timer.getIntervalID());
+        timer.setIntervalID(null);
+        timer.setRemaining(timer.getDuration());
+        document.getElementById(`TMR-timer-countdown-${timer_id}`).innerHTML = timeFormat(timer.getRemaining());
+        document.getElementById(`TMR-timer-start-button-${timer_id}`).className = 'fas fa-play TMR-timer-start-button';
     }
 
     function removeTimer(container_id, timer_id) {
+        const timer = TIMER_MAP.get(timer_id);
+        if (!timer.isPause()) {
+            timer.setPause(true);
+            clearInterval(timer.getIntervalID());
+            timer.setIntervalID(null);
+        }
         TIMERS_DISPLAY.removeChild(document.getElementById(container_id));
         TIMER_MAP.delete(timer_id);
         TMR_BODY.style.maxHeight = 46 + (TIMER_MAP.size)*100 + 'px';
+    }
+
+    function timeFormat(remainingTime) {
+        const seconds = Math.floor((remainingTime / 1000) % 60);
+        const minutes = Math.floor((remainingTime / (1000 * 60)) % 60);
+        const hours = Math.floor((remainingTime / (1000 * 60 * 60)));
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function durationConverter(hour, minute, second) {
+        if (isNaN(hour))     hour = 0;
+        if (isNaN(minute)) minute = 0;
+        if (isNaN(second)) second = 0;
+
+        [hour, minute, second] = [Number(hour), Number(minute), Number(second)];
+        if (second > 59) {
+            second -= 60;
+            minute += 1;
+        }
+        if (minute > 59) {
+            minute -= 60;
+            hour += 1;
+        }
+        return [hour, minute, second];
     }
 }
 
