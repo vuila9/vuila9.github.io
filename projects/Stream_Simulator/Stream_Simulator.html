@@ -27,8 +27,53 @@
 
 				<!-- Main -->
 					<div id="main">
+						<div id="stream-UI">
+							<!-- Project goes here -->
+							<div id="media-section">
+								<div id="video-player">
+									<p>Video player</p>
+								</div>
+								<div id="channel-info">
+									<div class="section-row-farend">
+										<div id="channel-info-left">
+											<img id="channel-user-avatar" src="assets/img/default_user_avatar.png" alt="">
+											<div id="channel-detail">
+												<div id="channel-name">YOU</div>
+												<div id="channel-title">THIS STREAM SUCKS</div>
+												<div id="channel-category">Just Chatting</div>
+											</div>
+										</div>
+
+										<div id="channel-info-right">
+											<div id="channel-action">
+												<button class="purple-button" id="follow-button">Follow</button>
+												<button class="purple-button" id="subscribe-button">Subscribe</button>
+											</div>
+											<div id="channel-numbers">
+												<div id="channel-viewer-count" style="color:brown"> <div class="fas fa-user-alt" style="margin-right: 5px;"></div>12000</div>
+												<div id="channel-stream-time">00:00:00</div>
+											</div>
+										</div>
+									</div>
+									
+								</div>
+							</div>
+							
+							<div id="chat-section">
+								<div id="chat-messages"></div>
+								<div class="chat-input">
+									<input type="text" id="chat-input" placeholder="Send a message">
+								</div>
+								<div class="section-row-farend">
+									<div class="fa fa-gift"></div>
+									<button class="purple-button" id="send-button">Chat</button>
+								</div>
+							</div>
+							
+						</div>
+
+						
 						<div class="inner">
-							<div><!-- Project goes here --></div>
 							<div>
 								<span class="submenu">Description</span>
 								<p>This is a work-in-progress project, nothing to see here...</p>
@@ -87,5 +132,7 @@
 			<script src="../../assets/js/project_global_function.js"></script>
 
 			<!-- project specifics -->
+			<script src="assets/js/Stream_Simulator.js"></script>
+
 	</body>
 </html>

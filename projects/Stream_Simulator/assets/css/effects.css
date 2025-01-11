@@ -1,0 +1,164 @@
+
+#stream-UI {
+    display: flex;
+    height: calc(100vh - 60px);
+    margin-left: 100px;
+    margin-right: 100px;
+    background-color: rgb(14, 14, 16);
+}
+
+/* GENERAL UI */
+
+#media-section {
+    flex: 1; /* Allows the video player to take up remaining space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    max-width: calc(100% - 300px); /* Ensures it does not exceed the container minus chat width */
+    height: auto; /* Allows height to be determined by aspect-ratio */
+    position: relative;
+}
+
+#video-player {
+    position: absolute; /* Position it relative to #media-section */
+    top: 0; /* Align to the top of #media-section */
+    left: 0; /* Align to the left of #media-section */
+    width: 100%; /* Make it full width */
+    aspect-ratio: 16/9;
+    z-index: 2; /* Higher z-index to stay on top */
+    background-color: purple; /* Optional: Add background color */
+}
+
+/* CHANNEL UI  */
+
+#channel-info {
+    position: absolute; /* Also position it within #media-section */
+    bottom: 0; /* Align it to the bottom of #media-section */
+    left: 0;
+    width: 100%; /* Optional: Full width */
+    height: 150px;
+    z-index: 1; /* Lower z-index to stay behind #video-player */
+    background-color: rgb(14, 14, 16); /* Optional: Semi-transparent background */
+    color: #fff; /* Optional: Text color for visibility */
+    padding: 1rem; /* Optional: Add padding */
+}
+
+#channel-user-avatar {
+    width: 80px;
+    height: 80px;
+}
+
+#channel-info-left {
+    display: flex; /* Make the container a flex container */
+    align-items: center; /* Align items vertically in the center */
+    gap: 10px; 
+    margin-top: 15px;
+}
+
+#channel-name, #channel-title {
+    font-size: 25px;
+    height: 30px;
+}
+
+#channel-action {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+#channel-category {
+    font-size: 15px;
+    margin-top: 5px;
+}
+
+#channel-numbers {
+    display: flex; /* Make the container a flex container */
+    align-items: center; /* Align items vertically in the center */
+    gap: 10px; 
+}
+
+/* CHAT SECTION */
+
+#chat-section {
+    width: 300px; /* Fixed width for the chat section */
+    background-color: #18181b;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Stays consistent with the parent height */
+}
+
+#chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+}
+
+#chat-messages p {
+    color:white;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.chat-input {
+    display: flex;
+}
+
+#chat-input {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: none;
+    height: 35px;
+    border-radius: 4px;
+    background-color: #3a3a3d;
+    color: #ffffff;
+    font-size: 15px;
+}
+
+input[type="text"] {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #3a3a3d;
+    color: #ffffff;
+}
+
+.purple-button {
+    all: revert;
+    background-color: rgb(119, 44, 232);
+    height: 30px;
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    color: #ffffff !important; /* Optional: Set text color */
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 14px; /* Optional: Adjust font size */
+    font-weight: bold;
+    border:none !important;
+    transition: background-color 0.3s ease; /* Smooth transition for the hover effect */
+    cursor: pointer; /* Add pointer cursor on hover */
+}
+
+.purple-button:hover {
+    color: #ffffff !important; /* Optional: Set text color */
+	box-shadow: none !important;
+    background-color: rgb(100, 34, 200) !important; /* Darker blue on hover */
+}
+
+.purple-button:active {
+    color: #ffffff !important; /* Optional: Set text color */
+    box-shadow: none !important;
+    background-color: rgb(79, 27, 159) !important; /* Even darker blue when clicked */
+}
+
+.section-row-farend {
+    display: flex;
+    margin-top: 10px;
+    justify-content: space-between; /* Push groups to the edges */
+    align-items: center; /* Align buttons vertically (optional) */
+    width: 100%; /* Make sure it spans the width of the parent */
+}
+
+
+
+
