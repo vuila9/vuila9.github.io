@@ -7,6 +7,20 @@ function countdown() {
 
     const TIMER_MAP = new Map();
 
+    const [hh_input, mm_input, ss_input] = document.querySelectorAll('.TMR-timer-input');
+
+    hh_input.addEventListener('wheel', (event) => {
+        scrollInput(event);
+    });
+
+    mm_input.addEventListener('wheel', (event) => {
+        scrollInput(event);
+    });
+
+    ss_input.addEventListener('wheel', (event) => {
+        scrollInput(event);
+    });
+
     add_button.onclick = function() {
         let [hh,mm,ss] = document.querySelectorAll('.TMR-timer-input');
         [hh,mm,ss] = durationConverter(hh.value, mm.value, ss.value);
@@ -148,6 +162,16 @@ function countdown() {
         TIMERS_DISPLAY.removeChild(document.getElementById(container_id));
         TIMER_MAP.delete(timer_id);
         TMR_BODY.style.maxHeight = 46 + (TIMER_MAP.size)*100 + 'px';
+    }
+
+    function scrollInput(event) {
+        event.preventDefault();
+        let currentValue = parseInt(event.target.value, 10) || 0;
+        if (event.deltaY < 0) 
+            currentValue = Math.min(currentValue + 1, 99); // Increment, cap at 99
+        else 
+            currentValue = Math.max(currentValue - 1, 0); // Decrement, cap at 0
+        event.target.value = currentValue;
     }
 
     function timerSound(timer_id, sound_label) {
