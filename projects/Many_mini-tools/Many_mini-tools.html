@@ -126,13 +126,16 @@
 								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('CDT-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="CDT-body">
-								<p>This tool was developed using manually built functions, without utilizing any built-in date manipulation functions, except for one to obtain the current date. <u>The result will include the ending date</u>.</p>
-								<p>Input a date, any date.</p>
+								<div style="display: flex">
+									<p style="margin-top: 0px">Input a date, any date.</p>
+									<div id="CDT-note" class="far fa-question-circle"></div>
+								</div>
 								<select id="CDT-select-prompt" style="width: auto">
 									<option value="current-days-gap">How many days from when to now?</option>
 									<option value="custom-days-gap">How many days from when to then?</option>
 									<option value="what-date-week">What day of the week is then?</option>
-								</select> <br>
+								</select>
+								<br>
 								<div class="same-line-block">
 									<label for="month">Month:</label>
 									<select id="CDT-select-month" style="width: auto"></select>
