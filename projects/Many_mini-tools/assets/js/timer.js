@@ -210,6 +210,12 @@ function countdown() {
         }
         return [hour, minute, second];
     }
+
+    function TMR_note() {
+        const TMR_note = document.getElementById('TMR-note');
+        TMR_note.title = `Users can input the time directly via the keyboard or hover over each box and scroll up or down to adjust.`
+    }
+    TMR_note();
 }
 
 countdown();
