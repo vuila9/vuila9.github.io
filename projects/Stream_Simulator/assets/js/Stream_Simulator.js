@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function Stream_Simulator()  {
     const chatMessages = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Populate chat messages
     sampleMessages.forEach(msg => {
         const messageElement = document.createElement('p');
+        messageElement.setAttribute('user', msg.user);
         messageElement.innerHTML = `<strong>${msg.user}:</strong> ${msg.message}`;
         chatMessages.appendChild(messageElement);
     });
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const message = chatInput.value.trim();
         if (message) {
             const messageElement = document.createElement('p');
+            messageElement.setAttribute('user', 'You');
             messageElement.innerHTML = `<strong>You:</strong> ${message}`;
             chatMessages.appendChild(messageElement);
             chatInput.value = '';
@@ -72,5 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
     //     followButton.classList.toggle('following');
     //     followButton.textContent = followButton.classList.contains('following') ? 'Following' : 'Follow';
     // });
-});
+}
+
+
+Stream_Simulator();
 
