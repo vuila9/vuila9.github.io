@@ -102,7 +102,7 @@
     color:white;
     font-size: 14px;
     font-family: Arial, Helvetica, sans-serif;
-    width: 92.5%; 
+    width: 100%; 
     word-wrap: break-word; 
     word-break: break-word; 
     white-space: normal; 
@@ -113,7 +113,7 @@
     background-color: rgb(55, 55, 57);
 }
 
-#chat-messages strong:hover {
+.user-message:hover {
     cursor: pointer; 
 }
 
