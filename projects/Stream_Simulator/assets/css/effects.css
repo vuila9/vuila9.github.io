@@ -1,7 +1,7 @@
 
 #stream-UI {
     display: flex;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 70px);
     margin-left: 100px;
     margin-right: 100px;
     background-color: rgb(14, 14, 16);
@@ -51,7 +51,7 @@
     display: flex; /* Make the container a flex container */
     align-items: center; /* Align items vertically in the center */
     gap: 10px; 
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
 #channel-name, #channel-title {
@@ -159,7 +159,7 @@
 }
 
 #chat-input:focus {
-    outline: 3px solid rgb(169, 112, 255);
+    outline: 4px solid rgb(169, 112, 255);
 }
 
 #under-chat-input {
