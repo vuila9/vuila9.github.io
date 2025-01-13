@@ -8,40 +8,38 @@
 }
 
 /* GENERAL UI */
-
 #media-section {
-    flex: 1; /* Allows the video player to take up remaining space */
+    flex: 1; 
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    max-width: calc(100% - 300px); /* Ensures it does not exceed the container minus chat width */
-    height: auto; /* Allows height to be determined by aspect-ratio */
+    max-width: calc(100% - 300px); 
+    height: auto; 
     position: relative;
 }
 
 #video-player {
-    position: absolute; /* Position it relative to #media-section */
-    top: 0; /* Align to the top of #media-section */
-    left: 0; /* Align to the left of #media-section */
-    width: 100%; /* Make it full width */
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
     aspect-ratio: 16/9;
-    z-index: 2; /* Higher z-index to stay on top */
-    background-color: purple; /* Optional: Add background color */
+    z-index: 2; 
+    background-color: purple; 
 }
 
 /* CHANNEL UI  */
-
 #channel-info {
-    position: absolute; /* Also position it within #media-section */
-    bottom: 0; /* Align it to the bottom of #media-section */
+    position: absolute; 
+    bottom: 0;
     left: 0;
-    width: 100%; /* Optional: Full width */
+    width: 100%; 
     height: 150px;
-    z-index: 1; /* Lower z-index to stay behind #video-player */
-    background-color: rgb(14, 14, 16); /* Optional: Semi-transparent background */
-    color: #fff; /* Optional: Text color for visibility */
-    padding: 1rem; /* Optional: Add padding */
+    z-index: 1; 
+    background-color: rgb(14, 14, 16); 
+    color: #fff; 
+    padding: 1rem; 
 }
 
 #channel-user-avatar {
@@ -57,7 +55,7 @@
 }
 
 #channel-name, #channel-title {
-    font-size: 25px;
+    font-size: 20px;
     height: 30px;
 }
 
@@ -79,7 +77,6 @@
 }
 
 /* CHAT SECTION */
-
 #chat-section {
     width: 300px; /* Fixed width for the chat section */
     background-color: #18181b;
