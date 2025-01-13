@@ -14,7 +14,7 @@
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
-    max-width: calc(100% - 300px); 
+    max-width: calc(100% - 315px); 
     height: auto; 
     position: relative;
 }
@@ -78,9 +78,11 @@
 
 /* CHAT SECTION */
 #chat-section {
-    width: 300px; /* Fixed width for the chat section */
+    width: 315px; /* Fixed width for the chat section */
     background-color: #18181b;
-    padding: 5px 0rem 1rem 1rem;
+    /* top, right, bottom, left */
+    /* padding: 5px 0rem 0.5rem 1rem;   */
+    padding: 5px 0 0.5rem 0;
     display: flex;
     flex-direction: column;
     height: 100%; /* Stays consistent with the parent height */
@@ -91,9 +93,10 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column; /* Ensures vertical stacking of <p> elements */
-    gap: 0px; /* Adds vertical spacing between child elements */
+    gap: 7px; /* Adds vertical spacing between child elements */
     position: relative;
-    padding-right: 5px;
+    padding-left: 10px;
+    padding-right: 6px;
     margin-bottom: 5px;
 }
 
@@ -120,13 +123,14 @@
 
 #chat-messages p {
     color:white;
-    font-size: 14px;
+    font-size: 13px;
     font-family: Arial, Helvetica, sans-serif;
     width: 100%; 
     word-wrap: break-word; 
     word-break: break-word; 
     white-space: normal; 
     margin: 0; /* Reset default margin */
+    line-height: 1.5;
 }   
 
 #chat-messages p:hover {
@@ -139,7 +143,8 @@
 
 .chat-input {
     display: flex;
-    padding-right: 1rem;
+    padding-right: 7px;
+    padding-left: 7px;
 }
 
 #chat-input {
@@ -153,8 +158,13 @@
     font-size: 15px;
 }
 
+#chat-input:focus {
+    outline: 3px solid rgb(169, 112, 255);
+}
+
 #under-chat-input {
-    padding-right: 1rem;
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 input[type="text"] {
