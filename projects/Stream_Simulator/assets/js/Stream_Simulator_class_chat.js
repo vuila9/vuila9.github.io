@@ -14,6 +14,7 @@ class ChatDisplay {
         messageUserElement.className = 'user-message';
         messageUserElement.textContent = message.getUser();
         messageUserElement.style.fontWeight = "bold";
+        messageUserElement.style.color = "green";
         messageUserElement.addEventListener(('click'), (event) => {
             console.log(message.getUser());
         });

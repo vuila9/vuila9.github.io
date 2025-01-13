@@ -83,7 +83,7 @@
 #chat-section {
     width: 300px; /* Fixed width for the chat section */
     background-color: #18181b;
-    padding: 1rem;
+    padding: 5px 0rem 1rem 1rem;
     display: flex;
     flex-direction: column;
     height: 100%; /* Stays consistent with the parent height */
@@ -96,6 +96,29 @@
     flex-direction: column; /* Ensures vertical stacking of <p> elements */
     gap: 0px; /* Adds vertical spacing between child elements */
     position: relative;
+    padding-right: 5px;
+    margin-bottom: 5px;
+}
+
+/* Webkit browsers */
+#chat-messages::-webkit-scrollbar {
+    width: 5px; /* Adjust the width to make it thin */
+    position: absolute;
+    right: -30px; /* Adjust this to shift the scrollbar */
+}
+
+#chat-messages::-webkit-scrollbar-track {
+    background: #18181b; /* Light grey background for the scrollbar track */
+}
+
+#chat-messages::-webkit-scrollbar-thumb {
+    background: #6e6e6e; /* Darker grey for the thumb */
+    border-radius: 10px; /* Optional: rounds the thumb */
+}
+
+#chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker grey when hovering */
+    cursor: pointer;
 }
 
 #chat-messages p {
@@ -119,6 +142,7 @@
 
 .chat-input {
     display: flex;
+    padding-right: 1rem;
 }
 
 #chat-input {
@@ -130,6 +154,10 @@
     background-color: #3a3a3d;
     color: #ffffff;
     font-size: 15px;
+}
+
+#under-chat-input {
+    padding-right: 1rem;
 }
 
 input[type="text"] {
