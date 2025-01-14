@@ -22,7 +22,7 @@ class User {
 
     getSubTier() { return this.sub_tier; }
 
-    isSubbed() { return this.isSubbed; }
+    isSub() { return this.isSubbed; }
 
     getUsernameColor() { return this.usernameColor; }
 }

@@ -8,15 +8,17 @@ class ChatDisplay {
 
     addMessage(message) { 
         const messageElement = document.createElement('p');
-        messageElement.setAttribute('user', message.getUser());
+        messageElement.setAttribute('user', message.getUser().getUsername());
         
         const messageUserElement = document.createElement('span');
         messageUserElement.className = 'user-message';
-        messageUserElement.textContent = message.getUser();
+        messageUserElement.textContent = `${message.getUser().getUsername()}`;
         messageUserElement.style.fontWeight = "bold";
-        messageUserElement.style.color = "green";
+        messageUserElement.style.fontSize = "13.5px";
+
+        messageUserElement.style.color = message.getUser().getUsernameColor();
         messageUserElement.addEventListener(('click'), (event) => {
-            console.log(message.getUser());
+            console.log(message.getUser().getUsername());
         });
         messageElement.appendChild(messageUserElement);
 
