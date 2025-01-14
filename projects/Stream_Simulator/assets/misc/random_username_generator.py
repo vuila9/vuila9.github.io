@@ -14,7 +14,7 @@ def generate_follow_date():
     start_date = datetime(2000, 1, 1)  # Start date: Jan 1, 2000
     end_date = datetime(2025, 12, 31)  # End date: Dec 31, 2025
     random_date = start_date + timedelta(days=random.randint(0, (end_date - start_date).days))
-    return random_date.strftime("%b - %d - %Y")
+    return random_date.strftime("%b %d, %Y")
 
 # Function to generate a random HEX color code
 def generate_hex_color():
@@ -38,7 +38,7 @@ random_users = [generate_random_user() for _ in range(100)]
 with open(output_file, mode="w", newline="") as file:
     writer = csv.writer(file)
     # Write the header
-    writer.writerow(["username", "followDate", "usernameColor"])
+    # writer.writerow(["username", "followDate", "usernameColor"])
     # Write user data
     for user in random_users:
         writer.writerow([user["username"], user["followDate"], user["usernameColor"]])
