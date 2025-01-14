@@ -155,7 +155,8 @@
     border-radius: 4px;
     background-color: #3a3a3d;
     color: #ffffff;
-    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
 }
 
 #chat-input:focus {
