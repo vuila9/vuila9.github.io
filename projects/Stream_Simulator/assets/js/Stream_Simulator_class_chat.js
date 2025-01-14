@@ -6,6 +6,12 @@ class ChatDisplay {
         this.chatMessageDiv = document.getElementById('chat-messages');
     }
 
+    toggleChat() { this.isPause = !this.isPause; }
+
+    pauseChat() { this.isPause = false; }
+
+    isPaused() { return this.isPause; }
+
     addMessage(message) { 
         const messageElement = document.createElement('p');
         messageElement.setAttribute('user', message.getUser().getUsername());
@@ -36,7 +42,10 @@ class ChatDisplay {
 
     getDiv() { return this.chatMessageDiv; }
 
-    autoPopulate() { return; }
+    autoPopulate(USERS, chatlogs) { 
+
+        return; 
+    }
 }
 
 class ChatMessage {

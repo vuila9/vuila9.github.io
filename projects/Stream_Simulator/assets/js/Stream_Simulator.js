@@ -1,7 +1,7 @@
 function Stream_Simulator()  {
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
-    const startButton = document.getElementById('start-button');
+    const startChatButton = document.getElementById('start-chat-button');
 
     const USERS = [];
     //populateUser();
@@ -11,6 +11,7 @@ function Stream_Simulator()  {
     (async () => {
         await populateUser(); // Wait for populateUser() to finish
         USERS.push(new User('Vuila9_', 'May 14 2019', '#394678'));
+        startChatButton.disabled = false;
         //console.log(USERS);
         CHAT_DISPLAY.addMessage(new ChatMessage(USERS[0], 'Hello everyone!'));
         CHAT_DISPLAY.addMessage(new ChatMessage(USERS[1], 'Great stream!'));
@@ -26,9 +27,14 @@ function Stream_Simulator()  {
             sendMessage();
     });
 
+    startChatButton.addEventListener('click', async (event) => {
+        CHAT_DISPLAY.toggleChat();
+        if (!CHAT_DISPLAY.isPaused())
+            startChatButton.textContent = 'Pause Chat';
+        else
+            startChatButton.textContent = 'Start Chat';
 
-    startButton.addEventListener('click', async (event) => {
-        populateUser();
+        CHAT_DISPLAY.autoPopulate(USERS);
     });
 
     function sendMessage() {
