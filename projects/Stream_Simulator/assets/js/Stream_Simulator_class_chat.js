@@ -3,6 +3,7 @@ class ChatDisplay {
         this.chatSize = 0;
         this.isPause = true;
         this.chatSizeLimit = limit;
+        this.chatIntervalID = null;
         this.chatMessageDiv = document.getElementById('chat-messages');
     }
 
@@ -11,6 +12,10 @@ class ChatDisplay {
     pauseChat() { this.isPause = false; }
 
     isPaused() { return this.isPause; }
+
+    getChatIntervalID() { return this.chatIntervalID; }
+
+    setChatIntervalID(intervalID) { this.chatIntervalID = intervalID; }
 
     addMessage(message) { 
         const messageElement = document.createElement('p');
@@ -41,6 +46,106 @@ class ChatDisplay {
     }
 
     getDiv() { return this.chatMessageDiv; }
+
+    async populateUser(USERS) {
+        const csvFileUrl = './assets/misc/random_users.csv'; 
+        try {
+            const response = await fetch(csvFileUrl);
+            if (!response.ok) throw new Error(`Error fetching CSV: ${response.statusText}`);
+
+            // Stream the response body
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let { value, done } = await reader.read();
+            let buffer = '';
+
+            while (!done) {
+                // Decode and append the chunk
+                buffer += decoder.decode(value, { stream: true });
+
+                // Process completed lines
+                let lines = buffer.split('\n');
+                buffer = lines.pop(); // Save the last incomplete line for the next iteration
+
+                // Process each complete line
+                lines.forEach(line => {
+                    const row = trimRow(line);
+                    USERS.push(new User(row[0], row[1], row[2]));
+                });
+
+                // Read the next chunk
+                ({ value, done } = await reader.read());
+            }
+
+            // Process the remaining buffer (last line)
+            if (buffer) {
+                const row = trimRow(buffer);
+                USERS.push(new User(row[0], row[1], row[2]));
+            }
+
+            //done here
+            
+        } catch (error) {
+            console.error(error);
+            alert('Failed to load Random_user.csv file.');
+        }
+
+        // Parse a single row of CSV
+        function trimRow(row) {
+            return row.split(',').map(value => value.trim());
+        }
+    }
+
+    async populateChat(CHAT_LOG) {
+        const csvFileUrl = './assets/misc/chatlogs.txt'; 
+        try {
+            const response = await fetch(csvFileUrl);
+            if (!response.ok) throw new Error(`Error fetching TXT: ${response.statusText}`);
+
+            // Stream the response body
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let { value, done } = await reader.read();
+            let buffer = '';
+
+            while (!done) {
+                // Decode and append the chunk
+                buffer += decoder.decode(value, { stream: true });
+
+                // Process completed lines
+                let lines = buffer.split('\n');
+                buffer = lines.pop(); // Save the last incomplete line for the next iteration
+
+                // Process each complete line
+                lines.forEach(line => {
+                    const row = trimRow(line);
+                    //USERS.push(new User(row[0], row[1], row[2]));
+                    CHAT_LOG.push(row)
+                });
+
+                // Read the next chunk
+                ({ value, done } = await reader.read());
+            }
+
+            // Process the remaining buffer (last line)
+            if (buffer) {
+                const row = trimRow(buffer);
+                //USERS.push(new User(row[0], row[1], row[2]));
+                CHAT_LOG.push(row);
+            }
+
+            //done here
+            
+        } catch (error) {
+            console.error(error);
+            alert('Failed to load Random_user.csv file.');
+        }
+
+        // Parse a single row of CSV
+        function trimRow(row) {
+            return row.replace('\r', '');
+        }
+    }
 
     autoPopulate(USERS, chatlogs) { 
 
