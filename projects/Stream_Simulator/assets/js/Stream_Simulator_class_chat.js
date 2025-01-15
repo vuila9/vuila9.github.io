@@ -43,6 +43,7 @@ class ChatDisplay {
             this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
             this.chatSize -= 1;
         }
+        this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
     getDiv() { return this.chatMessageDiv; }

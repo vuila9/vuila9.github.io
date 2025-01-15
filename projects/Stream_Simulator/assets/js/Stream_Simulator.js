@@ -6,6 +6,8 @@ function Stream_Simulator()  {
     const USERS = [];
     const CHAT_LOG = [];
 
+    const CHAT_DELAY = 500;
+
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
     
     (async () => {
@@ -36,10 +38,16 @@ function Stream_Simulator()  {
 
     startChatButton.addEventListener('click', async (event) => {
         CHAT_DISPLAY.toggleChat();
-        if (!CHAT_DISPLAY.isPaused())
-            startChatButton.textContent = 'Pause Chat';
-        else
+        if (CHAT_DISPLAY.isPaused()) {
             startChatButton.textContent = 'Start Chat';
+            clearInterval(CHAT_DISPLAY.getChatIntervalID());
+            CHAT_DISPLAY.setChatIntervalID(null);
+            return;
+        }
+        startChatButton.textContent = 'Pause Chat';
+        CHAT_DISPLAY.setChatIntervalID(setInterval(() => {
+            CHAT_DISPLAY.addMessage(new ChatMessage(USERS[getRand(USERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+        }, CHAT_DELAY));
 
         CHAT_DISPLAY.autoPopulate(USERS);
     });
@@ -53,7 +61,7 @@ function Stream_Simulator()  {
         if (!message) return;
         CHAT_DISPLAY.addMessage(new ChatMessage(USERS.at(-1), chatInput.value.trim()))
         chatInput.value = '';
-        CHAT_DISPLAY.getDiv().scrollTop = CHAT_DISPLAY.getDiv().scrollHeight;
+        //CHAT_DISPLAY.getDiv().scrollTop = CHAT_DISPLAY.getDiv().scrollHeight;
     }
 }
 
