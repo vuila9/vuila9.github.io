@@ -4,6 +4,7 @@ class ChatDisplay {
         this.isPause = true;
         this.chatSizeLimit = limit;
         this.chatIntervalID = null;
+        this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
     }
 
@@ -12,6 +13,10 @@ class ChatDisplay {
     pauseChat() { this.isPause = false; }
 
     isPaused() { return this.isPause; }
+
+    setScrollUp(bool) { this.scrollUp = bool; }
+
+    isScrollUp() { return this.scrollUp; }
 
     getChatIntervalID() { return this.chatIntervalID; }
 
@@ -43,7 +48,8 @@ class ChatDisplay {
             this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
             this.chatSize -= 1;
         }
-        this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
+        if (!this.scrollUp)
+            this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
     getDiv() { return this.chatMessageDiv; }
