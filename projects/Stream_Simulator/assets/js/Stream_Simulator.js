@@ -53,7 +53,7 @@ function Stream_Simulator()  {
     });
 
     function getRand(size) {
-        return Math.floor(Math.random() * size);
+        return Math.floor(Math.random() * size-1);
     }
 
     function sendMessage() {
