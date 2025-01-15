@@ -53,7 +53,7 @@ function Stream_Simulator()  {
     });
 
     function getRand(size) {
-        return Math.floor(Math.random() * size-1);
+        return Math.floor(Math.random() * (size-1)); // excluding the last line of data files
     }
 
     function sendMessage() {
