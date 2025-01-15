@@ -54,7 +54,7 @@ class ChatDisplay {
 
     getDiv() { return this.chatMessageDiv; }
 
-    async populateUser(USERS) {
+    async populateUser(VIEWERS) {
         const csvFileUrl = './assets/misc/random_users.csv'; 
         try {
             const response = await fetch(csvFileUrl);
@@ -77,7 +77,7 @@ class ChatDisplay {
                 // Process each complete line
                 lines.forEach(line => {
                     const row = trimRow(line);
-                    USERS.push(new User(row[0], row[1], row[2]));
+                    VIEWERS.push(new User(row[0], row[1], row[2]));
                 });
 
                 // Read the next chunk
@@ -87,7 +87,7 @@ class ChatDisplay {
             // Process the remaining buffer (last line)
             if (buffer) {
                 const row = trimRow(buffer);
-                USERS.push(new User(row[0], row[1], row[2]));
+                VIEWERS.push(new User(row[0], row[1], row[2]));
             }
 
             //done here
@@ -126,7 +126,7 @@ class ChatDisplay {
                 // Process each complete line
                 lines.forEach(line => {
                     const row = trimRow(line);
-                    //USERS.push(new User(row[0], row[1], row[2]));
+                    //VIEWERS.push(new User(row[0], row[1], row[2]));
                     CHAT_LOG.push(row)
                 });
 
@@ -137,7 +137,7 @@ class ChatDisplay {
             // Process the remaining buffer (last line)
             if (buffer) {
                 const row = trimRow(buffer);
-                //USERS.push(new User(row[0], row[1], row[2]));
+                //VIEWERS.push(new User(row[0], row[1], row[2]));
                 CHAT_LOG.push(row);
             }
 
@@ -154,7 +154,7 @@ class ChatDisplay {
         }
     }
 
-    autoPopulate(USERS, chatlogs) { 
+    autoPopulate(VIEWERS, chatlogs) { 
 
         return; 
     }
