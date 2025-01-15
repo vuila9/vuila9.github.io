@@ -1,6 +1,8 @@
 TODO:
 - add emotes
 - add chat reaction based on content (separte chat files depending on the content)
+- add hello/hi when stream first starts
+- give long time subber more chat rate
 - add icon/badges
 - add user profile UI when clicking on users
 - add sub gifting

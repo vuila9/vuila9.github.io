@@ -52,6 +52,9 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
+    #emoteReader() {
+    }
+
     getDiv() { return this.chatMessageDiv; }
 
     async populateUser(VIEWERS) {

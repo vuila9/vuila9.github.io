@@ -22,6 +22,7 @@ function Stream_Simulator()  {
         //console.log(CHAT_LOG);
         let counter = 0;
         while (counter < 100) {
+            
             CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
             counter +=1 ;
         }
@@ -46,6 +47,9 @@ function Stream_Simulator()  {
         }
         startChatButton.textContent = 'Pause Chat';
         CHAT_DISPLAY.setChatIntervalID(setInterval(() => {
+            if (chance(30)){
+                CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+            }
             CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length - 1)], CHAT_LOG[getRand(CHAT_LOG.length)]));
         }, CHAT_DELAY));
 
@@ -54,6 +58,10 @@ function Stream_Simulator()  {
 
     function getRand(size) {
         return Math.floor(Math.random() * size); // excluding the last line of data files
+    }
+
+    function chance(percent) {
+        return Math.floor(Math.random() * 101) <= percent;
     }
 
     function sendMessage() {
