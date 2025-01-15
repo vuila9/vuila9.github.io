@@ -1,0 +1,9 @@
+TODO:
+- add emotes
+- add chat reaction based on content (separte chat files depending on the content)
+- add icon/badges
+- add user profile UI when clicking on users
+- add sub gifting
+- add overlay
+- add basic commands
+- add YT footage to simulate ad playing (viewer react to ad playing)
