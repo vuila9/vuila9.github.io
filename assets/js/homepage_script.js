@@ -12,6 +12,12 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
+            imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
+            title: "Stream Simulator",
+            description: "A work-in-progress project to be released soon™",
+            link: "projects/Stream_Simulator/Stream_simulator.html"
+        },
+        {
             imageSrc: "assets/img/program_icons/snake_tile.jpg",
             title: "Snake Game",
             description: "Snake game made using HTML, CSS, JS",
