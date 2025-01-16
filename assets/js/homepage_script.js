@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function() {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
             title: "Stream Simulator",
             description: "A work-in-progress project to be released soon™",
-            link: "projects/Stream_Simulator/Stream_simulator.html"
+            link: "projects/Stream_Simulator/Stream_Simulator.html"
         },
         {
             imageSrc: "assets/img/program_icons/snake_tile.jpg",
