@@ -10,22 +10,17 @@ function Stream_Simulator()  {
     const CHAT_DELAY = 500;
 
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
-    
-    (async () => {
-        await CHAT_DISPLAY.populateUser(VIEWERS); // Wait for populateUser() to finish
-        startChatButton.disabled = false;
-        //console.log(VIEWERS);
-    })();
 
     (async () => {
-        await CHAT_DISPLAY.populateChat(CHAT_LOG); // Wait for populateUser() to finish
-        //console.log(CHAT_LOG);
-        let counter = 0;
-        while (counter < 100) {
-            
-            CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-            counter +=1 ;
-        }
+        // await CHAT_DISPLAY.populateUser(VIEWERS); // Wait for populateUser() to finish
+        // startChatButton.disabled = false;
+        await CHAT_DISPLAY.populateEmote();
+        // await CHAT_DISPLAY.populateChat(CHAT_LOG); // Wait for populateUser() to finish
+        // let counter = 0;
+        // while (counter < 100) {
+        //     CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+        //     counter +=1 ;
+        // }
     })();
 
     sendButton.addEventListener('click', (event) => {

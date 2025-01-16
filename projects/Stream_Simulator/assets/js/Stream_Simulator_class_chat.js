@@ -1,4 +1,7 @@
 class ChatDisplay {
+
+    #anyEmoteContainer;
+
     constructor(limit=200) {
         this.chatSize = 0;
         this.isPause = true;
@@ -6,7 +9,11 @@ class ChatDisplay {
         this.chatIntervalID = null;
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
+
+        this.#anyEmoteContainer = new Set();
     }
+
+
 
     toggleChat() { this.isPause = !this.isPause; }
 
@@ -39,9 +46,14 @@ class ChatDisplay {
         messageElement.appendChild(messageUserElement);
 
         const messageContent = document.createElement('span');
-        messageContent.textContent = `: ${message.getContent()}`;
-        messageElement.appendChild(messageContent);
 
+        if (message.getUser().getUsername() == 'Vuila9_') {
+            messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
+        }
+        else
+            messageContent.textContent = `: ${message.getContent()}`;
+
+        messageElement.appendChild(messageContent);
         this.chatMessageDiv.appendChild(messageElement);
         this.chatSize += 1;
         if (this.chatSize > this.chatSizeLimit) {
@@ -52,10 +64,29 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-    #emoteReader() {
+    #emoteReader(msg, theme = 'any') {
+        const msg_parts = msg.trim().split(' '); // Split the message into words
+
+        // Map each word to either <img> tag or keep it as is based on the Set
+        const msg_arr = msg_parts.map(part => {
+            if (this.#anyEmoteContainer.has(part)) {
+                // If the word is in the Set, wrap it in <img>
+                const imgUrl = `./assets/img/emotes/any/${part}.jpg`; // Construct the image path
+                return `<img style='position:relative; top: 6px; max-height: 30px;' src='${imgUrl}' title='${part}' alt='${part}'>`;
+            }
+            // Otherwise, keep the word as is
+            return part;
+        });
+    
+        // Join the processed parts into a single string and return
+        return msg_arr.join(' ');
     }
 
     getDiv() { return this.chatMessageDiv; }
+
+    async populateEmote() {
+        this.#anyEmoteContainer.add('xpp');
+    }
 
     async populateUser(VIEWERS) {
         const csvFileUrl = './assets/misc/random_users.csv'; 
