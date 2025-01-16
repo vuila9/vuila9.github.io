@@ -13,8 +13,6 @@ class ChatDisplay {
         this.#anyEmoteContainer = new Set();
     }
 
-
-
     toggleChat() { this.isPause = !this.isPause; }
 
     pauseChat() { this.isPause = false; }
