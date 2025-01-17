@@ -69,7 +69,7 @@ class ChatDisplay {
         const msg_arr = msg_parts.map(part => {
             if (this.#anyEmoteContainer.has(part)) {
                 // If the word is in the Set, wrap it in <img>
-                const imgUrl = `./assets/img/emotes/any/${part}.jpg`; // Construct the image path
+                const imgUrl = `./assets/img/emotes/${part}.jpg`; // Construct the image path
                 return `<img style='position:relative; top: 6px; max-height: 30px;' src='${imgUrl}' title='${part}' alt='${part}'>`;
             }
             // Otherwise, keep the word as is
@@ -86,11 +86,10 @@ class ChatDisplay {
         this.#anyEmoteContainer.add('xpp');
     }
 
-    async populateUser(VIEWERS) {
-        const csvFileUrl = './assets/misc/random_users.csv'; 
+    async populateData(datatype, container, path) {
         try {
-            const response = await fetch(csvFileUrl);
-            if (!response.ok) throw new Error(`Error fetching CSV: ${response.statusText}`);
+            const response = await fetch(path);
+            if (!response.ok) throw new Error(`Error fetching ${path}: ${response.statusText}`);
 
             // Stream the response body
             const reader = response.body.getReader();
@@ -108,8 +107,14 @@ class ChatDisplay {
 
                 // Process each complete line
                 lines.forEach(line => {
-                    const row = trimRow(line);
-                    VIEWERS.push(new User(row[0], row[1], row[2]));
+                    //const row = trimRow(line);
+                    if (datatype == 'VIEWER') {
+                        const row = line.split(',').map(value => value.trim());
+                        container.push(new User(row[0], row[1], row[2]));
+                    } else if (datatype == 'CHAT') {
+                        const row = line.replace('\r', '');
+                        container.push(row);
+                    }
                 });
 
                 // Read the next chunk
@@ -118,71 +123,19 @@ class ChatDisplay {
 
             // Process the remaining buffer (last line)
             if (buffer) {
-                const row = trimRow(buffer);
-                VIEWERS.push(new User(row[0], row[1], row[2]));
+                if (datatype == 'VIEWER') {
+                    const row = buffer.split(',').map(value => value.trim());
+                    container.push(new User(row[0], row[1], row[2]));
+                } else if (datatype == 'CHAT') {
+                    const row = buffer.replace('\r', '');
+                    container.push(row);
+                }
             }
 
             //done here
-            
         } catch (error) {
             console.error(error);
-            alert('Failed to load Random_user.csv file.');
-        }
-
-        // Parse a single row of CSV
-        function trimRow(row) {
-            return row.split(',').map(value => value.trim());
-        }
-    }
-
-    async populateChat(CHAT_LOG) {
-        const csvFileUrl = './assets/misc/chatlogs.txt'; 
-        try {
-            const response = await fetch(csvFileUrl);
-            if (!response.ok) throw new Error(`Error fetching TXT: ${response.statusText}`);
-
-            // Stream the response body
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-            let { value, done } = await reader.read();
-            let buffer = '';
-
-            while (!done) {
-                // Decode and append the chunk
-                buffer += decoder.decode(value, { stream: true });
-
-                // Process completed lines
-                let lines = buffer.split('\n');
-                buffer = lines.pop(); // Save the last incomplete line for the next iteration
-
-                // Process each complete line
-                lines.forEach(line => {
-                    const row = trimRow(line);
-                    //VIEWERS.push(new User(row[0], row[1], row[2]));
-                    CHAT_LOG.push(row)
-                });
-
-                // Read the next chunk
-                ({ value, done } = await reader.read());
-            }
-
-            // Process the remaining buffer (last line)
-            if (buffer) {
-                const row = trimRow(buffer);
-                //VIEWERS.push(new User(row[0], row[1], row[2]));
-                CHAT_LOG.push(row);
-            }
-
-            //done here
-            
-        } catch (error) {
-            console.error(error);
-            alert('Failed to load Random_user.csv file.');
-        }
-
-        // Parse a single row of CSV
-        function trimRow(row) {
-            return row.replace('\r', '');
+            alert(`Failed to load ${path} file.`);
         }
     }
 
