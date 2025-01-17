@@ -10,7 +10,7 @@ class ChatDisplay {
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
 
-        this.#anyEmoteContainer = new Set();
+        this.#anyEmoteContainer = new Map();
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -45,11 +45,13 @@ class ChatDisplay {
 
         const messageContent = document.createElement('span');
 
-        if (message.getUser().getUsername() == 'Vuila9_') {
-            messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
-        }
-        else
-            messageContent.textContent = `: ${message.getContent()}`;
+        // if (message.getUser().getUsername() == 'Vuila9_') 
+        //     messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
+        
+        // else
+        //     messageContent.textContent = `: ${message.getContent()}`;
+
+        messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
 
         messageElement.appendChild(messageContent);
         this.chatMessageDiv.appendChild(messageElement);
@@ -69,7 +71,7 @@ class ChatDisplay {
         const msg_arr = msg_parts.map(part => {
             if (this.#anyEmoteContainer.has(part)) {
                 // If the word is in the Set, wrap it in <img>
-                const imgUrl = `./assets/img/emotes/${part}.jpg`; // Construct the image path
+                const imgUrl = `./assets/img/emotes/${part}.${this.#anyEmoteContainer.get(part)}`; // Construct the image path
                 return `<img style='position:relative; top: 6px; max-height: 30px;' src='${imgUrl}' title='${part}'>`;
             }
             // Otherwise, keep the word as is
@@ -111,8 +113,8 @@ class ChatDisplay {
                         const row = line.replace('\r', '');
                         container.push(row);
                     } else if (datatype === 'EMOTE') {
-                        const row = line.replace('\r', '');
-                        this.#anyEmoteContainer.add(row);
+                        const row = line.replace('\r', '').split('.');
+                        this.#anyEmoteContainer.set(row[0], row[1]);
                     }
                 });
 
@@ -129,8 +131,8 @@ class ChatDisplay {
                     const row = buffer.replace('\r', '');
                     container.push(row);
                 } else if (datatype === 'EMOTE') {
-                    const row = buffer.replace('\r', '');
-                    this.#anyEmoteContainer.add(row);
+                    const row = buffer.replace('\r', '').split('.');
+                    this.#anyEmoteContainer.set(row[0], row[1]);
                 }
             }
 
