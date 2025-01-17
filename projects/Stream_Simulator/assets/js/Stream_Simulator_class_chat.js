@@ -45,11 +45,13 @@ class ChatDisplay {
 
         const messageContent = document.createElement('span');
 
-        if (message.getUser().getUsername() == 'Vuila9_') {
-            messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
-        }
-        else
-            messageContent.textContent = `: ${message.getContent()}`;
+        // if (message.getUser().getUsername() == 'Vuila9_') 
+        //     messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
+        
+        // else
+        //     messageContent.textContent = `: ${message.getContent()}`;
+
+        messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
 
         messageElement.appendChild(messageContent);
         this.chatMessageDiv.appendChild(messageElement);
@@ -58,10 +60,8 @@ class ChatDisplay {
             this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
             this.chatSize -= 1;
         }
-        if (!this.scrollUp) {
-            this.chatMessageDiv.offsetHeight;
+        if (!this.scrollUp)
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
-        }
     }
 
     #emoteReader(msg, theme = 'any') {
