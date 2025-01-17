@@ -9,3 +9,4 @@ TODO:
 - add overlay
 - add basic commands
 - add YT footage to simulate ad playing (viewer react to ad playing)
+- random ban + chat reaction
