@@ -70,7 +70,7 @@ class ChatDisplay {
             if (this.#anyEmoteContainer.has(part)) {
                 // If the word is in the Set, wrap it in <img>
                 const imgUrl = `./assets/img/emotes/${part}.jpg`; // Construct the image path
-                return `<img style='position:relative; top: 6px; max-height: 30px;' src='${imgUrl}' title='${part}' alt='${part}'>`;
+                return `<img style='position:relative; top: 6px; max-height: 30px;' src='${imgUrl}' title='${part}'>`;
             }
             // Otherwise, keep the word as is
             return part;
@@ -81,10 +81,6 @@ class ChatDisplay {
     }
 
     getDiv() { return this.chatMessageDiv; }
-
-    async populateEmote() {
-        this.#anyEmoteContainer.add('xpp');
-    }
 
     async populateData(datatype, container, path) {
         try {
@@ -108,12 +104,15 @@ class ChatDisplay {
                 // Process each complete line
                 lines.forEach(line => {
                     //const row = trimRow(line);
-                    if (datatype == 'VIEWER') {
+                    if (datatype === 'VIEWER') {
                         const row = line.split(',').map(value => value.trim());
                         container.push(new User(row[0], row[1], row[2]));
-                    } else if (datatype == 'CHAT') {
+                    } else if (datatype === 'CHAT') {
                         const row = line.replace('\r', '');
                         container.push(row);
+                    } else if (datatype === 'EMOTE') {
+                        const row = line.replace('\r', '');
+                        this.#anyEmoteContainer.add(row);
                     }
                 });
 
@@ -123,12 +122,15 @@ class ChatDisplay {
 
             // Process the remaining buffer (last line)
             if (buffer) {
-                if (datatype == 'VIEWER') {
+                if (datatype === 'VIEWER') {
                     const row = buffer.split(',').map(value => value.trim());
                     container.push(new User(row[0], row[1], row[2]));
-                } else if (datatype == 'CHAT') {
+                } else if (datatype === 'CHAT') {
                     const row = buffer.replace('\r', '');
                     container.push(row);
+                } else if (datatype === 'EMOTE') {
+                    const row = buffer.replace('\r', '');
+                    this.#anyEmoteContainer.add(row);
                 }
             }
 
@@ -158,4 +160,3 @@ class ChatMessage {
 
     getTimestamp() { return this.timestamp; }
 }
-

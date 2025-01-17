@@ -12,11 +12,9 @@ function Stream_Simulator()  {
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
 
     (async () => {
-        // await CHAT_DISPLAY.populateUser(VIEWERS); // Wait for populateUser() to finish
         await CHAT_DISPLAY.populateData("VIEWER", VIEWERS, './assets/misc/random_users.csv');
         startChatButton.disabled = false;
-        await CHAT_DISPLAY.populateEmote();
-        //await CHAT_DISPLAY.populateChat(CHAT_LOG); // Wait for populateUser() to finish
+        await CHAT_DISPLAY.populateData("EMOTE", null, "./assets/img/emotes/ANY");
         await CHAT_DISPLAY.populateData("CHAT", CHAT_LOG, "./assets/misc/chatlogs.txt");
 
         let counter = 0;
