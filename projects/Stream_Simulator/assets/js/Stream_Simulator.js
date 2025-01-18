@@ -6,9 +6,7 @@ function Stream_Simulator()  {
     const VIEWERS = [];
     const USER = new User('Vuila9_', 'May 14 2019', '#394678');
     const CHAT_LOG = [];
-
     const CHAT_DELAY = 500;
-
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
 
     (async () => {
@@ -49,29 +47,24 @@ function Stream_Simulator()  {
 
     let matchIndex = -1;
     let currentMatches = [];
-    let currentPrefix = ""; // Store the current prefix
+    let currentPrefix = "";
 
-    // Event listener for keydown events
     chatInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
-            sendMessage(); // Send the message on Enter
+            sendMessage();
         } else if (event.key === "Tab") {
-            event.preventDefault(); // Prevent default Tab behavior
-            autoComplete(); // Trigger autocomplete
-            console.log(currentPrefix)
-        } else if (event.key === " ") {
-            // Reset the currentPrefix when Spacebar is pressed
+            event.preventDefault(); 
+            autoComplete(); 
+        } else if (event.key === " ") { // Reset the currentPrefix when Spacebar is pressed
             currentPrefix = "";
             matchIndex = -1;
             currentMatches = [];
-        } else if (event.key === "Backspace" || event.key === 'Delete') {
-            // Adjust the currentPrefix when Backspace or Delete key is pressed
+        } else if (event.key === "Backspace" || event.key === 'Delete') { // Adjust the currentPrefix when Backspace or Delete key is pressed
             const inputValue = chatInput.value;
             const cursorPosition = chatInput.selectionStart;
             const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
-            if (wordInfo.word) {
+            if (wordInfo.word) 
                 currentPrefix = wordInfo.word; // Update the current prefix based on the word before the cursor
-            }
         }
     });
 
@@ -113,10 +106,7 @@ function Stream_Simulator()  {
             const { startIndex } = wordInfo;
 
             // Replace the word before the cursor with the current match
-            const updatedValue = 
-                inputValue.slice(0, startIndex) + 
-                replacementWord + 
-                inputValue.slice(cursorPosition);
+            const updatedValue = inputValue.slice(0, startIndex) + replacementWord + inputValue.slice(cursorPosition);
 
             // Update the input field and set the cursor position
             chatInput.value = updatedValue;
@@ -148,7 +138,6 @@ function Stream_Simulator()  {
         if (!message) return;
         CHAT_DISPLAY.addMessage(new ChatMessage(USER, chatInput.value.trim()))
         chatInput.value = '';
-        //CHAT_DISPLAY.getDiv().scrollTop = CHAT_DISPLAY.getDiv().scrollHeight;
     }
 }
 
