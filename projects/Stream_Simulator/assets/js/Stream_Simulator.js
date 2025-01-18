@@ -28,11 +28,6 @@ function Stream_Simulator()  {
         sendMessage();
     });
 
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') 
-            sendMessage();
-    });
-
     startChatButton.addEventListener('click', async (event) => {
         CHAT_DISPLAY.toggleChat();
         if (CHAT_DISPLAY.isPaused()) {
@@ -52,6 +47,94 @@ function Stream_Simulator()  {
         CHAT_DISPLAY.autoPopulate(VIEWERS);
     });
 
+    let matchIndex = -1;
+    let currentMatches = [];
+    let currentPrefix = ""; // Store the current prefix
+
+    // Event listener for keydown events
+    chatInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            sendMessage(); // Send the message on Enter
+        } else if (event.key === "Tab") {
+            event.preventDefault(); // Prevent default Tab behavior
+            autoComplete(); // Trigger autocomplete
+            console.log(currentPrefix)
+        } else if (event.key === " ") {
+            // Reset the currentPrefix when Spacebar is pressed
+            currentPrefix = "";
+            matchIndex = -1;
+            currentMatches = [];
+        } else if (event.key === "Backspace" || event.key === 'Delete') {
+            // Adjust the currentPrefix when Backspace or Delete key is pressed
+            const inputValue = chatInput.value;
+            const cursorPosition = chatInput.selectionStart;
+            const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
+            if (wordInfo.word) {
+                currentPrefix = wordInfo.word; // Update the current prefix based on the word before the cursor
+            }
+        }
+    });
+
+    // Event listener for input events to reset match state
+    chatInput.addEventListener("input", () => {
+        const inputValue = chatInput.value;
+        const cursorPosition = chatInput.selectionStart;
+
+        // Get the word before the cursor
+        const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
+        if (!wordInfo.word) return; // No valid word to process
+
+        const { word } = wordInfo;
+
+        // Update the current prefix as you type
+        currentPrefix = word;
+    });
+
+    // Autocomplete function
+    function autoComplete() {
+        const inputValue = chatInput.value;
+        const cursorPosition = chatInput.selectionStart;
+
+        // Find all words that start with the currentPrefix (case-insensitive)
+        if (!currentMatches.length || !currentMatches[0].toLowerCase().startsWith(currentPrefix.toLowerCase())) {
+            currentMatches = CHAT_DISPLAY.getAnyEmoteArray().filter((keyword) => 
+                keyword.toLowerCase().startsWith(currentPrefix.toLowerCase())
+            );
+            matchIndex = -1; // Reset match index
+        }
+
+        // Cycle through the matching words
+        if (currentMatches.length > 0) {
+            matchIndex = (matchIndex + 1) % currentMatches.length; // Increment and cycle index
+            const replacementWord = currentMatches[matchIndex];
+
+            // Get the word before the cursor to replace
+            const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
+            const { startIndex } = wordInfo;
+
+            // Replace the word before the cursor with the current match
+            const updatedValue = 
+                inputValue.slice(0, startIndex) + 
+                replacementWord + 
+                inputValue.slice(cursorPosition);
+
+            // Update the input field and set the cursor position
+            chatInput.value = updatedValue;
+            chatInput.selectionStart = chatInput.selectionEnd = startIndex + replacementWord.length;
+        }
+    }
+
+    // Helper: Get the word immediately before the cursor
+    function getWordBeforeCursor(text, cursorPosition) {
+        const leftPart = text.slice(0, cursorPosition); // Text up to the cursor
+        const match = leftPart.match(/\b\w+$/); // Find the last word using regex
+        if (!match) return { word: null, startIndex: cursorPosition }; // No match
+
+        const word = match[0]; // Extracted word
+        const startIndex = cursorPosition - word.length; // Start index of the word
+        return { word, startIndex };
+    }
+    
     function getRand(size) {
         return Math.floor(Math.random() * size); // excluding the last line of data files
     }

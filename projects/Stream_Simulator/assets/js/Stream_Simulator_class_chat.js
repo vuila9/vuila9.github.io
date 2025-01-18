@@ -1,6 +1,7 @@
 class ChatDisplay {
 
-    #anyEmoteContainer;
+    #anyEmoteMapContainer;
+    //#anyEmoteArrayContainer;
 
     constructor(limit=200) {
         this.chatSize = 0;
@@ -10,7 +11,8 @@ class ChatDisplay {
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
 
-        this.#anyEmoteContainer = new Map();
+        this.#anyEmoteMapContainer = new Map();
+        this.anyEmoteArrayContainer = [];
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -26,6 +28,8 @@ class ChatDisplay {
     getChatIntervalID() { return this.chatIntervalID; }
 
     setChatIntervalID(intervalID) { this.chatIntervalID = intervalID; }
+
+    getAnyEmoteArray() { return this.anyEmoteArrayContainer; }
 
     addMessage(message) { 
         const messageElement = document.createElement('p');
@@ -44,15 +48,7 @@ class ChatDisplay {
         messageElement.appendChild(messageUserElement);
 
         const messageContent = document.createElement('span');
-
-        // if (message.getUser().getUsername() == 'Vuila9_') 
-        //     messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
-        
-        // else
-        //     messageContent.textContent = `: ${message.getContent()}`;
-
         messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
-
         messageElement.appendChild(messageContent);
         this.chatMessageDiv.appendChild(messageElement);
         this.chatSize += 1;
@@ -69,9 +65,9 @@ class ChatDisplay {
 
         // Map each word to either <img> tag or keep it as is based on the Set
         const msg_arr = msg_parts.map(part => {
-            if (this.#anyEmoteContainer.has(part)) {
+            if (this.#anyEmoteMapContainer.has(part)) {
                 // If the word is in the Set, wrap it in <img>
-                const imgUrl = `./assets/img/emotes/${part}.${this.#anyEmoteContainer.get(part)}`; // Construct the image path
+                const imgUrl = `./assets/img/emotes/${part}.${this.#anyEmoteMapContainer.get(part)}`; // Construct the image path
                 return `<img style='position:relative; top: 6px; max-height: 30px;' src='${imgUrl}' title='${part}'>`;
             }
             // Otherwise, keep the word as is
@@ -114,7 +110,8 @@ class ChatDisplay {
                         container.push(row);
                     } else if (datatype === 'EMOTE') {
                         const row = line.replace('\r', '').split('.');
-                        this.#anyEmoteContainer.set(row[0], row[1]);
+                        this.anyEmoteArrayContainer.push(row[0]);
+                        this.#anyEmoteMapContainer.set(row[0], row[1]);
                     }
                 });
 
@@ -132,7 +129,8 @@ class ChatDisplay {
                     container.push(row);
                 } else if (datatype === 'EMOTE') {
                     const row = buffer.replace('\r', '').split('.');
-                    this.#anyEmoteContainer.set(row[0], row[1]);
+                    this.anyEmoteArrayContainer.push(row[0]);
+                    this.#anyEmoteMapContainer.set(row[0], row[1]);
                 }
             }
 
