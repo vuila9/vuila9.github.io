@@ -68,7 +68,8 @@ class ChatDisplay {
             if (this.#anyEmoteMapContainer.has(part)) {
                 // If the word is in the Set, wrap it in <img>
                 const imgUrl = `./assets/img/emotes/${part}.${this.#anyEmoteMapContainer.get(part)}`; // Construct the image path
-                return `<img style='position:relative; top: 6px; max-height: 32px;' src='${imgUrl}' title='${part}'>`;
+                const maxheight = (part === 'om') ? '21' : '32';
+                return `<img style='position:relative; top: 6px; max-height: ${maxheight}px;' src='${imgUrl}' title='${part}'>`;
             }
             // Otherwise, keep the word as is
             return part;
