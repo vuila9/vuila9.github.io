@@ -10,4 +10,4 @@ TODO:
 - add basic commands
 - add YT footage to simulate ad playing (viewer react to ad playing)
 - random ban + chat reaction
-- reaction: song, ban, vote, sub, sus, lewd, hype, start, end
+- reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end
