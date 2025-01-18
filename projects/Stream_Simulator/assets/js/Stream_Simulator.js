@@ -65,8 +65,10 @@ function Stream_Simulator()  {
             const inputValue = chatInput.value;
             const cursorPosition = chatInput.selectionStart;
             const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
-            if (wordInfo.word) 
+            if (wordInfo.word) {
                 currentPrefix = wordInfo.word; // Update the current prefix based on the word before the cursor
+                currentMatches = [];
+            }
         }
     });
 
