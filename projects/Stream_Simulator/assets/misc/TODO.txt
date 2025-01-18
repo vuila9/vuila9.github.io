@@ -1,5 +1,4 @@
 TODO:
-- add emotes
 - add chat reaction based on content (separte chat files depending on the content)
 - add hello/hi when stream first starts
 - give long time subber more chat rate
@@ -11,3 +10,6 @@ TODO:
 - add YT footage to simulate ad playing (viewer react to ad playing)
 - random ban + chat reaction
 - reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end, prediction
+
+DONE:
+- add emotes
