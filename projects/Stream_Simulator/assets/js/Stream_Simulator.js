@@ -52,6 +52,9 @@ function Stream_Simulator()  {
     chatInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
             sendMessage();
+            currentPrefix = "";
+            matchIndex = -1;
+            currentMatches = [];
         } else if (event.key === "Tab") {
             event.preventDefault();
             if (currentPrefix.length == 0)
