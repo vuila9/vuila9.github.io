@@ -53,7 +53,9 @@ function Stream_Simulator()  {
         if (event.key === "Enter") {
             sendMessage();
         } else if (event.key === "Tab") {
-            event.preventDefault(); 
+            event.preventDefault();
+            if (currentPrefix.length == 0)
+                return;
             autoComplete(); 
         } else if (event.key === " ") { // Reset the currentPrefix when Spacebar is pressed
             currentPrefix = "";
