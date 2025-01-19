@@ -60,6 +60,7 @@ function Stream_Simulator()  {
                 matchIndex = -1;
                 currentMatches = [];
                 emotePreview.style.visibility = 'hidden';
+                user_chat_index = 0;
                 break;
         
             case "Tab":
@@ -90,7 +91,6 @@ function Stream_Simulator()  {
                 }
                 chatInput.value = USER.getChatHistory().at(user_chat_index);
                 break;
-
 
             case "ArrowDown":
                 event.preventDefault();
