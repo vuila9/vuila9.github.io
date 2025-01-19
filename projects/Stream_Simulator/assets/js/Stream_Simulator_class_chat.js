@@ -67,9 +67,8 @@ class ChatDisplay {
         const msg_arr = msg_parts.map(part => {
             if (this.#anyEmoteMapContainer.has(part)) {
                 // If the word is in the Set, wrap it in <img>
-                const imgUrl = `./assets/img/emotes/${part}.${this.#anyEmoteMapContainer.get(part)}`; // Construct the image path
-                const maxheight = (part === 'om') ? '21' : '32';
-                return `<img style='position:relative; top: 6px; max-height: ${maxheight}px;' src='${imgUrl}' title='${part}'>`;
+                const imgUrl = this.getEmoteSrc(part);
+                return `<img src='${imgUrl}' title='${part}'>`;
             }
             // Otherwise, keep the word as is
             return part;
@@ -77,6 +76,10 @@ class ChatDisplay {
     
         // Join the processed parts into a single string and return
         return msg_arr.join(' ');
+    }
+
+    getEmoteSrc(name) {
+        return `./assets/img/emotes/${name}.${this.#anyEmoteMapContainer.get(name)}`;
     }
 
     getDiv() { return this.chatMessageDiv; }

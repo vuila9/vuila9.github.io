@@ -96,6 +96,7 @@
     flex-direction: column; /* Ensures vertical stacking of <p> elements */
     gap: 7px; /* Adds vertical spacing between child elements */
     position: relative;
+    height: 100%;
     padding-left: 10px;
     padding-right: 6px;
     margin-bottom: 5px;
@@ -132,10 +133,6 @@
     white-space: normal; 
     margin: 0; /* Reset default margin */
     line-height: 1.45;
-}  
-
-p img {
-    position:relative; top: 6px; max-height: 30px;
 }
 
 #chat-messages p:hover {
@@ -148,8 +145,21 @@ p img {
 
 .chat-input {
     display: flex;
+    position: relative;
     padding-right: 7px;
     padding-left: 7px;
+}
+
+#emote-preview {
+    position: absolute;
+    top: 40px;
+    left: 40%;
+    transform: translateX(-50%);
+    max-height: 30px;
+    max-width: 96px;
+    pointer-events: none;
+    visibility: hidden;
+    outline: 4px solid rgb(169, 112, 255);
 }
 
 #chat-input {
@@ -171,6 +181,10 @@ p img {
 #under-chat-input {
     padding-right: 10px;
     padding-left: 10px;
+}
+
+p span img {
+    position:relative; top: 6px; max-height: 32px; max-width: 96px
 }
 
 input[type="text"] {

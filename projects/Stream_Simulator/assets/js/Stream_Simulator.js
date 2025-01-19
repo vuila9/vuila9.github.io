@@ -2,6 +2,7 @@ function Stream_Simulator()  {
     const chatInput = document.getElementById('chat-input');
     const sendButton = document.getElementById('send-button');
     const startChatButton = document.getElementById('start-chat-button');
+    const emotePreview = document.getElementById('emote-preview');
 
     const VIEWERS = [];
     const USER = new User('Vuila9_', 'May 14 2019', '#394678');
@@ -55,20 +56,22 @@ function Stream_Simulator()  {
             currentPrefix = "";
             matchIndex = -1;
             currentMatches = [];
+            emotePreview.style.visibility = 'hidden';
         } else if (event.key === "Tab" && event.shiftKey) {
             event.preventDefault();
-            if (currentPrefix.length == 0)
+            if (currentPrefix.length == 0 || chatInput.value.length == 0)
                 return;
             autoComplete(shift=true); 
         } else if (event.key === "Tab") {
             event.preventDefault();
-            if (currentPrefix.length == 0)
+            if (currentPrefix.length == 0 || chatInput.value.length == 0)
                 return;
             autoComplete(); 
         } else if (event.key === " ") { // Reset the currentPrefix when Spacebar is pressed
             currentPrefix = "";
             matchIndex = -1;
             currentMatches = [];
+            emotePreview.style.visibility = 'hidden';
         } else if (event.key === "Backspace" || event.key === 'Delete') { // Adjust the currentPrefix when Backspace or Delete key is pressed
             const inputValue = chatInput.value;
             const cursorPosition = chatInput.selectionStart;
@@ -77,6 +80,7 @@ function Stream_Simulator()  {
                 currentPrefix = wordInfo.word; // Update the current prefix based on the word before the cursor
                 currentMatches = [];
             }
+            emotePreview.style.visibility = 'hidden';
         }
     });
 
@@ -93,6 +97,7 @@ function Stream_Simulator()  {
 
         // Update the current prefix as you type
         currentPrefix = word;
+        emotePreview.style.visibility = 'hidden';
     });
 
     // Autocomplete function
@@ -115,6 +120,9 @@ function Stream_Simulator()  {
             else 
                 matchIndex = (matchIndex + 1) % currentMatches.length;
             const replacementWord = currentMatches[matchIndex];
+            //console.log(CHAT_DISPLAY.getEmoteSrc(replacementWord));
+            emotePreview.src = CHAT_DISPLAY.getEmoteSrc(replacementWord);
+            emotePreview.style.visibility = 'visible';
 
             // Get the word before the cursor to replace
             const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
