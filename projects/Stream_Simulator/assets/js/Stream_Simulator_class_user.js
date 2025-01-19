@@ -14,6 +14,10 @@ class User {
 
     getFollowDate() { return this.followSince; }
 
+    addChatHistory(message) { 
+        this.chatHistory.push(message);
+    } 
+
     getChatHistory() { return this.chatHistory; }
 
     getMessageCount() { return this.messageCount; }

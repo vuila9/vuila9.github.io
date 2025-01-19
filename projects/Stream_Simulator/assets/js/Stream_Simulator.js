@@ -10,6 +10,8 @@ function Stream_Simulator()  {
     const CHAT_DELAY = 500;
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
 
+    let user_chat_index = 0;
+
     (async () => {
         await CHAT_DISPLAY.populateData("VIEWER", VIEWERS, './assets/misc/random_users.csv');
         startChatButton.disabled = false;
@@ -51,36 +53,71 @@ function Stream_Simulator()  {
     let currentPrefix = "";
 
     chatInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            sendMessage();
-            currentPrefix = "";
-            matchIndex = -1;
-            currentMatches = [];
-            emotePreview.style.visibility = 'hidden';
-        } else if (event.key === "Tab" && event.shiftKey) {
-            event.preventDefault();
-            if (currentPrefix.length == 0 || chatInput.value.length == 0)
-                return;
-            autoComplete(shift=true); 
-        } else if (event.key === "Tab") {
-            event.preventDefault();
-            if (currentPrefix.length == 0 || chatInput.value.length == 0)
-                return;
-            autoComplete(); 
-        } else if (event.key === " " || event.key === "ArrowLeft" || event.key === 'ArrowRight') { // Reset the currentPrefix when Spacebar is pressed
-            currentPrefix = "";
-            matchIndex = -1;
-            currentMatches = [];
-            emotePreview.style.visibility = 'hidden';
-        } else if (event.key === "Backspace" || event.key === 'Delete') { // Adjust the currentPrefix when Backspace or Delete key is pressed
-            const inputValue = chatInput.value;
-            const cursorPosition = chatInput.selectionStart;
-            const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
-            if (wordInfo.word) {
-                currentPrefix = wordInfo.word; // Update the current prefix based on the word before the cursor
+        switch (event.key) {
+            case "Enter":
+                sendMessage();
+                currentPrefix = "";
+                matchIndex = -1;
                 currentMatches = [];
-            }
-            emotePreview.style.visibility = 'hidden';
+                emotePreview.style.visibility = 'hidden';
+                break;
+        
+            case "Tab":
+                event.preventDefault();
+                if (currentPrefix.length === 0 || chatInput.value.length === 0) return;
+                if (event.shiftKey) 
+                    autoComplete(true);
+                else 
+                    autoComplete();
+                break;
+        
+            case " ":
+            case "ArrowLeft":
+            case "ArrowRight":
+                // Reset the currentPrefix when Spacebar, ArrowLeft, or ArrowRight is pressed
+                currentPrefix = "";
+                matchIndex = -1;
+                currentMatches = [];
+                emotePreview.style.visibility = 'hidden';
+                break;
+            
+            case "ArrowUp":
+                event.preventDefault();
+                user_chat_index -= 1;
+                if (USER.getChatHistory().at(user_chat_index) === undefined) {
+                    user_chat_index = -USER.getChatHistory().length;
+                    return;
+                }
+                chatInput.value = USER.getChatHistory().at(user_chat_index);
+                break;
+
+
+            case "ArrowDown":
+                event.preventDefault();
+                user_chat_index += 1;
+                if (USER.getChatHistory().at(user_chat_index) === undefined || user_chat_index >= 0) {
+                    user_chat_index = 0;
+                    chatInput.value = '';
+                    return;
+                }
+                chatInput.value = USER.getChatHistory().at(user_chat_index);
+                break;
+        
+            case "Backspace":
+            case "Delete":
+                // Adjust the currentPrefix when Backspace or Delete key is pressed
+                const inputValue = chatInput.value;
+                const cursorPosition = chatInput.selectionStart;
+                const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
+                if (wordInfo.word) {
+                    currentPrefix = wordInfo.word; // Update the current prefix based on the word before the cursor
+                    currentMatches = [];
+                }
+                emotePreview.style.visibility = 'hidden';
+                break;
+        
+            default:
+                break;
         }
     });
 

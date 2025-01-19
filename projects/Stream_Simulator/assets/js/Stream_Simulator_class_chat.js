@@ -49,6 +49,9 @@ class ChatDisplay {
 
         const messageContent = document.createElement('span');
         messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
+        message.getUser().addChatHistory(message.getContent());
+        if (message.getUser().getUsername() === 'Vuila9_')
+            console.log(message.getUser().getChatHistory());
         messageElement.appendChild(messageContent);
         this.chatMessageDiv.appendChild(messageElement);
         this.chatSize += 1;
