@@ -55,6 +55,11 @@ function Stream_Simulator()  {
             currentPrefix = "";
             matchIndex = -1;
             currentMatches = [];
+        } else if (event.key === "Tab" && event.shiftKey) {
+            event.preventDefault();
+            if (currentPrefix.length == 0)
+                return;
+            autoComplete(shift=true); 
         } else if (event.key === "Tab") {
             event.preventDefault();
             if (currentPrefix.length == 0)
@@ -91,7 +96,7 @@ function Stream_Simulator()  {
     });
 
     // Autocomplete function
-    function autoComplete() {
+    function autoComplete(shift=false) {
         const inputValue = chatInput.value;
         const cursorPosition = chatInput.selectionStart;
 
@@ -105,7 +110,10 @@ function Stream_Simulator()  {
 
         // Cycle through the matching words
         if (currentMatches.length > 0) {
-            matchIndex = (matchIndex + 1) % currentMatches.length; // Increment and cycle index
+            if (shift) 
+                matchIndex = (matchIndex == 0) ? (currentMatches.length - 1) : (matchIndex - 1);
+            else 
+                matchIndex = (matchIndex + 1) % currentMatches.length;
             const replacementWord = currentMatches[matchIndex];
 
             // Get the word before the cursor to replace
