@@ -59,7 +59,6 @@ function Stream_Simulator()  {
                 currentPrefix = "";
                 matchIndex = -1;
                 currentMatches = [];
-                emotePreview.style.visibility = 'hidden';
                 user_chat_index = 0;
                 break;
         
@@ -198,6 +197,7 @@ function Stream_Simulator()  {
         if (!message) return;
         CHAT_DISPLAY.addMessage(new ChatMessage(USER, chatInput.value.trim()))
         chatInput.value = '';
+        emotePreview.style.visibility = 'hidden';
     }
 }
 
