@@ -67,7 +67,7 @@ function Stream_Simulator()  {
             if (currentPrefix.length == 0 || chatInput.value.length == 0)
                 return;
             autoComplete(); 
-        } else if (event.key === " ") { // Reset the currentPrefix when Spacebar is pressed
+        } else if (event.key === " " || event.key === "ArrowLeft" || event.key === 'ArrowRight') { // Reset the currentPrefix when Spacebar is pressed
             currentPrefix = "";
             matchIndex = -1;
             currentMatches = [];
@@ -133,7 +133,7 @@ function Stream_Simulator()  {
 
             // Update the input field and set the cursor position
             chatInput.value = updatedValue;
-            chatInput.selectionStart = chatInput.selectionEnd = startIndex + replacementWord.length;
+            //chatInput.selectionStart = chatInput.selectionEnd = startIndex + replacementWord.length;
         }
     }
 
