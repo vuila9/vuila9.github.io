@@ -74,6 +74,7 @@
 #channel-numbers {
     display: flex; /* Make the container a flex container */
     align-items: center; /* Align items vertically in the center */
+    float: right;
     gap: 10px; 
 }
 

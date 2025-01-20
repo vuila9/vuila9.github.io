@@ -200,11 +200,10 @@ function Stream_Simulator()  {
             const command = message.split(' ')[0];
             const command_body = message.split(' ').slice(1).join(' ');
             if (CHAT_DISPLAY.verifyCommand(command)) {
-                console.log('valid command');
                 CHAT_DISPLAY.commandHandler(command, command_body, USER);
             }
             else
-                console.log(`invalid command: ${command}`);
+                CHAT_DISPLAY.addSystemMessage(`invalid command: ${command}`);
 
             USER.addChatHistory(chatInput.value.trim());
             console.log(USER.getChatHistory())

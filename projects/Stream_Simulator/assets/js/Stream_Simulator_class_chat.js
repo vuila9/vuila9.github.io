@@ -64,6 +64,19 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
+    addSystemMessage(message, color='#a4a4ae', backgroundColor='transparent') {
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        messageElement.style.fontSize = '13px';
+        messageElement.style.fontFamily = 'Arial, Helvetica, sans-serif';
+        messageElement.style.color = color;
+        messageElement.style.backgroundColor = backgroundColor;
+        this.chatMessageDiv.appendChild(messageElement);
+        this.chatSize += 1;
+        if (!this.scrollUp)
+            this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
+    }
+
     #emoteReader(msg, theme = 'any') {
         const msg_parts = msg.trim().split(' '); // Split the message into words
 
@@ -161,14 +174,18 @@ class ChatDisplay {
                 break;
             case '/username':
                 console.log(command_body);
+                const old_name = USER.getUsername();
                 USER.setUsername(command_body.split(' ')[0]);
                 document.getElementById('channel-name').textContent = USER.getUsername();
+                this.addSystemMessage(`Streamer has changed their name from ${old_name} to ${USER.getUsername()}`);
                 break;
             case '/title':
                 document.getElementById('channel-title').textContent = command_body;
+                this.addSystemMessage(`Stream title is now set to "${command_body}"`);
                 break;
             case '/category':
                 document.getElementById('channel-category').textContent = command_body;
+                this.addSystemMessage(`Stream category is now set to "${command_body}"`);
                 break;
             default:
                 break;
