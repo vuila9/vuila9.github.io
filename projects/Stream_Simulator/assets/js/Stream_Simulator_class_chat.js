@@ -164,7 +164,6 @@ class ChatDisplay {
                 USER.setUsername(command_body.split(' ')[0]);
                 document.getElementById('channel-name').textContent = USER.getUsername();
                 break;
-
             case '/title':
                 document.getElementById('channel-title').textContent = command_body;
                 break;

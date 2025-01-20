@@ -201,7 +201,7 @@ function Stream_Simulator()  {
             const command_body = message.split(' ').slice(1).join(' ');
             if (CHAT_DISPLAY.verifyCommand(command)) {
                 console.log('valid command');
-                CHAT_DISPLAY.commandHandler(command, command_body, USER, );
+                CHAT_DISPLAY.commandHandler(command, command_body, USER);
             }
             else
                 console.log(`invalid command: ${command}`);
