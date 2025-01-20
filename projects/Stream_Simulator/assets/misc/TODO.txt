@@ -11,6 +11,7 @@ TODO:
 - random ban + chat reaction
 - reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end, prediction
 - simulate ads playing by playing a short YT clip (muted)
+- play random funny audio (my name is jeff)
 
 DONE:
 - add emotes
