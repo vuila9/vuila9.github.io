@@ -5,9 +5,10 @@ function Stream_Simulator()  {
     const emotePreview = document.getElementById('emote-preview');
 
     const VIEWERS = [];
+    let FAKE_VIEWER_COUNT = 10000;
     const USER = new User('Vuila9_', 'May 14 2019', '#394678');
     const CHAT_LOG = [];
-    const CHAT_DELAY = 500;
+    const CHAT_DELAY_BASED_RATE = 0.06969;
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
 
     let user_chat_index = 0;
@@ -43,7 +44,7 @@ function Stream_Simulator()  {
                 CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
             }
             CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length - 1)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-        }, CHAT_DELAY));
+        }, chatRate(FAKE_VIEWER_COUNT)));
 
         CHAT_DISPLAY.autoPopulate(VIEWERS);
     });
@@ -213,6 +214,15 @@ function Stream_Simulator()  {
         CHAT_DISPLAY.addMessage(new ChatMessage(USER, chatInput.value.trim()))
         chatInput.value = '';
     }
+
+    function chatRate(viewerCount) {
+        const R_max = 1000; // Maximum chat rate (messages per second)
+        const k = 0.0004;   // Growth rate factor
+        const v0 = 15000;   // Viewer count where growth accelerates
+      
+        // Logistic growth formula
+        return  (1 + Math.exp(-k * (viewerCount - v0))) / R_max;
+      }
 }
 
 Stream_Simulator();
