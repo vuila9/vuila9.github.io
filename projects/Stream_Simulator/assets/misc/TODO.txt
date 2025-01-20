@@ -10,6 +10,7 @@ TODO:
 - add YT footage to simulate ad playing (viewer react to ad playing)
 - random ban + chat reaction
 - reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end, prediction
+- simulate ads playing by playing a short YT clip (muted)
 
 DONE:
 - add emotes
