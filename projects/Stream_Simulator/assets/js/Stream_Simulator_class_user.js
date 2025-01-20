@@ -10,6 +10,8 @@ class User {
         this.usernameColor = usernameColor;
     }
 
+    setUsername(name) { this.username = name;}
+
     getUsername() { return this.username; }
 
     getFollowDate() { return this.followSince; }

@@ -13,6 +13,7 @@ class ChatDisplay {
 
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
+        this.command = new Set(['/ban', '/title', '/username', '/clear', '/category']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -24,6 +25,8 @@ class ChatDisplay {
     setScrollUp(bool) { this.scrollUp = bool; }
 
     isScrollUp() { return this.scrollUp; }
+
+    verifyCommand(command) { return this.command.has(command); }
 
     getChatIntervalID() { return this.chatIntervalID; }
 
@@ -50,8 +53,6 @@ class ChatDisplay {
         const messageContent = document.createElement('span');
         messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
         message.getUser().addChatHistory(message.getContent());
-        if (message.getUser().getUsername() === 'Vuila9_')
-            console.log(message.getUser().getChatHistory());
         messageElement.appendChild(messageContent);
         this.chatMessageDiv.appendChild(messageElement);
         this.chatSize += 1;
@@ -151,6 +152,28 @@ class ChatDisplay {
     autoPopulate(VIEWERS, chatlogs) { 
 
         return; 
+    }
+
+    commandHandler(command, command_body, USER) {
+        switch (command) {
+            case '/clear':
+                this.chatMessageDiv.innerHTML = '';
+                break;
+            case '/username':
+                console.log(command_body);
+                USER.setUsername(command_body.split(' ')[0]);
+                document.getElementById('channel-name').textContent = USER.getUsername();
+                break;
+
+            case '/title':
+                document.getElementById('channel-title').textContent = command_body;
+                break;
+            case '/category':
+                document.getElementById('channel-category').textContent = command_body;
+                break;
+            default:
+                break;
+        }
     }
 }
 

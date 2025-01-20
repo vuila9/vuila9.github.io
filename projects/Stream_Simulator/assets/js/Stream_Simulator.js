@@ -193,11 +193,26 @@ function Stream_Simulator()  {
     }
 
     function sendMessage() {
+        emotePreview.style.visibility = 'hidden';
         const message = chatInput.value.trim();
         if (!message) return;
+        if (message[0] === '/') {
+            const command = message.split(' ')[0];
+            const command_body = message.split(' ').slice(1).join(' ');
+            if (CHAT_DISPLAY.verifyCommand(command)) {
+                console.log('valid command');
+                CHAT_DISPLAY.commandHandler(command, command_body, USER, );
+            }
+            else
+                console.log(`invalid command: ${command}`);
+
+            USER.addChatHistory(chatInput.value.trim());
+            console.log(USER.getChatHistory())
+            chatInput.value = '';
+            return;
+        }
         CHAT_DISPLAY.addMessage(new ChatMessage(USER, chatInput.value.trim()))
         chatInput.value = '';
-        emotePreview.style.visibility = 'hidden';
     }
 }
 
