@@ -76,11 +76,8 @@
     align-items: center; /* Align items vertically in the center */
     float: right;
     gap: 10px; 
+    font-family: Arial, Helvetica, sans-serif;
 }
-
-/* #channel-view-count {
-    display: inline;
-} */
 
 /* CHAT SECTION */
 #chat-section {

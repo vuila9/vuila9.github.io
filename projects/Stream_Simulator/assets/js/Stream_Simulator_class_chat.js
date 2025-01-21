@@ -11,7 +11,6 @@ class ChatDisplay {
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
 
-
         this.fakeViewCount = 12000;
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
@@ -190,10 +189,10 @@ class ChatDisplay {
                 }
                 this.fakeViewCount = Number(count);
                 this.addSystemMessage(`Fake view count is set to: ${count}`);
-                document.getElementById('channel-viewer-count').lastChild.nodeValue = this.fakeViewCount;
-                console.log(this.fakeViewCount);
-                clearInterval(this.intervalID);
-                setInterval(this.intervalID)
+                document.getElementById('channel-viewer-count').lastChild.nodeValue = Number(this.fakeViewCount).toLocaleString();
+                console.log(Number(this.fakeViewCount).toLocaleString());
+                if (!this.isPause)
+                    document.getElementById('start-chat-button').click();
                 break;
 
             case '/title':
@@ -210,14 +209,6 @@ class ChatDisplay {
             default:
                 break;
         }
-    }
-
-    getRand(size) {
-        return Math.floor(Math.random() * size); // excluding the last line of data files
-    }
-
-    chance(percent) {
-        return Math.floor(Math.random() * 101) <= percent;
     }
 }
 

@@ -7,7 +7,6 @@ function Stream_Simulator()  {
     const VIEWERS = [];
     const USER = new User('Vuila9_', 'May 14 2019', '#394678');
     const CHAT_LOG = [];
-    const CHAT_DELAY_BASED_RATE = 0.06969;
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
 
     let user_chat_index = 0;
@@ -35,12 +34,16 @@ function Stream_Simulator()  {
         }
         startChatButton.textContent = 'Pause Chat';
         CHAT_DISPLAY.setChatIntervalID(setInterval(() => {
-            if (chance(30)){
-                CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+            if (chance(10)){
+                let count = 0;
+                while (count <getRand(5)) {
+                    CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+                    count +=1;
+                }
             }
             CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length - 1)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-        }, chatRate(CHAT_DISPLAY.getFakeViewCount())/1000));
-
+        }, chatRate(CHAT_DISPLAY.getFakeViewCount())));
+        console.log('chat rate:..', chatRate(CHAT_DISPLAY.getFakeViewCount()));
         CHAT_DISPLAY.autoPopulate(VIEWERS);
     });
 
@@ -157,7 +160,6 @@ function Stream_Simulator()  {
             else 
                 matchIndex = (matchIndex + 1) % currentMatches.length;
             const replacementWord = currentMatches[matchIndex];
-            //console.log(CHAT_DISPLAY.getEmoteSrc(replacementWord));
             emotePreview.src = CHAT_DISPLAY.getEmoteSrc(replacementWord);
             emotePreview.style.visibility = 'visible';
 
@@ -215,12 +217,22 @@ function Stream_Simulator()  {
     }
 
     function chatRate(viewerCount) {
-        const R_max = 1000; // Maximum chat rate (messages per second)
-        const k = 0.0004;   // Growth rate factor
-        const v0 = 15000;   // Viewer count where growth accelerates
-      
-        // Logistic growth formula
-        return  (1 + Math.exp(-k * (viewerCount - v0))) / R_max;
+        const T_min = 700;  // Minimum time between chats (300 ms)
+        const v0 = 60000;   // Inflection point (50,000 viewers)
+        const k = 0.00005;  // Growth rate factor (adjusted for smoother transition)
+
+        // Scaling factor to ensure 2000 ms at 1,000 viewers
+        const T_scale = 1 + Math.exp(-k * (1000 - v0));
+
+        if (viewerCount < 1000 && viewerCount > 500) 
+            return 4000; 
+        else if (viewerCount < 500 && viewerCount > 100)
+            return 7000;
+        else if (viewerCount < 100)
+            return 10000;
+
+        // Logistic growth formula for time between chats
+        return (T_min * (1 + Math.exp(-k * (viewerCount - v0)))) / T_scale;
       }
 }
 
