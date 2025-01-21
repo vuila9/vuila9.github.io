@@ -11,9 +11,11 @@ class ChatDisplay {
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
 
+
+        this.fakeViewCount = 12000;
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/title', '/username', '/clear', '/category']);
+        this.command = new Set(['/ban', '/title', '/username', '/clear', '/category', '/viewcount']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -25,6 +27,10 @@ class ChatDisplay {
     setScrollUp(bool) { this.scrollUp = bool; }
 
     isScrollUp() { return this.scrollUp; }
+
+    setFakeViewCount(count) { this.fakeViewCount = count; }
+
+    getFakeViewCount() { return this.fakeViewCount; }
 
     verifyCommand(command) { return this.command.has(command); }
 
@@ -169,16 +175,27 @@ class ChatDisplay {
 
     commandHandler(command, command_body, USER) {
         switch (command) {
-            case '/clear':
-                this.chatMessageDiv.innerHTML = '';
-                break;
             case '/username':
-                console.log(command_body);
                 const old_name = USER.getUsername();
                 USER.setUsername(command_body.split(' ')[0]);
                 document.getElementById('channel-name').textContent = USER.getUsername();
                 this.addSystemMessage(`Streamer has changed their name from ${old_name} to ${USER.getUsername()}`);
                 break;
+            
+            case '/viewcount':
+                const count = command_body.split(' ')[0];
+                if (isNaN(count)) {
+                    this.addSystemMessage(`invalid syntax for /viewcount: ${count} is not a number`);
+                    return;
+                }
+                this.fakeViewCount = Number(count);
+                this.addSystemMessage(`Fake view count is set to: ${count}`);
+                document.getElementById('channel-viewer-count').lastChild.nodeValue = this.fakeViewCount;
+                console.log(this.fakeViewCount);
+                clearInterval(this.intervalID);
+                setInterval(this.intervalID)
+                break;
+
             case '/title':
                 document.getElementById('channel-title').textContent = command_body;
                 this.addSystemMessage(`Stream title is now set to "${command_body}"`);
@@ -187,9 +204,20 @@ class ChatDisplay {
                 document.getElementById('channel-category').textContent = command_body;
                 this.addSystemMessage(`Stream category is now set to "${command_body}"`);
                 break;
+            case '/clear':
+                this.chatMessageDiv.innerHTML = '';
+                break;
             default:
                 break;
         }
+    }
+
+    getRand(size) {
+        return Math.floor(Math.random() * size); // excluding the last line of data files
+    }
+
+    chance(percent) {
+        return Math.floor(Math.random() * 101) <= percent;
     }
 }
 

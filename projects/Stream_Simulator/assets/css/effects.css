@@ -78,6 +78,10 @@
     gap: 10px; 
 }
 
+/* #channel-view-count {
+    display: inline;
+} */
+
 /* CHAT SECTION */
 #chat-section {
     width: 315px; /* Fixed width for the chat section */

@@ -5,7 +5,6 @@ function Stream_Simulator()  {
     const emotePreview = document.getElementById('emote-preview');
 
     const VIEWERS = [];
-    let FAKE_VIEWER_COUNT = 10000;
     const USER = new User('Vuila9_', 'May 14 2019', '#394678');
     const CHAT_LOG = [];
     const CHAT_DELAY_BASED_RATE = 0.06969;
@@ -26,10 +25,6 @@ function Stream_Simulator()  {
         }
     })();
 
-    sendButton.addEventListener('click', (event) => {
-        sendMessage();
-    });
-
     startChatButton.addEventListener('click', async (event) => {
         CHAT_DISPLAY.toggleChat();
         if (CHAT_DISPLAY.isPaused()) {
@@ -44,7 +39,7 @@ function Stream_Simulator()  {
                 CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
             }
             CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length - 1)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-        }, chatRate(FAKE_VIEWER_COUNT)));
+        }, chatRate(CHAT_DISPLAY.getFakeViewCount())/1000));
 
         CHAT_DISPLAY.autoPopulate(VIEWERS);
     });
@@ -66,10 +61,7 @@ function Stream_Simulator()  {
             case "Tab":
                 event.preventDefault();
                 if (currentPrefix.length === 0 || chatInput.value.length === 0) return;
-                if (event.shiftKey) 
-                    autoComplete(true);
-                else 
-                    autoComplete();
+                autoComplete(event.shiftKey);
                 break;
         
             case " ":
@@ -119,6 +111,14 @@ function Stream_Simulator()  {
             default:
                 break;
         }
+    });
+
+    sendButton.addEventListener('click', (event) => {
+        sendMessage();
+        currentPrefix = "";
+        matchIndex = -1;
+        currentMatches = [];
+        user_chat_index = 0;
     });
 
     // Event listener for input events to reset match state
@@ -207,7 +207,6 @@ function Stream_Simulator()  {
                 CHAT_DISPLAY.addSystemMessage(`invalid command: ${command}`);
 
             USER.addChatHistory(chatInput.value.trim());
-            console.log(USER.getChatHistory())
             chatInput.value = '';
             return;
         }
