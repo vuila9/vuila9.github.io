@@ -25,6 +25,13 @@ function Stream_Simulator()  {
     })();
 
     startChatButton.addEventListener('click', async (event) => {
+        if (!CHAT_DISPLAY.getStreamIntervalID()) {
+            let startTime = Date.now();
+            CHAT_DISPLAY.setStreamIntervalID(setInterval(() => {
+                const totalElapsed = Date.now() - startTime;
+                document.getElementById('channel-stream-time').textContent = timeConverter(Math.floor(totalElapsed/1000));
+            },1000));
+        }
         CHAT_DISPLAY.toggleChat();
         if (CHAT_DISPLAY.isPaused()) {
             startChatButton.textContent = 'Start Chat';
@@ -216,6 +223,13 @@ function Stream_Simulator()  {
         chatInput.value = '';
     }
 
+    function timeConverter(seconds) {
+        const hour = String(Math.floor(seconds / 3600)).padStart(2, '0');
+        const minute = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+        const second = String(seconds % 60).padStart(2, '0');
+        return `${hour}:${minute}:${second}`;
+    }
+
     function chatRate(viewerCount) {
         const T_min = 700;  // Minimum time between chats (300 ms)
         const v0 = 60000;   // Inflection point (50,000 viewers)
@@ -233,7 +247,7 @@ function Stream_Simulator()  {
 
         // Logistic growth formula for time between chats
         return (T_min * (1 + Math.exp(-k * (viewerCount - v0)))) / T_scale;
-      }
+    }
 }
 
 Stream_Simulator();

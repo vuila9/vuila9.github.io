@@ -8,13 +8,14 @@ class ChatDisplay {
         this.isPause = true;
         this.chatSizeLimit = limit;
         this.chatIntervalID = null;
+        this.streamIntervalID = null;
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
 
         this.fakeViewCount = 12000;
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/title', '/username', '/clear', '/category', '/viewcount']);
+        this.command = new Set(['/ban', '/title', '/username', '/clear', '/category', '/viewcount', '/start', '/pause']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -33,9 +34,13 @@ class ChatDisplay {
 
     verifyCommand(command) { return this.command.has(command); }
 
+    setChatIntervalID(intervalID) { this.chatIntervalID = intervalID; }
+
     getChatIntervalID() { return this.chatIntervalID; }
 
-    setChatIntervalID(intervalID) { this.chatIntervalID = intervalID; }
+    setStreamIntervalID(intervalID) { this.streamIntervalID = intervalID; }
+
+    getStreamIntervalID() { return this.streamIntervalID; }
 
     getAnyEmoteArray() { return this.anyEmoteArrayContainer; }
 
@@ -78,6 +83,10 @@ class ChatDisplay {
         messageElement.style.backgroundColor = backgroundColor;
         this.chatMessageDiv.appendChild(messageElement);
         this.chatSize += 1;
+        if (this.chatSize > this.chatSizeLimit) {
+            this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
+            this.chatSize -= 1;
+        }
         if (!this.scrollUp)
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
@@ -183,14 +192,13 @@ class ChatDisplay {
             
             case '/viewcount':
                 const count = command_body.split(' ')[0];
-                if (isNaN(count)) {
+                if (isNaN(count) || count.length == 0) {
                     this.addSystemMessage(`invalid syntax for /viewcount: ${count} is not a number`);
                     return;
                 }
                 this.fakeViewCount = Number(count);
                 this.addSystemMessage(`Fake view count is set to: ${count}`);
                 document.getElementById('channel-viewer-count').lastChild.nodeValue = Number(this.fakeViewCount).toLocaleString();
-                console.log(Number(this.fakeViewCount).toLocaleString());
                 if (!this.isPause)
                     document.getElementById('start-chat-button').click();
                 break;
@@ -203,7 +211,16 @@ class ChatDisplay {
                 document.getElementById('channel-category').textContent = command_body;
                 this.addSystemMessage(`Stream category is now set to "${command_body}"`);
                 break;
+            case '/start':
+                if (this.isPause)
+                    document.getElementById('start-chat-button').click();
+                break;
+            case '/pause':
+                if (!this.isPause)
+                    document.getElementById('start-chat-button').click();
+                break;
             case '/clear':
+                this.chatSize = 0;
                 this.chatMessageDiv.innerHTML = '';
                 break;
             default:
