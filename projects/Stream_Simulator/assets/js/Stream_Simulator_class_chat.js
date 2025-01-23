@@ -15,7 +15,7 @@ class ChatDisplay {
         this.fakeViewCount = 12124;
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/title', '/username', '/yt' , '/category', '/viewcount', '/start', '/pause', '/clear']);
+        this.command = new Set(['/ban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/start', '/pause', '/clear']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -187,7 +187,39 @@ class ChatDisplay {
         return match ? match[1] : null;
     }
 
-    commandHandler(command, command_body, USER) {
+    #getRand(size) {
+        return Math.floor(Math.random() * size); // excluding the last line of data files
+    }
+
+    #spamVariation(feed) {
+        if (feed.split(' ').length > 2 || feed.length > 10) return [feed];
+        const spam_chat = [];
+        spam_chat.push(feed);
+        spam_chat.push(`${feed} ${feed}`);
+        spam_chat.push(`${feed} ${feed} ${feed}`);
+        spam_chat.push(`${feed}${feed}${feed}`);
+        spam_chat.push(`${feed}${feed.at(-1)}`);
+        spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
+
+        feed = feed.toLowerCase();
+        spam_chat.push(feed);
+        spam_chat.push(`${feed} ${feed}`);
+        spam_chat.push(`${feed} ${feed} ${feed}`);
+        spam_chat.push(`${feed}${feed}${feed}`);
+        spam_chat.push(`${feed}${feed.at(-1)}`);
+        spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
+
+        feed = feed.toUpperCase();
+        spam_chat.push(feed);
+        spam_chat.push(`${feed} ${feed}`);
+        spam_chat.push(`${feed} ${feed} ${feed}`);
+        spam_chat.push(`${feed}${feed}${feed}`);
+        spam_chat.push(`${feed}${feed.at(-1)}`);
+        spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
+        return spam_chat;
+    }
+
+    commandHandler(command, command_body, USER, VIEWERS, chatRate) {
         switch (command) {
             case '/username':
                 const old_name = USER.getUsername();
@@ -225,6 +257,20 @@ class ChatDisplay {
                 YTCLIP.onload = () => {
                     this.addSystemMessage(`${USER.getUsername()} has changed the embedded Youtube video.`);
                 };
+                break;
+
+            case '/spam':
+                if (this.isPause) return;
+                const spam_chat = this.#spamVariation(command_body);
+                const chat_rate = Math.min(chatRate/2, 800);
+                const intervalId = setInterval(() => {
+                    this.addMessage(new ChatMessage(VIEWERS[this.#getRand(VIEWERS.length)], spam_chat[this.#getRand(spam_chat.length)]));
+                }, chat_rate); 
+                const duration = Math.max(Math.min(6900 * 500/chatRate, 13000), 5000);
+                setTimeout(() => {
+                    clearInterval(intervalId); 
+                    console.log('spam ends');
+                }, duration);
                 break;
 
             case '/title':

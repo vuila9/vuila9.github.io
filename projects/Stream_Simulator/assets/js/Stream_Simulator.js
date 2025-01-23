@@ -30,7 +30,7 @@ function Stream_Simulator()  {
             CHAT_DISPLAY.setStreamIntervalID(setInterval(() => {
                 const totalElapsed = Date.now() - startTime;
                 document.getElementById('channel-stream-time').textContent = timeConverter(Math.floor(totalElapsed/1000));
-            },1000));
+            },100));
         }
         CHAT_DISPLAY.toggleChat();
         if (CHAT_DISPLAY.isPaused()) {
@@ -50,7 +50,6 @@ function Stream_Simulator()  {
             }
             CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length - 1)], CHAT_LOG[getRand(CHAT_LOG.length)]));
         }, chatRate(CHAT_DISPLAY.getFakeViewCount())));
-        console.log('chat rate:..', chatRate(CHAT_DISPLAY.getFakeViewCount()));
         CHAT_DISPLAY.autoPopulate(VIEWERS);
     });
 
@@ -210,7 +209,7 @@ function Stream_Simulator()  {
             const command = message.split(' ')[0];
             const command_body = message.split(' ').slice(1).join(' ');
             if (CHAT_DISPLAY.verifyCommand(command)) {
-                CHAT_DISPLAY.commandHandler(command, command_body, USER);
+                CHAT_DISPLAY.commandHandler(command, command_body, USER, VIEWERS, chatRate(CHAT_DISPLAY.getFakeViewCount()));
             }
             else
                 CHAT_DISPLAY.addSystemMessage(`Invalid command: ${command}`);
@@ -232,7 +231,7 @@ function Stream_Simulator()  {
 
     function chatRate(viewerCount) {
         const T_min = 700;  // Minimum time between chats (300 ms)
-        const v0 = 60000;   // Inflection point (50,000 viewers)
+        const v0 = 90000;   // Inflection point (50,000 viewers)
         const k = 0.00005;  // Growth rate factor (adjusted for smoother transition)
 
         // Scaling factor to ensure 2000 ms at 1,000 viewers
@@ -248,6 +247,25 @@ function Stream_Simulator()  {
         // Logistic growth formula for time between chats
         return (T_min * (1 + Math.exp(-k * (viewerCount - v0)))) / T_scale;
     }
+    function chatRate(viewerCount) {
+        //const T_min = 10000;  
+        const v0 = 100000; 
+        const k = 0.00001;
+
+        // Scaling factor to ensure 2000 ms at 1,000 viewers
+        const T_scale = 10* (1 + Math.exp(-k * (viewerCount - v0)));
+
+        if (viewerCount < 1000 && viewerCount > 500) 
+            return 4000; 
+        else if (viewerCount < 500 && viewerCount > 100)
+            return 7000;
+        else if (viewerCount < 100)
+            return 10000;
+
+        // Logistic growth formula for time between chats
+        return T_scale * 15;
+    }
+
 }
 
 Stream_Simulator();
