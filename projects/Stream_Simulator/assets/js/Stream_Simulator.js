@@ -9,6 +9,8 @@ function Stream_Simulator()  {
     const CHAT_LOG = [];
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
 
+    let STREAM_STARTING = true;
+
     let user_chat_index = 0;
 
     (async () => {
@@ -16,21 +18,20 @@ function Stream_Simulator()  {
         startChatButton.disabled = false;
         await CHAT_DISPLAY.populateData("EMOTE", null, "./assets/img/emotes/ANY");
         await CHAT_DISPLAY.populateData("CHAT", CHAT_LOG, "./assets/misc/chatlogs.txt");
-
-        let counter = 0;
-        while (counter < 100) {
-            CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-            counter +=1 ;
-        }
     })();
 
     startChatButton.addEventListener('click', async (event) => {
+        CHAT_DISPLAY.setChatRate(chatRate(CHAT_DISPLAY.getFakeViewCount()));
         if (!CHAT_DISPLAY.getStreamIntervalID()) {
             let startTime = Date.now();
             CHAT_DISPLAY.setStreamIntervalID(setInterval(() => {
                 const totalElapsed = Date.now() - startTime;
                 document.getElementById('channel-stream-time').textContent = timeConverter(Math.floor(totalElapsed/1000));
             },100));
+        }
+        if (STREAM_STARTING) { // chat say hi when stream just starts
+            CHAT_DISPLAY.spamChat(VIEWERS, 'Hi Hi hello', 15000, 3);
+            STREAM_STARTING = false;
         }
         CHAT_DISPLAY.toggleChat();
         if (CHAT_DISPLAY.isPaused()) {
@@ -49,7 +50,7 @@ function Stream_Simulator()  {
                 }
             }
             CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length - 1)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-        }, chatRate(CHAT_DISPLAY.getFakeViewCount())));
+        }, CHAT_DISPLAY.getChatRate()));
         CHAT_DISPLAY.autoPopulate(VIEWERS);
     });
 
@@ -209,7 +210,7 @@ function Stream_Simulator()  {
             const command = message.split(' ')[0];
             const command_body = message.split(' ').slice(1).join(' ');
             if (CHAT_DISPLAY.verifyCommand(command)) {
-                CHAT_DISPLAY.commandHandler(command, command_body, USER, VIEWERS, chatRate(CHAT_DISPLAY.getFakeViewCount()));
+                CHAT_DISPLAY.commandHandler(command, command_body, USER, VIEWERS);
             }
             else
                 CHAT_DISPLAY.addSystemMessage(`Invalid command: ${command}`);
@@ -230,30 +231,10 @@ function Stream_Simulator()  {
     }
 
     function chatRate(viewerCount) {
-        const T_min = 700;  // Minimum time between chats (300 ms)
-        const v0 = 90000;   // Inflection point (50,000 viewers)
-        const k = 0.00005;  // Growth rate factor (adjusted for smoother transition)
-
-        // Scaling factor to ensure 2000 ms at 1,000 viewers
-        const T_scale = 1 + Math.exp(-k * (1000 - v0));
-
-        if (viewerCount < 1000 && viewerCount > 500) 
-            return 4000; 
-        else if (viewerCount < 500 && viewerCount > 100)
-            return 7000;
-        else if (viewerCount < 100)
-            return 10000;
-
-        // Logistic growth formula for time between chats
-        return (T_min * (1 + Math.exp(-k * (viewerCount - v0)))) / T_scale;
-    }
-    function chatRate(viewerCount) {
-        //const T_min = 10000;  
         const v0 = 100000; 
         const k = 0.00001;
 
-        // Scaling factor to ensure 2000 ms at 1,000 viewers
-        const T_scale = 10* (1 + Math.exp(-k * (viewerCount - v0)));
+        const rate = 10* (1 + Math.exp(-k * (viewerCount - v0)));
 
         if (viewerCount < 1000 && viewerCount > 500) 
             return 4000; 
@@ -262,8 +243,7 @@ function Stream_Simulator()  {
         else if (viewerCount < 100)
             return 10000;
 
-        // Logistic growth formula for time between chats
-        return T_scale * 15;
+        return rate * 15;
     }
 
 }

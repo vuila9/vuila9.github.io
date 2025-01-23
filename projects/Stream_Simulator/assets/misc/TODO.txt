@@ -1,5 +1,4 @@
 TODO:
-- add chat reaction based on content (separate chat files depending on the content)
 - add hello/hi when stream first starts
 - give long time subber more chat rate
 - add icon/badges
@@ -7,13 +6,13 @@ TODO:
 - add sub gifting
 - add overlay
 - random ban + chat reaction
-- reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end, prediction
 - simulate ads playing by playing a short YT clip (muted)
 - play random funny audio (my name is jeff)
-- add '/spam <phrase>' command that makes chat spamming the phrase in different format variation
 
 DONE:
 - add emotes
 - add basic commands
 - add YT footage to simulate ad playing (viewer react to ad playing)
-
+- add '/spam <phrase>' command that makes chat spamming the phrase in different format variation
+- reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end, prediction (/spam handles this)
+- add chat reaction based on content (separate chat files depending on the content) (/spam handles this)

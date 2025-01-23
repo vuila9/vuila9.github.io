@@ -12,6 +12,8 @@ class ChatDisplay {
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
 
+        this.chatRate = 0;
+
         this.fakeViewCount = 12124;
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
@@ -27,6 +29,10 @@ class ChatDisplay {
     setScrollUp(bool) { this.scrollUp = bool; }
 
     isScrollUp() { return this.scrollUp; }
+
+    setChatRate(chatRate) { this.chatRate = chatRate;}
+
+    getChatRate() { return this.chatRate; }
 
     setFakeViewCount(count) { this.fakeViewCount = count; }
 
@@ -191,8 +197,8 @@ class ChatDisplay {
         return Math.floor(Math.random() * size); // excluding the last line of data files
     }
 
-    #spamVariation(feed) {
-        if (feed.split(' ').length > 2 || feed.length > 10) return [feed];
+    #spamVariation(feed, limit) {
+        if (feed.split(' ').length > limit || feed.length > 15) return [feed];
         const spam_chat = [];
         spam_chat.push(feed);
         spam_chat.push(`${feed} ${feed}`);
@@ -219,7 +225,19 @@ class ChatDisplay {
         return spam_chat;
     }
 
-    commandHandler(command, command_body, USER, VIEWERS, chatRate) {
+    spamChat(VIEWERS, msg, duration_=null, limit) {
+        const spam_chat = this.#spamVariation(msg, limit);
+        const chat_rate = Math.min(this.chatRate/2, 800);
+        const intervalId = setInterval(() => {
+            this.addMessage(new ChatMessage(VIEWERS[this.#getRand(VIEWERS.length)], spam_chat[this.#getRand(spam_chat.length)]));
+        }, chat_rate);
+        let duration = (duration_ === null) ? Math.max(Math.min(6900 * 500/this.chatRate, 13000), 5000) : duration_;
+        setTimeout(() => {
+            clearInterval(intervalId); 
+        }, duration);
+    } 
+
+    commandHandler(command, command_body, USER, VIEWERS) {
         switch (command) {
             case '/username':
                 const old_name = USER.getUsername();
@@ -261,16 +279,7 @@ class ChatDisplay {
 
             case '/spam':
                 if (this.isPause) return;
-                const spam_chat = this.#spamVariation(command_body);
-                const chat_rate = Math.min(chatRate/2, 800);
-                const intervalId = setInterval(() => {
-                    this.addMessage(new ChatMessage(VIEWERS[this.#getRand(VIEWERS.length)], spam_chat[this.#getRand(spam_chat.length)]));
-                }, chat_rate); 
-                const duration = Math.max(Math.min(6900 * 500/chatRate, 13000), 5000);
-                setTimeout(() => {
-                    clearInterval(intervalId); 
-                    console.log('spam ends');
-                }, duration);
+                this.spamChat(VIEWERS, command_body, 2)
                 break;
 
             case '/title':
