@@ -1,5 +1,4 @@
 TODO:
-- add hello/hi when stream first starts
 - give long time subber more chat rate
 - add icon/badges
 - add user profile UI when clicking on users
@@ -16,3 +15,4 @@ DONE:
 - add '/spam <phrase>' command that makes chat spamming the phrase in different format variation
 - reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end, prediction (/spam handles this)
 - add chat reaction based on content (separate chat files depending on the content) (/spam handles this)
+- add hello/hi when stream first starts
