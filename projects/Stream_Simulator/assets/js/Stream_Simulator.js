@@ -213,7 +213,7 @@ function Stream_Simulator()  {
                 CHAT_DISPLAY.commandHandler(command, command_body, USER);
             }
             else
-                CHAT_DISPLAY.addSystemMessage(`invalid command: ${command}`);
+                CHAT_DISPLAY.addSystemMessage(`Invalid command: ${command}`);
 
             USER.addChatHistory(chatInput.value.trim());
             chatInput.value = '';

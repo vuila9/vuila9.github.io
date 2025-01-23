@@ -12,10 +12,10 @@ class ChatDisplay {
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
 
-        this.fakeViewCount = 12000;
+        this.fakeViewCount = 12124;
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/title', '/username', '/clear', '/category', '/viewcount', '/start', '/pause']);
+        this.command = new Set(['/ban', '/title', '/username', '/yt' , '/category', '/viewcount', '/start', '/pause', '/clear']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -181,19 +181,25 @@ class ChatDisplay {
         return; 
     }
 
+    #getYouTubeVideoId(url) {
+        const regex = /(?:\?v=|\/embed\/|\/shorts\/|youtu\.be\/|\/v\/|\/watch\?v=|\/watch\?.+&v=)([a-zA-Z0-9_-]{11})/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+    }
+
     commandHandler(command, command_body, USER) {
         switch (command) {
             case '/username':
                 const old_name = USER.getUsername();
                 USER.setUsername(command_body.split(' ')[0]);
                 document.getElementById('channel-name').textContent = USER.getUsername();
-                this.addSystemMessage(`Streamer has changed their name from ${old_name} to ${USER.getUsername()}`);
+                this.addSystemMessage(`Streamer has changed their name from ${old_name} to ${USER.getUsername()}.`);
                 break;
             
             case '/viewcount':
                 const count = command_body.split(' ')[0];
                 if (isNaN(count) || count.length == 0) {
-                    this.addSystemMessage(`invalid syntax for /viewcount: ${count} is not a number`);
+                    this.addSystemMessage(`Invalid syntax for /viewcount: ${count} is not a number.`);
                     return;
                 }
                 this.fakeViewCount = Number(count);
@@ -202,14 +208,32 @@ class ChatDisplay {
                 if (!this.isPause)
                     document.getElementById('start-chat-button').click();
                 break;
+            
+            case '/yt':
+                const YTCLIP = document.getElementById('video-player');
+                const yt_id = this.#getYouTubeVideoId(command_body);
+                if (command_body == 'remove') {
+                    YTCLIP.src = '';
+                    this.addSystemMessage('Current embedded Youtube video is removed.');
+                    break;
+                }
+                if (yt_id === null) {
+                    this.addSystemMessage('Invalid Youtube URL.');
+                    break;
+                }
+                YTCLIP.src = `https://www.youtube.com/embed/${yt_id}`;
+                YTCLIP.onload = () => {
+                    this.addSystemMessage(`${USER.getUsername()} has changed the embedded Youtube video.`);
+                };
+                break;
 
             case '/title':
                 document.getElementById('channel-title').textContent = command_body;
-                this.addSystemMessage(`Stream title is now set to "${command_body}"`);
+                this.addSystemMessage(`Stream title is now set to "${command_body}".`);
                 break;
             case '/category':
                 document.getElementById('channel-category').textContent = command_body;
-                this.addSystemMessage(`Stream category is now set to "${command_body}"`);
+                this.addSystemMessage(`Stream category is now set to "${command_body}".`);
                 break;
             case '/start':
                 if (this.isPause)
