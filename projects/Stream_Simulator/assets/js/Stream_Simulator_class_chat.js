@@ -225,7 +225,7 @@ class ChatDisplay {
         return spam_chat;
     }
 
-    spamChat(VIEWERS, msg, duration_=null, limit) {
+    spamChat(VIEWERS, msg, limit, duration_=null) {
         const spam_chat = this.#spamVariation(msg, limit);
         const chat_rate = Math.min(this.chatRate/2, 800);
         const intervalId = setInterval(() => {
@@ -279,7 +279,7 @@ class ChatDisplay {
 
             case '/spam':
                 if (this.isPause) return;
-                this.spamChat(VIEWERS, command_body, 2)
+                this.spamChat(VIEWERS, command_body, 2);
                 break;
 
             case '/title':
