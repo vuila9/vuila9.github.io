@@ -7,7 +7,7 @@ class User {
         this.sub_tier = null;
         this.subAge = 0;
         this.isSubbed = false;
-        this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 31)}.png`;
+        this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 30 + 1)}.png`;
         this.usernameColor = usernameColor;
     }
 

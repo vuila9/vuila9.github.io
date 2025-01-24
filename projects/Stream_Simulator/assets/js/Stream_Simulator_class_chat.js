@@ -297,7 +297,13 @@ class ChatDisplay {
         const spam_chat = [];
         spam_chat.push(feed);
         spam_chat.push(`${feed} ${feed}`);
-        spam_chat.push(`${feed} ${feed} ${feed}`);
+        let counter = this.#getRand(5) + 1;
+        let repeat = [];
+        while (counter > 0) {
+            repeat.push(feed);
+            counter -= 1;
+        }
+        spam_chat.push(repeat.join(' '));
         spam_chat.push(`${feed}${feed}${feed}`);
         spam_chat.push(`${feed}${feed.at(-1)}`);
         spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
@@ -305,15 +311,27 @@ class ChatDisplay {
         feed = feed.toLowerCase();
         spam_chat.push(feed);
         spam_chat.push(`${feed} ${feed}`);
-        spam_chat.push(`${feed} ${feed} ${feed}`);
+        counter = this.#getRand(5) + 1;
+        repeat = [];
+        while (counter > 0) {
+            repeat.push(feed);
+            counter -= 1;
+        }
+        spam_chat.push(repeat.join(' '));
         spam_chat.push(`${feed}${feed}${feed}`);
         spam_chat.push(`${feed}${feed.at(-1)}`);
         spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
-
+        
         feed = feed.toUpperCase();
         spam_chat.push(feed);
         spam_chat.push(`${feed} ${feed}`);
-        spam_chat.push(`${feed} ${feed} ${feed}`);
+        counter = this.#getRand(5) + 1;
+        repeat = [];
+        while (counter > 0) {
+            repeat.push(feed);
+            counter -= 1;
+        }
+        spam_chat.push(repeat.join(' '));
         spam_chat.push(`${feed}${feed}${feed}`);
         spam_chat.push(`${feed}${feed.at(-1)}`);
         spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
