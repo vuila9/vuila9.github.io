@@ -197,8 +197,9 @@ class ChatDisplay {
         return Math.floor(Math.random() * size); // excluding the last line of data files
     }
 
-    #spamVariation(feed, limit) {
-        if (feed.split(' ').length > limit || feed.length > 15) return [feed];
+    #spamVariation(feed) {
+        if (feed.length > 1) return feed;
+        feed = feed[0];
         const spam_chat = [];
         spam_chat.push(feed);
         spam_chat.push(`${feed} ${feed}`);
@@ -225,8 +226,21 @@ class ChatDisplay {
         return spam_chat;
     }
 
-    spamChat(VIEWERS, msg, limit, duration_=null) {
-        const spam_chat = this.#spamVariation(msg, limit);
+    #smartSplit(sentence) {
+        const regex = /"([^"]*)"|(\S+)/g;
+        const result = [];
+        let match;
+    
+        while ((match = regex.exec(sentence)) !== null) {
+            // match[1] contains the quoted phrase, match[2] contains unquoted words
+            result.push(match[1] || match[2]);
+        }
+    
+        return result;
+    }
+
+    spamChat(VIEWERS, msg, duration_=null) {
+        const spam_chat = this.#spamVariation(msg);
         const chat_rate = Math.min(this.chatRate/2, 800);
         const intervalId = setInterval(() => {
             this.addMessage(new ChatMessage(VIEWERS[this.#getRand(VIEWERS.length)], spam_chat[this.#getRand(spam_chat.length)]));
@@ -279,7 +293,7 @@ class ChatDisplay {
 
             case '/spam':
                 if (this.isPause) return;
-                this.spamChat(VIEWERS, command_body, 2);
+                this.spamChat(VIEWERS, this.#smartSplit(command_body.trim()));
                 break;
 
             case '/title':
