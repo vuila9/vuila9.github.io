@@ -63,6 +63,7 @@ class ChatDisplay {
         messageUserElement.style.color = message.getUser().getUsernameColor();
         messageUserElement.addEventListener(('click'), (event) => {
             console.log(message.getUser().getUsername());
+            this.userProfile(message.getUser(), event.clientX, event.clientY);
         });
         messageElement.appendChild(messageUserElement);
 
@@ -97,21 +98,59 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-    #emoteReader(msg, theme = 'any') {
-        const msg_parts = msg.trim().split(' '); // Split the message into words
+    userProfile(user, mouseX, mouseY) {
+        // Create the popup container
+        const popup = document.createElement("div");
+        popup.className = "popup-user-profile";
+        popup.style.top = `${mouseY}px`;
+        popup.style.left = `${mouseX - 340}px`;
 
-        // Map each word to either <img> tag or keep it as is based on the Set
+        // Create the close button
+        const closeButton = document.createElement("div");
+        closeButton.className = "popup-user-profile-close";
+        closeButton.textContent = "✖";
+
+        // Close the popup on clicking the close button
+        closeButton.addEventListener("click", () => {
+            popup.remove();
+        });
+
+        popup.appendChild(closeButton);
+        document.body.appendChild(popup);
+
+        // Enable dragging
+        let isDragging = false;
+        let offsetX = 0, offsetY = 0;
+
+        popup.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            offsetX = e.clientX - popup.offsetLeft;
+            offsetY = e.clientY - popup.offsetTop;
+            popup.style.cursor = "grabbing";
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                popup.style.left = `${e.clientX - offsetX}px`;
+                popup.style.top = `${e.clientY - offsetY}px`;
+            }
+        });
+
+        document.addEventListener("mouseup", () => {
+            isDragging = false;
+            popup.style.cursor = "grab";
+        });
+    }
+
+    #emoteReader(msg, theme = 'any') {
+        const msg_parts = msg.trim().split(' ');
         const msg_arr = msg_parts.map(part => {
             if (this.#anyEmoteMapContainer.has(part)) {
-                // If the word is in the Set, wrap it in <img>
                 const imgUrl = this.getEmoteSrc(part);
                 return `<img src='${imgUrl}' title='${part}'>`;
             }
-            // Otherwise, keep the word as is
             return part;
         });
-    
-        // Join the processed parts into a single string and return
         return msg_arr.join(' ');
     }
 
@@ -199,6 +238,7 @@ class ChatDisplay {
 
     #spamVariation(feed) {
         if (feed.length > 1) return feed;
+        if (feed[0].length > 10) return feed;
         feed = feed[0];
         const spam_chat = [];
         spam_chat.push(feed);
@@ -230,12 +270,10 @@ class ChatDisplay {
         const regex = /"([^"]*)"|(\S+)/g;
         const result = [];
         let match;
-    
         while ((match = regex.exec(sentence)) !== null) {
             // match[1] contains the quoted phrase, match[2] contains unquoted words
             result.push(match[1] || match[2]);
         }
-    
         return result;
     }
 

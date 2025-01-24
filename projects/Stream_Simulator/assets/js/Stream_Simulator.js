@@ -18,6 +18,11 @@ function Stream_Simulator()  {
         startChatButton.disabled = false;
         await CHAT_DISPLAY.populateData("EMOTE", null, "./assets/img/emotes/ANY");
         await CHAT_DISPLAY.populateData("CHAT", CHAT_LOG, "./assets/misc/chatlogs.txt");
+        let counter = 0;
+        while (counter < 100) {
+            CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+            counter++;
+        }
     })();
 
     startChatButton.addEventListener('click', async (event) => {
@@ -30,7 +35,7 @@ function Stream_Simulator()  {
             },100));
         }
         if (STREAM_STARTING) { // chat say hi when stream just starts
-            CHAT_DISPLAY.spamChat(VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            //CHAT_DISPLAY.spamChat(VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
             STREAM_STARTING = false;
         }
         CHAT_DISPLAY.toggleChat();

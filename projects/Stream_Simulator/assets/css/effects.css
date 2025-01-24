@@ -232,3 +232,24 @@ input[type="text"] {
     align-items: center; 
     width: 100%;
 }
+
+/* USER PROFILE */
+.popup-user-profile {
+    position: fixed;
+    width: 340px;
+    height: 125px;
+    background-color: #060606;
+    border: 1px solid black;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    cursor: grab;
+}
+
+.popup-user-profile-close {
+    position: absolute;
+    top: -5px;
+    right: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    color: white;
+}
