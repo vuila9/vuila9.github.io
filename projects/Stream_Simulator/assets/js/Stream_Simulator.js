@@ -30,7 +30,9 @@ function Stream_Simulator()  {
             },100));
         }
         if (STREAM_STARTING) { // chat say hi when stream just starts
-            CHAT_DISPLAY.spamChat(VIEWERS, 'Hi Hi hello', words_limit=3, duration=15000);
+            CHAT_DISPLAY.spamChat(VIEWERS, 'Hi Hi', words_limit=3, duration=12000);
+            CHAT_DISPLAY.spamChat(VIEWERS, 'Hello', words_limit=3, duration=12000);
+            CHAT_DISPLAY.spamChat(VIEWERS, 'Hii', words_limit=3, duration=12000);
             STREAM_STARTING = false;
         }
         CHAT_DISPLAY.toggleChat();
