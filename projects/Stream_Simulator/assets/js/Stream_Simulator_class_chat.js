@@ -102,20 +102,74 @@ class ChatDisplay {
         // Create the popup container
         const popup = document.createElement("div");
         popup.className = "popup-user-profile";
+        popup.id = `popup-${user.getUsername()}`;
         popup.style.top = `${mouseY}px`;
         popup.style.left = `${mouseX - 340}px`;
 
-        // Create the close button
+        // Add the close button
         const closeButton = document.createElement("div");
         closeButton.className = "popup-user-profile-close";
         closeButton.textContent = "✖";
-
-        // Close the popup on clicking the close button
         closeButton.addEventListener("click", () => {
             popup.remove();
         });
-
         popup.appendChild(closeButton);
+
+        // Add the viewer avatar
+        const viewerAvatar = document.createElement("img");
+        viewerAvatar.src = user.getAvatar();
+        viewerAvatar.className = "channel-user-avatar";
+        viewerAvatar.alt = `${user.getUsername()}'s avatar`;
+        viewerAvatar.style.top = '5px';
+        viewerAvatar.style.left = '5px';
+        viewerAvatar.style.width = '50px';
+        viewerAvatar.style.height = '50px';
+        viewerAvatar.style.position = 'absolute';
+        popup.appendChild(viewerAvatar);
+
+        // Add viewer username
+        const username = document.createElement("div");
+        username.textContent = user.getUsername();
+        username.style.color = "white";
+        username.style.fontSize = '17px'; 
+        username.style.top = '5px';
+        username.style.left = '60px';
+        username.style.fontWeight = 'bold';
+        username.style.position = 'absolute';
+        popup.appendChild(username);
+
+
+        // Add created date
+        const created = document.createElement("div");
+        created.textContent = `🎂 Account created on ${user.getDateCreate()}`;
+        created.style.color = "white";
+        created.style.fontSize = '14px'; 
+        created.style.top = '27px';
+        created.style.left = '60px';
+        created.style.position = 'absolute';
+        popup.appendChild(created);
+
+        // Add follow date 🤍
+        const follow = document.createElement("div");
+        follow.textContent = `❤️ Follow Since ${user.getFollowDate()}`;
+        follow.style.color = "white";
+        follow.style.fontSize = '14px'; 
+        follow.style.top = '46px';
+        follow.style.left = '60px';
+        follow.style.position = 'absolute';
+        popup.appendChild(follow);
+
+        // Add sub date
+        // if (user.isSub()) {
+            const sub = document.createElement("div");
+            sub.textContent = `⭐ Tier ${user.getSubTier()} - Subbed for ${user.getSubAge()} Months`;
+            sub.style.color = "white";
+            sub.style.fontSize = '14px'; 
+            sub.style.top = '65px';
+            sub.style.left = '60px';
+            sub.style.position = 'absolute';
+            popup.appendChild(sub);
+        // }
         document.body.appendChild(popup);
 
         // Enable dragging

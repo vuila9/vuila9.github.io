@@ -7,6 +7,7 @@ class User {
         this.sub_tier = null;
         this.subAge = 0;
         this.isSubbed = false;
+        this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 31)}.png`;
         this.usernameColor = usernameColor;
     }
 
@@ -18,7 +19,11 @@ class User {
 
     addChatHistory(message) { 
         this.chatHistory.push(message);
-    } 
+    }
+
+    getDateCreate() { return null; }
+
+    getAvatar() { return this.avatar; }
 
     getChatHistory() { return this.chatHistory; }
 

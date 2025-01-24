@@ -43,17 +43,11 @@
     padding: 1rem; 
 }
 
-#channel-user-avatar img{
-    position: absolute;
-    width: 80px;
-    height: 80px;
-}
-
-#channel-user-avatar{
-    width: 80px; /* Diameter of the circle */
-    height: 80px; /* Diameter of the circle */
+.channel-user-avatar{
+    width: 64px;
+    height: 64px;
     border-radius: 50%; /* Make it a circle */
-    overflow: hidden; /* Hide the overflow */
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -250,7 +244,7 @@ input[type="text"] {
     position: fixed;
     width: 340px;
     height: 125px;
-    background-color: #060606;
+    background-color: #202020;
     border: 1px solid black;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
