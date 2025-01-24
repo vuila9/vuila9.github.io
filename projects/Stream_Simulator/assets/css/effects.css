@@ -43,9 +43,21 @@
     padding: 1rem; 
 }
 
-#channel-user-avatar {
+#channel-user-avatar img{
+    position: absolute;
     width: 80px;
     height: 80px;
+}
+
+#channel-user-avatar{
+    width: 80px; /* Diameter of the circle */
+    height: 80px; /* Diameter of the circle */
+    border-radius: 50%; /* Make it a circle */
+    overflow: hidden; /* Hide the overflow */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
 }
 
 #channel-info-left {
