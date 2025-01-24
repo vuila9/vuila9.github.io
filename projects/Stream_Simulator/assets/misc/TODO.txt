@@ -1,7 +1,6 @@
 TODO:
 - give long time subber more chat rate
 - add icon/badges
-- add user profile UI when clicking on users
 - add sub gifting
 - add overlay
 - random ban + chat reaction
@@ -16,3 +15,4 @@ DONE:
 - reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end, prediction (/spam handles this)
 - add chat reaction based on content (separate chat files depending on the content) (/spam handles this)
 - add hello/hi when stream first starts
+- add user profile UI when clicking on users
