@@ -5,7 +5,7 @@ function Stream_Simulator()  {
     const emotePreview = document.getElementById('emote-preview');
 
     const VIEWERS = [];
-    const USER = new User('Vuila9_', 'May 14 2019', '#394678');
+    const USER = new User('Vuila9_','Jan 3rd 2023', '#394678', 'May 14 2019', 26, 3);
     const CHAT_LOG = [];
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
 

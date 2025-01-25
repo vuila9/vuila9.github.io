@@ -99,6 +99,7 @@ class ChatDisplay {
     }
 
     userProfile(user, mouseX, mouseY) {
+        if (document.getElementById(`popup-${user.getUsername()}`)) return;
         // Create the popup container
         const popup = document.createElement("div");
         popup.className = "popup-user-profile";
@@ -151,7 +152,7 @@ class ChatDisplay {
 
         // Add follow date 🤍
         const follow = document.createElement("div");
-        follow.textContent = `❤️ Follow Since ${user.getFollowDate()}`;
+        follow.textContent = `❤️ Followed since ${user.getFollowDate()}`;
         follow.style.color = "white";
         follow.style.fontSize = '14px'; 
         follow.style.top = '46px';

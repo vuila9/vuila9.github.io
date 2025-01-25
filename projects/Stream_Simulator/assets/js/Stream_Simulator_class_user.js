@@ -1,13 +1,17 @@
 class User {
-    constructor(username, followSince, usernameColor='green') {
+    constructor(username, followSince, usernameColor='green', dateCreated=null, subAge=0, sub_tier=null) {
         this.username = username;
         this.followSince = followSince;
+        this.dateCreated = dateCreated;
         this.chatHistory = [];
         this.messageCount = 0;
-        this.sub_tier = null;
-        this.subAge = 0;
+        this.sub_tier = sub_tier;
+        this.subAge = subAge;
         this.isSubbed = false;
-        this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 30 + 1)}.png`;
+        if (username === 'Vuila9_')
+            this.avatar = `assets/img/default_user_avatar.png`;
+        else
+            this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 30 + 1)}.png`;
         this.usernameColor = usernameColor;
     }
 
@@ -21,7 +25,7 @@ class User {
         this.chatHistory.push(message);
     }
 
-    getDateCreate() { return null; }
+    getDateCreate() { return this.dateCreated; }
 
     getAvatar() { return this.avatar; }
 
