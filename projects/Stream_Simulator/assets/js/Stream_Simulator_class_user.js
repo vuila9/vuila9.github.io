@@ -1,5 +1,5 @@
 class User {
-    constructor(username, followSince, usernameColor='green', dateCreated=null, subAge=0, sub_tier=null) {
+    constructor(username, followSince, usernameColor='green', dateCreated=null, isSubbed=false, subAge=0, sub_tier=null) {
         this.username = username;
         this.followSince = followSince;
         this.dateCreated = dateCreated;
@@ -7,7 +7,7 @@ class User {
         this.messageCount = 0;
         this.sub_tier = sub_tier;
         this.subAge = subAge;
-        this.isSubbed = false;
+        this.isSubbed = isSubbed;
         if (username === 'Vuila9_')
             this.avatar = `assets/img/default_user_avatar.png`;
         else

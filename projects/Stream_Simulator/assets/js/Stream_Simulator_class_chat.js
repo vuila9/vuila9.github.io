@@ -161,16 +161,19 @@ class ChatDisplay {
         popup.appendChild(follow);
 
         // Add sub date
-        // if (user.isSub()) {
+        if (user.getSubAge() > 0) {
             const sub = document.createElement("div");
-            sub.textContent = `⭐ Tier ${user.getSubTier()} - Subbed for ${user.getSubAge()} Months`;
+            if (user.isSub())
+                sub.textContent = `⭐ Tier ${user.getSubTier()} - Subscribed for ${user.getSubAge()} Months`;
+            else
+                sub.textContent = `⭐ Previously subscribed for ${user.getSubAge()} Months`;
             sub.style.color = "white";
             sub.style.fontSize = '14px'; 
             sub.style.top = '65px';
             sub.style.left = '60px';
             sub.style.position = 'absolute';
             popup.appendChild(sub);
-        // }
+        }
         document.body.appendChild(popup);
 
         // Enable dragging
