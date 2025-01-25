@@ -1,5 +1,5 @@
 class User {
-    constructor(username, followSince, usernameColor='green', dateCreated=null, isSubbed=false, subAge=0, sub_tier=null) {
+    constructor(username, dateCreated=null, followSince=null, isSubbed=false, subAge=0, sub_tier=null, usernameColor='green', streamer=false) {
         this.username = username;
         this.followSince = followSince;
         this.dateCreated = dateCreated;
@@ -7,8 +7,9 @@ class User {
         this.messageCount = 0;
         this.sub_tier = sub_tier;
         this.subAge = subAge;
+        this.streamer = streamer;
         this.isSubbed = isSubbed;
-        if (username === 'Vuila9_')
+        if (streamer)
             this.avatar = `assets/img/default_user_avatar.png`;
         else
             this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 30 + 1)}.png`;
@@ -24,6 +25,8 @@ class User {
     addChatHistory(message) { 
         this.chatHistory.push(message);
     }
+
+    isStreamer() { return this.streamer; }
 
     getDateCreate() { return this.dateCreated; }
 

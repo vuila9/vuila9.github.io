@@ -2,6 +2,7 @@ class ChatDisplay {
 
     #anyEmoteMapContainer;
     //#anyEmoteArrayContainer;
+    #viewersMap;
 
     constructor(limit=200) {
         this.chatSize = 0;
@@ -11,13 +12,13 @@ class ChatDisplay {
         this.streamIntervalID = null;
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
-
         this.chatRate = 0;
-
         this.fakeViewCount = 12124;
+
+        this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/start', '/pause', '/clear']);
+        this.command = new Set(['/ban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/start', '/pause', '/clear', '/clearpopup', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -81,9 +82,12 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-    addSystemMessage(message, color='#a4a4ae', backgroundColor='transparent') {
+    addSystemMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
         const messageElement = document.createElement('p');
-        messageElement.textContent = message;
+        if (forcedInnerHTML)
+            messageElement.innerHTML = message;
+        else
+            messageElement.textContent = message;
         messageElement.style.fontSize = '13px';
         messageElement.style.fontFamily = 'Arial, Helvetica, sans-serif';
         messageElement.style.color = color;
@@ -151,14 +155,16 @@ class ChatDisplay {
         popup.appendChild(created);
 
         // Add follow date 🤍
-        const follow = document.createElement("div");
-        follow.textContent = `❤️ Followed since ${user.getFollowDate()}`;
-        follow.style.color = "white";
-        follow.style.fontSize = '14px'; 
-        follow.style.top = '46px';
-        follow.style.left = '60px';
-        follow.style.position = 'absolute';
-        popup.appendChild(follow);
+        if (!user.isStreamer()) {
+            const follow = document.createElement("div");
+            follow.textContent = `❤️ Followed since ${user.getFollowDate()}`;
+            follow.style.color = "white";
+            follow.style.fontSize = '14px'; 
+            follow.style.top = '46px';
+            follow.style.left = '60px';
+            follow.style.position = 'absolute';
+            popup.appendChild(follow);
+        }
 
         // Add sub date
         if (user.getSubAge() > 0) {
@@ -168,8 +174,8 @@ class ChatDisplay {
             else
                 sub.textContent = `⭐ Previously subscribed for ${user.getSubAge()} Months`;
             sub.style.color = "white";
-            sub.style.fontSize = '14px'; 
-            sub.style.top = '65px';
+            sub.style.fontSize = '14px';
+            sub.style.top = (user.isStreamer()) ? '46px': '65px';
             sub.style.left = '60px';
             sub.style.position = 'absolute';
             popup.appendChild(sub);
@@ -239,10 +245,10 @@ class ChatDisplay {
 
                 // Process each complete line
                 lines.forEach(line => {
-                    //const row = trimRow(line);
                     if (datatype === 'VIEWER') {
                         const row = line.split(',').map(value => value.trim());
-                        container.push(new User(row[0], row[1], row[2]));
+                        container.push(new User(row[0], row[1], row[2], row[3], row[4], row[5], row[6]));
+                        this.#viewersMap.set(container.at(-1).getUsername(), container.at(-1));
                     } else if (datatype === 'CHAT') {
                         const row = line.replace('\r', '');
                         container.push(row);
@@ -271,7 +277,6 @@ class ChatDisplay {
                     this.#anyEmoteMapContainer.set(row[0], row[1]);
                 }
             }
-
             //done here
         } catch (error) {
             console.error(error);
@@ -280,7 +285,6 @@ class ChatDisplay {
     }
 
     autoPopulate(VIEWERS, chatlogs) { 
-
         return; 
     }
 
@@ -363,7 +367,23 @@ class ChatDisplay {
         setTimeout(() => {
             clearInterval(intervalId); 
         }, duration);
-    } 
+    }
+
+    #showCommands() {
+        this.addSystemMessage(`
+            /username 'name': change your user name<br>
+            /viewcount 'number': set viewer count to any number from 1 - 999,999<br>
+            /yt 'URL': change embedded video player to the URL Youtube<br>
+            /spam 'word/"phrase" or both': trigger the chat to spam specified word(s) and/or phrase(s). Ensure phrases are wrapped in double quotation marks.<br>
+            /title 'title': change stream title<br>
+            /category 'category': change stream category<br>
+            /start: start/resume stream chat<br>
+            /pause: pause stream chat<br>
+            /clearpopup: remove all user profile popups<br>
+            /clear: clear chat<br>
+            *Note: some commands are only executable during pausing/running chat
+        `,true);
+    }
 
     commandHandler(command, command_body, USER, VIEWERS) {
         switch (command) {
@@ -378,6 +398,10 @@ class ChatDisplay {
                 const count = command_body.split(' ')[0];
                 if (isNaN(count) || count.length == 0) {
                     this.addSystemMessage(`Invalid syntax for /viewcount: ${count} is not a number.`);
+                    return;
+                }
+                if (count < 1 || count.length > 6) {
+                    this.addSystemMessage(`Invalid syntax for /viewcount: ${count} is out of bound.`);
                     return;
                 }
                 this.fakeViewCount = Number(count);
@@ -426,9 +450,17 @@ class ChatDisplay {
                 if (!this.isPause)
                     document.getElementById('start-chat-button').click();
                 break;
+            case '/clearpopup':
+                const elements = document.querySelectorAll(`.popup-user-profile`);
+                elements.forEach(element => element.remove());
+                this.addSystemMessage('All user profile popups are now removed')
+                break;
             case '/clear':
                 this.chatSize = 0;
                 this.chatMessageDiv.innerHTML = '';
+                break;
+            case '/command':
+                this.#showCommands();
                 break;
             default:
                 break;

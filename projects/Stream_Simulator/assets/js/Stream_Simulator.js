@@ -5,7 +5,7 @@ function Stream_Simulator()  {
     const emotePreview = document.getElementById('emote-preview');
 
     const VIEWERS = [];
-    const USER = new User('Vuila9_','Jan 3rd 2023', '#394678', 'May 14 2019', true, 26, 3);
+    const USER = new User('Vuila9_', 'May 14 2019', 'May 14 2019', true, 69, 3, '#394678', true);
     const CHAT_LOG = [];
     const CHAT_DISPLAY = new ChatDisplay(limit=150);
 
@@ -14,10 +14,12 @@ function Stream_Simulator()  {
     let user_chat_index = 0;
 
     (async () => {
-        await CHAT_DISPLAY.populateData("VIEWER", VIEWERS, './assets/misc/random_users.csv');
+        await CHAT_DISPLAY.populateData("VIEWER", VIEWERS, './assets/misc/random_viewers.csv');
         startChatButton.disabled = false;
         await CHAT_DISPLAY.populateData("EMOTE", null, "./assets/img/emotes/ANY");
         await CHAT_DISPLAY.populateData("CHAT", CHAT_LOG, "./assets/misc/chatlogs.txt");
+        CHAT_DISPLAY.addSystemMessage('Welcome to Stream Simulator');
+        CHAT_DISPLAY.addSystemMessage('Type /command to see all available commands');
         // let counter = 0;
         // while (counter < 100) {
         //     CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
