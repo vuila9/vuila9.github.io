@@ -16,3 +16,4 @@ DONE:
 - add chat reaction based on content (separate chat files depending on the content) (/spam handles this)
 - add hello/hi when stream first starts
 - add user profile UI when clicking on users
+- add @_ing feature
