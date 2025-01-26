@@ -54,23 +54,35 @@ class ChatDisplay {
     getAnyEmoteArray() { return this.anyEmoteArrayContainer; }
 
     addMessage(message) { 
+        const USER = message.getUser();
+
         const messageElement = document.createElement('p');
-        messageElement.setAttribute('user', message.getUser().getUsername());
+        messageElement.setAttribute('user', USER.getUsername());
         
+
+        const badgesUserName = document.createElement('span');
+        badgesUserName.className = 'user-message-badges';
+        for (let i = 0; i < USER.getBadges().length || 3; i++) {
+            if (i == 3) break;
+            const img_badge = document.createElement('img');
+            img_badge.src = 
+        }
+
+
         const messageUserName = document.createElement('span');
         messageUserName.className = 'user-message';
-        messageUserName.textContent = `${message.getUser().getUsername()}`;
+        messageUserName.textContent = `${USER.getUsername()}`;
         messageUserName.style.fontWeight = "bold";
         messageUserName.style.fontSize = "13.5px";
-        messageUserName.style.color = message.getUser().getUsernameColor();
+        messageUserName.style.color = USER.getUsernameColor();
         messageUserName.addEventListener(('click'), (event) => {
-            this.#userProfile(message.getUser(), event.clientX, event.clientY);
+            this.#userProfile(USER, event.clientX, event.clientY);
         });
         messageElement.appendChild(messageUserName);
 
         const messageContent = document.createElement('span');
         this.#processMessageContent(message.getContent(), messageContent);
-        message.getUser().addChatHistory(message.getContent());
+        USER.addChatHistory(message.getContent());
         messageElement.appendChild(messageContent);
 
         this.chatMessageDiv.appendChild(messageElement);

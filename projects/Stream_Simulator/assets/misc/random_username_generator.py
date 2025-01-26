@@ -61,7 +61,7 @@ def generate():
     output_file = "random_viewers.csv"
 
     # Generate random users
-    random_users = [generate_random_user() for _ in range(100)]
+    random_users = [generate_random_user() for _ in range(100000)]
 
     # Write the users to a CSV file
     with open(output_file, mode="w", newline="") as file:
@@ -74,4 +74,4 @@ def generate():
 
     print(f"Data has been written to {output_file}")
 
-generate()
+#generate()
