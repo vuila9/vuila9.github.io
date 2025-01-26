@@ -304,8 +304,6 @@ class ChatDisplay {
                 }
             }
             //done here
-            if (datatype=='VIEWER')
-                console.log(this.#viewersMap)
         } catch (error) {
             console.error(error);
             alert(`Failed to load ${path} file.`);
