@@ -5,9 +5,9 @@ function Stream_Simulator()  {
     const emotePreview = document.getElementById('emote-preview');
 
     const VIEWERS = [];
-    const USER = new User('Vuila9_', 'May 14 2019', 'May 14 2019', true, 69, 3, '#394678', true);
+    const STREAMER = new User('Vuila9_', 'May 14 2019', 'May 14 2019', true, 69, 3, '#394678', true);
     const CHAT_LOG = [];
-    const CHAT_DISPLAY = new ChatDisplay(limit=150);
+    const CHAT_DISPLAY = new ChatDisplay(STREAMER, limit=150);
 
     let STREAM_STARTING = true;
 
@@ -18,8 +18,8 @@ function Stream_Simulator()  {
         startChatButton.disabled = false;
         await CHAT_DISPLAY.populateData("EMOTE", null, "./assets/img/emotes/ANY");
         await CHAT_DISPLAY.populateData("CHAT", CHAT_LOG, "./assets/misc/chatlogs.txt");
-        CHAT_DISPLAY.addSystemMessage('Welcome to Stream Simulator');
-        CHAT_DISPLAY.addSystemMessage('Type /command to see all available commands');
+        CHAT_DISPLAY.addSystemMessage('Welcome to Stream Simulator!');
+        CHAT_DISPLAY.addSystemMessage('Type /command to see useful commands');
         // let counter = 0;
         // while (counter < 100) {
         //     CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
@@ -94,22 +94,22 @@ function Stream_Simulator()  {
             case "ArrowUp":
                 event.preventDefault();
                 user_chat_index -= 1;
-                if (USER.getChatHistory().at(user_chat_index) === undefined) {
-                    user_chat_index = -USER.getChatHistory().length;
+                if (STREAMER.getChatHistory().at(user_chat_index) === undefined) {
+                    user_chat_index = -STREAMER.getChatHistory().length;
                     return;
                 }
-                chatInput.value = USER.getChatHistory().at(user_chat_index);
+                chatInput.value = STREAMER.getChatHistory().at(user_chat_index);
                 break;
 
             case "ArrowDown":
                 event.preventDefault();
                 user_chat_index += 1;
-                if (USER.getChatHistory().at(user_chat_index) === undefined || user_chat_index >= 0) {
+                if (STREAMER.getChatHistory().at(user_chat_index) === undefined || user_chat_index >= 0) {
                     user_chat_index = 0;
                     chatInput.value = '';
                     return;
                 }
-                chatInput.value = USER.getChatHistory().at(user_chat_index);
+                chatInput.value = STREAMER.getChatHistory().at(user_chat_index);
                 break;
         
             case "Backspace":
@@ -217,16 +217,16 @@ function Stream_Simulator()  {
             const command = message.split(' ')[0];
             const command_body = message.split(' ').slice(1).join(' ');
             if (CHAT_DISPLAY.verifyCommand(command)) {
-                CHAT_DISPLAY.commandHandler(command, command_body, USER, VIEWERS);
+                CHAT_DISPLAY.commandHandler(command, command_body, STREAMER, VIEWERS);
             }
             else
                 CHAT_DISPLAY.addSystemMessage(`Invalid command: ${command}`);
 
-            USER.addChatHistory(chatInput.value.trim());
+            STREAMER.addChatHistory(chatInput.value.trim());
             chatInput.value = '';
             return;
         }
-        CHAT_DISPLAY.addMessage(new ChatMessage(USER, chatInput.value.trim()))
+        CHAT_DISPLAY.addMessage(new ChatMessage(STREAMER, chatInput.value.trim()))
         chatInput.value = '';
     }
 
@@ -256,4 +256,3 @@ function Stream_Simulator()  {
 }
 
 Stream_Simulator();
-

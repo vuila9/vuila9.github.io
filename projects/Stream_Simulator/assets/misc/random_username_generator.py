@@ -51,7 +51,7 @@ def generate():
             "username": username,
             "createDate": create_date.strftime("%b %d %Y"),
             "followDate": follow_date.strftime("%b %d %Y"),
-            "isSubbed": random.choices([False,True], [99.99, 0.01], k=1)[0],
+            "isSubbed": random.choices([0,1], [90, 10], k=1)[0],
             "subAge": random.choices(subAge, chance, k=1)[0],
             "subTier": random.choices([1,2,3],[99.999,0.0009,0.0001], k=1)[0],
             "usernameColor": generate_hex_color()

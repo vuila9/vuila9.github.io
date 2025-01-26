@@ -4,7 +4,7 @@ class ChatDisplay {
     //#anyEmoteArrayContainer;
     #viewersMap;
 
-    constructor(limit=200) {
+    constructor(streamer, limit=200) {
         this.chatSize = 0;
         this.isPause = true;
         this.chatSizeLimit = limit;
@@ -14,6 +14,8 @@ class ChatDisplay {
         this.chatMessageDiv = document.getElementById('chat-messages');
         this.chatRate = 0;
         this.fakeViewCount = 12124;
+
+        this.STREAMER = streamer;
 
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
@@ -55,23 +57,22 @@ class ChatDisplay {
         const messageElement = document.createElement('p');
         messageElement.setAttribute('user', message.getUser().getUsername());
         
-        const messageUserElement = document.createElement('span');
-        messageUserElement.className = 'user-message';
-        messageUserElement.textContent = `${message.getUser().getUsername()}`;
-        messageUserElement.style.fontWeight = "bold";
-        messageUserElement.style.fontSize = "13.5px";
-
-        messageUserElement.style.color = message.getUser().getUsernameColor();
-        messageUserElement.addEventListener(('click'), (event) => {
-            console.log(message.getUser().getUsername());
-            this.userProfile(message.getUser(), event.clientX, event.clientY);
+        const messageUserName = document.createElement('span');
+        messageUserName.className = 'user-message';
+        messageUserName.textContent = `${message.getUser().getUsername()}`;
+        messageUserName.style.fontWeight = "bold";
+        messageUserName.style.fontSize = "13.5px";
+        messageUserName.style.color = message.getUser().getUsernameColor();
+        messageUserName.addEventListener(('click'), (event) => {
+            this.#userProfile(message.getUser(), event.clientX, event.clientY);
         });
-        messageElement.appendChild(messageUserElement);
+        messageElement.appendChild(messageUserName);
 
         const messageContent = document.createElement('span');
-        messageContent.innerHTML = `: ${this.#emoteReader(message.getContent())}`;
+        this.#processMessageContent(message.getContent(), messageContent);
         message.getUser().addChatHistory(message.getContent());
         messageElement.appendChild(messageContent);
+
         this.chatMessageDiv.appendChild(messageElement);
         this.chatSize += 1;
         if (this.chatSize > this.chatSizeLimit) {
@@ -102,7 +103,7 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-    userProfile(user, mouseX, mouseY) {
+    #userProfile(user, mouseX, mouseY) {
         if (document.getElementById(`popup-${user.getUsername()}`)) return;
         // Create the popup container
         const popup = document.createElement("div");
@@ -121,16 +122,18 @@ class ChatDisplay {
         popup.appendChild(closeButton);
 
         // Add the viewer avatar
-        const viewerAvatar = document.createElement("img");
-        viewerAvatar.src = user.getAvatar();
-        viewerAvatar.className = "channel-user-avatar";
-        viewerAvatar.alt = `${user.getUsername()}'s avatar`;
-        viewerAvatar.style.top = '5px';
-        viewerAvatar.style.left = '5px';
-        viewerAvatar.style.width = '50px';
-        viewerAvatar.style.height = '50px';
-        viewerAvatar.style.position = 'absolute';
-        popup.appendChild(viewerAvatar);
+        if (user.getDateCreate()) {
+            const viewerAvatar = document.createElement("img");
+            viewerAvatar.src = user.getAvatar();
+            viewerAvatar.className = "channel-user-avatar";
+            viewerAvatar.alt = `${user.getUsername()}'s avatar`;
+            viewerAvatar.style.top = '5px';
+            viewerAvatar.style.left = '5px';
+            viewerAvatar.style.width = '50px';
+            viewerAvatar.style.height = '50px';
+            viewerAvatar.style.position = 'absolute';
+            popup.appendChild(viewerAvatar);
+        }
 
         // Add viewer username
         const username = document.createElement("div");
@@ -143,10 +146,12 @@ class ChatDisplay {
         username.style.position = 'absolute';
         popup.appendChild(username);
 
-
-        // Add created date
+        // Add created date 🎂
         const created = document.createElement("div");
-        created.textContent = `🎂 Account created on ${user.getDateCreate()}`;
+        if (user.getDateCreate())
+            created.textContent = `🎂 Account created on ${user.getDateCreate()}`;
+        else
+            created.textContent = `⚠️ Unable to fetch account`;
         created.style.color = "white";
         created.style.fontSize = '14px'; 
         created.style.top = '27px';
@@ -155,7 +160,7 @@ class ChatDisplay {
         popup.appendChild(created);
 
         // Add follow date 🤍
-        if (!user.isStreamer()) {
+        if (!user.isStreamer() && user.getDateCreate()) {
             const follow = document.createElement("div");
             follow.textContent = `❤️ Followed since ${user.getFollowDate()}`;
             follow.style.color = "white";
@@ -166,7 +171,7 @@ class ChatDisplay {
             popup.appendChild(follow);
         }
 
-        // Add sub date
+        // Add sub date ⭐
         if (user.getSubAge() > 0) {
             const sub = document.createElement("div");
             if (user.isSub())
@@ -190,7 +195,6 @@ class ChatDisplay {
             isDragging = true;
             offsetX = e.clientX - popup.offsetLeft;
             offsetY = e.clientY - popup.offsetTop;
-            popup.style.cursor = "grabbing";
         });
 
         document.addEventListener("mousemove", (e) => {
@@ -202,20 +206,42 @@ class ChatDisplay {
 
         document.addEventListener("mouseup", () => {
             isDragging = false;
-            popup.style.cursor = "grab";
         });
     }
 
-    #emoteReader(msg, theme = 'any') {
+    #processMessageContent(msg, element) {
         const msg_parts = msg.trim().split(' ');
-        const msg_arr = msg_parts.map(part => {
-            if (this.#anyEmoteMapContainer.has(part)) {
-                const imgUrl = this.getEmoteSrc(part);
-                return `<img src='${imgUrl}' title='${part}'>`;
+        element.appendChild(document.createTextNode(': '));
+        for (let part of msg_parts) {
+            if (part[0] === '@') {
+                const user_name = part.slice(1);
+                const user_search = document.createElement('span');
+                user_search.textContent = part;
+                user_search.style.fontWeight = 'bold';
+                user_search.style.cursor = 'pointer';
+                user_search.style.color = '#efeff1';
+                user_search.style.fontSize = '13.5px';
+                user_search.addEventListener(('click'), (event) => {
+                    if (this.#viewersMap.has(user_name))
+                        this.#userProfile(this.#viewersMap.get(user_name), event.clientX, event.clientY);
+                    else if (this.STREAMER.getUsername() == user_name)
+                        this.#userProfile(this.STREAMER, event.clientX, event.clientY);
+                    else
+                        this.#userProfile(new User(user_name), event.clientX, event.clientY);
+                });
+                element.appendChild(user_search)
             }
-            return part;
-        });
-        return msg_arr.join(' ');
+            else if (this.#anyEmoteMapContainer.has(part)) {
+                const imgElement = document.createElement('img');
+                imgElement.src = this.getEmoteSrc(part);
+                imgElement.alt = part;
+                element.appendChild(imgElement)
+            }
+            else {
+                const textNode = document.createTextNode(` ${part} `);
+                element.appendChild(textNode);
+            }
+        }
     }
 
     getEmoteSrc(name) {
@@ -247,7 +273,7 @@ class ChatDisplay {
                 lines.forEach(line => {
                     if (datatype === 'VIEWER') {
                         const row = line.split(',').map(value => value.trim());
-                        container.push(new User(row[0], row[1], row[2], row[3], row[4], row[5], row[6]));
+                        container.push(new User(row[0], row[1], row[2], true == row[3], row[4], row[5], row[6]));
                         this.#viewersMap.set(container.at(-1).getUsername(), container.at(-1));
                     } else if (datatype === 'CHAT') {
                         const row = line.replace('\r', '');
@@ -278,6 +304,8 @@ class ChatDisplay {
                 }
             }
             //done here
+            if (datatype=='VIEWER')
+                console.log(this.#viewersMap)
         } catch (error) {
             console.error(error);
             alert(`Failed to load ${path} file.`);
@@ -369,29 +397,13 @@ class ChatDisplay {
         }, duration);
     }
 
-    #showCommands() {
-        this.addSystemMessage(`
-            /username 'name': change your user name<br>
-            /viewcount 'number': set viewer count to any number from 1 - 999,999<br>
-            /yt 'URL': change embedded video player to the URL Youtube<br>
-            /spam 'word/"phrase" or both': trigger the chat to spam specified word(s) and/or phrase(s). Ensure phrases are wrapped in double quotation marks.<br>
-            /title 'title': change stream title<br>
-            /category 'category': change stream category<br>
-            /start: start/resume stream chat<br>
-            /pause: pause stream chat<br>
-            /clearpopup: remove all user profile popups<br>
-            /clear: clear chat<br>
-            *Note: some commands are only executable during pausing/running chat
-        `,true);
-    }
-
-    commandHandler(command, command_body, USER, VIEWERS) {
+    commandHandler(command, command_body, STREAMER, VIEWERS) {
         switch (command) {
             case '/username':
-                const old_name = USER.getUsername();
-                USER.setUsername(command_body.split(' ')[0]);
-                document.getElementById('channel-name').textContent = USER.getUsername();
-                this.addSystemMessage(`Streamer has changed their name from ${old_name} to ${USER.getUsername()}.`);
+                const old_name = STREAMER.getUsername();
+                STREAMER.setUsername(command_body.split(' ')[0]);
+                document.getElementById('channel-name').textContent = STREAMER.getUsername();
+                this.addSystemMessage(`Streamer has changed their name from ${old_name} to ${STREAMER.getUsername()}.`);
                 break;
             
             case '/viewcount':
@@ -425,7 +437,7 @@ class ChatDisplay {
                 }
                 YTCLIP.src = `https://www.youtube.com/embed/${yt_id}`;
                 YTCLIP.onload = () => {
-                    this.addSystemMessage(`${USER.getUsername()} has changed the embedded Youtube video.`);
+                    this.addSystemMessage(`${STREAMER.getUsername()} has changed the embedded Youtube video.`);
                 };
                 break;
 
@@ -465,6 +477,20 @@ class ChatDisplay {
             default:
                 break;
         }
+    }
+
+    #showCommands() {
+        this.addSystemMessage(`
+            /username name: change your user name<br>
+            /viewcount number: set viewer count to any number from 1 - 999,999<br>
+            /yt URL: change the embedded YouTube video<br>
+            /spam word/"phrase" or both: trigger the chat to spam specified word(s) and/or phrase(s)<br>
+            /title title: change stream title<br>
+            /category category: change stream category<br>
+            /clearpopup: remove all user profile popups<br>
+            /clear: clear chat<br>
+            *Note: some commands are only executable during pausing/running chat
+        `,true);
     }
 }
 

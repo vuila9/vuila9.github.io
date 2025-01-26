@@ -1,5 +1,5 @@
 class User {
-    constructor(username, dateCreated=null, followSince=null, isSubbed=false, subAge=0, sub_tier=null, usernameColor='green', streamer=false) {
+    constructor(username, dateCreated=null, followSince=null, isSubbed=false, subAge=0, sub_tier=null, usernameColor='white', streamer=false) {
         this.username = username;
         this.followSince = followSince;
         this.dateCreated = dateCreated;
