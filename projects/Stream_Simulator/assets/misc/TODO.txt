@@ -1,9 +1,10 @@
 TODO:
-- give long time subber more chat rate
-- add icon/badges
 - add sub gifting
+- random ban/unmod/mod/vip
+- chat reaction to ban/unmod/mod/vip
+- make groups of highly active chatters, frequent chatters, lurkers
+- give long time subber more chat rate
 - add overlay
-- random ban + chat reaction
 - simulate ads playing by playing a short YT clip (muted)
 - play random funny audio (my name is jeff)
 
@@ -17,3 +18,4 @@ DONE:
 - add hello/hi when stream first starts
 - add user profile UI when clicking on users
 - add @_ing feature
+- add icon/badges
