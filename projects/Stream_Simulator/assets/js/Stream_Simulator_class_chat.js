@@ -20,7 +20,7 @@ class ChatDisplay {
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/start', '/pause', '/clear', '/clearpopup', '/command']);
+        this.command = new Set(['/ban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/start', '/pause', '/clear', '/clearpopup', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -55,19 +55,22 @@ class ChatDisplay {
 
     addMessage(message) { 
         const USER = message.getUser();
-
         const messageElement = document.createElement('p');
         messageElement.setAttribute('user', USER.getUsername());
-        
 
         const badgesUserName = document.createElement('span');
         badgesUserName.className = 'user-message-badges';
-        for (let i = 0; i < USER.getBadges().length || 3; i++) {
-            if (i == 3) break;
+        const badges_limit = (USER.isStreamer()) ? 3 : 2;
+        for (let i = 0; i < USER.getBadges().length; i++) {
+            if (i == badges_limit) break;
             const img_badge = document.createElement('img');
-            img_badge.src = 
+            img_badge.src = `./assets/img/badges/${USER.getBadges()[i]}.png`;
+            img_badge.title = (USER.getBadges()[i].includes('Sub')) ? 'Subscriber' : USER.getBadges()[i];
+            img_badge.className = 'user-badge';
+            badgesUserName.appendChild(img_badge);
         }
-
+        if (badgesUserName.hasChildNodes())
+            messageElement.appendChild(badgesUserName);
 
         const messageUserName = document.createElement('span');
         messageUserName.className = 'user-message';
@@ -138,7 +141,7 @@ class ChatDisplay {
             const viewerAvatar = document.createElement("img");
             viewerAvatar.src = user.getAvatar();
             viewerAvatar.className = "channel-user-avatar";
-            viewerAvatar.alt = `${user.getUsername()}'s avatar`;
+            viewerAvatar.title = `${user.getUsername()}'s avatar`;
             viewerAvatar.style.top = '5px';
             viewerAvatar.style.left = '5px';
             viewerAvatar.style.width = '50px';
@@ -199,6 +202,22 @@ class ChatDisplay {
         }
         document.body.appendChild(popup);
 
+        const badgesProfile = document.createElement('div');
+        badgesProfile.className = 'user-profile-badges';
+        for (let i = 0; i < user.getBadges().length; i++) {
+            const img_badge = document.createElement('img');
+            img_badge.src = `./assets/img/badges/${user.getBadges()[i]}.png`;
+            img_badge.title = (user.getBadges()[i].includes('Sub')) ? 'Subscriber' : user.getBadges()[i];
+            img_badge.className = 'user-badge';
+            badgesProfile.appendChild(img_badge);
+        }
+        if (badgesProfile.hasChildNodes()) {
+            badgesProfile.style.top = '89px';
+            badgesProfile.style.left = '60px';
+            badgesProfile.style.position = 'absolute';
+            popup.appendChild(badgesProfile);
+        }
+
         // Enable dragging
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
@@ -246,7 +265,7 @@ class ChatDisplay {
             else if (this.#anyEmoteMapContainer.has(part)) {
                 const imgElement = document.createElement('img');
                 imgElement.src = this.getEmoteSrc(part);
-                imgElement.alt = part;
+                imgElement.title = part;
                 element.appendChild(imgElement)
             }
             else {
@@ -451,6 +470,36 @@ class ChatDisplay {
                 };
                 break;
 
+            case '/mod':
+                var username = command_body.split(' ')[0];
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).modViewer()) 
+                    this.addSystemMessage(`"${username}" has been made a Moderator.`);
+                break;
+
+            case '/unmod':
+                var username = command_body.split(' ')[0];
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unmodViewer()) 
+                    this.addSystemMessage(`"${username}" is no longer a Moderator.`);
+                break;
+
+            case '/vip':
+                var username = command_body.split(' ')[0];
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).vipViewer()) 
+                    this.addSystemMessage(`"${username}" has been promoted to VIP.`);
+                break;
+
+            case '/unvip':
+                var username = command_body.split(' ')[0];
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unvipViewer()) 
+                    this.addSystemMessage(`"${username}" is no longer a VIP.`);
+                break;
+
+            case '/founder':
+                var username = command_body.split(' ')[0];
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).founderViewer()) 
+                    this.addSystemMessage(`"${username}" is now a channel founder.`);
+                break;
+
             case '/spam':
                 if (this.isPause) return;
                 this.spamChat(VIEWERS, this.#smartSplit(command_body.trim()));
@@ -497,6 +546,10 @@ class ChatDisplay {
             /spam word/"phrase" or both: trigger the chat to spam specified word(s) and/or phrase(s)<br>
             /title title: change stream title<br>
             /category category: change stream category<br>
+            /mod name: make a viewer a moderator<br>
+            /vip name: make a viewer a vip<br>
+            /founder name: make a viewer a founder<br>
+            /gift name: gift a sub to a viewer<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>
             *Note: some commands are only executable during pausing/running chat

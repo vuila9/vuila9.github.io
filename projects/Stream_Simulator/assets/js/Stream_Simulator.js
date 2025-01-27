@@ -20,11 +20,11 @@ function Stream_Simulator()  {
         await CHAT_DISPLAY.populateData("CHAT", CHAT_LOG, "./assets/misc/chatlogs.txt");
         CHAT_DISPLAY.addSystemMessage('Welcome to Stream Simulator!');
         CHAT_DISPLAY.addSystemMessage('Type /command to see useful commands');
-        // let counter = 0;
-        // while (counter < 100) {
-        //     CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-        //     counter++;
-        // }
+        let counter = 0;
+        while (counter < 150) {
+            CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+            counter++;
+        }
     })();
 
     startChatButton.addEventListener('click', async (event) => {
@@ -37,7 +37,7 @@ function Stream_Simulator()  {
             },100));
         }
         if (STREAM_STARTING) { // chat say hi when stream just starts
-            CHAT_DISPLAY.spamChat(VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            //CHAT_DISPLAY.spamChat(VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
             STREAM_STARTING = false;
         }
         CHAT_DISPLAY.toggleChat();

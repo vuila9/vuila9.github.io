@@ -11,6 +11,8 @@ class User {
         this.badges = [];
         this.streamer = streamer;
         this.sub = sub;
+
+        this.banned = false;
        
         if (streamer) {
             this.avatar = `assets/img/default_user_avatar.png`;
@@ -18,15 +20,18 @@ class User {
             this.vip = false;
             this.founder = false;
             this.mod = false;
+            this.turbo = false;
+            this.verified = true;
         }
         else {
             this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 30 + 1)}.png`;
             this.prime = false;
-            this.mod = (Math.floor(Math.random()*100) < 1) ? true : false;;
+            this.turbo = (Math.floor(Math.random()*100) < 1) ? true : false;
+            this.mod = (Math.floor(Math.random()*100) < 1) ? true : false;
             this.founder = (Math.floor(Math.random()*100) < 1) ? true : false;
             this.vip = (Math.floor(Math.random()*100) < 1) ? true : false;
-            if (this.sub_tier == 1 && this.sub)
-                this.prime = (Math.floor(Math.random()*100) < 70) ? true : false;
+            this.verified = (Math.floor(Math.random()*100) < 1) ? true : false;
+            this.prime = (Math.floor(Math.random()*100) < 30) ? true : false;
         }
         this.usernameColor = usernameColor;
         this.initBadges();
@@ -42,24 +47,62 @@ class User {
         this.chatHistory.push(message);
     }
 
-    initBadges() {
-        if (this.streamer) this.badges.push('broadcaster');
-        if (this.vip) this.badges.push('vip');
-        if (this.prime) this.badges.push('prime');
-        if (this.mod) this.badges.push('mod');
-        if (this.founder) this.badges.push('founder');
+    banViewer() { this.banned = true; }
 
-        if (this.subAge == 0) return;
-        if (!this.sub) return;
-        for (let i = this.#subBadges.length - 1; i >= 0; i--) {
-            if (this.subAge >= this.#subBadges[i]) {
-                this.badges.push(`sub_${this.#subBadges[i]}`);
-                return;
+    isBanned() { return this.banned; }
+
+    initBadges() {
+        this.badges = [];
+        if (this.streamer) this.badges.push('Broadcaster');
+        if (this.founder) this.badges.push('Founder');
+        if (this.vip) this.badges.push('VIP');
+        if (this.mod) this.badges.push('Moderator');
+        if (this.verified) this.badges.push('Verified');
+        if (this.turbo) this.badges.push('Turbo');
+        if (this.subAge > 0 && this.sub) {
+            for (let i = this.#subBadges.length - 1; i >= 0; i--) {
+                if (this.subAge >= this.#subBadges[i]) {
+                    this.badges.push(`Subscriber_${this.#subBadges[i]}`);
+                    break;
+                }
             }
         }
+        if (this.prime) this.badges.push('Prime Gaming');
     }
 
-    addBadge(badge) { this.badges.push(badge); }
+    modViewer() { 
+        if (this.mod) return false; 
+        this.mod = true;
+        this.initBadges();
+        return true;
+    }
+
+    unmodViewer() { 
+        if (!this.mod) return false; 
+        this.mod = false;
+        this.initBadges();
+        return true;
+    }
+
+    founderViewer() { 
+        if (this.founder) return false;
+        this.founder = true; 
+        this.initBadges();
+        return true;
+    }
+
+    vipViewer() { 
+        if (this.vip) return false; 
+        this.vip = true;
+        this.initBadges();
+        return true;
+    }
+    unvipViewer() { 
+        if (!this.vip) return false; 
+        this.vip = false; 
+        this.initBadges();
+        return true
+    }
 
     getBadges() { return this.badges; }
 

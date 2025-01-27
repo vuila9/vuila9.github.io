@@ -260,3 +260,10 @@ input[type="text"] {
     font-size: 20px;
     color: white;
 }
+
+.user-badge {
+    width: 18px;
+    height: 18px;
+    margin-right: 3px;
+    margin-bottom: 2px;
+}
