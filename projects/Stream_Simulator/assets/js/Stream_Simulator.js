@@ -42,14 +42,18 @@ function Stream_Simulator()  {
             CHAT_DISPLAY.setStreamIntervalID(setInterval(() => {
                 const totalElapsed = Date.now() - startTime;
                 document.getElementById('channel-stream-time').textContent = timeConverter(Math.floor(totalElapsed/1000));
+                if (chance(CHAT_DISPLAY.getFakeViewCount() * 0.01)) {
+                    random_change = Math.floor(Math.random() * CHAT_DISPLAY.getFakeViewCount() * 0.00005);
+                    CHAT_DISPLAY.incFakeViewCount((chance(50) ? random_change : -random_change));
+                    document.getElementById('channel-viewer-count').textContent = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
+                }
             },100));
         }
         CHAT_DISPLAY.toggleChat();
         if (STREAM_STARTING) { // chat say hi when stream just starts
-            startChatButton.disabled = true;
-            CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            //startChatButton.disabled = true;
+            //CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
             STREAM_STARTING = false;
-            console.log('test')
         }
         if (CHAT_DISPLAY.isPaused()) {
             startChatButton.textContent = 'Start Chat';
@@ -253,7 +257,7 @@ function Stream_Simulator()  {
     }
 
     function timeConverter(seconds) {
-        const hour = String(Math.floor(seconds / 3600)).padStart(2, '0');
+        const hour = String(Math.floor(seconds / 3600));
         const minute = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
         const second = String(seconds % 60).padStart(2, '0');
         return `${hour}:${minute}:${second}`;

@@ -13,7 +13,8 @@ class ChatDisplay {
         this.scrollUp = false;
         this.chatMessageDiv = document.getElementById('chat-messages');
         this.chatRate = 0;
-        this.fakeViewCount = 12124;
+        this.fakeViewCount = Math.floor(Math.random() * 100000);
+        document.getElementById('channel-viewer-count').textContent = this.fakeViewCount.toLocaleString();
 
         this.STREAMER = streamer;
 
@@ -41,6 +42,8 @@ class ChatDisplay {
 
     getFakeViewCount() { return this.fakeViewCount; }
 
+    incFakeViewCount(change) { this.fakeViewCount += change; }
+
     verifyCommand(command) { return this.command.has(command); }
 
     setChatIntervalID(intervalID) { this.chatIntervalID = intervalID; }
@@ -55,7 +58,10 @@ class ChatDisplay {
 
     addMessage(message) { 
         const USER = message.getUser();
-        if (USER.isBanned()) return; //dead man dont talk
+        if (USER.isBanned()) { //dead man dont talk
+            this.addSystemMessage(`"${USER.getUsername()}" tried to chat but was banned.`)
+            return; 
+        }
         const messageElement = document.createElement('p');
         messageElement.setAttribute('user', USER.getUsername());
 
@@ -477,18 +483,46 @@ class ChatDisplay {
                 };
                 break;
 
+            case '/gift': 
+                var username = command_body.split(' ')[0];
+                if (username[0] == "@") username = username.slice(1);
+                var sub_tier = command_body.split(' ')[1];
+                if (isNaN(sub_tier)) sub_tier = 1;
+                if (sub_tier > 3 || sub_tier < 1) sub_tier = 1;
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).giftViewer(sub_tier)) 
+                    this.addSystemMessage(`"${username}" has been gifted a sub by ${STREAMER.getUsername()}`);
+                else {
+                    if (this.#viewersMap.get(username).isSub()) {
+                        var user = VIEWERS[this.#getRand(VIEWERS.length)];
+                        var counter = 0;
+                        while (!user.isSub && counter < VIEWERS.length) {
+                            user = VIEWERS[this.#getRand(VIEWERS.length)];
+                            counter += 1;
+                        }
+                        this.addSystemMessage(`"${username}" is already subbed and decided to pass the sub to "${user.getUsername()}"`);
+                        user.giftViewer(sub_tier);
+                    }
+                    else
+                        this.addSystemMessage(`"${username}" is not a chatter in this community.`);
+                }
+                break;
+
             case '/mod':
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
-                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).modViewer()) 
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).modViewer())  {
                     this.addSystemMessage(`"${username}" has been made a Moderator.`);
+                    this.spamChat(VIEWERS, ['should have been me Saddies', 'did bro even sub??', 'how much for mod', `who is you  @${username}`, `never seen this guy before wtf`]);
+                }
                 break;
 
             case '/unmod':
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
-                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unmodViewer()) 
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unmodViewer()) {
                     this.addSystemMessage(`"${username}" is no longer a Moderator.`);
+                    this.spamChat(VIEWERS, ['peepoL', 'deserved', 'good, now mod me Demanding', `what did you do??  @${username}`, `o7`, 'o7', ])
+                }
                 break;
 
             case '/vip':
@@ -496,6 +530,7 @@ class ChatDisplay {
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).vipViewer()) 
                     this.addSystemMessage(`"${username}" has been promoted to VIP.`);
+                    this.spamChat(VIEWERS, ['should have been me Saddies', 'did bro even sub??', 'how much for VIP', `who is you  @${username}`, `never seen this guy before wtf`])
                 break;
 
             case '/unvip':
@@ -517,7 +552,7 @@ class ChatDisplay {
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).banViewer()) {
                     this.addSystemMessage(`"${username}" is permanently banned.`);
-                    this.spamChat(VIEWERS, ["RIPBOZO", "SCATTER", "SCATTER", "free that guy", "o7", "o7", "o7 o7", "truth = banned", "RIPBOZO rip bozo", "why bro got banned?", "see bro never", "keep mess around and find out"]);
+                    this.spamChat(VIEWERS, [`@${username}  RIPBOZO `, "SCATTER", "SCATTER", `free @${username} right meow`, "o7", "o7", "o7 o7", "truth = banned", "banned o7", "RIPBOZO rip bozo", "why bro got banned?", `@${username} see you never`, "keep mess around and find out", `@${username}  welcome to the gulag o7`, 'deserved o7']);
                 }
                 break;
 
@@ -525,8 +560,10 @@ class ChatDisplay {
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
                 if (username[0] == "@") username = username.slice(1);
-                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unbanViewer()) 
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unbanViewer()) {
                     this.addSystemMessage(`"${username}" is no longer banned.`);
+                    this.spamChat(VIEWERS, ["???", "why free him?", "keem them banned wtf", "bro is free tf Aware", `welcome back @${username}`, `@${username} did you bribe the streamer??`]);
+                }
                 break;
 
             case '/spam':

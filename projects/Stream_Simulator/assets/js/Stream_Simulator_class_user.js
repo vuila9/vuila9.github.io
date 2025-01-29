@@ -60,6 +60,15 @@ class User {
         if (this.prime) this.badges.push('Prime Gaming');
     }
 
+    giftViewer(tier=1) {
+        if (this.sub) return false;
+        this.sub = true;
+        this.subAge = Number(this.subAge) + 1;
+        this.sub_tier = tier;
+        this.initBadges();
+        return true;
+    }
+
     modViewer() { 
         if (this.mod) return false; 
         this.mod = true;
