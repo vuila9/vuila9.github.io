@@ -281,7 +281,7 @@ class ChatDisplay {
 
     getDiv() { return this.chatMessageDiv; }
 
-    async populateData(datatype, container, path) {
+    async populateData(datatype, container, path, sub_container=null, all_names=null) {
         try {
             const response = await fetch(path);
             if (!response.ok) throw new Error(`Error fetching ${path}: ${response.statusText}`);
@@ -304,8 +304,12 @@ class ChatDisplay {
                 lines.forEach(line => {
                     if (datatype === 'VIEWER') {
                         const row = line.split(',').map(value => value.trim());
-                        container.push(new User(row[0], row[1], row[2], true == row[3], row[4], row[5], row[6]));
+                        container.push(new User(row[0], row[1], row[2], (true == row[3]), row[4], row[5], (true == row[6]),
+                                                (true == row[7]), (true == row[8]), (true == row[9]), (true == row[10]), (true == row[11]), row[12]));
                         this.#viewersMap.set(container.at(-1).getUsername(), container.at(-1));
+                        sub_container.push(container.at(-1));
+                        all_names.push(`@${container.at(-1).getUsername()}`);
+
                     } else if (datatype === 'CHAT') {
                         const row = line.replace('\r', '');
                         container.push(row);

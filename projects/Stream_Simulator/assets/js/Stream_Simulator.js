@@ -4,8 +4,12 @@ function Stream_Simulator()  {
     const startChatButton = document.getElementById('start-chat-button');
     const emotePreview = document.getElementById('emote-preview');
 
-    const VIEWERS = [];
-    const STREAMER = new User('Vuila9_', 'May 14 2019', 'May 14 2019', true, 69, 3, '#394678', true);
+    const ALL_VIEWERS = [];
+    const RANDOM_VIEWERS = [];
+    const ACTIVE_VIEWERS = [];
+    const REGULAR_VIEWERS = [];
+    const ALL_VIEWERS_NAME = [];
+    const STREAMER = new User('Vuila9_', 'May 14 2019', 'May 14 2019', sub=true, subAge=69, sub_tier=3, prime=false, mod=false, turbo=false, founder=false, vip=false, verified=true, usernameColor='#394678', streamer=true);
     const CHAT_LOG = [];
     const CHAT_DISPLAY = new ChatDisplay(STREAMER, limit=150);
 
@@ -14,7 +18,8 @@ function Stream_Simulator()  {
     let user_chat_index = 0;
 
     (async () => {
-        await CHAT_DISPLAY.populateData("VIEWER", VIEWERS, './assets/misc/random_viewers.csv');
+        await CHAT_DISPLAY.populateData("VIEWER", ALL_VIEWERS, './assets/misc/random_viewers.csv', RANDOM_VIEWERS, ALL_VIEWERS_NAME);
+        await CHAT_DISPLAY.populateData("VIEWER", ALL_VIEWERS, './assets/misc/active_viewers.csv', ACTIVE_VIEWERS, ALL_VIEWERS_NAME);
         startChatButton.disabled = false;
         await CHAT_DISPLAY.populateData("EMOTE", null, "./assets/img/emotes/ANY");
         await CHAT_DISPLAY.populateData("CHAT", CHAT_LOG, "./assets/misc/chatlogs.txt");
@@ -22,7 +27,10 @@ function Stream_Simulator()  {
         CHAT_DISPLAY.addSystemMessage('Type /command to see useful commands');
         let counter = 0;
         while (counter < 150) {
-            CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+            if (chance(90))
+                CHAT_DISPLAY.addMessage(new ChatMessage(ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+            else
+                CHAT_DISPLAY.addMessage(new ChatMessage(RANDOM_VIEWERS[getRand(RANDOM_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
             counter++;
         }
     })();
@@ -37,7 +45,7 @@ function Stream_Simulator()  {
             },100));
         }
         if (STREAM_STARTING) { // chat say hi when stream just starts
-            //CHAT_DISPLAY.spamChat(VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            //CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
             STREAM_STARTING = false;
         }
         CHAT_DISPLAY.toggleChat();
@@ -51,14 +59,17 @@ function Stream_Simulator()  {
         CHAT_DISPLAY.setChatIntervalID(setInterval(() => {
             if (chance(10)){
                 let count = 0;
-                while (count <getRand(5)) {
-                    CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+                while (count < getRand(5)) {
+                    CHAT_DISPLAY.addMessage(new ChatMessage(RANDOM_VIEWERS[getRand(RANDOM_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
                     count +=1;
                 }
             }
-            CHAT_DISPLAY.addMessage(new ChatMessage(VIEWERS[getRand(VIEWERS.length - 1)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+            if (chance(90))
+                CHAT_DISPLAY.addMessage(new ChatMessage(ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+            else
+                CHAT_DISPLAY.addMessage(new ChatMessage(RANDOM_VIEWERS[getRand(RANDOM_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
         }, CHAT_DISPLAY.getChatRate()));
-        CHAT_DISPLAY.autoPopulate(VIEWERS);
+        //CHAT_DISPLAY.autoPopulate(ALL_VIEWERS);
     });
 
     let matchIndex = -1;
@@ -159,9 +170,20 @@ function Stream_Simulator()  {
         const inputValue = chatInput.value;
         const cursorPosition = chatInput.selectionStart;
 
+        let data;
+        let type;
+        if (currentPrefix.startsWith('@')) {
+            data = ALL_VIEWERS_NAME;
+            type = 'name';
+            //currentPrefix = currentPrefix.slice(1);
+        } else {
+            data = CHAT_DISPLAY.getAnyEmoteArray();
+            type = 'emote';
+        }
+
         // Find all words that start with the currentPrefix (case-insensitive)
         if (!currentMatches.length || !currentMatches[0].toLowerCase().startsWith(currentPrefix.toLowerCase())) {
-            currentMatches = CHAT_DISPLAY.getAnyEmoteArray().filter((keyword) => 
+            currentMatches = data.filter((keyword) => 
                 keyword.toLowerCase().startsWith(currentPrefix.toLowerCase())
             );
             matchIndex = -1; // Reset match index
@@ -173,33 +195,31 @@ function Stream_Simulator()  {
                 matchIndex = (matchIndex == 0) ? (currentMatches.length - 1) : (matchIndex - 1);
             else 
                 matchIndex = (matchIndex + 1) % currentMatches.length;
-            const replacementWord = currentMatches[matchIndex];
-            emotePreview.src = CHAT_DISPLAY.getEmoteSrc(replacementWord);
-            emotePreview.style.visibility = 'visible';
 
+            const replacementWord = currentMatches[matchIndex];
+            if (type == 'emote') {
+                emotePreview.src = CHAT_DISPLAY.getEmoteSrc(replacementWord);
+                emotePreview.style.visibility = 'visible';
+            }
             // Get the word before the cursor to replace
             const wordInfo = getWordBeforeCursor(inputValue, cursorPosition);
             const { startIndex } = wordInfo;
-
-            // Replace the word before the cursor with the current match
             const updatedValue = inputValue.slice(0, startIndex) + replacementWord + inputValue.slice(cursorPosition);
-
-            // Update the input field and set the cursor position
             chatInput.value = updatedValue;
-            //chatInput.selectionStart = chatInput.selectionEnd = startIndex + replacementWord.length;
         }
     }
 
     // Helper: Get the word immediately before the cursor
     function getWordBeforeCursor(text, cursorPosition) {
         const leftPart = text.slice(0, cursorPosition); // Text up to the cursor
-        const match = leftPart.match(/\b\w+$/); // Find the last word using regex
+        const match = leftPart.match(/(?:^|\s)([@]?\w+)$/); // Find the last word or @word using regex
         if (!match) return { word: null, startIndex: cursorPosition }; // No match
 
-        const word = match[0]; // Extracted word
+        const word = match[1]; // Extracted word (including '@' if present)
         const startIndex = cursorPosition - word.length; // Start index of the word
         return { word, startIndex };
     }
+
     
     function getRand(size) {
         return Math.floor(Math.random() * size); // excluding the last line of data files
@@ -217,7 +237,7 @@ function Stream_Simulator()  {
             const command = message.split(' ')[0];
             const command_body = message.split(' ').slice(1).join(' ');
             if (CHAT_DISPLAY.verifyCommand(command)) {
-                CHAT_DISPLAY.commandHandler(command, command_body, STREAMER, VIEWERS);
+                CHAT_DISPLAY.commandHandler(command, command_body, STREAMER, ALL_VIEWERS);
             }
             else
                 CHAT_DISPLAY.addSystemMessage(`Invalid command: ${command}`);

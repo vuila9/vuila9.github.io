@@ -47,13 +47,20 @@ def generate():
         # subAge in months: 0 is 90%, 1-12 is 9%, 13-30 is 0.9%, and 31-69 is 0.1%
         subAge = [0, *range(1, 13), *range(13, 31), *range(31, 70)]
         chance = [90] + [9] * 12 + [0.9] * 18 + [0.1] * 39  # Corresponding weights
+
         return {
             "username": username,
             "createDate": create_date.strftime("%b %d %Y"),
             "followDate": follow_date.strftime("%b %d %Y"),
             "isSubbed": random.choices([0,1], [90, 10], k=1)[0],
             "subAge": random.choices(subAge, chance, k=1)[0],
-            "subTier": random.choices([1,2,3],[99.999,0.0009,0.0001], k=1)[0],
+            "subTier": random.choices([1,2,3],[97,2,1], k=1)[0],
+            "prime": random.choices([0,1], [90, 10], k=1)[0],
+            "mod": random.choices([0,1], [99, 1], k=1)[0],
+            "turbo": random.choices([0,1], [95, 5], k=1)[0],
+            "founder": random.choices([0,1], [99, 1], k=1)[0],
+            "vip": random.choices([0,1], [99, 1], k=1)[0],
+            "verified": random.choices([0,1], [99, 1], k=1)[0],
             "usernameColor": generate_hex_color()
         }
 
@@ -61,7 +68,7 @@ def generate():
     output_file = "random_viewers.csv"
 
     # Generate random users
-    random_users = [generate_random_user() for _ in range(100000)]
+    random_users = [generate_random_user() for _ in range(1000)]
 
     # Write the users to a CSV file
     with open(output_file, mode="w", newline="") as file:
@@ -70,8 +77,9 @@ def generate():
         # writer.writerow(["username", "followDate", "usernameColor"])
         # Write user data
         for user in random_users:
-            writer.writerow([user["username"],user["createDate"] , user["followDate"], user["isSubbed"], user["subAge"], user["subTier"], user["usernameColor"]])
+            writer.writerow([user["username"],user["createDate"] , user["followDate"], user["isSubbed"], user["subAge"], user["subTier"], 
+                             user["prime"], user["mod"], user["turbo"], user["founder"], user["vip"], user["verified"], user["usernameColor"]])
 
     print(f"Data has been written to {output_file}")
 
-#generate()
+generate()

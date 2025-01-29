@@ -1,6 +1,6 @@
 class User {
     #subBadges = [1,2,3,6,9,12,18,24,30,36];
-    constructor(username, dateCreated=null, followSince=null, sub=false, subAge=0, sub_tier=null, usernameColor='white', streamer=false) {
+    constructor(username, dateCreated=null, followSince=null, sub=false, subAge=0, sub_tier=null, prime=false, mod=false, turbo=false, founder=false, vip=false, verified=false, usernameColor='white', streamer=false) {
         this.username = username;
         this.followSince = followSince;
         this.dateCreated = dateCreated;
@@ -10,30 +10,22 @@ class User {
         this.subAge = subAge;
         this.badges = [];
         this.streamer = streamer;
-        this.sub = sub;
 
-        this.banned = false;
+        this.sub = sub;
+        this.prime = prime;
+        this.mod = mod;
+        this.turbo = turbo;
+        this.founder = founder;
+        this.vip = vip;
+        this.verified = verified;
        
-        if (streamer) {
+        if (streamer) 
             this.avatar = `assets/img/default_user_avatar.png`;
-            this.prime = true;
-            this.vip = false;
-            this.founder = false;
-            this.mod = false;
-            this.turbo = false;
-            this.verified = true;
-        }
-        else {
+        else 
             this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 30 + 1)}.png`;
-            this.prime = false;
-            this.turbo = (Math.floor(Math.random()*100) < 1) ? true : false;
-            this.mod = (Math.floor(Math.random()*100) < 1) ? true : false;
-            this.founder = (Math.floor(Math.random()*100) < 1) ? true : false;
-            this.vip = (Math.floor(Math.random()*100) < 1) ? true : false;
-            this.verified = (Math.floor(Math.random()*100) < 1) ? true : false;
-            this.prime = (Math.floor(Math.random()*100) < 30) ? true : false;
-        }
+
         this.usernameColor = usernameColor;
+        this.banned = false;
         this.initBadges();
     }
 
