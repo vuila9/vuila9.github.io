@@ -42,10 +42,10 @@ function Stream_Simulator()  {
             CHAT_DISPLAY.setStreamIntervalID(setInterval(() => {
                 const totalElapsed = Date.now() - startTime;
                 document.getElementById('channel-stream-time').textContent = timeConverter(Math.floor(totalElapsed/1000));
-                if (chance(CHAT_DISPLAY.getFakeViewCount() * 0.01)) {
-                    random_change = Math.floor(Math.random() * CHAT_DISPLAY.getFakeViewCount() * 0.00005);
+                if (chance(fluctuateChance())) {
+                    random_change = Math.floor(Math.random() * CHAT_DISPLAY.getFakeViewCount() * 0.00005) + 1;
                     CHAT_DISPLAY.incFakeViewCount((chance(50) ? random_change : -random_change));
-                    document.getElementById('channel-viewer-count').textContent = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
+                    document.getElementById('channel-viewer-count').lastChild.nodeValue = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
                 }
             },100));
         }
@@ -263,6 +263,14 @@ function Stream_Simulator()  {
         return `${hour}:${minute}:${second}`;
     }
 
+    function fluctuateChance() {
+        const viewcount = CHAT_DISPLAY.getFakeViewCount();
+        if (viewcount < 100) return 5;
+        else if (viewcount < 1000) return 10
+        else if (viewcount < 10000) return 15;
+        else if (viewcount < 100000) return 25;
+        else return 30;
+    }
     function chatRate(viewerCount) {
         const v0 = 100000; 
         const k = 0.00001;

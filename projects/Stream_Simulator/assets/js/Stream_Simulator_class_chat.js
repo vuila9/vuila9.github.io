@@ -14,7 +14,7 @@ class ChatDisplay {
         this.chatMessageDiv = document.getElementById('chat-messages');
         this.chatRate = 0;
         this.fakeViewCount = Math.floor(Math.random() * 100000);
-        document.getElementById('channel-viewer-count').textContent = this.fakeViewCount.toLocaleString();
+        document.getElementById('channel-viewer-count').lastChild.nodeValue = this.fakeViewCount.toLocaleString();
 
         this.STREAMER = streamer;
 
