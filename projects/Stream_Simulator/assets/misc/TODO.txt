@@ -1,13 +1,11 @@
 TODO:
 - add sub gifting
 - random ban/unmod/mod/vip
-- chat reaction to ban/unmod/mod/vip
-- make groups of highly active chatters, frequent chatters, lurkers
-- give long time subber more chat rate
 - add overlay
 - simulate ads playing by playing a short YT clip (muted)
 - play random funny audio (my name is jeff)
 - add a bot to count xdd use
+- add bot command like: !followage, !song, !game
 
 DONE:
 - add emotes
@@ -20,3 +18,6 @@ DONE:
 - add user profile UI when clicking on users
 - add @_ing feature
 - add icon/badges
+- chat reaction to ban/unmod/mod/vip
+- make groups of highly active chatters, frequent chatters, lurkers
+- give long time subber more chat rate
