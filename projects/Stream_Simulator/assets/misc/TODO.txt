@@ -7,6 +7,7 @@ TODO:
 - add overlay
 - simulate ads playing by playing a short YT clip (muted)
 - play random funny audio (my name is jeff)
+- add a bot to count xdd use
 
 DONE:
 - add emotes
