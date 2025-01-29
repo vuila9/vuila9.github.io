@@ -39,8 +39,6 @@ class User {
         this.chatHistory.push(message);
     }
 
-    banViewer() { this.banned = true; }
-
     isBanned() { return this.banned; }
 
     initBadges() {
@@ -93,7 +91,19 @@ class User {
         if (!this.vip) return false; 
         this.vip = false; 
         this.initBadges();
-        return true
+        return true;
+    }
+
+    banViewer() {
+        if (this.banned) return false; 
+        this.banned = true;
+        return true;
+    }
+
+    unbanViewer() {
+        if (!this.banned) return false; 
+        this.banned = false; 
+        return true;
     }
 
     getBadges() { return this.badges; }

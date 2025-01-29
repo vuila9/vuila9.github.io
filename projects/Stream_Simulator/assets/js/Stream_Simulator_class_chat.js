@@ -20,7 +20,7 @@ class ChatDisplay {
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/start', '/pause', '/clear', '/clearpopup', '/command']);
+        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/start', '/pause', '/clear', '/clearpopup', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -419,6 +419,7 @@ class ChatDisplay {
     }
 
     spamChat(VIEWERS, msg, duration_=null) {
+        if (this.isPause) return;
         const spam_chat = this.#spamVariation(msg);
         const chat_rate = Math.min(this.chatRate/2, 800);
         const intervalId = setInterval(() => {
@@ -476,32 +477,54 @@ class ChatDisplay {
 
             case '/mod':
                 var username = command_body.split(' ')[0];
+                if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).modViewer()) 
                     this.addSystemMessage(`"${username}" has been made a Moderator.`);
                 break;
 
             case '/unmod':
                 var username = command_body.split(' ')[0];
+                if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unmodViewer()) 
                     this.addSystemMessage(`"${username}" is no longer a Moderator.`);
                 break;
 
             case '/vip':
                 var username = command_body.split(' ')[0];
+                if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).vipViewer()) 
                     this.addSystemMessage(`"${username}" has been promoted to VIP.`);
                 break;
 
             case '/unvip':
                 var username = command_body.split(' ')[0];
+                if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unvipViewer()) 
                     this.addSystemMessage(`"${username}" is no longer a VIP.`);
                 break;
 
             case '/founder':
                 var username = command_body.split(' ')[0];
+                if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).founderViewer()) 
                     this.addSystemMessage(`"${username}" is now a channel founder.`);
+                break;
+
+            case '/ban':
+                var username = command_body.split(' ')[0];
+                if (username[0] == "@") username = username.slice(1);
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).banViewer()) {
+                    this.addSystemMessage(`"${username}" is permanently banned.`);
+                    this.spamChat(VIEWERS, ["RIPBOZO", "SCATTER", "SCATTER", "free that guy", "o7", "o7", "o7 o7", "RIPBOZO rip bozo", "why bro got banned?", "see bro never", "keep mess around and find out"]);
+                }
+                break;
+
+            case '/unban':
+                var username = command_body.split(' ')[0];
+                if (username[0] == "@") username = username.slice(1);
+                if (username[0] == "@") username = username.slice(1);
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unbanViewer()) 
+                    this.addSystemMessage(`"${username}" is no longer banned.`);
                 break;
 
             case '/spam':
@@ -528,7 +551,7 @@ class ChatDisplay {
             case '/clearpopup':
                 const elements = document.querySelectorAll(`.popup-user-profile`);
                 elements.forEach(element => element.remove());
-                this.addSystemMessage('All user profile popups are now removed')
+                this.addSystemMessage('All user profile popups are now removed.')
                 break;
             case '/clear':
                 this.chatSize = 0;
@@ -554,6 +577,7 @@ class ChatDisplay {
             /vip name: make a viewer a vip<br>
             /founder name: make a viewer a founder<br>
             /gift name: gift a sub to a viewer<br>
+            /ban: ban any viewer<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>
             *Note: some commands are only executable during pausing/running chat

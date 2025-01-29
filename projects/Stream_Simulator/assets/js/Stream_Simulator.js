@@ -25,14 +25,14 @@ function Stream_Simulator()  {
         await CHAT_DISPLAY.populateData("CHAT", CHAT_LOG, "./assets/misc/chatlogs.txt");
         CHAT_DISPLAY.addSystemMessage('Welcome to Stream Simulator!');
         CHAT_DISPLAY.addSystemMessage('Type /command to see useful commands');
-        let counter = 0;
-        while (counter < 150) {
-            if (chance(90))
-                CHAT_DISPLAY.addMessage(new ChatMessage(ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-            else
-                CHAT_DISPLAY.addMessage(new ChatMessage(RANDOM_VIEWERS[getRand(RANDOM_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
-            counter++;
-        }
+        // let counter = 0;
+        // while (counter < 150) {
+        //     if (chance(90))
+        //         CHAT_DISPLAY.addMessage(new ChatMessage(ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+        //     else
+        //         CHAT_DISPLAY.addMessage(new ChatMessage(RANDOM_VIEWERS[getRand(RANDOM_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
+        //     counter++;
+        // }
     })();
 
     startChatButton.addEventListener('click', async (event) => {
@@ -44,11 +44,12 @@ function Stream_Simulator()  {
                 document.getElementById('channel-stream-time').textContent = timeConverter(Math.floor(totalElapsed/1000));
             },100));
         }
-        if (STREAM_STARTING) { // chat say hi when stream just starts
-            //CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
-            STREAM_STARTING = false;
-        }
         CHAT_DISPLAY.toggleChat();
+        if (STREAM_STARTING) { // chat say hi when stream just starts
+            CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            STREAM_STARTING = false;
+            console.log('test')
+        }
         if (CHAT_DISPLAY.isPaused()) {
             startChatButton.textContent = 'Start Chat';
             clearInterval(CHAT_DISPLAY.getChatIntervalID());
