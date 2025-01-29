@@ -46,6 +46,7 @@ function Stream_Simulator()  {
         }
         CHAT_DISPLAY.toggleChat();
         if (STREAM_STARTING) { // chat say hi when stream just starts
+            startChatButton.disabled = true;
             CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
             STREAM_STARTING = false;
             console.log('test')

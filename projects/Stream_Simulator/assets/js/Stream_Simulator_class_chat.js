@@ -428,6 +428,7 @@ class ChatDisplay {
         let duration = (duration_ === null) ? Math.max(Math.min(6900 * 500/this.chatRate, 13000), 5000) : duration_;
         setTimeout(() => {
             clearInterval(intervalId); 
+            document.getElementById('start-chat-button').disabled = false;
         }, duration);
     }
 
@@ -515,7 +516,7 @@ class ChatDisplay {
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).banViewer()) {
                     this.addSystemMessage(`"${username}" is permanently banned.`);
-                    this.spamChat(VIEWERS, ["RIPBOZO", "SCATTER", "SCATTER", "free that guy", "o7", "o7", "o7 o7", "RIPBOZO rip bozo", "why bro got banned?", "see bro never", "keep mess around and find out"]);
+                    this.spamChat(VIEWERS, ["RIPBOZO", "SCATTER", "SCATTER", "free that guy", "o7", "o7", "o7 o7", "truth = banned", "RIPBOZO rip bozo", "why bro got banned?", "see bro never", "keep mess around and find out"]);
                 }
                 break;
 
