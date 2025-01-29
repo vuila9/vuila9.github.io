@@ -55,6 +55,7 @@ class ChatDisplay {
 
     addMessage(message) { 
         const USER = message.getUser();
+        if (USER.isbanned()) return; //dead man dont talk
         const messageElement = document.createElement('p');
         messageElement.setAttribute('user', USER.getUsername());
 
