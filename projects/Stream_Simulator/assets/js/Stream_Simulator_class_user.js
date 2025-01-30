@@ -44,8 +44,8 @@ class User {
     initBadges() {
         this.badges = [];
         if (this.streamer) this.badges.push('Broadcaster');
-        if (this.founder) this.badges.push('Founder');
         if (this.vip) this.badges.push('VIP');
+        if (this.founder) this.badges.push('Founder');
         if (this.mod) this.badges.push('Moderator');
         if (this.verified) this.badges.push('Verified');
         if (this.turbo) this.badges.push('Turbo');

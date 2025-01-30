@@ -9,7 +9,7 @@ function Stream_Simulator()  {
     const ACTIVE_VIEWERS = [];
     const REGULAR_VIEWERS = [];
     const ALL_VIEWERS_NAME = [];
-    const STREAMER = new User('Vuila9_', 'May 14 2019', 'May 14 2019', sub=true, subAge=69, sub_tier=3, prime=false, mod=false, turbo=false, founder=false, vip=false, verified=true, usernameColor='#394678', streamer=true);
+    const STREAMER = new User('Vuila9_', 'May 14 2019', 'May 14 2019', sub=true, subAge=69, sub_tier=3, prime=true, mod=false, turbo=false, founder=false, vip=false, verified=true, usernameColor='#394678', streamer=true);
     const CHAT_LOG = [];
     const CHAT_DISPLAY = new ChatDisplay(STREAMER, limit=150);
 

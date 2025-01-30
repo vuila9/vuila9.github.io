@@ -251,6 +251,7 @@ class ChatDisplay {
         const msg_parts = msg.trim().split(' ');
         element.appendChild(document.createTextNode(': '));
         for (let part of msg_parts) {
+            if (part == '${STREAMER}') part = `@${this.STREAMER.getUsername()}`;
             if (part[0] === '@') {
                 const user_name = part.slice(1);
                 const user_search = document.createElement('span');
@@ -489,8 +490,10 @@ class ChatDisplay {
                 var sub_tier = command_body.split(' ')[1];
                 if (isNaN(sub_tier)) sub_tier = 1;
                 if (sub_tier > 3 || sub_tier < 1) sub_tier = 1;
-                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).giftViewer(sub_tier)) 
+                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).giftViewer(sub_tier)) {
                     this.addSystemMessage(`"${username}" has been gifted a sub by ${STREAMER.getUsername()}`);
+                    this.addMessage(new ChatMessage(this.#viewersMap.get(username), "Thanks for the gifted sub ${streamer}"));
+                }
                 else {
                     if (this.#viewersMap.get(username).isSub()) {
                         var user = VIEWERS[this.#getRand(VIEWERS.length)];
@@ -499,8 +502,9 @@ class ChatDisplay {
                             user = VIEWERS[this.#getRand(VIEWERS.length)];
                             counter += 1;
                         }
-                        this.addSystemMessage(`"${username}" is already subbed and decided to pass the sub to "${user.getUsername()}"`);
+                        this.addSystemMessage(`"${username}" is already subbed and decides to pass the sub to "${user.getUsername()}"`);
                         user.giftViewer(sub_tier);
+                        this.addMessage(new ChatMessage(user, `Thanks for the gifted sub @${username}`));
                     }
                     else
                         this.addSystemMessage(`"${username}" is not a chatter in this community.`);

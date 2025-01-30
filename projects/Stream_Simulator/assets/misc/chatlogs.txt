@@ -7,25 +7,25 @@ chat, press F for that fail
 did anyone see that? No way! WHAT
 can someone clip that for me? MadgeClap
 who else is hyped for the next match? LETSGO
-streamer, what’s your setup? !spec
+streamer what’s your setup? !spec
 don’t forget to hydrate bro
 good luck with this boss ElNoSabe
 how did you miss that? BRUH
 when’s the giveaway happening? Demanding
-chat, can we spam hearts for the streamer? peepoHeart
+@chat, can we spam hearts for the streamer? peepoHeart
 mods, ban that guy, he’s trolling peepoBan
 ggs that was intense frfr
-streamer, do you have a Discord server?
+${STREAMER} do you have a Discord server?
 chat, what’s the best weapon in this game?
 that glitch was hilarious om
 wait, are we doing predictions this round? plotge
 should I all in next bet Thinkge
-streamer, what’s your favorite snack during streams? peepoCute
+${STREAMER} what’s your favorite snack during streams? peepoCute
 how long have you been playing this game? ihaveaquestion
 no shot that actually worked ICANT
 how do you keep your cool under pressure? BeanChilling
 let’s goooooo! LETSGO
-streamer, do you play with viewers? peepoShy
+${STREAMER} do you play with viewers? peepoShy
 this reminds me of the time you clutched last month!
 who’s been here since the start of the stream?
 why stream so late man Latege
@@ -35,14 +35,14 @@ nt nt
 donkWalk donkWalk
 jk deserved pepePoint
 welp, RIP the dream peepoSad
-streamer, can you explain what’s happening for new viewers? 
+${STREAMER} can you explain what’s happening for new viewers? 
 that’s my favorite part of the game!
 someone gift me a sub, I’m broke lol Poor
 do you think you’ll hit the goal tonight?
 OMG, you’re so cracked at this game! peepoPoggie
 chat, do we believe? Type 1 for yes, 2 for no
 this game is so nostalgic for me Oldge
-streamer, what’s your go-to strategy here? NOTED
+${STREAMER} what’s your go-to strategy here? NOTED
 epic fail, but we still love you! artistpat
 gotta go, catch you next time sir Bye
 I've been lossing all night catDespair
@@ -69,7 +69,7 @@ HOLY
 I must be trpping peepoTrip
 GIGACHAD
 !ticket 1
-pls no more 20 games of league yesdear
+${STREAMER} pls no more 20 games of league yesdear
 peepoPls
 holy GIGACHAD
 OneGuy
@@ -88,7 +88,7 @@ rip Deadge1
 omg 
 duckHowdy
 that's gotta be fake
-did you sleep well
+did you sleep well? ${STREAMER}
 my goat
 ? tf
 you're a demon
@@ -102,7 +102,7 @@ shut up
 yo chat Im shaking xddShaking
 men
 what about the other guy?
-can I join you next one pepePraying
+${STREAMER} can I join you next one pepePraying
 fml
 haha
 ta
@@ -204,9 +204,9 @@ CAUGHT
 xpp
 SHEESH sheesh
 awww socute
-stop being mean to chat sadding
+${STREAMER} stop being mean to chat sadding
 nice 
-can I link something peepoShy
+${STREAMER}  can I link something peepoShy
 stream too loud Loudge
 Wokege
 increase the volume I cant hear sht Deafge
@@ -224,7 +224,7 @@ facts
 GG
 ggs
 GAMBA
-wish me luck on exam tmr Prayge
+@chat wish me luck on exam tmr Prayge
 I have a bad day today yall Sadge
 HI YOUTUBE Hi
 hi
@@ -296,7 +296,7 @@ lowkey
 not even close YEP
 ur lowkey kinda bad at this game xdd
 play FNAF plz
-aint no party like a Diddy's party am I right 5Head
+aint no party like a Pippy's party am I right 5Head
 yeah
 stop yapping Yapping
 Yapping
@@ -575,9 +575,9 @@ COOKED
 2
 2222222
 sanest twitch chatter SMH
-good morning Hi
-good evening Hi
-good noon Hi
+${STREAMER} good morning Hi
+${STREAMER} good evening Hi
+${STREAMER} good noon Hi
 xdd
 1v1 me
 dsfdlsaflfjsdf aldfsdlfj lfdlfkfjlekjlkdf
@@ -594,6 +594,7 @@ worth
 there's nothing wrong with being Gayge
 dont get rage bait by chat
 that's gotta be a bait fishinge
+{streamer} fishinge
 sorry I only use freedom unit Kkona
 hello, lm your #1 fan, now gift me a sub Demanding
 些随机的中文单词
@@ -617,8 +618,8 @@ Tssk Tssk Tssk
 oh hoy
 ONE OF US xddgang
 kappapenischungusdeluxe questionmark
-who would win 1v1, Batman or Ironman?
-who would win 1v1, Goku or Superman?
+who would win 1v1, Batman or Ironman? ${STREAMER}
+who would win 1v1, Goku or Superman? ${STREAMER}
 DELETE GUNSLINGER Praying DELETE GUNSLINGER Praying DELETE GUNSLINGER Praying DELETE GUNSLINGER
 I hope one day I will sleep before midnight like normal humans do. Everyday I sleep tormorrow, even yesterday i slept today. Bedge
 EDM Headbang EDM Headbang EDM Headbang EDM Headbang EDM Headbang EDM Headbang EDM Headbang EDM Headbang EDM Headbang 
