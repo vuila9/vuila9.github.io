@@ -110,7 +110,7 @@ class ChatDisplay {
     }
 
     addSubAlertMessage(USER, subType, gift_ammount) {
-
+        
     }
 
     addSubMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
