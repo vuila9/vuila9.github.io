@@ -252,6 +252,7 @@ class ChatDisplay {
         element.appendChild(document.createTextNode(': '));
         for (let part of msg_parts) {
             if (part == '${STREAMER}') part = `@${this.STREAMER.getUsername()}`;
+            if (part == '${RANDOM_EMOTE}') part = `${this.anyEmoteArrayContainer[this.#getRand(this.anyEmoteArrayContainer.length)]}`;
             if (part[0] === '@') {
                 const user_name = part.slice(1);
                 const user_search = document.createElement('span');
@@ -492,6 +493,7 @@ class ChatDisplay {
                 if (sub_tier > 3 || sub_tier < 1) sub_tier = 1;
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).giftViewer(sub_tier)) {
                     this.addSystemMessage(`"${username}" has been gifted a sub by ${STREAMER.getUsername()}`);
+                    this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier ${sub_tier} sub to ${username}`);
                     this.addMessage(new ChatMessage(this.#viewersMap.get(username), "Thanks for the gifted sub ${streamer}"));
                 }
                 else {

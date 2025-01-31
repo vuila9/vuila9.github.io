@@ -181,7 +181,6 @@ function Stream_Simulator()  {
         if (currentPrefix.startsWith('@')) {
             data = ALL_VIEWERS_NAME;
             type = 'name';
-            //currentPrefix = currentPrefix.slice(1);
         } else {
             data = CHAT_DISPLAY.getAnyEmoteArray();
             type = 'emote';

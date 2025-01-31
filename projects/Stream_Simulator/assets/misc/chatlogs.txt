@@ -42,9 +42,10 @@ do you think you’ll hit the goal tonight?
 OMG, you’re so cracked at this game! peepoPoggie
 chat, do we believe? Type 1 for yes, 2 for no
 this game is so nostalgic for me Oldge
-${STREAMER} what’s your go-to strategy here? NOTED
+${STREAMER} what’s your go-to strategy here?
 epic fail, but we still love you! artistpat
 gotta go, catch you next time sir Bye
+gtg, bye @chat and ${STREAMER}
 I've been lossing all night catDespair
 tmr is Monday Despair
 I have played WoW for 20 years, you're wrong Dentge
@@ -134,7 +135,7 @@ Im dead lol 💀
 👁👄👁
 💪💪💪
 MrDestructoid hh
-🫵🍆🤏
+🫵🍆🤏 ${STREAMER}
 👍
 okaygeThumpUp
 what is that?? whaaat
@@ -380,7 +381,7 @@ p2w trash
 what a noob peepoNoob
 what a simp peepoSimp
 what a nerd xddnerd
-@BenAgain only thing I'm gonna hold is your corpse UltraMad
+${STREAMER} only thing I'm gonna hold is your corpse UltraMad
 NOOBIE
 ur right
 true
@@ -529,6 +530,9 @@ damn he's hot Gayge
 GYATTTTT 
 nahh
 xd
+${RANDOM_EMOTE}
+${RANDOM_EMOTE}
+${RANDOM_EMOTE}
 T1
 I saw that peepo4kLeave
 laggg feelslagman feelslagman feelslagman

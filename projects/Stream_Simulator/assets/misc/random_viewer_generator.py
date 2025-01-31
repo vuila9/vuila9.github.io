@@ -28,10 +28,19 @@ def generate():
 
     # Function to generate a random HEX color code
     def generate_hex_color():
-        random_hex_color = f"#{''.join(random.choice('0123456789ABCDEF') for _ in range(6))}"
-        while (random_hex_color == f"#18181b"):
-            random_hex_color = f"#{''.join(random.choice('0123456789ABCDEF') for _ in range(6))}"
-        return random_hex_color
+        while True:
+            # Generate random RGB components
+            red = random.randint(0, 255)
+            green = random.randint(0, 255)
+            blue = random.randint(0, 255)
+            
+            # Ensure that at least one of the components is above a certain threshold (e.g., 128)
+            if red > 128 or green > 128 or blue > 128:
+                # Convert RGB to hex
+                hex_color = f"#{red:02X}{green:02X}{blue:02X}"
+                # Ensure the color is not #18181B
+                if hex_color != "#18181B":
+                    return hex_color
 
     # Function to generate a random user object
     def generate_random_user():
