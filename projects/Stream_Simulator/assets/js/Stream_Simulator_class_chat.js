@@ -16,12 +16,14 @@ class ChatDisplay {
         this.fakeViewCount = Math.floor(Math.random() * 100000);
         document.getElementById('channel-viewer-count').lastChild.nodeValue = this.fakeViewCount.toLocaleString();
 
+        this.subCount = 0;
+
         this.STREAMER = streamer;
 
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/start', '/pause', '/clear', '/clearpopup', '/command']);
+        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/start', '/pause', '/clear', '/clearpopup', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -33,6 +35,8 @@ class ChatDisplay {
     setScrollUp(bool) { this.scrollUp = bool; }
 
     isScrollUp() { return this.scrollUp; }
+
+    getSubCount() { return this.subCount; }
 
     setChatRate(chatRate) { this.chatRate = chatRate;}
 
@@ -104,6 +108,15 @@ class ChatDisplay {
         if (!this.scrollUp)
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
+
+    addSubAlertMessage(USER, subType, gift_ammount) {
+
+    }
+
+    addSubMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
+
+    }
+
 
     addSystemMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
         const messageElement = document.createElement('p');
@@ -488,28 +501,53 @@ class ChatDisplay {
             case '/gift': 
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
+                if (!this.#viewersMap.has(username))  {
+                    this.addSystemMessage(`"${username}" is not a chatter in this community.`); 
+                    break;
+                }
                 var sub_tier = command_body.split(' ')[1];
                 if (isNaN(sub_tier)) sub_tier = 1;
                 if (sub_tier > 3 || sub_tier < 1) sub_tier = 1;
-                if (this.#viewersMap.has(username) && this.#viewersMap.get(username).giftViewer(sub_tier)) {
+                if (this.#viewersMap.get(username).giftViewer(sub_tier)) {
                     this.addSystemMessage(`"${username}" has been gifted a sub by ${STREAMER.getUsername()}`);
                     this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier ${sub_tier} sub to ${username}`);
-                    this.addMessage(new ChatMessage(this.#viewersMap.get(username), "Thanks for the gifted sub ${streamer}"));
+                    this.addMessage(new ChatMessage(this.#viewersMap.get(username), "Thanks for the gifted sub! ${STREAMER}"));
                 }
                 else {
-                    if (this.#viewersMap.get(username).isSub()) {
+                    var user = VIEWERS[this.#getRand(VIEWERS.length)];
+                    var counter = 0;
+                    while (!user.isSub && counter < VIEWERS.length) {
+                        user = VIEWERS[this.#getRand(VIEWERS.length)];
+                        counter += 1;
+                    }
+                    this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier ${sub_tier} sub to ${username}`);
+                    this.addSystemMessage(`${username} is already subbed and decides to pass the sub to ${user.getUsername()}`);
+                    user.giftViewer(sub_tier);
+                    this.addMessage(new ChatMessage(user, `Thanks for the gifted sub! @${username}`));
+                }
+                break;
+
+            case '/giftrandom':
+                var amount = command_body.split(' ')[0];
+                if (isNaN(amount)) return;
+                if (amount > 100 || amount < 1) return; 
+                while (amount > 0) {
+                    var random_viewer = VIEWERS[this.#getRand(VIEWERS.length)];
+                    this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier 1 sub to ${random_viewer.getUsername()}`);
+                    if (random_viewer.isSub()) {
                         var user = VIEWERS[this.#getRand(VIEWERS.length)];
                         var counter = 0;
                         while (!user.isSub && counter < VIEWERS.length) {
                             user = VIEWERS[this.#getRand(VIEWERS.length)];
                             counter += 1;
                         }
-                        this.addSystemMessage(`"${username}" is already subbed and decides to pass the sub to "${user.getUsername()}"`);
+                        this.addSystemMessage(`${random_viewer.getUsername()} is already subbed and decides to pass the sub to ${user.getUsername()}`);
                         user.giftViewer(sub_tier);
-                        this.addMessage(new ChatMessage(user, `Thanks for the gifted sub @${username}`));
+                        //this.addMessage(new ChatMessage(user, `Thanks for the gifted sub! @${username}`));
                     }
-                    else
-                        this.addSystemMessage(`"${username}" is not a chatter in this community.`);
+                    else 
+                        random_viewer.giftViewer();
+                    amount -= 1;
                 }
                 break;
 
@@ -558,7 +596,7 @@ class ChatDisplay {
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).banViewer()) {
                     this.addSystemMessage(`"${username}" is permanently banned.`);
-                    this.spamChat(VIEWERS, [`@${username}  RIPBOZO `, "SCATTER", "SCATTER", `free @${username} right meow`, "o7", "o7", "o7 o7", "truth = banned", "banned o7", "RIPBOZO rip bozo", "why bro got banned?", `@${username} see you never`, "keep mess around and find out", `@${username}  welcome to the gulag o7`, 'deserved o7']);
+                    this.spamChat(VIEWERS, [`@${username}  RIPBOZO `, "SCATTER", "SCATTER", `free @${username} right meow`, "o7", "o7", "o7 o7", "gg", "truth = banned", "banned o7", "RIPBOZO rip bozo", "why bro got banned?", `@${username} see you never`, "keep mess around and find out", `@${username}  welcome to the gulag o7`, 'deserved o7']);
                 }
                 break;
 
@@ -622,6 +660,7 @@ class ChatDisplay {
             /vip name: make a viewer a vip<br>
             /founder name: make a viewer a founder<br>
             /gift name: gift a sub to a viewer<br>
+            /giftrandom number: gifting 1 - 100 subs to random viewers<br>
             /ban: ban any viewer<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>

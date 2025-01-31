@@ -10,6 +10,7 @@ class User {
         this.subAge = subAge;
         this.badges = [];
         this.streamer = streamer;
+        this.gifted = 0;
 
         this.sub = sub;
         this.prime = prime;
@@ -19,8 +20,10 @@ class User {
         this.vip = vip;
         this.verified = verified;
        
-        if (streamer) 
+        if (streamer) {
             this.avatar = `assets/img/default_user_avatar.png`;
+            this.gifted = 1703;
+        }
         else 
             this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 30 + 1)}.png`;
 
@@ -38,6 +41,10 @@ class User {
     addChatHistory(message) { 
         this.chatHistory.push(message);
     }
+
+    incGiftSub(inc) { this.gifted += inc; }
+
+    getGiftSub() { return this.gifted; }
 
     isBanned() { return this.banned; }
 
