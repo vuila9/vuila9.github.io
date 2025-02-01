@@ -23,7 +23,7 @@ def generate():
         "Tens", "AWOOOL", "NightHunter", "CrimsonFang", "GhostReaper", "DarkVortex",
         "SolarFlare", "VenomStrike", "ThunderB0lt", "MysticDragon", "SteelTitan", "Axis",
         "PhantomRider", "LunarEclipse", "InfernoBlade", "SIlverHawk", "OmegaStrike",
-        "RogueAssassin", "EchoWraith", "MidasTouch", "RiotGame", "SkyGuardian",
+        "RogueAssassin", "EchoWraith", "MidasTouch", "RiotGame", "SkyGuardian", "AGS", "Bezos",
         "ChaosBringer", "FrostWarden", "SpectralKnight", "DoomBringer", "VoidWalker",
         "RadiantFury", "ChinaLover", "IronClad", "NightStalker", "CrimsonAvenger",
         "ShadowWraith", "BlazeFurry", "ThunderFist", "MysticRogue", "SteelShadow",
