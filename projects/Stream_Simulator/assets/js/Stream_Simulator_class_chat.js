@@ -131,11 +131,18 @@ class ChatDisplay {
         giftAlertMessage.appendChild(gifterName);
 
         const giftContext = document.createElement('div');
-        giftContext.innerHTML = `Gifted a <span style="font-weight: 900">Tier ${sub_tier}</span> to <span style="font-weight: 900">${receiver}</span>`;
+        giftContext.innerHTML = `Gifted a <span style="font-weight: 900">Tier ${sub_tier}</span> Sub to <span style="font-weight: 900">${receiver}</span>`;
         giftAlertMessage.style.color = 'white';
         giftAlertMessage.appendChild(giftContext);
 
         this.chatMessageDiv.appendChild(giftAlertMessage);
+        this.chatSize += 1;
+        if (this.chatSize > this.chatSizeLimit) {
+            this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
+            this.chatSize -= 1;
+        }
+        if (!this.scrollUp)
+            this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
     addSubMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
@@ -580,7 +587,7 @@ class ChatDisplay {
                     amount -= 1;
                 }
                 if (Number(command_body.split(' ')[0]) > 10) 
-                    this.spamChat(VIEWERS, ['where is my gifted sub Stare', "all these gifted subs and I dont still get it", 'EZdodge', 'EZdodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge']);
+                    this.spamChat(VIEWERS, ['where is my gifted sub Stare', "all these gifted subs and I dont still get it", 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge']);
                 break;
 
             case '/mod':
