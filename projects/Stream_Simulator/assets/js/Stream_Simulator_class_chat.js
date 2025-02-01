@@ -95,7 +95,9 @@ class ChatDisplay {
         messageElement.appendChild(messageUserName);
 
         const messageContent = document.createElement('span');
-        this.#processMessageContent(message.getContent(), messageContent);
+        if (this.#processMessageContent(message.getContent(), messageContent)) {
+            messageElement.style.backgroundColor = 'rgb(142,15,15)';
+        }
         USER.addChatHistory(message.getContent());
         messageElement.appendChild(messageContent);
 
@@ -109,8 +111,31 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-    addSubAlertMessage(USER, subType, gift_ammount) {
+    addGiftAlertMessage(gifter, sub_tier, receiver) {
+        const giftAlertMessage = document.createElement('div');
+        giftAlertMessage.className = 'sub-alert-message';
         
+        const giftIcon = document.createElement('span');
+        giftIcon.className = 'fa fa-gift';
+        giftIcon.style.color = '#a970ff';
+        giftIcon.style.marginTop = '3px';
+        giftAlertMessage.appendChild(giftIcon);
+
+        const gifterName = document.createElement('strong');
+        gifterName.textContent = gifter.getUsername();
+        gifterName.style.color = '#a970ff';
+        gifterName.style.marginLeft = "5px";
+        gifterName.addEventListener(('click'), (event) => {
+            this.#userProfile(gifter, event.clientX, event.clientY);
+        });
+        giftAlertMessage.appendChild(gifterName);
+
+        const giftContext = document.createElement('div');
+        giftContext.innerHTML = `Gifted a <span style="font-weight: 900">Tier ${sub_tier}</span> to <span style="font-weight: 900">${receiver}</span>`;
+        giftAlertMessage.style.color = 'white';
+        giftAlertMessage.appendChild(giftContext);
+
+        this.chatMessageDiv.appendChild(giftAlertMessage);
     }
 
     addSubMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
@@ -263,8 +288,12 @@ class ChatDisplay {
     #processMessageContent(msg, element) {
         const msg_parts = msg.trim().split(' ');
         element.appendChild(document.createTextNode(': '));
+        let streamer = false;
         for (let part of msg_parts) {
-            if (part == '${STREAMER}') part = `@${this.STREAMER.getUsername()}`;
+            if (part == '${STREAMER}') {
+                part = `@${this.STREAMER.getUsername()}`;
+                streamer = true;
+            }
             if (part == '${RANDOM_EMOTE}') part = `${this.anyEmoteArrayContainer[this.#getRand(this.anyEmoteArrayContainer.length)]}`;
             if (part[0] === '@') {
                 const user_name = part.slice(1);
@@ -295,6 +324,7 @@ class ChatDisplay {
                 element.appendChild(textNode);
             }
         }
+        return streamer;
     }
 
     getEmoteSrc(name) {
@@ -509,8 +539,7 @@ class ChatDisplay {
                 if (isNaN(sub_tier)) sub_tier = 1;
                 if (sub_tier > 3 || sub_tier < 1) sub_tier = 1;
                 if (this.#viewersMap.get(username).giftViewer(sub_tier)) {
-                    this.addSystemMessage(`"${username}" has been gifted a sub by ${STREAMER.getUsername()}`);
-                    this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier ${sub_tier} sub to ${username}`);
+                    this.addGiftAlertMessage(STREAMER, sub_tier, username);
                     this.addMessage(new ChatMessage(this.#viewersMap.get(username), "Thanks for the gifted sub! ${STREAMER}"));
                 }
                 else {
@@ -520,7 +549,8 @@ class ChatDisplay {
                         user = VIEWERS[this.#getRand(VIEWERS.length)];
                         counter += 1;
                     }
-                    this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier ${sub_tier} sub to ${username}`);
+                    this.addGiftAlertMessage(STREAMER, sub_tier, username);
+                    //this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier ${sub_tier} sub to ${username}`);
                     this.addSystemMessage(`${username} is already subbed and decides to pass the sub to ${user.getUsername()}`);
                     user.giftViewer(sub_tier);
                     this.addMessage(new ChatMessage(user, `Thanks for the gifted sub! @${username}`));
@@ -533,7 +563,6 @@ class ChatDisplay {
                 if (amount > 100 || amount < 1) return; 
                 while (amount > 0) {
                     var random_viewer = VIEWERS[this.#getRand(VIEWERS.length)];
-                    this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier 1 sub to ${random_viewer.getUsername()}`);
                     if (random_viewer.isSub()) {
                         var user = VIEWERS[this.#getRand(VIEWERS.length)];
                         var counter = 0;
@@ -541,21 +570,24 @@ class ChatDisplay {
                             user = VIEWERS[this.#getRand(VIEWERS.length)];
                             counter += 1;
                         }
-                        this.addSystemMessage(`${random_viewer.getUsername()} is already subbed and decides to pass the sub to ${user.getUsername()}`);
+                        this.addGiftAlertMessage(STREAMER, 1, user.getUsername());
                         user.giftViewer(sub_tier);
-                        //this.addMessage(new ChatMessage(user, `Thanks for the gifted sub! @${username}`));
                     }
-                    else 
+                    else {
+                        this.addGiftAlertMessage(STREAMER, 1, random_viewer.getUsername());
                         random_viewer.giftViewer();
+                    }
                     amount -= 1;
                 }
+                if (Number(command_body.split(' ')[0]) > 10) 
+                    this.spamChat(VIEWERS, ['where is my gifted sub Stare', "all these gifted subs and I dont still get it", 'EZdodge', 'EZdodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge']);
                 break;
 
             case '/mod':
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).modViewer())  {
-                    this.addSystemMessage(`"${username}" has been made a Moderator.`);
+                    this.addSystemMessage(`${username} has been made a Moderator.`);
                     this.spamChat(VIEWERS, ['should have been me Saddies', 'did bro even sub??', 'how much for mod', `who is you  @${username}`, `never seen this guy before wtf`]);
                 }
                 break;
@@ -564,7 +596,7 @@ class ChatDisplay {
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unmodViewer()) {
-                    this.addSystemMessage(`"${username}" is no longer a Moderator.`);
+                    this.addSystemMessage(`${username} is no longer a Moderator.`);
                     this.spamChat(VIEWERS, ['peepoL', 'deserved', 'good, now mod me Demanding', `what did you do??  @${username}`, `o7`, 'o7', ])
                 }
                 break;
@@ -573,7 +605,7 @@ class ChatDisplay {
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).vipViewer()) 
-                    this.addSystemMessage(`"${username}" has been promoted to VIP.`);
+                    this.addSystemMessage(`${username} has been promoted to VIP.`);
                     this.spamChat(VIEWERS, ['should have been me Saddies', 'did bro even sub??', 'how much for VIP', `who is you  @${username}`, `never seen this guy before wtf`])
                 break;
 
@@ -581,21 +613,21 @@ class ChatDisplay {
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unvipViewer()) 
-                    this.addSystemMessage(`"${username}" is no longer a VIP.`);
+                    this.addSystemMessage(`${username} is no longer a VIP.`);
                 break;
 
             case '/founder':
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).founderViewer()) 
-                    this.addSystemMessage(`"${username}" is now a channel founder.`);
+                    this.addSystemMessage(`${username} is now a channel founder.`);
                 break;
 
             case '/ban':
                 var username = command_body.split(' ')[0];
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).banViewer()) {
-                    this.addSystemMessage(`"${username}" is permanently banned.`);
+                    this.addSystemMessage(`${username} is permanently banned.`);
                     this.spamChat(VIEWERS, [`@${username}  RIPBOZO `, "SCATTER", "SCATTER", `free @${username} right meow`, "o7", "o7", "o7 o7", "gg", "truth = banned", "banned o7", "RIPBOZO rip bozo", "why bro got banned?", `@${username} see you never`, "keep mess around and find out", `@${username}  welcome to the gulag o7`, 'deserved o7']);
                 }
                 break;
@@ -605,7 +637,7 @@ class ChatDisplay {
                 if (username[0] == "@") username = username.slice(1);
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).unbanViewer()) {
-                    this.addSystemMessage(`"${username}" is no longer banned.`);
+                    this.addSystemMessage(`${username} is no longer banned.`);
                     this.spamChat(VIEWERS, ["???", "why free him?", "keem them banned wtf", "bro is free tf Aware", `welcome back @${username}`, `@${username} did you bribe the streamer??`]);
                 }
                 break;

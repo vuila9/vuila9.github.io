@@ -51,11 +51,10 @@ class User {
     initBadges() {
         this.badges = [];
         if (this.streamer) this.badges.push('Broadcaster');
+        if (this.mod) this.badges.push('Moderator');
         if (this.vip) this.badges.push('VIP');
         if (this.founder) this.badges.push('Founder');
-        if (this.mod) this.badges.push('Moderator');
         if (this.verified) this.badges.push('Verified');
-        if (this.turbo) this.badges.push('Turbo');
         if (this.subAge > 0 && this.sub) {
             for (let i = this.#subBadges.length - 1; i >= 0; i--) {
                 if (this.subAge >= this.#subBadges[i]) {
@@ -64,6 +63,7 @@ class User {
                 }
             }
         }
+        if (this.turbo) this.badges.push('Turbo');
         if (this.prime) this.badges.push('Prime Gaming');
     }
 
