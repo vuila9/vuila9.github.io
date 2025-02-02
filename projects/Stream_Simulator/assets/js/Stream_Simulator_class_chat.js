@@ -46,7 +46,13 @@ class ChatDisplay {
 
     getFakeViewCount() { return this.fakeViewCount; }
 
-    incFakeViewCount(change) { this.fakeViewCount += change; }
+    incFakeViewCount(change) {
+        if (this.fakeViewCount > 5)
+            this.fakeViewCount += change; 
+        else {
+            this.fakeViewCount += Math.abs(change);
+        }
+    }
 
     verifyCommand(command) { return this.command.has(command); }
 
@@ -97,7 +103,10 @@ class ChatDisplay {
         const messageContent = document.createElement('span');
         if (this.#processMessageContent(message.getContent(), messageContent)) {
             messageElement.style.backgroundColor = '#2c1a1d';
+            messageElement.style.borderLeft  = '3px solid #e13232';
+            messageElement.style.borderRight = '3px solid #e13232';
         }
+
         USER.addChatHistory(message.getContent());
         messageElement.appendChild(messageContent);
 
@@ -107,13 +116,57 @@ class ChatDisplay {
             this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
             this.chatSize -= 1;
         }
+        if (!this.scrollUp) {
+            this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
+        }
+    }
+
+    addViewerSubscribeAlertMessage(user, sub_type, sub_tier=1) {
+
+    }
+
+    addGiftAlertAnnouncement(amount, gifter=this.STREAMER) {
+        const giftAlertMessage = document.createElement('div');
+        giftAlertMessage.className = 'sub-alert-message'; 
+        giftAlertMessage.style.borderLeft = `4px solid ${gifter.getUsernameColor()}`;
+        
+        const giftIcon = document.createElement('span');
+        giftIcon.className = 'fa fa-gift';
+        giftIcon.style.color = 'white';
+        giftIcon.style.marginTop = '3px';
+        giftAlertMessage.appendChild(giftIcon);
+
+        const gifterName = document.createElement('strong');
+        gifterName.style.fontSize = '15px';
+        gifterName.textContent = gifter.getUsername();
+        gifterName.style.color = 'white';
+        gifterName.style.marginLeft = "5px";
+        gifterName.addEventListener(('click'), (event) => {
+            this.#userProfile(gifter, event.clientX, event.clientY);
+        });
+        giftAlertMessage.appendChild(gifterName);
+
+        const giftContext = document.createElement('div');
+        gifter.incGiftSub(Number(amount));
+        giftContext.textContent = `is gifting ${amount} Tier 1 Subs. They've gifted a total of ${gifter.getGiftSub()} Subs in the channel!`;
+        giftAlertMessage.style.color = 'white';
+        giftAlertMessage.appendChild(giftContext);
+
+        this.chatMessageDiv.appendChild(giftAlertMessage);
+        this.chatSize += 1;
+        if (this.chatSize > this.chatSizeLimit) {
+            this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
+            this.chatSize -= 1;
+        }
         if (!this.scrollUp)
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
+
     addGiftAlertMessage(gifter, sub_tier, receiver) {
         const giftAlertMessage = document.createElement('div');
-        giftAlertMessage.className = 'sub-alert-message';
+        giftAlertMessage.className = 'sub-alert-message'; 
+        giftAlertMessage.style.borderLeft = `4px solid ${gifter.getUsernameColor()}`;
         
         const giftIcon = document.createElement('span');
         giftIcon.className = 'fa fa-gift';
@@ -148,7 +201,6 @@ class ChatDisplay {
     addSubMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
 
     }
-
 
     addSystemMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
         const messageElement = document.createElement('p');
@@ -292,7 +344,7 @@ class ChatDisplay {
         });
     }
 
-    #processMessageContent(msg, element) {
+    #processMessageContent(msg, element) { // return True if mentioning the Streamer, false otherwise
         const msg_parts = msg.trim().split(' ');
         element.appendChild(document.createTextNode(': '));
         let streamer = false;
@@ -491,6 +543,34 @@ class ChatDisplay {
         }, duration);
     }
 
+    subGifting(amount, VIEWERS, gifter=this.STREAMER) {
+        const og_amount = amount;
+        //if (amount > 5)
+            this.addGiftAlertAnnouncement(amount, gifter);
+        while (amount > 0) {
+            const random_viewer = VIEWERS[this.#getRand(VIEWERS.length)];
+            if (random_viewer.isSub()) {
+                const user = VIEWERS[this.#getRand(VIEWERS.length)];
+                const counter = 0;
+                while (!user.isSub && counter < VIEWERS.length) {
+                    user = VIEWERS[this.#getRand(VIEWERS.length)];
+                    counter += 1;
+                }
+                this.addGiftAlertMessage(gifter, sub_tier=1, user.getUsername());
+                user.giftViewer();
+            }
+            else {
+                this.addGiftAlertMessage(gifter, sub_tier=1, random_viewer.getUsername());
+                random_viewer.giftViewer();
+            }
+            amount -= 1;
+        }
+        if (og_amount >= 10) {
+            const duration = Math.max(Math.min(6900 * 500/this.chatRate, 7000), 5000) * (1 + amount/100);
+            this.spamChat(VIEWERS, ['where is my gifted sub Stare', "all these gifted subs and I dont still get it", 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge'], duration);
+        }
+    }
+
     commandHandler(command, command_body, STREAMER, VIEWERS) {
         switch (command) {
             case '/username':
@@ -557,7 +637,6 @@ class ChatDisplay {
                         counter += 1;
                     }
                     this.addGiftAlertMessage(STREAMER, sub_tier, username);
-                    //this.addSystemMessage(`${STREAMER.getUsername()} gifted a Tier ${sub_tier} sub to ${username}`);
                     this.addSystemMessage(`${username} is already subbed and decides to pass the sub to ${user.getUsername()}`);
                     user.giftViewer(sub_tier);
                     this.addMessage(new ChatMessage(user, `Thanks for the gifted sub! @${username}`));
@@ -568,26 +647,7 @@ class ChatDisplay {
                 var amount = command_body.split(' ')[0];
                 if (isNaN(amount)) return;
                 if (amount > 100 || amount < 1) return; 
-                while (amount > 0) {
-                    var random_viewer = VIEWERS[this.#getRand(VIEWERS.length)];
-                    if (random_viewer.isSub()) {
-                        var user = VIEWERS[this.#getRand(VIEWERS.length)];
-                        var counter = 0;
-                        while (!user.isSub && counter < VIEWERS.length) {
-                            user = VIEWERS[this.#getRand(VIEWERS.length)];
-                            counter += 1;
-                        }
-                        this.addGiftAlertMessage(STREAMER, 1, user.getUsername());
-                        user.giftViewer(sub_tier);
-                    }
-                    else {
-                        this.addGiftAlertMessage(STREAMER, 1, random_viewer.getUsername());
-                        random_viewer.giftViewer();
-                    }
-                    amount -= 1;
-                }
-                if (Number(command_body.split(' ')[0]) > 10) 
-                    this.spamChat(VIEWERS, ['where is my gifted sub Stare', "all these gifted subs and I dont still get it", 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge']);
+                this.subGifting(amount, VIEWERS);
                 break;
 
             case '/mod':

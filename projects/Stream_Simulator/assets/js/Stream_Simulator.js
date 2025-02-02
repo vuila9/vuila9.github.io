@@ -42,7 +42,7 @@ function Stream_Simulator()  {
             CHAT_DISPLAY.setStreamIntervalID(setInterval(() => {
                 const totalElapsed = Date.now() - startTime;
                 document.getElementById('channel-stream-time').textContent = timeConverter(Math.floor(totalElapsed/1000));
-                if (chance(fluctuateChance())) {
+                if (chance(fluctuateChanceByViewerCount()())) {
                     random_change = Math.floor(Math.random() * CHAT_DISPLAY.getFakeViewCount() * 0.00005) + 1;
                     CHAT_DISPLAY.incFakeViewCount((chance(50) ? random_change : -random_change));
                     document.getElementById('channel-viewer-count').lastChild.nodeValue = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
@@ -52,7 +52,7 @@ function Stream_Simulator()  {
         CHAT_DISPLAY.toggleChat();
         if (STREAM_STARTING) { // chat say hi when stream just starts
             //startChatButton.disabled = true;
-            //CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            //CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'first', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
             STREAM_STARTING = false;
         }
         if (CHAT_DISPLAY.isPaused()) {
@@ -63,7 +63,7 @@ function Stream_Simulator()  {
         }
         startChatButton.textContent = 'Pause Chat';
         CHAT_DISPLAY.setChatIntervalID(setInterval(() => {
-            if (chance(10)){
+            if (chance(10) && CHAT_DISPLAY.getFakeViewCount() > 1){
                 let count = 0;
                 while (count < getRand(5)) {
                     CHAT_DISPLAY.addMessage(new ChatMessage(RANDOM_VIEWERS[getRand(RANDOM_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
@@ -262,7 +262,7 @@ function Stream_Simulator()  {
         return `${hour}:${minute}:${second}`;
     }
 
-    function fluctuateChance() {
+    function fluctuateChanceByViewerCount() {
         const viewcount = CHAT_DISPLAY.getFakeViewCount();
         if (viewcount < 100) return 5;
         else if (viewcount < 1000) return 10

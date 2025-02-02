@@ -133,6 +133,7 @@
 }
 
 #chat-messages p {
+    position: relative;
     color: #dbdbdd;
     font-size: 13px;
     font-family: 'Roobert', sans-serif;
