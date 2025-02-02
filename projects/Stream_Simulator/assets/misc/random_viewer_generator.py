@@ -76,7 +76,7 @@ def generate():
     output_file = "random_viewers.csv"
 
     # Generate random users
-    random_users = [generate_random_user() for _ in range(1000)]
+    random_users = [generate_random_user() for _ in range(100000)]
 
     # Write the users to a CSV file
     with open(output_file, mode="w", newline="") as file:
