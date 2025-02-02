@@ -649,7 +649,7 @@ worth
 there's nothing wrong with being Gayge
 dont get ragebaited by chat ${STREAMER}
 that's gotta be a bait fishinge
-{streamer} fishinge
+{STREAMER} fishinge
 sorry I only use freedom unit KKona
 hello, lm your #1 fan, now gift me a sub Demanding
 些随机的中文单词

@@ -3,6 +3,7 @@ function Stream_Simulator()  {
     const sendButton = document.getElementById('send-button');
     const startChatButton = document.getElementById('start-chat-button');
     const emotePreview = document.getElementById('emote-preview');
+    const chatMessageDiv = document.getElementById('chat-messages');
 
     const ALL_VIEWERS = [];
     const RANDOM_VIEWERS = [];
@@ -59,8 +60,8 @@ function Stream_Simulator()  {
         }
         CHAT_DISPLAY.toggleChat();
         if (STREAM_STARTING) { // chat say hi when stream just starts
-            startChatButton.disabled = true;
-            CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'first', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            //startChatButton.disabled = true;
+            //CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'first', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
             STREAM_STARTING = false;
         }
         if (CHAT_DISPLAY.isPaused()) {
@@ -151,6 +152,20 @@ function Stream_Simulator()  {
         
             default:
                 break;
+        }
+    });
+
+    let isMouseOver = false;
+    chatMessageDiv.addEventListener('mouseenter', () => {
+        isMouseOver = true;
+    });
+    chatMessageDiv.addEventListener('mouseleave', () => {
+        isMouseOver = false;
+    });
+    chatMessageDiv.addEventListener('wheel', (event) => {
+        if (isMouseOver) {
+            if (event.deltaY < 0 && !CHAT_DISPLAY.isPaused()) 
+                startChatButton.click(); // Call your custom function here
         }
     });
 
