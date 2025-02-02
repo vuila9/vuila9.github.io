@@ -101,7 +101,7 @@ def generate():
             "username": username,
             "createDate": create_date.strftime("%b %d %Y"),
             "followDate": follow_date.strftime("%b %d %Y"),
-            "isSubbed": random.choices([0,1], [90, 10], k=1)[0],
+            "isSubbed": random.choices([0,1], [85, 15], k=1)[0],
             "subAge": random.choices(subAge, chance, k=1)[0],
             "subTier": random.choices([1,2,3],[97,2,1], k=1)[0],
             "prime": random.choices([0,1], [95, 5], k=1)[0],
@@ -110,7 +110,7 @@ def generate():
             "founder": random.choices([0,1], [99, 1], k=1)[0],
             "vip": random.choices([0,1], [99, 1], k=1)[0],
             "verified": random.choices([0,1], [99, 1], k=1)[0],
-            "gifted": random.choices([0, *range(1,101)], [95] + [5]*100),
+            "gifted": random.choices([0, *range(1,101)], [95] + [0.5]*100, k=1)[0],
             "usernameColor": generate_hex_color()
         }
 
