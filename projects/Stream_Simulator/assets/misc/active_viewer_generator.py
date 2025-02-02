@@ -93,9 +93,9 @@ def generate():
         create_date = min(date1, date2)
         follow_date = max(date1, date2)
 
-        # subAge in months: 0 is 70%, 1-12 is 28.5%, 13-30 is 1%, and 31-69 is 0.5%
+        # subAge in months: 0 is 70%, 1-12 is 28.5, 13-30 is 1%, and 31-69 is 0.5%
         subAge = [0, *range(1, 13), *range(13, 31), *range(31, 70)]
-        chance = [70] + [2.375] * 12 + [0.05555] * 18 + [0.01282] * 39  # Corresponding weights
+        chance = [70] + [28.5] * 12 + [1] * 18 + [0.5] * 39  # Corresponding weights
 
         return {
             "username": username,
@@ -110,7 +110,7 @@ def generate():
             "founder": random.choices([0,1], [99, 1], k=1)[0],
             "vip": random.choices([0,1], [99, 1], k=1)[0],
             "verified": random.choices([0,1], [99, 1], k=1)[0],
-            "gifted": random.choices([0, *range(1,101)], [95] + [0.05]*100),
+            "gifted": random.choices([0, *range(1,101)], [95] + [5]*100),
             "usernameColor": generate_hex_color()
         }
 

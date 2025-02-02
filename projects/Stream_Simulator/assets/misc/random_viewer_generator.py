@@ -53,7 +53,7 @@ def generate():
 
         # subAge in months: 0 is 90%, 1-12 is 9%, 13-30 is 0.9%, and 31-69 is 0.1%
         subAge = [0, *range(1, 13), *range(13, 31), *range(31, 70)]
-        chance = [90] + [0.75] * 12 + [0.05] * 18 + [0.00256] * 39  # Corresponding weights
+        chance = [90] + [9] * 12 + [0.9] * 18 + [0.1] * 39  # Corresponding weights
 
         return {
             "username": username,
@@ -65,10 +65,10 @@ def generate():
             "prime": random.choices([0,1], [90, 10], k=1)[0],
             "mod": random.choices([0,1], [99, 1], k=1)[0],
             "turbo": random.choices([0,1], [95, 5], k=1)[0],
-            "founder": random.choices([0,1], [99, 1], k=1)[0],
-            "vip": random.choices([0,1], [99, 1], k=1)[0],
+            "founder": random.choices([0,1], [99.9, 0.1], k=1)[0],
+            "vip": random.choices([0,1], [99.9, 0.1], k=1)[0],
             "verified": random.choices([0,1], [99, 1], k=1)[0],
-            "gifted": random.choices([0, *range(1,101)], [99] + [0.01]*100),
+            "gifted": random.choices([0, *range(1,101)], [99] + [1]*100),
             "usernameColor": generate_hex_color()
         }
 

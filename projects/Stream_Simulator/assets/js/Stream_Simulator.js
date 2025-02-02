@@ -42,7 +42,7 @@ function Stream_Simulator()  {
             CHAT_DISPLAY.setStreamIntervalID(setInterval(() => {
                 const totalElapsed = Date.now() - startTime;
                 document.getElementById('channel-stream-time').textContent = timeConverter(Math.floor(totalElapsed/1000));
-                if (chance(fluctuateChanceByViewerCount()())) {
+                if (chance(fluctuateChanceByViewerCount())) {
                     random_change = Math.floor(Math.random() * CHAT_DISPLAY.getFakeViewCount() * 0.00005) + 1;
                     CHAT_DISPLAY.incFakeViewCount((chance(50) ? random_change : -random_change));
                     document.getElementById('channel-viewer-count').lastChild.nodeValue = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
