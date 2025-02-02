@@ -116,9 +116,17 @@ class ChatDisplay {
             this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
             this.chatSize -= 1;
         }
-        if (!this.scrollUp) {
+        const images = messageContent.querySelectorAll('img');
+        if (images.length > 0) {
+            // Wait for all images to load, then scroll
+            Promise.all(
+                Array.from(images).map(img => img.complete ? Promise.resolve() : new Promise(resolve => img.onload = resolve))
+            ).then(() => {
+                this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
+            });
+        } 
+        else 
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
-        }
     }
 
     addViewerSubscribeAlertMessage(user, sub_type, sub_tier=1) {
