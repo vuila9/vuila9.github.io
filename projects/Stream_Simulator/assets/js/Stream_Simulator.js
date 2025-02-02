@@ -54,14 +54,12 @@ function Stream_Simulator()  {
                     const gifter = ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     CHAT_DISPLAY.addGiftAlertOverlay(randomGiftAmount, gifter);
                     CHAT_DISPLAY.subGifting(randomGiftAmount, ALL_VIEWERS, gifter);
-                    console.log(`${randomGiftAmount} gifted subs from ${gifter.getUsername()}`);
                 }
             },200));
         }
         CHAT_DISPLAY.toggleChat();
         if (STREAM_STARTING) { // chat say hi when stream just starts
-            //startChatButton.disabled = true;
-            //CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'first', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'first', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=10000);
             STREAM_STARTING = false;
         }
         if (CHAT_DISPLAY.isPaused()) {

@@ -163,7 +163,6 @@ class ChatDisplay {
     }
 
     addGiftAlertAnnouncement(amount, gifter=this.STREAMER) {
-        console.log
         const giftAlertMessage = document.createElement('div');
         giftAlertMessage.className = 'sub-alert-message'; 
         giftAlertMessage.style.borderLeft = `4px solid ${gifter.getUsernameColor()}`;
@@ -569,6 +568,7 @@ class ChatDisplay {
 
     spamChat(VIEWERS, msg, duration_=null) {
         if (this.isPause) return;
+        document.getElementById('start-chat-button').disabled = true;
         const spam_chat = this.#spamVariation(msg);
         const chat_rate = Math.min(this.chatRate/2, 800);
         const intervalId = setInterval(() => {
@@ -582,7 +582,6 @@ class ChatDisplay {
     }
 
     subGifting(amount, VIEWERS, gifter=this.STREAMER) {
-        //const subAlertSound = new Audio('./assets/audio/sub_alert_boom.wav');
         const subAlertSound = new Audio('./assets/audio/sub_alert_bell.wav');
         subAlertSound.play();
         const og_amount = amount;
@@ -608,8 +607,9 @@ class ChatDisplay {
         }
         if (og_amount >= 10) {
             const duration = Math.max(Math.min(6900 * 500/this.chatRate, 7000), 5000) * (1 + amount/100);
-            this.spamChat(VIEWERS, ['where is my gifted sub Stare', "all these gifted subs and I dont still get it", 'PotFriend', 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge'], duration);
+            this.spamChat(VIEWERS, ['where is my gifted sub Stare', "PogChamp", "all these gifted subs and I dont still get it", 'PotFriend', 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge'], duration);
         }
+        console.log(`${og_amount} gifted subs from ${gifter.getUsername()}`);
     }
 
     commandHandler(command, command_body, STREAMER, VIEWERS) {
@@ -791,7 +791,6 @@ class ChatDisplay {
             case '/suboverlay':
                 if (command_body.split(' ')[0] != 'off' && command_body.split(' ')[0] != 'on') break;
                 const state = (command_body.split(' ')[0] == 'off') ? 'hidden' : 'visible';
-                console.log(state)
                 document.getElementById('sub-count-overlay').style.visibility = state;
                 break;
             case '/command':
