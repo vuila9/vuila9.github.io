@@ -406,7 +406,8 @@ ur right
 true
 wrong
 any drama today?
-any gifter
+any gifter?
+any gifter?
 L  ads
 L  ads peepoAds
 L  ADS Poor
@@ -546,6 +547,18 @@ F5
 F5
 alt F4 to screenshot
 bro crashing out
+valid crashout
+hey ${STREAMER} I just got a job today peepoYay
+totally understandable reaction
+I see you're also a cultured man Sure
+dont disturb bros cooking
+well back in my days... Oldge
+I miss when LoL was this fun Sadge
+that's why I play this game
+that's why I love this game
+brick by brick
+well deserved
+hate this game
 PAY UP
 #ad
 who is that?
@@ -561,7 +574,8 @@ ${RANDOM_EMOTE} Clap
 ${RANDOM_EMOTE}
 ${RANDOM_EMOTE}
 T1
-I saw that peepo4kLeave
+I saw that Starege
+-100000000 social credits. You are sentenced to bing chilling BINGCHILLING
 laggg feelslagman feelslagman feelslagman
 is it me or this stream is hella lagging feelslagman
 do you play AFK Journey?
