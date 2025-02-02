@@ -563,6 +563,8 @@ class ChatDisplay {
     }
 
     subGifting(amount, VIEWERS, gifter=this.STREAMER) {
+        const subAlertSound = new Audio('./assets/audio/sub_alert_boom.wav');
+        subAlertSound.play();
         const og_amount = amount;
         //if (amount > 5)
         this.updateSubCountOverlay(amount);
