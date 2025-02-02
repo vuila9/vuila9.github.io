@@ -30,7 +30,7 @@ def generate():
         "PhantomStriker", "LunarWolf", "InfernoWarden", "SilverFang", "OmegaReaper",
         "RoguePhoenix", "EchoStrike", "NovaBlade", "BloodWolf", "SkyReaper", "Obsidian",
         "ChaosWarden", "FrostDragon", "SpectralFang", "DomStriker", "VoidHunter",
-        "VALORANT", "StormWolf", "OnlyFang", "NightBlade", "CrimsonWraith", "Eon"
+        "VALORANT", "StormWolf", "OnlyFang", "NightBlade", "CrimsonWraith", "Eon", "De4dlyX"
     ]
 
     def generate_username(counter):
