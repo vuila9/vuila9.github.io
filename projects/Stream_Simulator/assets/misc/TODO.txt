@@ -1,7 +1,5 @@
 TODO:
-- add sub gifting
 - random ban/unmod/mod/vip
-- add overlay
 - simulate ads playing by playing a short YT clip (muted)
 - play random funny audio (my name is jeff)
 - add a bot to count xdd use
@@ -21,3 +19,5 @@ DONE:
 - chat reaction to ban/unmod/mod/vip
 - make groups of highly active chatters, frequent chatters, lurkers
 - give long time subber more chat rate
+- add overlay
+- add (random) sub gifting
