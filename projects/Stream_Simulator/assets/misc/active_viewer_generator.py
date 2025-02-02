@@ -110,7 +110,7 @@ def generate():
             "founder": random.choices([0,1], [99, 1], k=1)[0],
             "vip": random.choices([0,1], [99, 1], k=1)[0],
             "verified": random.choices([0,1], [99, 1], k=1)[0],
-            "gifted": random.choices([0, *range(1,1001)], [95, 5]),
+            "gifted": random.choices([0, *range(1,101)], [95] + [0.05]*100),
             "usernameColor": generate_hex_color()
         }
 
