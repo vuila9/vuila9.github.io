@@ -79,12 +79,11 @@ def generate():
             blue = random.randint(0, 255)
             
             # Ensure that at least one of the components is above a certain threshold (e.g., 128)
-            if red > 128 or green > 128 or blue > 128:
+            if (red + blue + green) > 400:
                 # Convert RGB to hex
                 hex_color = f"#{red:02X}{green:02X}{blue:02X}"
                 # Ensure the color is not #18181B
-                if hex_color != "#18181B":
-                    return hex_color
+                return hex_color
 
     # Function to generate a random user object
     def generate_active_user(counter):
@@ -94,9 +93,9 @@ def generate():
         create_date = min(date1, date2)
         follow_date = max(date1, date2)
 
-        # subAge in months: 0 is 90%, 1-12 is 9%, 13-30 is 0.9%, and 31-69 is 0.1%
+        # subAge in months: 0 is 70%, 1-12 is 28.5%, 13-30 is 1%, and 31-69 is 0.5%
         subAge = [0, *range(1, 13), *range(13, 31), *range(31, 70)]
-        chance = [70] + [28.5] * 12 + [1] * 18 + [0.5] * 39  # Corresponding weights
+        chance = [70] + [2.375] * 12 + [0.05555] * 18 + [0.01282] * 39  # Corresponding weights
 
         return {
             "username": username,
@@ -111,6 +110,7 @@ def generate():
             "founder": random.choices([0,1], [99, 1], k=1)[0],
             "vip": random.choices([0,1], [99, 1], k=1)[0],
             "verified": random.choices([0,1], [99, 1], k=1)[0],
+            "gifted": random.choices([0, *range(1,1001)], [95, 5]),
             "usernameColor": generate_hex_color()
         }
 
@@ -133,7 +133,7 @@ def generate():
         # Write user data
         for user in active_users:
             writer.writerow([user["username"],user["createDate"] , user["followDate"], user["isSubbed"], user["subAge"], user["subTier"], 
-                             user["prime"], user["mod"], user["turbo"], user["founder"], user["vip"], user["verified"], user["usernameColor"]])
+                             user["prime"], user["mod"], user["turbo"], user["founder"], user["vip"], user["verified"], user['gifted'], user["usernameColor"]])
 
     print(f"Data has been written to {output_file}")
 

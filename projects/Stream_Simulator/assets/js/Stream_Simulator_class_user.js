@@ -1,6 +1,6 @@
 class User {
     #subBadges = [1,2,3,6,9,12,18,24,30,36];
-    constructor(username, dateCreated=null, followSince=null, sub=false, subAge=0, sub_tier=null, prime=false, mod=false, turbo=false, founder=false, vip=false, verified=false, usernameColor='white', streamer=false) {
+    constructor(username, dateCreated=null, followSince=null, sub=false, subAge=0, sub_tier=null, prime=false, mod=false, turbo=false, founder=false, vip=false, verified=false, gifted=0, usernameColor='white', streamer=false) {
         this.username = username;
         this.followSince = followSince;
         this.dateCreated = dateCreated;
@@ -10,7 +10,7 @@ class User {
         this.subAge = subAge;
         this.badges = [];
         this.streamer = streamer;
-        this.gifted = 0;
+        this.gifted = gifted;
 
         this.sub = sub;
         this.prime = prime;
@@ -22,7 +22,6 @@ class User {
        
         if (streamer) {
             this.avatar = `assets/img/default_user_avatar.png`;
-            this.gifted = 1703;
         }
         else 
             this.avatar = `assets/img/user_avatar${Math.floor(Math.random() * 30 + 1)}.png`;
