@@ -35,8 +35,6 @@ function Stream_Simulator()  {
         // }
     })();
 
-
-
     startChatButton.addEventListener('click', async (event) => {
         CHAT_DISPLAY.setChatRate(chatRate(CHAT_DISPLAY.getFakeViewCount()));
         if (!CHAT_DISPLAY.getStreamIntervalID()) {
@@ -53,6 +51,7 @@ function Stream_Simulator()  {
                 if (chance(fluctuateChanceByViewerCount(rate)) && !CHAT_DISPLAY.isPaused()) {
                     const randomGiftAmount = getRandomGiftAmount();
                     const gifter = ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
+                    CHAT_DISPLAY.addGiftAlertOverlay(randomGiftAmount, gifter);
                     CHAT_DISPLAY.subGifting(randomGiftAmount, ALL_VIEWERS, gifter);
                     console.log(`${randomGiftAmount} gifted subs from ${gifter.getUsername()}`);
                 }
@@ -60,8 +59,8 @@ function Stream_Simulator()  {
         }
         CHAT_DISPLAY.toggleChat();
         if (STREAM_STARTING) { // chat say hi when stream just starts
-            //startChatButton.disabled = true;
-            //CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'first', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
+            startChatButton.disabled = true;
+            CHAT_DISPLAY.spamChat(ACTIVE_VIEWERS, ['Hi', 'first', 'Hi hello', 'Hii', "Hii hiiiii", 'peepoArrive peepoArrive', 'docArrive'], duration=15000);
             STREAM_STARTING = false;
         }
         if (CHAT_DISPLAY.isPaused()) {
@@ -84,7 +83,6 @@ function Stream_Simulator()  {
             else
                 CHAT_DISPLAY.addMessage(new ChatMessage(RANDOM_VIEWERS[getRand(RANDOM_VIEWERS.length)], CHAT_LOG[getRand(CHAT_LOG.length)]));
         }, CHAT_DISPLAY.getChatRate()));
-        //CHAT_DISPLAY.autoPopulate(ALL_VIEWERS);
     });
 
     let matchIndex = -1;

@@ -25,7 +25,7 @@ class ChatDisplay {
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/start', '/pause', '/clear', '/clearpopup', '/suboverlay', '/command']);
+        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/giftrate', '/start', '/pause', '/clear', '/clearpopup', '/suboverlay', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -144,7 +144,26 @@ class ChatDisplay {
 
     }
 
+    addGiftAlertOverlay(amount, gifter=this.STREAMER) {
+        const overlay = document.getElementById('sub-alert-overlay');
+        const gifter_span = document.createElement('strong');
+        gifter_span.style.color = '#14bc7d';
+        gifter_span.style.fontSize = '20px';
+        gifter_span.textContent = gifter.getUsername();
+
+        overlay.appendChild(gifter_span);
+        overlay.appendChild(document.createTextNode(` has gifted ${amount} subs to the community!`))
+        overlay.appendChild(document.createElement('br'));
+        overlay.style.visibility = 'visible';
+
+        setTimeout(() => {
+            overlay.style.visibility = 'hidden';
+            overlay.innerHTML = '';
+        }, 6900);
+    }
+
     addGiftAlertAnnouncement(amount, gifter=this.STREAMER) {
+        console.log
         const giftAlertMessage = document.createElement('div');
         giftAlertMessage.className = 'sub-alert-message'; 
         giftAlertMessage.style.borderLeft = `4px solid ${gifter.getUsernameColor()}`;
@@ -563,10 +582,10 @@ class ChatDisplay {
     }
 
     subGifting(amount, VIEWERS, gifter=this.STREAMER) {
-        const subAlertSound = new Audio('./assets/audio/sub_alert_boom.wav');
+        //const subAlertSound = new Audio('./assets/audio/sub_alert_boom.wav');
+        const subAlertSound = new Audio('./assets/audio/sub_alert_bell.wav');
         subAlertSound.play();
         const og_amount = amount;
-        //if (amount > 5)
         this.updateSubCountOverlay(amount);
         this.addGiftAlertAnnouncement(amount, gifter);
         while (amount > 0) {
@@ -669,7 +688,15 @@ class ChatDisplay {
                 var amount = command_body.split(' ')[0];
                 if (isNaN(amount)) return;
                 if (amount > 100 || amount < 1) return; 
+                this.addGiftAlertOverlay(amount);
                 this.subGifting(amount, VIEWERS);
+                break;
+
+            case '/giftrate':
+                var rate = command_body.split(' ')[0];
+                if (isNaN(rate)) return;
+                if (rate > 10 || rate < 1) return; 
+                this.setGiftRate(Number(rate));
                 break;
 
             case '/mod':
@@ -788,6 +815,7 @@ class ChatDisplay {
             /founder name: make a viewer a founder<br>
             /gift name: gift a sub to a viewer<br>
             /giftrandom number: gifting 1 - 100 subs to random viewers<br>
+            /giftrate 1-10: increase usual gifted sub by 1-10 times<br>
             /ban: ban any viewer<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>

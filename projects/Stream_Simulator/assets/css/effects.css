@@ -35,13 +35,29 @@
     top: calc(100% - 200px);
     left: 10px; /* Distance from the left of #video-player */
     color: white;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    background-color: rgba(14, 14, 16, 0.5); /* Semi-transparent background */
     padding: 5px;
     font-size: 16px;
     font-weight: 900;
     z-index: 3; /* Ensure it's on top of the video player */
     pointer-events: none; /* Allow clicks to pass through to the video player */
-  }
+}
+
+#sub-alert-overlay {
+    position: absolute;
+    top: 50px;
+    right: 100px;
+    width: 200px;
+    background-color: rgba(14, 14, 16, 0.5); /* Semi-transparent background */
+    color: white;
+    font-size: 20px;
+    word-wrap: break-word; 
+    word-break: break-word; 
+    white-space: normal; 
+    pointer-events: none; /* Allow clicks to pass through to the video player */
+    z-index: 3; /* Ensure it's on top of the video player */
+    visibility: hidden;
+}
 
 /* CHANNEL UI  */
 #channel-info {
