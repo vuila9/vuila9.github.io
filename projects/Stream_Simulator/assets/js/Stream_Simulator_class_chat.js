@@ -20,10 +20,12 @@ class ChatDisplay {
 
         this.STREAMER = streamer;
 
+        this.giftRate = 1;
+
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/start', '/pause', '/clear', '/clearpopup', '/command']);
+        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/start', '/pause', '/clear', '/clearpopup', '/suboverlay', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -36,11 +38,20 @@ class ChatDisplay {
 
     isScrollUp() { return this.scrollUp; }
 
+    updateSubCountOverlay(inc) {
+        this.subCount = Number(this.subCount) + Number(inc);
+        document.getElementById('sub-count-overlay').textContent = `Sub gifted: ${this.subCount}`;
+    }
+
     getSubCount() { return this.subCount; }
 
     setChatRate(chatRate) { this.chatRate = chatRate;}
 
     getChatRate() { return this.chatRate; }
+
+    setGiftRate(rate) { this.giftRate = rate; }
+
+    getGiftRate() { return Number(this.giftRate); }
 
     setFakeViewCount(count) { this.fakeViewCount = count; }
 
@@ -554,7 +565,8 @@ class ChatDisplay {
     subGifting(amount, VIEWERS, gifter=this.STREAMER) {
         const og_amount = amount;
         //if (amount > 5)
-            this.addGiftAlertAnnouncement(amount, gifter);
+        this.updateSubCountOverlay(amount);
+        this.addGiftAlertAnnouncement(amount, gifter);
         while (amount > 0) {
             const random_viewer = VIEWERS[this.#getRand(VIEWERS.length)];
             if (random_viewer.isSub()) {
@@ -575,7 +587,7 @@ class ChatDisplay {
         }
         if (og_amount >= 10) {
             const duration = Math.max(Math.min(6900 * 500/this.chatRate, 7000), 5000) * (1 + amount/100);
-            this.spamChat(VIEWERS, ['where is my gifted sub Stare', "all these gifted subs and I dont still get it", 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge'], duration);
+            this.spamChat(VIEWERS, ['where is my gifted sub Stare', "all these gifted subs and I dont still get it", 'PotFriend', 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge'], duration);
         }
     }
 
@@ -747,6 +759,12 @@ class ChatDisplay {
                 this.chatSize = 0;
                 this.chatMessageDiv.innerHTML = '';
                 break;
+            case '/suboverlay':
+                if (command_body.split(' ')[0] != 'off' && command_body.split(' ')[0] != 'on') break;
+                const state = (command_body.split(' ')[0] == 'off') ? 'hidden' : 'visible';
+                console.log(state)
+                document.getElementById('sub-count-overlay').style.visibility = state;
+                break;
             case '/command':
                 this.#showCommands();
                 break;
@@ -771,6 +789,7 @@ class ChatDisplay {
             /ban: ban any viewer<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>
+            /suboverlay on/off: turn sub overlay on/off<br>
             *Note: some commands are only executable during pausing/running chat
         `,true);
     }

@@ -10,7 +10,7 @@ class User {
         this.subAge = subAge;
         this.badges = [];
         this.streamer = streamer;
-        this.gifted = gifted;
+        this.gifted = Number(gifted);
 
         this.sub = sub;
         this.prime = prime;
@@ -41,7 +41,7 @@ class User {
         this.chatHistory.push(message);
     }
 
-    incGiftSub(inc) { this.gifted += inc; }
+    incGiftSub(inc) { this.gifted = Number(this.gifted) + inc; }
 
     getGiftSub() { return this.gifted; }
 

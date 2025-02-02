@@ -35,6 +35,8 @@ function Stream_Simulator()  {
         // }
     })();
 
+
+
     startChatButton.addEventListener('click', async (event) => {
         CHAT_DISPLAY.setChatRate(chatRate(CHAT_DISPLAY.getFakeViewCount()));
         if (!CHAT_DISPLAY.getStreamIntervalID()) {
@@ -47,7 +49,14 @@ function Stream_Simulator()  {
                     CHAT_DISPLAY.incFakeViewCount((chance(50) ? random_change : -random_change));
                     document.getElementById('channel-viewer-count').lastChild.nodeValue = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
                 }
-            },100));
+                let rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0001) * CHAT_DISPLAY.getGiftRate();
+                if (chance(fluctuateChanceByViewerCount(rate)) && !CHAT_DISPLAY.isPaused()) {
+                    const randomGiftAmount = getRandomGiftAmount();
+                    const gifter = ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
+                    CHAT_DISPLAY.subGifting(randomGiftAmount, ALL_VIEWERS, gifter);
+                    console.log(`${randomGiftAmount} gifted subs from ${gifter.getUsername()}`);
+                }
+            },200));
         }
         CHAT_DISPLAY.toggleChat();
         if (STREAM_STARTING) { // chat say hi when stream just starts
@@ -227,11 +236,11 @@ function Stream_Simulator()  {
 
     
     function getRand(size) {
-        return Math.floor(Math.random() * size); // excluding the last line of data files
+        return Math.floor(Math.random() * size);
     }
 
     function chance(percent) {
-        return Math.floor(Math.random() * 101) <= percent;
+        return (Math.random() * 101) <= percent;
     }
 
     function sendMessage() {
@@ -262,14 +271,33 @@ function Stream_Simulator()  {
         return `${hour}:${minute}:${second}`;
     }
 
-    function fluctuateChanceByViewerCount() {
+    function fluctuateChanceByViewerCount(rate=1) {
         const viewcount = CHAT_DISPLAY.getFakeViewCount();
         if (viewcount < 100) return 5;
-        else if (viewcount < 1000) return 10
-        else if (viewcount < 10000) return 15;
-        else if (viewcount < 100000) return 25;
-        else return 30;
+        else if (viewcount < 1000) return 10 * rate;
+        else if (viewcount < 10000) return 15 * rate;
+        else if (viewcount < 100000) return 25 * rate;
+        else return 30 * rate;
     }
+
+    function getRandomGiftAmount() {
+        const items = [1, 5, 10, 20, 50, 100];
+        const weights = [0.04, 0.35, 0.25, 0.2, 0.15, 0.01];
+        const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
+
+        // Generate a random number between 0 and the total weight
+        const randomNum = Math.random() * totalWeight;
+
+        // Iterate through the items and accumulate weights
+        let accumulatedWeight = 0;
+        for (let i = 0; i < items.length; i++) {
+            accumulatedWeight += weights[i];
+            if (randomNum <= accumulatedWeight) {
+                return items[i];
+            }
+        }
+    }
+
     function chatRate(viewerCount) {
         const v0 = 100000; 
         const k = 0.00001;
