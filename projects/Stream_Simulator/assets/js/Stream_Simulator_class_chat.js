@@ -96,7 +96,7 @@ class ChatDisplay {
 
         const messageContent = document.createElement('span');
         if (this.#processMessageContent(message.getContent(), messageContent)) {
-            messageElement.style.backgroundColor = 'rgb(142,15,15)';
+            messageElement.style.backgroundColor = '#2c1a1d';
         }
         USER.addChatHistory(message.getContent());
         messageElement.appendChild(messageContent);
