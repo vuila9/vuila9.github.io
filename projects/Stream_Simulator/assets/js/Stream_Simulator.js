@@ -51,7 +51,7 @@ function Stream_Simulator()  {
                 let rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0001) * CHAT_DISPLAY.getGiftRate();
                 if (chance(fluctuateChanceByViewerCount(rate)) && !CHAT_DISPLAY.isPaused()) {
                     const randomGiftAmount = getRandomGiftAmount();
-                    const gifter = ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
+                    const gifter = (chance(80)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] :  ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     CHAT_DISPLAY.addGiftAlertOverlay(randomGiftAmount, gifter);
                     CHAT_DISPLAY.subGifting(randomGiftAmount, ALL_VIEWERS, gifter);
                 }

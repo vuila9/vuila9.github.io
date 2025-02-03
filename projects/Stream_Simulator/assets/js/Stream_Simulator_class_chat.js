@@ -3,6 +3,7 @@ class ChatDisplay {
     #anyEmoteMapContainer;
     //#anyEmoteArrayContainer;
     #viewersMap;
+    #subgifterLog = [];
 
     constructor(streamer, limit=200) {
         this.chatSize = 0;
@@ -25,7 +26,7 @@ class ChatDisplay {
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/giftrate', '/start', '/pause', '/clear', '/clearpopup', '/suboverlay', '/command']);
+        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/giftrate', '/giftlog', '/start', '/pause', '/clear', '/clearpopup', '/suboverlay', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -40,7 +41,7 @@ class ChatDisplay {
 
     updateSubCountOverlay(inc) {
         this.subCount = Number(this.subCount) + Number(inc);
-        document.getElementById('sub-count-overlay').textContent = `Sub gifted: ${this.subCount}`;
+        document.getElementById('sub-count-overlay').textContent = `SUBS TODAY: ${this.subCount}`;
     }
 
     getSubCount() { return this.subCount; }
@@ -152,8 +153,7 @@ class ChatDisplay {
         gifter_span.textContent = gifter.getUsername();
 
         overlay.appendChild(gifter_span);
-        overlay.appendChild(document.createTextNode(` has gifted ${amount} subs to the community!`))
-        overlay.appendChild(document.createElement('br'));
+        overlay.innerHTML += ` has gifted <strong style="color: #14bc7d">${amount}</strong> subs to the community!<br>`
         overlay.style.visibility = 'visible';
 
         setTimeout(() => {
@@ -375,7 +375,6 @@ class ChatDisplay {
                 popup.style.top = `${e.clientY - offsetY}px`;
             }
         });
-
         document.addEventListener("mouseup", () => {
             isDragging = false;
         });
@@ -521,6 +520,23 @@ class ChatDisplay {
             counter -= 1;
         }
         spam_chat.push(repeat.join(' '));
+        return spam_chat;
+    }
+
+    #spamVariations(feed) {
+        if (feed.length > 1) return feed;
+        if (feed[0].length > 10) return feed;
+        feed = feed[0];
+        const spam_chat = [];
+        spam_chat.push(feed);
+        spam_chat.push(`${feed} ${feed}`);
+        let counter = this.#getRand(5) + 1;
+        let repeat = [];
+        while (counter > 0) {
+            repeat.push(feed);
+            counter -= 1;
+        }
+        spam_chat.push(repeat.join(' '));
         spam_chat.push(`${feed}${feed}${feed}`);
         spam_chat.push(`${feed}${feed.at(-1)}`);
         spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
@@ -610,6 +626,7 @@ class ChatDisplay {
             this.spamChat(VIEWERS, ['where is my gifted sub Stare', "PogChamp", "all these gifted subs and I dont still get it", 'PotFriend', 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge'], duration);
         }
         console.log(`${og_amount} gifted subs from ${gifter.getUsername()}`);
+        this.#subgifterLog.push(`${og_amount} gifted subs from ${gifter.getUsername()}`);
     }
 
     commandHandler(command, command_body, STREAMER, VIEWERS) {
@@ -697,6 +714,7 @@ class ChatDisplay {
                 if (isNaN(rate)) return;
                 if (rate > 10 || rate < 1) return; 
                 this.setGiftRate(Number(rate));
+                this.addSystemMessage(`Default sub gifting rate has been boosted by ${rate} times`);
                 break;
 
             case '/mod':
@@ -793,6 +811,10 @@ class ChatDisplay {
                 const state = (command_body.split(' ')[0] == 'off') ? 'hidden' : 'visible';
                 document.getElementById('sub-count-overlay').style.visibility = state;
                 break;
+            case '/giftlog':
+                for (let each of this.#subgifterLog)
+                    this.addSystemMessage(each);
+                break;
             case '/command':
                 this.#showCommands();
                 break;
@@ -815,6 +837,7 @@ class ChatDisplay {
             /gift name: gift a sub to a viewer<br>
             /giftrandom number: gifting 1 - 100 subs to random viewers<br>
             /giftrate 1-10: increase usual gifted sub by 1-10 times<br>
+            /giftlog: show log of all gifter<br>
             /ban: ban any viewer<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>
