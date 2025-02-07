@@ -21,7 +21,7 @@ class ChatDisplay {
 
         this.STREAMER = streamer;
 
-        this.giftRate = 1;
+        this.giftRate = 2;
 
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
