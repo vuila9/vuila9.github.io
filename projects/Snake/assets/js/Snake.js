@@ -250,6 +250,8 @@ function main() {
         SNAKE.updateOccupiedGrid(`${SNAKE.getHead()['position'][0]},${SNAKE.getHead()['position'][1]}`);
 
         if (SNAKE.eatenFood(APPLE)) {
+            const eatingSound = new Audio('./assets/audio/pop.wav');
+            eatingSound.play();
             SNAKE.grow();
             APPLE.spawn(PLAY_FIELD.getRowsNum(), PLAY_FIELD.getColsNum(), SNAKE.getOccupiedGrid(), PLAY_FIELD.getOccupiedGrid());
             updateScore()

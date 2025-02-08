@@ -56,7 +56,7 @@ function Stream_Simulator()  {
                     CHAT_DISPLAY.subGifting(randomGiftAmount, ALL_VIEWERS, gifter);
                 }
 
-                let sub_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 2 * CHAT_DISPLAY.getGiftRate();
+                let sub_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.8 * CHAT_DISPLAY.getGiftRate();
                 if (chance(fluctuateChanceByViewerCount(sub_rate)) && !CHAT_DISPLAY.isPaused()) {
                     const subber = (chance(50)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     if (!subber.isSub()) {
