@@ -145,7 +145,7 @@ class ChatDisplay {
 
     }
 
-    addGiftAlertOverlay(amount, gifter=this.STREAMER) {
+    addGiftAlertOverlay(amount=1, gifter=this.STREAMER) {
         const overlay = document.getElementById('gift-alert-overlay');
         const gifter_span = document.createElement('strong');
         gifter_span.style.color = '#14bc7d';
@@ -753,6 +753,13 @@ class ChatDisplay {
                 var sub_tier = command_body.split(' ')[1];
                 if (isNaN(sub_tier)) sub_tier = 1;
                 if (sub_tier > 3 || sub_tier < 1) sub_tier = 1;
+
+                const subAlertSound = new Audio('./assets/audio/sub_alert_bell.wav');
+                subAlertSound.play();
+                this.updateSubCountOverlay(1);
+                this.addGiftAlertOverlay(1);
+                this.addGiftAlertAnnouncement(1);
+
                 if (this.#viewersMap.get(username).giftViewer(sub_tier)) {
                     this.addGiftAlertMessage(STREAMER, sub_tier, username);
                     this.addMessage(new ChatMessage(this.#viewersMap.get(username), "Thanks for the gifted sub! ${STREAMER}"));
