@@ -302,9 +302,9 @@ function Stream_Simulator()  {
             else
                 return 5;
         }
-        else if (viewcount < 1000) return 10 * rate;
-        else if (viewcount < 10000) return 15 * rate;
-        else if (viewcount < 100000) return 25 * rate;
+        else if (viewcount < 1000) return 6 * rate * (1 + viewcount/1000);
+        else if (viewcount < 10000) return 13 * rate * (1 + viewcount/10000);
+        else if (viewcount < 100000) return 26 * rate;
         else return 30 * rate;
     }
 
