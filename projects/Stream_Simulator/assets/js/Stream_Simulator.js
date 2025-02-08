@@ -48,7 +48,7 @@ function Stream_Simulator()  {
                     CHAT_DISPLAY.incFakeViewCount((chance(50) ? random_change : -random_change));
                     document.getElementById('channel-viewer-count').lastChild.nodeValue = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
                 }
-                let gift_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.15 * CHAT_DISPLAY.getGiftRate();
+                let gift_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.1 * CHAT_DISPLAY.getGiftRate();
                 if (chance(fluctuateChanceByViewerCount(gift_rate)) && !CHAT_DISPLAY.isPaused()) {
                     const randomGiftAmount = getRandomGiftAmount();
                     const gifter = (chance(80)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
@@ -56,7 +56,7 @@ function Stream_Simulator()  {
                     CHAT_DISPLAY.subGifting(randomGiftAmount, ALL_VIEWERS, gifter);
                 }
 
-                let sub_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.8 * CHAT_DISPLAY.getGiftRate();
+                let sub_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.75 * CHAT_DISPLAY.getGiftRate();
                 if (chance(fluctuateChanceByViewerCount(sub_rate)) && !CHAT_DISPLAY.isPaused()) {
                     const subber = (chance(50)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     if (!subber.isSub()) {
@@ -309,8 +309,8 @@ function Stream_Simulator()  {
     }
 
     function getRandomGiftAmount() {
-        const items = [1, 5, 10, 20, 50, 100];
-        const weights = [0.04, 0.35, 0.25, 0.2, 0.15, 0.01];
+        const items = [1, 5, 10, 20, 50, 100]; // 4%, 40%, 30%, 20%, 6%, 0.5% (respectively)
+        const weights = [0.04, 0.4, 0.3, 0.2, 0.06, 0.005];
         const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
 
         // Generate a random number between 0 and the total weight
