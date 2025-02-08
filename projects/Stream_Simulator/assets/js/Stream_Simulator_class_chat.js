@@ -39,7 +39,7 @@ class ChatDisplay {
 
     isScrollUp() { return this.scrollUp; }
 
-    updateSubCountOverlay(inc) {
+    updateSubCountOverlay(inc=1) {
         this.subCount = Number(this.subCount) + Number(inc);
         document.getElementById('sub-count-overlay').textContent = `SUBS TODAY: ${this.subCount}`;
     }
@@ -247,9 +247,6 @@ class ChatDisplay {
         else
             overlay.innerHTML += ` just subscribed with Tier ${sub_tier}!<br>`;
 
-        if (message.length < 50)
-            overlay.innerHTML += `${message}<br>`
-
         overlay.style.visibility = 'visible';
 
         setTimeout(() => {
@@ -260,6 +257,7 @@ class ChatDisplay {
 
     viewerSubsribe(subber, sub_tier, message, prime=false) {
         subber.subscribe(prime);
+        this.updateSubCountOverlay();
         const subAlertMessage = document.createElement('div');
         subAlertMessage.className = 'sub-alert-message'; 
         subAlertMessage.style.borderLeft = `4px solid ${subber.getUsernameColor()}`;
@@ -655,6 +653,7 @@ class ChatDisplay {
 
     spamChat(VIEWERS, msg, duration_=null) {
         if (this.isPause) return;
+        if (Number(this.fakeViewCount) < 50) return;
         document.getElementById('start-chat-button').disabled = true;
         const spam_chat = this.#spamVariation(msg);
         const chat_rate = Math.min(this.chatRate/2, 800);

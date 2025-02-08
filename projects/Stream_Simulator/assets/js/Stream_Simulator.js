@@ -48,7 +48,7 @@ function Stream_Simulator()  {
                     CHAT_DISPLAY.incFakeViewCount((chance(50) ? random_change : -random_change));
                     document.getElementById('channel-viewer-count').lastChild.nodeValue = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
                 }
-                let gift_rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0000001) * CHAT_DISPLAY.getGiftRate();
+                let gift_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.15 * CHAT_DISPLAY.getGiftRate();
                 if (chance(fluctuateChanceByViewerCount(gift_rate)) && !CHAT_DISPLAY.isPaused()) {
                     const randomGiftAmount = getRandomGiftAmount();
                     const gifter = (chance(80)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
@@ -56,8 +56,7 @@ function Stream_Simulator()  {
                     CHAT_DISPLAY.subGifting(randomGiftAmount, ALL_VIEWERS, gifter);
                 }
 
-                //let sub_rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0000005) * CHAT_DISPLAY.getGiftRate();
-                let sub_rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0000005) * CHAT_DISPLAY.getGiftRate();
+                let sub_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.5 * CHAT_DISPLAY.getGiftRate();
                 if (chance(fluctuateChanceByViewerCount(sub_rate)) && !CHAT_DISPLAY.isPaused()) {
                     const subber = (chance(50)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     if (!subber.isSub()) {
@@ -300,7 +299,12 @@ function Stream_Simulator()  {
 
     function fluctuateChanceByViewerCount(rate=1) {
         const viewcount = CHAT_DISPLAY.getFakeViewCount();
-        if (viewcount < 100) return 5;
+        if (viewcount < 100) {
+            if (rate != 1)
+                return viewcount/100;
+            else
+                return 5;
+        }
         else if (viewcount < 1000) return 10 * rate;
         else if (viewcount < 10000) return 15 * rate;
         else if (viewcount < 100000) return 25 * rate;
