@@ -256,6 +256,8 @@ class ChatDisplay {
     }
 
     viewerSubsribe(subber, sub_tier, message, prime=false) {
+        const subAlertSound = new Audio('./assets/audio/sub_alert_soft.wav');
+        subAlertSound.play();
         subber.subscribe(prime);
         this.updateSubCountOverlay();
         const subAlertMessage = document.createElement('div');
@@ -285,7 +287,7 @@ class ChatDisplay {
         if (prime)
             giftContext.innerHTML = `<strong>Subscribed</strong> with Prime. They've subscribed for <strong>${subber.getSubAge()} months</strong>, ${this.#getRand(subber.getSubAge()) + 1} months in a row.`;
         else
-            giftContext.innerHTML = `<strong>Subscribed</strong> with Tier ${sub_tier}.<br>They've subscribed for <strong>${subber.getSubAge()} months</strong>!`;
+            giftContext.innerHTML = `<strong>Subscribed</strong> with Tier ${sub_tier}. They've subscribed for <strong>${subber.getSubAge()} months</strong>!`;
 
         subAlertMessage.style.color = 'white';
         subAlertMessage.appendChild(giftContext);
@@ -655,8 +657,6 @@ class ChatDisplay {
         if (this.isPause) return;
         if (Number(this.fakeViewCount) < 50) return;
         
-        //document.getElementById('start-chat-button').disabled = true;
-        
         const spam_chat = this.#spamVariation(msg);
         const chat_rate = Math.min(this.chatRate / 2, 800);
         
@@ -666,8 +666,7 @@ class ChatDisplay {
         const intervalId = setInterval(() => {
             // Check if the duration has elapsed
             if (Date.now() - startTime >= duration || this.isPause) { // terminate spam immediately when duration ends or chat is paused
-                clearInterval(intervalId); // Stop the interval
-                document.getElementById('start-chat-button').disabled = false;
+                clearInterval(intervalId);
                 return; 
             }
             // Continue spamming messages
