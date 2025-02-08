@@ -23,10 +23,12 @@ class ChatDisplay {
 
         this.giftRate = 1;
 
+        this.muted_alert = false;
+
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/giftrate', '/giftlog', '/start', '/pause', '/clear', '/clearpopup', '/suboverlay', '/command']);
+        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/giftrate', '/giftlog', '/start', '/pause', '/clear', '/clearpopup', '/mute', '/unmute', '/suboverlay', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -256,8 +258,10 @@ class ChatDisplay {
     }
 
     viewerSubsribe(subber, sub_tier, message, prime=false) {
-        const subAlertSound = new Audio('./assets/audio/sub_alert_soft.wav');
-        subAlertSound.play();
+        if (!this.muted_alert) {
+            const subAlertSound = new Audio('./assets/audio/sub_alert_soft.wav');
+            subAlertSound.play();
+        }
         subber.subscribe(prime);
         this.updateSubCountOverlay();
         const subAlertMessage = document.createElement('div');
@@ -675,8 +679,10 @@ class ChatDisplay {
     }
 
     subGifting(amount, VIEWERS, gifter=this.STREAMER) {
-        const subAlertSound = new Audio('./assets/audio/sub_alert_bell.wav');
-        subAlertSound.play();
+        if (!this.muted_alert) {
+            const subAlertSound = new Audio('./assets/audio/sub_alert_bell.wav');
+            subAlertSound.play();
+        }
         const og_amount = amount;
         this.updateSubCountOverlay(amount);
         this.addGiftAlertAnnouncement(amount, gifter);
@@ -761,8 +767,10 @@ class ChatDisplay {
                 if (isNaN(sub_tier)) sub_tier = 1;
                 if (sub_tier > 3 || sub_tier < 1) sub_tier = 1;
 
-                const subAlertSound = new Audio('./assets/audio/sub_alert_bell.wav');
-                subAlertSound.play();
+                if (!this.muted_alert) {
+                    const subAlertSound = new Audio('./assets/audio/sub_alert_bell.wav');
+                    subAlertSound.play();
+                }
                 this.updateSubCountOverlay(1);
                 this.addGiftAlertOverlay(1);
                 this.addGiftAlertAnnouncement(1);
@@ -881,6 +889,12 @@ class ChatDisplay {
                 if (!this.isPause)
                     document.getElementById('start-chat-button').click();
                 break;
+            case '/mute':
+                this.muted_alert = true;
+                break;
+            case '/unmute':
+                this.muted_alert = false;
+                break;
             case '/clearpopup':
                 const elements = document.querySelectorAll(`.popup-user-profile`);
                 elements.forEach(element => element.remove());
@@ -925,6 +939,7 @@ class ChatDisplay {
             /ban: ban any viewer<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>
+            /mute: mute all sub/prime/gift sound alert<br>
             /suboverlay on/off: turn sub overlay on/off<br>
             *Note: some commands are only executable during pausing/running chat
         `,true);
