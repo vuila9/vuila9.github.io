@@ -235,7 +235,24 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-    addSubMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
+    addSubAlertOverlay(subber, prime=false) {
+        const overlay = document.getElementById('sub-alert-overlay');
+        const subber_span = document.createElement('strong');
+        subber_span.style.color = '#14bc7d';
+        subber_span.style.fontSize = '20px';
+        subber_span.textContent = subber.getUsername();
+
+        overlay.appendChild(subber_span);
+        overlay.innerHTML += ` has gifted <strong style="color: #14bc7d">${amount}</strong> subs to the community!<br>`
+        overlay.style.visibility = 'visible';
+
+        setTimeout(() => {
+            overlay.style.visibility = 'hidden';
+            overlay.innerHTML = '';
+        }, 6900);
+    }
+
+    addSubAlertMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
 
     }
 
