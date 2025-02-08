@@ -48,12 +48,28 @@ function Stream_Simulator()  {
                     CHAT_DISPLAY.incFakeViewCount((chance(50) ? random_change : -random_change));
                     document.getElementById('channel-viewer-count').lastChild.nodeValue = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
                 }
-                let rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0001) * CHAT_DISPLAY.getGiftRate();
-                if (chance(fluctuateChanceByViewerCount(rate)) && !CHAT_DISPLAY.isPaused()) {
+                let gift_rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0000001) * CHAT_DISPLAY.getGiftRate();
+                if (chance(fluctuateChanceByViewerCount(gift_rate)) && !CHAT_DISPLAY.isPaused()) {
                     const randomGiftAmount = getRandomGiftAmount();
-                    const gifter = (chance(80)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] :  ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
+                    const gifter = (chance(80)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     CHAT_DISPLAY.addGiftAlertOverlay(randomGiftAmount, gifter);
                     CHAT_DISPLAY.subGifting(randomGiftAmount, ALL_VIEWERS, gifter);
+                }
+
+                //let sub_rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0000005) * CHAT_DISPLAY.getGiftRate();
+                let sub_rate = Math.max(CHAT_DISPLAY.getFakeViewCount() / 10000000, 0.0000005) * CHAT_DISPLAY.getGiftRate();
+                if (chance(fluctuateChanceByViewerCount(sub_rate)) && !CHAT_DISPLAY.isPaused()) {
+                    const subber = (chance(50)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
+                    if (!subber.isSub()) {
+                        const sub_tier = getRandomSubTier();
+                        const message = CHAT_LOG[getRand(CHAT_LOG.length)];
+                        const prime = chance(60);
+                        CHAT_DISPLAY.addSubAlertOverlay(subber, sub_tier, message, prime);
+                        CHAT_DISPLAY.viewerSubsribe(subber, sub_tier, message, prime);
+                    }
+                    else {
+                        console.log('current subber tried to sub')
+                    }
                 }
             },200));
         }
@@ -305,6 +321,21 @@ function Stream_Simulator()  {
             accumulatedWeight += weights[i];
             if (randomNum <= accumulatedWeight) {
                 return items[i];
+            }
+        }
+    }
+
+    function getRandomSubTier() {
+        const tiers = [1,2,3];
+        const weights = [99, 0.9, 0.1];
+        const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
+
+        const randomNum = Math.random() * totalWeight;
+        let accumulatedWeight = 0;
+        for (let i = 0; i < tiers.length; i++) {
+            accumulatedWeight += weights[i];
+            if (randomNum <= accumulatedWeight) {
+                return tiers[i];
             }
         }
     }

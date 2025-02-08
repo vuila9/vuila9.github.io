@@ -21,7 +21,7 @@ class ChatDisplay {
 
         this.STREAMER = streamer;
 
-        this.giftRate = 2;
+        this.giftRate = 1;
 
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
@@ -56,7 +56,7 @@ class ChatDisplay {
 
     setFakeViewCount(count) { this.fakeViewCount = count; }
 
-    getFakeViewCount() { return this.fakeViewCount; }
+    getFakeViewCount() { return Number(this.fakeViewCount); }
 
     incFakeViewCount(change) {
         if (this.fakeViewCount > 5)
@@ -113,7 +113,7 @@ class ChatDisplay {
         messageElement.appendChild(messageUserName);
 
         const messageContent = document.createElement('span');
-        if (this.#processMessageContent(message.getContent(), messageContent)) {
+        if (this.#processMessageContent(message.getContent(), messageContent)) { //true if the message is mentioning the streamer
             messageElement.style.backgroundColor = '#2c1a1d';
             messageElement.style.borderLeft  = '3px solid #e13232';
             messageElement.style.borderRight = '3px solid #e13232';
@@ -146,7 +146,7 @@ class ChatDisplay {
     }
 
     addGiftAlertOverlay(amount, gifter=this.STREAMER) {
-        const overlay = document.getElementById('sub-alert-overlay');
+        const overlay = document.getElementById('gift-alert-overlay');
         const gifter_span = document.createElement('strong');
         gifter_span.style.color = '#14bc7d';
         gifter_span.style.fontSize = '20px';
@@ -159,7 +159,7 @@ class ChatDisplay {
         setTimeout(() => {
             overlay.style.visibility = 'hidden';
             overlay.innerHTML = '';
-        }, 6900);
+        }, 10000);
     }
 
     addGiftAlertAnnouncement(amount, gifter=this.STREAMER) {
@@ -199,7 +199,6 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-
     addGiftAlertMessage(gifter, sub_tier, receiver) {
         const giftAlertMessage = document.createElement('div');
         giftAlertMessage.className = 'sub-alert-message'; 
@@ -235,7 +234,7 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-    addSubAlertOverlay(subber, prime=false) {
+    addSubAlertOverlay(subber, sub_tier, message, prime=false) {
         const overlay = document.getElementById('sub-alert-overlay');
         const subber_span = document.createElement('strong');
         subber_span.style.color = '#14bc7d';
@@ -243,13 +242,68 @@ class ChatDisplay {
         subber_span.textContent = subber.getUsername();
 
         overlay.appendChild(subber_span);
-        overlay.innerHTML += ` has gifted <strong style="color: #14bc7d">${amount}</strong> subs to the community!<br>`
+        if (prime)
+            overlay.innerHTML += ` just subscribed with prime!<br>`;
+        else
+            overlay.innerHTML += ` just subscribed with Tier ${sub_tier}!<br>`;
+
+        if (message.length < 50)
+            overlay.innerHTML += `${message}<br>`
+
         overlay.style.visibility = 'visible';
 
         setTimeout(() => {
             overlay.style.visibility = 'hidden';
             overlay.innerHTML = '';
-        }, 6900);
+        }, 7000);
+    }
+
+    viewerSubsribe(subber, sub_tier, message, prime=false) {
+        subber.subscribe(prime);
+        const subAlertMessage = document.createElement('div');
+        subAlertMessage.className = 'sub-alert-message'; 
+        subAlertMessage.style.borderLeft = `4px solid ${subber.getUsernameColor()}`;
+        
+        const subIcon = document.createElement('span');
+        if (prime)
+            subIcon.className = 'fas fa-crown';
+        else
+            subIcon.className = 'fa fa-star';
+
+        subIcon.style.color = '#a970ff';
+        subIcon.style.marginTop = '3px';
+        subAlertMessage.appendChild(subIcon);
+
+        const subberName = document.createElement('strong');
+        subberName.textContent = subber.getUsername();
+        subberName.style.color = '#a970ff';
+        subberName.style.marginLeft = "5px";
+        subberName.addEventListener(('click'), (event) => {
+            this.#userProfile(subber, event.clientX, event.clientY);
+        });
+        subAlertMessage.appendChild(subberName);
+
+        const giftContext = document.createElement('div');
+        if (prime)
+            giftContext.innerHTML = `<strong>Subscribed</strong> with Prime. They've subscribed for <strong>${subber.getSubAge()} months</strong>, ${this.#getRand(subber.getSubAge()) + 1} months in a row.`;
+        else
+            giftContext.innerHTML = `<strong>Subscribed</strong> with Tier ${sub_tier}. They've subscribed for <strong>${subber.getSubAge()} months</strong>!`;
+
+        subAlertMessage.style.color = 'white';
+        subAlertMessage.appendChild(giftContext);
+
+        //const submessage = document.createElement('div');
+        //submessage.textContent = message;
+        // too lazy to implement this ....
+
+        this.chatMessageDiv.appendChild(subAlertMessage);
+        this.chatSize += 1;
+        if (this.chatSize > this.chatSizeLimit) {
+            this.chatMessageDiv.removeChild(this.chatMessageDiv.firstElementChild);
+            this.chatSize -= 1;
+        }
+        if (!this.scrollUp)
+            this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
     addSubAlertMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
@@ -402,7 +456,7 @@ class ChatDisplay {
         element.appendChild(document.createTextNode(': '));
         let streamer = false;
         for (let part of msg_parts) {
-            if (part == '${STREAMER}') {
+            if (part == '${STREAMER}' || part == `@${this.STREAMER.getUsername()}`) {
                 part = `@${this.STREAMER.getUsername()}`;
                 streamer = true;
             }

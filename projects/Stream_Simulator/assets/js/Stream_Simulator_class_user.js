@@ -140,4 +140,12 @@ class User {
     isSub() { return this.sub; }
 
     getUsernameColor() { return this.usernameColor; }
+
+    subscribe(prime) {
+        this.subAge = Number(this.subAge) + 1;
+        this.sub = true;
+        if (prime)      
+            this.prime = prime;
+        this.initBadges();              
+    }
 }

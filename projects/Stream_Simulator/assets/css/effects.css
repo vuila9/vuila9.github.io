@@ -43,10 +43,26 @@
     pointer-events: none; /* Allow clicks to pass through to the video player */
 }
 
+#gift-alert-overlay {
+    position: absolute;
+    top: 50px;
+    right: 450px;
+    width: 200px;
+    background-color: rgba(14, 14, 16, 0.5); /* Semi-transparent background */
+    color: white;
+    font-size: 20px;
+    word-wrap: break-word; 
+    word-break: break-word; 
+    white-space: normal; 
+    pointer-events: none; /* Allow clicks to pass through to the video player */
+    z-index: 3; /* Ensure it's on top of the video player */
+    visibility: hidden;
+}
+
 #sub-alert-overlay {
     position: absolute;
     top: 50px;
-    right: 100px;
+    right: 150px;
     width: 200px;
     background-color: rgba(14, 14, 16, 0.5); /* Semi-transparent background */
     color: white;
