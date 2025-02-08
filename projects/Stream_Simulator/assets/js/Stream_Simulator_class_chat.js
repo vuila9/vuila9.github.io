@@ -285,7 +285,7 @@ class ChatDisplay {
         if (prime)
             giftContext.innerHTML = `<strong>Subscribed</strong> with Prime. They've subscribed for <strong>${subber.getSubAge()} months</strong>, ${this.#getRand(subber.getSubAge()) + 1} months in a row.`;
         else
-            giftContext.innerHTML = `<strong>Subscribed</strong> with Tier ${sub_tier}. They've subscribed for <strong>${subber.getSubAge()} months</strong>!`;
+            giftContext.innerHTML = `<strong>Subscribed</strong> with Tier ${sub_tier}.<br>They've subscribed for <strong>${subber.getSubAge()} months</strong>!`;
 
         subAlertMessage.style.color = 'white';
         subAlertMessage.appendChild(giftContext);
@@ -654,17 +654,25 @@ class ChatDisplay {
     spamChat(VIEWERS, msg, duration_=null) {
         if (this.isPause) return;
         if (Number(this.fakeViewCount) < 50) return;
-        document.getElementById('start-chat-button').disabled = true;
+        
+        //document.getElementById('start-chat-button').disabled = true;
+        
         const spam_chat = this.#spamVariation(msg);
-        const chat_rate = Math.min(this.chatRate/2, 800);
+        const chat_rate = Math.min(this.chatRate / 2, 800);
+        
+        const startTime = Date.now(); // Record the start time
+        const duration = (duration_ === null) ? Math.max(Math.min(6900 * 500 / this.chatRate, 13000), 5000) : duration_;
+        
         const intervalId = setInterval(() => {
+            // Check if the duration has elapsed
+            if (Date.now() - startTime >= duration || this.isPause) { // terminate spam immediately when duration ends or chat is paused
+                clearInterval(intervalId); // Stop the interval
+                document.getElementById('start-chat-button').disabled = false;
+                return; 
+            }
+            // Continue spamming messages
             this.addMessage(new ChatMessage(VIEWERS[this.#getRand(VIEWERS.length)], spam_chat[this.#getRand(spam_chat.length)]));
         }, chat_rate);
-        let duration = (duration_ === null) ? Math.max(Math.min(6900 * 500/this.chatRate, 13000), 5000) : duration_;
-        setTimeout(() => {
-            clearInterval(intervalId); 
-            document.getElementById('start-chat-button').disabled = false;
-        }, duration);
     }
 
     subGifting(amount, VIEWERS, gifter=this.STREAMER) {

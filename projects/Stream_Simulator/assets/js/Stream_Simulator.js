@@ -301,7 +301,7 @@ function Stream_Simulator()  {
         const viewcount = CHAT_DISPLAY.getFakeViewCount();
         if (viewcount < 100) {
             if (rate != 1)
-                return viewcount/100;
+                return viewcount/1000;
             else
                 return 5;
         }
@@ -359,7 +359,6 @@ function Stream_Simulator()  {
 
         return rate * 15;
     }
-
 }
 
 Stream_Simulator();
