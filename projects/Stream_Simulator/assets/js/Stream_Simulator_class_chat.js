@@ -402,19 +402,27 @@ class ChatDisplay {
 
         const chatHistory = document.createElement('div');
         chatHistory.className = 'user-chatHistory';
-        if (user.getChatHistory().length == 0) {
+        if (user.isBanned()) {
+            chatHistory.textContent = `${user.getUsername()} is banned and cannot chat here`;
+            chatHistory.style.textAlign = 'center';
+            chatHistory.style.color = 'white';
+            chatHistory.style.fontSize = '13.5px';
+            popup.style.height = '140px';
+        }
+        else if (user.getChatHistory().length == 0) {
             chatHistory.textContent = `${user.getUsername()} has not chatted here`;
             chatHistory.style.textAlign = 'center';
             chatHistory.style.color = 'white';
             chatHistory.style.fontSize = '13.5px';
             popup.style.height = '140px';
         }
-        for (let chat of user.getChatHistory()) {
-            const chatlog = document.createElement('div'); //p
-            this.#processUserInfo(user, chatlog);
-            this.#processMessageContent(chat, chatlog)
-            //chatlog.textContent = chat;
-            chatHistory.appendChild(chatlog);
+        else {
+            for (let chat of user.getChatHistory()) {
+                const chatlog = document.createElement('div'); //p
+                this.#processUserInfo(user, chatlog);
+                this.#processMessageContent(chat, chatlog)
+                chatHistory.appendChild(chatlog);
+            }
         }
         popup.appendChild(chatHistory);
         chatHistory.scrollTop = chatHistory.scrollHeight
