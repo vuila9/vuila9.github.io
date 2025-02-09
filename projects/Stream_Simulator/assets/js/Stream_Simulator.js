@@ -66,7 +66,7 @@ function Stream_Simulator()  {
             streamCapturer.style.visibility = 'visible';
             streamCapturer.srcObject = stream;
             isStreamON = true;
-            streamButton.textContent = 'Stop Sharing'
+            streamButton.textContent = 'Stop Capturing';
             // Optional: Handle when the user stops sharing the screen
             stream.getVideoTracks()[0].onended = () => {
                 alert('Screen sharing has ended.');

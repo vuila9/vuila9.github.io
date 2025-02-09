@@ -28,7 +28,7 @@ class ChatDisplay {
         this.#viewersMap = new Map();
         this.#anyEmoteMapContainer = new Map();
         this.anyEmoteArrayContainer = [];
-        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/giftrate', '/giftlog', '/start', '/pause', '/clear', '/clearpopup', '/mute', '/unmute', '/suboverlay', '/command']);
+        this.command = new Set(['/ban', '/unban', '/title', '/username', '/yt', '/spam', '/category', '/viewcount', '/mod', '/unmod', '/vip', '/unvip', '/founder', '/gift', '/giftrandom', '/giftrate', '/giftlog', '/start', '/pause', '/clear', '/clearpopup', '/mute', '/unmute', '/suboverlay', '/screencapture', '/command']);
     }
 
     toggleChat() { this.isPause = !this.isPause; }
@@ -916,6 +916,14 @@ class ChatDisplay {
             case '/command':
                 this.#showCommands();
                 break;
+            case '/screencapture':
+                this.addSystemMessage(`Disclaimer: This tool uses the Screen Capture feature to display your screen content in real-time. Please note that this tool is hosted on GitHub Pages, which means it is a static website. As a static website, it does not include a backend server to store, process, or transmit any data.`);
+                this.addSystemMessage(`As a result:`);
+                this.addSystemMessage(`No data is stored or transmitted: All screen content displayed here is purely for visual purposes and is not saved, recorded, or shared anywhere.`);
+                this.addSystemMessage('No server-side processing: The screen capture is handled entirely by your browser, and no data leaves your device.');
+                this.addSystemMessage('Privacy: Your screen content remains private and is not accessible to anyone else.');
+                this.addSystemMessage(`By using this tool, you acknowledge and agree to these terms. If you have any concerns, please review your browser's permissions and settings before proceeding.`)
+                break;
             default:
                 break;
         }
@@ -941,6 +949,7 @@ class ChatDisplay {
             /clear: clear chat<br>
             /mute: mute all sub/prime/gift sound alert<br>
             /suboverlay on/off: turn sub overlay on/off<br>
+            /screencapture: quick disclaimer about this feature<br>
             *Note: some commands are only executable during pausing/running chat
         `,true);
     }
