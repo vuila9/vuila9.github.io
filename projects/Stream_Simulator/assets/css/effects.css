@@ -20,7 +20,7 @@
     position: relative;
 }
 
-#video-player {
+#youtube-player, #stream-capturer{
     position: absolute; 
     top: 0; 
     left: 0; 
@@ -33,7 +33,7 @@
 #sub-count-overlay {
     position: absolute; /* Position the overlay absolutely within #media-section */
     top: calc(100% - 200px);
-    left: 10px; /* Distance from the left of #video-player */
+    left: 10px; /* Distance from the left of #   */
     color: white;
     background-color: rgba(14, 14, 16, 0.5); /* Semi-transparent background */
     padding: 5px;

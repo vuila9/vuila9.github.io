@@ -739,7 +739,7 @@ class ChatDisplay {
                 break;
             
             case '/yt':
-                const YTCLIP = document.getElementById('video-player');
+                const YTCLIP = document.getElementById('youtube-player');
                 const yt_id = this.#getYouTubeVideoId(command_body);
                 if (command_body == 'remove') {
                     YTCLIP.src = '';

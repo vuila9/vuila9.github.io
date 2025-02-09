@@ -4,6 +4,13 @@ function Stream_Simulator()  {
     const startChatButton = document.getElementById('start-chat-button');
     const emotePreview = document.getElementById('emote-preview');
     const chatMessageDiv = document.getElementById('chat-messages');
+    const streamButton = document.getElementById('stream-button');
+
+    const streamCapturer = document.getElementById('stream-capturer');
+    const youtubePlayer = document.getElementById('youtube-player');
+
+    let isStreamON = false;
+
 
     const ALL_VIEWERS = [];
     const RANDOM_VIEWERS = [];
@@ -35,6 +42,41 @@ function Stream_Simulator()  {
         //     counter++;
         // }
     })();
+
+    streamButton.addEventListener('click', async (event) => {
+        if (isStreamON) {
+            const stream = streamCapturer.srcObject;
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop()); // Stop all tracks
+            streamCapturer.srcObject = null;
+            streamButton.textContent = 'Screen Sharing';
+            youtubePlayer.style.visibility = 'visible';
+            streamCapturer.style.visibility = 'hidden';
+            isStreamON = false;
+            return;
+        }
+        try {
+            // Request screen capture
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+                video: true,
+                audio: true, // Set to true if you want to capture audio as well
+            });
+            // Set the stream as the source for the video element
+            youtubePlayer.style.visibility = 'hidden';
+            streamCapturer.style.visibility = 'visible';
+            streamCapturer.srcObject = stream;
+            isStreamON = true;
+            streamButton.textContent = 'Stop Sharing'
+            // Optional: Handle when the user stops sharing the screen
+            stream.getVideoTracks()[0].onended = () => {
+                alert('Screen sharing has ended.');
+                streamCapturer.srcObject = null; // Clear the video element
+            };
+        } catch (error) {
+            console.error('Error capturing screen:', error);
+            alert('Failed to start screen capture. Please try again.');
+        }
+    });
 
     startChatButton.addEventListener('click', async (event) => {
         CHAT_DISPLAY.setChatRate(chatRate(CHAT_DISPLAY.getFakeViewCount()));
@@ -302,10 +344,10 @@ function Stream_Simulator()  {
             else
                 return 5;
         }
-        else if (viewcount < 1000) return 6 * rate * (1 + viewcount/1000);
-        else if (viewcount < 10000) return 13 * rate * (1 + viewcount/10000);
-        else if (viewcount < 100000) return 26 * rate;
-        else return 30 * rate;
+        else if (viewcount < 1000) return 7 * rate * (1 + viewcount/1000);
+        else if (viewcount < 10000) return 14 * rate * (1 + viewcount/10000);
+        else if (viewcount < 100000) return 28 * rate;
+        else return 35 * rate;
     }
 
     function getRandomGiftAmount() {
@@ -347,9 +389,9 @@ function Stream_Simulator()  {
 
         const rate = 10* (1 + Math.exp(-k * (viewerCount - v0)));
 
-        if (viewerCount < 1000 && viewerCount > 500) 
+        if (500 < viewerCount && viewerCount < 1000) 
             return 4000; 
-        else if (viewerCount < 500 && viewerCount > 100)
+        else if (100 < viewerCount && viewerCount < 500)
             return 7000;
         else if (viewerCount < 100)
             return 10000;
