@@ -181,7 +181,7 @@
     cursor: pointer;
 }
 
-#chat-messages p {
+#chat-messages div {
     position: relative;
     color: #dbdbdd;
     font-size: 13px;
@@ -196,7 +196,7 @@
     padding-left: 10px; /* Adds space to the left */
 }
 
-#chat-messages p:hover {
+#chat-messages div:hover {
     background-color: rgb(55, 55, 57);
 }
 
@@ -263,11 +263,7 @@
     padding-left: 10px;
 }
 
-/* p span img {
-    position:relative; top: 6px; max-height: 32px; max-width: 96px
-} */
-
-.emotes {
+.emotes, .user-badge {
     position:relative; top: 6px; max-height: 32px; max-width: 96px;
 }
 
@@ -318,7 +314,9 @@ input[type="text"] {
 .popup-user-profile {
     position: fixed;
     width: 340px;
-    height: 350px;
+    /* height: 125px;
+    max-height: 350px; */
+    height: 330px;
     background-color: #202020;
     border: 1px solid black;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -344,14 +342,14 @@ input[type="text"] {
 
 .user-chatHistory {
     position: relative;
-    top: 120px;
+    top: 100px;
     left: 10px;
     width: 320px;
     height: 215px;
     overflow-y: auto;
 }
 
-.user-chatHistory p {
+.user-chatHistory div {
     position: relative;
     color: #dbdbdd;
     font-size: 13px;

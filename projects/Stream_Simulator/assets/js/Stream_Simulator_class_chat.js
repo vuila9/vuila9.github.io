@@ -85,7 +85,7 @@ class ChatDisplay {
             this.addSystemMessage(`"${USER.getUsername()}" tried to chat but was banned.`)
             return; 
         }
-        const messageElement = document.createElement('p');
+        const messageElement = document.createElement('div'); //p
         messageElement.setAttribute('user', USER.getUsername());
 
         this.#processUserInfo(USER, messageElement);
@@ -283,7 +283,7 @@ class ChatDisplay {
     }
 
     addSystemMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
-        const messageElement = document.createElement('p');
+        const messageElement = document.createElement('div'); //p
         if (forcedInnerHTML)
             messageElement.innerHTML = message;
         else
@@ -343,6 +343,21 @@ class ChatDisplay {
         username.style.left = '60px';
         username.style.fontWeight = 'bold';
         username.style.position = 'absolute';
+
+        const badgesProfile = document.createElement('span');
+        badgesProfile.className = 'user-profile-badges';
+        for (let i = 0; i < user.getBadges().length; i++) {
+            const img_badge = document.createElement('img');
+            img_badge.src = `./assets/img/badges/${user.getBadges()[i]}.png`;
+            img_badge.title = (user.getBadges()[i].includes('Sub')) ? 'Subscriber' : user.getBadges()[i];
+            img_badge.className = 'user-badge';
+            badgesProfile.appendChild(img_badge);
+        }
+        if (badgesProfile.hasChildNodes()) {
+            badgesProfile.style.marginLeft = '10px'; 
+            username.appendChild(badgesProfile)
+        }
+        
         popup.appendChild(username);
 
         // Add created date 🎂
@@ -384,28 +399,18 @@ class ChatDisplay {
             sub.style.position = 'absolute';
             popup.appendChild(sub);
         }
-        document.body.appendChild(popup);
-
-        const badgesProfile = document.createElement('div');
-        badgesProfile.className = 'user-profile-badges';
-        for (let i = 0; i < user.getBadges().length; i++) {
-            const img_badge = document.createElement('img');
-            img_badge.src = `./assets/img/badges/${user.getBadges()[i]}.png`;
-            img_badge.title = (user.getBadges()[i].includes('Sub')) ? 'Subscriber' : user.getBadges()[i];
-            img_badge.className = 'user-badge';
-            badgesProfile.appendChild(img_badge);
-        }
-        if (badgesProfile.hasChildNodes()) {
-            badgesProfile.style.top = '89px';
-            badgesProfile.style.left = '60px';
-            badgesProfile.style.position = 'absolute';
-            popup.appendChild(badgesProfile);
-        }
 
         const chatHistory = document.createElement('div');
         chatHistory.className = 'user-chatHistory';
+        if (user.getChatHistory().length == 0) {
+            chatHistory.textContent = `${user.getUsername()} has not chatted here`;
+            chatHistory.style.textAlign = 'center';
+            chatHistory.style.color = 'white';
+            chatHistory.style.fontSize = '13.5px';
+            popup.style.height = '140px';
+        }
         for (let chat of user.getChatHistory()) {
-            const chatlog = document.createElement('p');
+            const chatlog = document.createElement('div'); //p
             this.#processUserInfo(user, chatlog);
             this.#processMessageContent(chat, chatlog)
             //chatlog.textContent = chat;
@@ -414,6 +419,7 @@ class ChatDisplay {
         popup.appendChild(chatHistory);
         chatHistory.scrollTop = chatHistory.scrollHeight
 
+        document.body.appendChild(popup);
         // Enable dragging
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
