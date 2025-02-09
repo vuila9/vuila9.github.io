@@ -344,15 +344,15 @@ function Stream_Simulator()  {
             else
                 return 5;
         }
-        else if (viewcount < 1000) return 7 * rate * (1 + viewcount/1000);
-        else if (viewcount < 10000) return 14 * rate * (1 + viewcount/10000);
-        else if (viewcount < 100000) return 28 * rate;
+        else if (viewcount < 1000) return 6 * rate * (1 + viewcount/1000);
+        else if (viewcount < 10000) return 12 * rate * (1 + viewcount/10000);
+        else if (viewcount < 100000) return 24 * rate * (1 + viewcount/200000);
         else return 35 * rate;
     }
 
     function getRandomGiftAmount() {
-        const items = [1, 5, 10, 20, 50, 100]; // 4%, 40%, 30%, 20%, 6%, 0.5% (respectively)
-        const weights = [0.04, 0.4, 0.3, 0.2, 0.06, 0.005];
+        const items = [1, 5, 10, 20, 50, 100]; // 4%, 50%, 30%, 10%, 6%, 0.5% (respectively)
+        const weights = [0.04, 0.5, 0.3, 0.1, 0.06, 0.005];
         const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
 
         // Generate a random number between 0 and the total weight
