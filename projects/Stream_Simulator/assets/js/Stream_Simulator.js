@@ -91,7 +91,7 @@ function Stream_Simulator()  {
                     document.getElementById('channel-viewer-count').lastChild.nodeValue = CHAT_DISPLAY.getFakeViewCount().toLocaleString();
                 }
                 let gift_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.1 * CHAT_DISPLAY.getGiftRate();
-                if (chance(fluctuateChanceByViewerCount(gift_rate)) && !CHAT_DISPLAY.isPaused()) {
+                if (chance(fluctuateChanceByViewerCount(gift_rate)) && !CHAT_DISPLAY.isPaused() && CHAT_DISPLAY.getFakeViewCount() > 100) {
                     const randomGiftAmount = getRandomGiftAmount();
                     const gifter = (chance(80)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     CHAT_DISPLAY.addGiftAlertOverlay(randomGiftAmount, gifter);
@@ -99,7 +99,7 @@ function Stream_Simulator()  {
                 }
 
                 let sub_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.75 * CHAT_DISPLAY.getGiftRate();
-                if (chance(fluctuateChanceByViewerCount(sub_rate)) && !CHAT_DISPLAY.isPaused()) {
+                if (chance(fluctuateChanceByViewerCount(sub_rate)) && !CHAT_DISPLAY.isPaused() && CHAT_DISPLAY.getFakeViewCount() > 50) {
                     const subber = (chance(50)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     if (!subber.isSub()) {
                         const sub_tier = getRandomSubTier();
@@ -338,15 +338,10 @@ function Stream_Simulator()  {
 
     function fluctuateChanceByViewerCount(rate=1) {
         const viewcount = CHAT_DISPLAY.getFakeViewCount();
-        if (viewcount < 100) {
-            if (rate != 1)
-                return viewcount/1000;
-            else
-                return 5;
-        }
-        else if (viewcount < 1000) return 6 * rate * (1 + viewcount/1000);
-        else if (viewcount < 10000) return 12 * rate * (1 + viewcount/10000);
-        else if (viewcount < 100000) return 24 * rate * (1 + viewcount/200000);
+        if      (viewcount < 100)    return 1 + viewcount/200;  // gifting/sub rate does not apply when viewer count is below 100 and 50
+        else if (viewcount < 1000)   return 6 * rate * (1 + viewcount/1100);
+        else if (viewcount < 10000)  return 12 * rate * (1 + viewcount/12000);
+        else if (viewcount < 100000) return 23 * rate * (1 + viewcount/230000);
         else return 35 * rate;
     }
 

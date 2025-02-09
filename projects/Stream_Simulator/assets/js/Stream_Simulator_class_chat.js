@@ -61,11 +61,10 @@ class ChatDisplay {
     getFakeViewCount() { return Number(this.fakeViewCount); }
 
     incFakeViewCount(change) {
-        if (this.fakeViewCount > 5)
-            this.fakeViewCount += change; 
-        else {
+        if (this.fakeViewCount <= 100) // viewer count will only go up when below 100
             this.fakeViewCount += Math.abs(change);
-        }
+        else 
+            this.fakeViewCount += change; 
     }
 
     verifyCommand(command) { return this.command.has(command); }
