@@ -13,7 +13,7 @@ DONE:
 - reaction: song, ban, vote, sub, sus, questionable, lewd, hype, start, end, prediction (/spam handles this)
 - add chat reaction based on content (separate chat files depending on the content) (/spam handles this)
 - add hello/hi when stream first starts
-- add user profile UI when clicking on users
+- add user profile UI when clicking on users -> now display chat history log
 - add @_ing feature
 - add icon/badges
 - chat reaction to ban/unmod/mod/vip
