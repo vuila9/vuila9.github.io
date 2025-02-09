@@ -680,7 +680,7 @@ class ChatDisplay {
 
     subGifting(amount, VIEWERS, gifter=this.STREAMER) {
         if (!this.muted_alert) {
-            const subAlertSound = new Audio('./assets/audio/sub_alert_bell.wav');
+            const subAlertSound = new Audio((amount < 50) ? './assets/audio/sub_alert_bell.wav' : './assets/audio/sub_alert_50100.wav');
             subAlertSound.play();
         }
         const og_amount = amount;
@@ -704,9 +704,13 @@ class ChatDisplay {
             }
             amount -= 1;
         }
-        if (og_amount >= 10) {
+        if (og_amount >= 10 && og_amount < 50) {
             const duration = Math.max(Math.min(6900 * 500/this.chatRate, 7000), 5000) * (1 + amount/100);
             this.spamChat(VIEWERS, ['where is my gifted sub Stare', "PogChamp", "all these gifted subs and I dont still get it", 'PotFriend', 'EzDodge', 'EZdodge', 'EZdodge ez dodge', 'EZdodge', 'EZdodge', 'EZdodge EZdodge'], duration);
+        }
+        else if (og_amount >= 50) {
+            const duration = Math.max(Math.min(6900 * 500/this.chatRate, 7000), 5000) * (1 + amount/100);
+            this.spamChat(VIEWERS, ["PogChamp", 'PogChamp', 'WWWW', 'W W W W', 'EZdodge ez dodge', 'EZdodge', 'W', 'W gifter', 'W gifter', `W ${gifter.getUsername()}`, `W ${gifter.getUsername()}`], duration);
         }
         console.log(`${og_amount} gifted subs from ${gifter.getUsername()}`);
         this.#subgifterLog.push(`${og_amount} gifted subs from ${gifter.getUsername()}`);
