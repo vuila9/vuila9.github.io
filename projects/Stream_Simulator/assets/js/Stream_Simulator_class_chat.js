@@ -680,7 +680,7 @@ class ChatDisplay {
 
     subGifting(amount, VIEWERS, gifter=this.STREAMER) {
         if (!this.muted_alert) {
-            const subAlertSound = new Audio((amount < 50) ? './assets/audio/sub_alert_bell.wav' : './assets/audio/sub_alert_50100.wav');
+            const subAlertSound = new Audio((Number(amount) > 50) ? './assets/audio/sub_alert_bell.wav' : './assets/audio/sub_alert_50100.wav');
             subAlertSound.play();
         }
         const og_amount = amount;
