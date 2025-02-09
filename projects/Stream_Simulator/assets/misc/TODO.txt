@@ -21,3 +21,4 @@ DONE:
 - give long time subber more chat rate
 - add overlay
 - add (random) sub gifting
+- add screen sharing feature
