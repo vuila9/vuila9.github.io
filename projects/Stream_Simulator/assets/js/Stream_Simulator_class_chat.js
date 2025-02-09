@@ -676,7 +676,7 @@ class ChatDisplay {
         }
         else if (og_amount >= 50) {
             const duration = Math.max(Math.min(6900 * 500/this.chatRate, 7000), 5000) * (1 + amount/100);
-            this.spamChat(VIEWERS, ["PogChamp", 'PogChamp', 'WWWW', 'W W W W', 'EZdodge ez dodge', 'EZdodge', 'W', 'W gifter', 'W gifter', `W ${gifter.getUsername()}`, `W ${gifter.getUsername()}`], duration);
+            this.spamChat(VIEWERS, ["PogChamp", 'PogChamp', 'WWWW', 'W W W W', 'EZdodge ez dodge', 'EZdodge', 'W', 'W gifter', 'W gifter', `W @${gifter.getUsername()}`, `W ${gifter.getUsername()}`], duration);
         }
         console.log(`${og_amount} gifted subs from ${gifter.getUsername()}`);
         this.#subgifterLog.push(`${og_amount} gifted subs from ${gifter.getUsername()}`);
