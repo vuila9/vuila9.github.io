@@ -3,7 +3,6 @@ function Stream_Simulator()  {
     const sendButton = document.getElementById('send-button');
     const startChatButton = document.getElementById('start-chat-button');
     const emotePreview = document.getElementById('emote-preview');
-    const chatMessageDiv = document.getElementById('chat-messages');
     const streamButton = document.getElementById('stream-button');
 
     const streamCapturer = document.getElementById('stream-capturer');
@@ -99,7 +98,7 @@ function Stream_Simulator()  {
                 }
 
                 let sub_rate = (CHAT_DISPLAY.getFakeViewCount() / 10000000) * 1.75 * CHAT_DISPLAY.getGiftRate();
-                if (chance(fluctuateChanceByViewerCount(sub_rate)) && !CHAT_DISPLAY.isPaused() && CHAT_DISPLAY.getFakeViewCount() > 50) {
+                if (chance(fluctuateChanceByViewerCount(sub_rate)) && !CHAT_DISPLAY.isPaused() && CHAT_DISPLAY.getFakeViewCount() > 95) {
                     const subber = (chance(50)) ? ACTIVE_VIEWERS[getRand(ACTIVE_VIEWERS.length)] : ALL_VIEWERS[getRand(ALL_VIEWERS.length)];
                     if (!subber.isSub()) {
                         const sub_tier = getRandomSubTier();
@@ -208,13 +207,13 @@ function Stream_Simulator()  {
     });
 
     let isMouseOver = false;
-    chatMessageDiv.addEventListener('mouseenter', () => {
+    CHAT_DISPLAY.getDiv().addEventListener('mouseenter', () => {
         isMouseOver = true;
     });
-    chatMessageDiv.addEventListener('mouseleave', () => {
+    CHAT_DISPLAY.getDiv().addEventListener('mouseleave', () => {
         isMouseOver = false;
     });
-    chatMessageDiv.addEventListener('wheel', (event) => {
+    CHAT_DISPLAY.getDiv().addEventListener('wheel', (event) => {
         if (isMouseOver) {
             if (event.deltaY < 0 && !CHAT_DISPLAY.isPaused()) 
                 startChatButton.click(); // Call your custom function here
@@ -338,10 +337,10 @@ function Stream_Simulator()  {
 
     function fluctuateChanceByViewerCount(rate=1) {
         const viewcount = CHAT_DISPLAY.getFakeViewCount();
-        if      (viewcount < 100)    return 1 + viewcount/200;  // gifting/sub rate does not apply when viewer count is below 100 and 50
-        else if (viewcount < 1000)   return 6 * rate * (1 + viewcount/1100);
-        else if (viewcount < 10000)  return 12 * rate * (1 + viewcount/12000);
-        else if (viewcount < 100000) return 23 * rate * (1 + viewcount/230000);
+        if      (viewcount < 100)    return 1 + viewcount/20;  // gifting/sub rate does not apply when viewer count is below 100 and 50
+        else if (viewcount < 1000)   return 6 * rate * (1 + viewcount/900);
+        else if (viewcount < 10000)  return 12 * rate * (1 + viewcount/11000);
+        else if (viewcount < 100000) return 23 * rate * (1 + viewcount/220000);
         else return 35 * rate;
     }
 

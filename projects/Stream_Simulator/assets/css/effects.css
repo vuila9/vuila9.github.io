@@ -108,7 +108,9 @@
 
 #channel-name, #channel-title {
     font-size: 20px;
-    height: 30px;
+    height: 20px;
+    text-decoration: none !important;
+    color: white;
 }
 
 #channel-action {
@@ -120,6 +122,8 @@
 #channel-category {
     font-size: 15px;
     margin-top: 5px;
+    text-decoration: none !important;
+    color: rgb(164, 112, 255);
 }
 
 #channel-numbers {
@@ -259,8 +263,12 @@
     padding-left: 10px;
 }
 
-p span img {
+/* p span img {
     position:relative; top: 6px; max-height: 32px; max-width: 96px
+} */
+
+.emotes {
+    position:relative; top: 6px; max-height: 32px; max-width: 96px;
 }
 
 input[type="text"] {
@@ -310,7 +318,7 @@ input[type="text"] {
 .popup-user-profile {
     position: fixed;
     width: 340px;
-    height: 125px;
+    height: 350px;
     background-color: #202020;
     border: 1px solid black;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -332,4 +340,48 @@ input[type="text"] {
     height: 18px;
     margin-right: 3px;
     margin-bottom: 2px;
+}
+
+.user-chatHistory {
+    position: relative;
+    top: 120px;
+    left: 10px;
+    width: 320px;
+    height: 215px;
+    overflow-y: auto;
+}
+
+.user-chatHistory p {
+    position: relative;
+    color: #dbdbdd;
+    font-size: 13px;
+    font-family: 'Roobert', sans-serif;
+    width: 100%; 
+    word-wrap: break-word; 
+    word-break: break-word; 
+    white-space: normal; 
+    margin: 0; /* Reset default margin */
+    line-height: 1.45;
+    padding-left: 10px; /* Adds space to the left */
+}
+
+/* Webkit browsers */
+.user-chatHistory::-webkit-scrollbar {
+    width: 5px; /* Adjust the width to make it thin */
+    position: absolute;
+    right: -30px; /* Adjust this to shift the scrollbar */
+}
+
+.user-chatHistory::-webkit-scrollbar-track {
+    background: #18181b; /* Light grey background for the scrollbar track */
+}
+
+.user-chatHistory::-webkit-scrollbar-thumb {
+    background: #6e6e6e; /* Darker grey for the thumb */
+    border-radius: 10px; /* Optional: rounds the thumb */
+}
+
+.user-chatHistory::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Darker grey when hovering */
+    cursor: pointer;
 }

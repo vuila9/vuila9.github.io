@@ -41,6 +41,8 @@ class User {
         this.chatHistory.push(message);
     }
 
+    getChatHistory() { return this.chatHistory; }
+
     incGiftSub(inc) { this.gifted = Number(this.gifted) + inc; }
 
     getGiftSub() { return this.gifted; }
@@ -128,8 +130,6 @@ class User {
     getDateCreate() { return this.dateCreated; }
 
     getAvatar() { return this.avatar; }
-
-    getChatHistory() { return this.chatHistory; }
 
     getMessageCount() { return this.messageCount; }
 

@@ -264,6 +264,7 @@ BASED SmokeTime
 brb
 um ?
 Starege Thinking1 Bedge Thinking2
+Bedge Thinking1 ${RANDOM_EMOTE} Thinking2
 lm about to bust goon
 GOTTEM gottem
 what's up cuties peepoHey

@@ -88,30 +88,7 @@ class ChatDisplay {
         const messageElement = document.createElement('p');
         messageElement.setAttribute('user', USER.getUsername());
 
-        const badgesUserName = document.createElement('span');
-        badgesUserName.className = 'user-message-badges';
-        const badges_limit = (USER.isStreamer()) ? 3 : 2;
-        for (let i = 0; i < USER.getBadges().length; i++) {
-            if (i == badges_limit) break;
-            const img_badge = document.createElement('img');
-            img_badge.src = `./assets/img/badges/${USER.getBadges()[i]}.png`;
-            img_badge.title = (USER.getBadges()[i].includes('Sub')) ? 'Subscriber' : USER.getBadges()[i];
-            img_badge.className = 'user-badge';
-            badgesUserName.appendChild(img_badge);
-        }
-        if (badgesUserName.hasChildNodes())
-            messageElement.appendChild(badgesUserName);
-
-        const messageUserName = document.createElement('span');
-        messageUserName.className = 'user-message';
-        messageUserName.textContent = `${USER.getUsername()}`;
-        messageUserName.style.fontWeight = "bold";
-        messageUserName.style.fontSize = "13.5px";
-        messageUserName.style.color = USER.getUsernameColor();
-        messageUserName.addEventListener(('click'), (event) => {
-            this.#userProfile(USER, event.clientX, event.clientY);
-        });
-        messageElement.appendChild(messageUserName);
+        this.#processUserInfo(USER, messageElement);
 
         const messageContent = document.createElement('span');
         if (this.#processMessageContent(message.getContent(), messageContent)) { //true if the message is mentioning the streamer
@@ -140,10 +117,6 @@ class ChatDisplay {
         } 
         else 
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
-    }
-
-    addViewerSubscribeAlertMessage(user, sub_type, sub_tier=1) {
-
     }
 
     addGiftAlertOverlay(amount=1, gifter=this.STREAMER) {
@@ -309,10 +282,6 @@ class ChatDisplay {
             this.chatMessageDiv.scrollTop = this.chatMessageDiv.scrollHeight;
     }
 
-    addSubAlertMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
-
-    }
-
     addSystemMessage(message, forcedInnerHTML=false, color='#a4a4ae', backgroundColor='transparent') {
         const messageElement = document.createElement('p');
         if (forcedInnerHTML)
@@ -433,6 +402,18 @@ class ChatDisplay {
             popup.appendChild(badgesProfile);
         }
 
+        const chatHistory = document.createElement('div');
+        chatHistory.className = 'user-chatHistory';
+        for (let chat of user.getChatHistory()) {
+            const chatlog = document.createElement('p');
+            this.#processUserInfo(user, chatlog);
+            this.#processMessageContent(chat, chatlog)
+            //chatlog.textContent = chat;
+            chatHistory.appendChild(chatlog);
+        }
+        popup.appendChild(chatHistory);
+        chatHistory.scrollTop = chatHistory.scrollHeight
+
         // Enable dragging
         let isDragging = false;
         let offsetX = 0, offsetY = 0;
@@ -452,6 +433,33 @@ class ChatDisplay {
         document.addEventListener("mouseup", () => {
             isDragging = false;
         });
+    }
+
+    #processUserInfo(USER, element) {
+        const badgesUserName = document.createElement('span');
+        badgesUserName.className = 'user-message-badges';
+        const badges_limit = (USER.isStreamer()) ? 3 : 2;
+        for (let i = 0; i < USER.getBadges().length; i++) {
+            if (i == badges_limit) break;
+            const img_badge = document.createElement('img');
+            img_badge.src = `./assets/img/badges/${USER.getBadges()[i]}.png`;
+            img_badge.title = (USER.getBadges()[i].includes('Sub')) ? 'Subscriber' : USER.getBadges()[i];
+            img_badge.className = 'user-badge';
+            badgesUserName.appendChild(img_badge);
+        }
+        if (badgesUserName.hasChildNodes())
+            element.appendChild(badgesUserName);
+
+        const messageUserName = document.createElement('span');
+        messageUserName.className = 'user-message';
+        messageUserName.textContent = `${USER.getUsername()}`;
+        messageUserName.style.fontWeight = "bold";
+        messageUserName.style.fontSize = "13.5px";
+        messageUserName.style.color = USER.getUsernameColor();
+        messageUserName.addEventListener(('click'), (event) => {
+            this.#userProfile(USER, event.clientX, event.clientY);
+        });
+        element.appendChild(messageUserName);
     }
 
     #processMessageContent(msg, element) { // return True if mentioning the Streamer, false otherwise
@@ -484,8 +492,9 @@ class ChatDisplay {
             }
             else if (this.#anyEmoteMapContainer.has(part)) {
                 const imgElement = document.createElement('img');
-                imgElement.src = this.getEmoteSrc(part);
+                imgElement.className = 'emotes';
                 imgElement.title = part;
+                imgElement.src = this.getEmoteSrc(part);
                 element.appendChild(imgElement)
             }
             else {
@@ -597,54 +606,6 @@ class ChatDisplay {
         return spam_chat;
     }
 
-    #spamVariations(feed) {
-        if (feed.length > 1) return feed;
-        if (feed[0].length > 10) return feed;
-        feed = feed[0];
-        const spam_chat = [];
-        spam_chat.push(feed);
-        spam_chat.push(`${feed} ${feed}`);
-        let counter = this.#getRand(5) + 1;
-        let repeat = [];
-        while (counter > 0) {
-            repeat.push(feed);
-            counter -= 1;
-        }
-        spam_chat.push(repeat.join(' '));
-        spam_chat.push(`${feed}${feed}${feed}`);
-        spam_chat.push(`${feed}${feed.at(-1)}`);
-        spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
-
-        feed = feed.toLowerCase();
-        spam_chat.push(feed);
-        spam_chat.push(`${feed} ${feed}`);
-        counter = this.#getRand(5) + 1;
-        repeat = [];
-        while (counter > 0) {
-            repeat.push(feed);
-            counter -= 1;
-        }
-        spam_chat.push(repeat.join(' '));
-        spam_chat.push(`${feed}${feed}${feed}`);
-        spam_chat.push(`${feed}${feed.at(-1)}`);
-        spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
-        
-        feed = feed.toUpperCase();
-        spam_chat.push(feed);
-        spam_chat.push(`${feed} ${feed}`);
-        counter = this.#getRand(5) + 1;
-        repeat = [];
-        while (counter > 0) {
-            repeat.push(feed);
-            counter -= 1;
-        }
-        spam_chat.push(repeat.join(' '));
-        spam_chat.push(`${feed}${feed}${feed}`);
-        spam_chat.push(`${feed}${feed.at(-1)}`);
-        spam_chat.push(`${feed}${feed.at(-1)}${feed.at(-1)}`);
-        return spam_chat;
-    }
-
     #smartSplit(sentence) {
         const regex = /"([^"]*)"|(\S+)/g;
         const result = [];
@@ -718,9 +679,14 @@ class ChatDisplay {
     commandHandler(command, command_body, STREAMER, VIEWERS) {
         switch (command) {
             case '/username':
+                if (command_body.length > 30) {
+                    this.addSystemMessage('Error: user name too long');
+                    return;
+                }
                 const old_name = STREAMER.getUsername();
                 STREAMER.setUsername(command_body.split(' ')[0]);
                 document.getElementById('channel-name').textContent = STREAMER.getUsername();
+                document.getElementById('channel-name').href = `https://www.twitch.tv/${STREAMER.getUsername()}`;
                 this.addSystemMessage(`Streamer has changed their name from ${old_name} to ${STREAMER.getUsername()}.`);
                 break;
             
@@ -809,7 +775,7 @@ class ChatDisplay {
                 if (isNaN(rate)) return;
                 if (rate > 10 || rate < 1) return; 
                 this.setGiftRate(Number(rate));
-                this.addSystemMessage(`Default sub gifting rate has been boosted by ${rate} times`);
+                this.addSystemMessage(`Base gifting and subscribing rate has been boosted by ${rate} times`);
                 break;
 
             case '/mod':
@@ -877,11 +843,20 @@ class ChatDisplay {
                 break;
 
             case '/title':
+                if (command_body.length > 100) {
+                    this.addSystemMessage('Error: title too long');
+                    return;
+                }
                 document.getElementById('channel-title').textContent = command_body;
                 this.addSystemMessage(`Stream title is now set to "${command_body}".`);
                 break;
             case '/category':
+                if (command_body.length > 50) {
+                    this.addSystemMessage('Error: category too long');
+                    return;
+                }
                 document.getElementById('channel-category').textContent = command_body;
+                document.getElementById('channel-category').href = `https://www.twitch.tv/directory/category/${command_body.split(' ').join('-').toLowerCase()}`;
                 this.addSystemMessage(`Stream category is now set to "${command_body}".`);
                 break;
             case '/start':
