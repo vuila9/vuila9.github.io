@@ -345,7 +345,8 @@ input[type="text"] {
     top: 100px;
     left: 10px;
     width: 320px;
-    height: 215px;
+    height: 38px;
+    max-height: 215px;
     overflow-y: auto;
 }
 
@@ -354,7 +355,7 @@ input[type="text"] {
     color: #dbdbdd;
     font-size: 13px;
     font-family: 'Roobert', sans-serif;
-    width: 100%; 
+    width: 100%;
     word-wrap: break-word; 
     word-break: break-word; 
     white-space: normal; 

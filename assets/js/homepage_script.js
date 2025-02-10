@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
         {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
             title: "Stream Simulator",
-            description: "A work-in-progress project to be released soon™",
+            description: "A streaming simulator that lets you role-play as a streamer with any audience size.",
             link: "projects/Stream_Simulator/Stream_Simulator.html"
         },
         {

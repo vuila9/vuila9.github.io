@@ -52,12 +52,11 @@
 										<div id="channel-info-right">
 											<div id="channel-action">
 												<button class="purple-button" id="start-chat-button" style="width: 90px" disabled >Start Chat</button>
-												<button class="purple-button" id="stream-button">Screen Capture</button>
+												<button class="purple-button" id="stream-button" disabled>Screen Capture</button>
 												<button class="purple-button" id="follow-button" title="This button does not do anything">Follow</button>
 												<button class="purple-button" id="subscribe-button" title="This button does not do anything">Subscribe</button>
 											</div>
 											<div id="channel-numbers">
-												<!-- <div id="channel-viewer-count-container" style="color:brown"> <div class="fas fa-user-alt" style="margin-right: 5px;"></div><div id="channel-viewer-count">12000</div></div> -->
 												<div id="channel-viewer-count" style="color:brown; font-weight: bold;"> <div class="fas fa-user-alt" style="margin-right: 5px;"></div>0</div>
 												<div id="channel-stream-time" style="width: 55px">0:00:00</div>
 											</div>
@@ -84,7 +83,8 @@
 						<div class="inner">
 							<div>
 								<span class="submenu">Description</span>
-								<p>This is a work-in-progress project, nothing to see here...</p>
+								<p>This is a streaming simulator inspired by the Twitch platform, built entirely using HTML, JavaScript, and CSS. I aimed to replicate the real-life streaming experience as realistically as possible. Expect features like viewer interactions through chats and reactions, random gifting/subscriptions, fluctuating viewer counts, and broadcaster privileges such as banning, modding, etc. and many more.</p>
+								<p>Please watch the attached YT video above for a full walkthrough of the program, or type '/command' into the chat to show a list of all supported commands. More info are available in the <u>Features</u> section.</p>
 							</div>
 
 							<div class="container">
@@ -104,7 +104,53 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="features-content">
-								<p>Features</p>
+								<p>The majority of these features scales with total viewer count. With a high viewer count, the frequency of happening will increase, and vice versa. The duration of certain events also scales with viewer count. With a high viewer count, the duration is extended, and vice versa. The stream will remain running indefinitely once started. Some features will only happen when chat is running. Some feature will pause chat when applied.</p>
+								<p>Features that scales with viewer count:</p>
+								<ul>
+									<li><span class="effect-span">Viewer count: Viewer count will fluctuate up and down. Fluctuation rate scales with view count.</span></li>
+									<li><span class="effect-span">Chat output: Chat will be generated indefinitely. Chat output rate scales with view count.</span></li>
+									<li><span class="effect-span">Subscription/Gifting: Random viewers will subscribe or gift random amount of subs to the chat. The chance of this scales with view count.</span></li>
+								</ul>
+								<p>Chat reaction (Duration and frequence scales with viewer count):</p>
+								<ul>
+									<li><span class="effect-span">Greeting: chat will greet you when the stream just started. </span></li>
+									<li><span class="effect-span">Gifting: chat will react based on the amount of gifted subs being generated.</span></li>
+									<li><span class="effect-span">Ban/Unban/Mod/Unmod: chat will react when a viewer gets banned or unbanned (by you).</span></li>
+								</ul>
+								<p>Commands (also displayed when enter '/command'):</p>
+								<ul>
+									<li><span class="effect-span">/username name: change your user name</span></li>
+									<li><span class="effect-span">/title title: change stream title</span></li>
+									<li><span class="effect-span">/category category: change stream category</span></li>
+
+									
+									<li><span class="effect-span">/spam word/"phrase" or both: trigger the chat to spam specified word(s) and/or phrase(s)</span></li>
+									<li><span class="effect-span">/mod name: make a viewer a moderator</span></li>
+									<li><span class="effect-span">/unmod name: demote a moderator</span></li>
+
+									<li><span class="effect-span">/vip name: make a viewer a vip</span></li>
+									<li><span class="effect-span">/founder name: make a viewer a founder</span></li>
+									<li><span class="effect-span">/ban: ban any viewer</span></li>
+									<li><span class="effect-span">/viewcount number: set viewer count to any number from 1 - 999,999</span></li>
+									<li><span class="effect-span">/yt URL: change the embedded YouTube video</span></li>
+									<li><span class="effect-span">/gift name: gift a sub to a viewer</span></li>
+									<li><span class="effect-span">/giftrandom number: gifting 1 - 100 subs to random viewers</span></li>
+									<li><span class="effect-span">/giftrate 1-10: increase usual gifted sub by 1-10 times</span></li>
+									<li><span class="effect-span">/giftlog: show log of all gifter</span></li>
+									<li><span class="effect-span">/clearpopup: remove all user profile popups</span></li>
+									<li><span class="effect-span">/clear: clear chat</span></li>
+									<li><span class="effect-span">/mute: mute all sub/prime/gift sound alert</span></li>
+									<li><span class="effect-span">/suboverlay on/off: turn sub overlay on/off</span></li>
+									<li><span class="effect-span">/screencapture: quick disclaimer about this feature</span></li>
+								</ul>
+								<p>Buttons feature:</p>
+								<ul>
+									<li><span class="effect-span">Start/Pause Chat (button): Start/pause/resume chat.</span></li>
+									<li><span class="effect-span">Screen Capture (button): Disabled by default. Capture user's screen content. To see disclaimer: enter '/screencapture' in the chat.</span></li>
+									<li><span class="effect-span">Arrow key up/down: traversing chat history.</span></li>
+									<li><span class="effect-span">Chat (button/enter): output your message onto the chat.</span></li>
+									<li><span class="effect-span">Follow/Subscribe (button): does nothing, for decoration.</span></li>
+								</ul>
 							</div>
 
 							<div class="container">
@@ -124,7 +170,7 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="github-content">
-								<p>link</p>
+								<a target="_blank" href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Stream_Simulator"><p>Source code</p></a>
 							</div>
 				<!--END-->
 						</div>

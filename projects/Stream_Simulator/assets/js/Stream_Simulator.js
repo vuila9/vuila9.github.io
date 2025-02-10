@@ -314,9 +314,8 @@ function Stream_Simulator()  {
         if (message[0] === '/') {
             const command = message.split(' ')[0];
             const command_body = message.split(' ').slice(1).join(' ');
-            if (CHAT_DISPLAY.verifyCommand(command)) {
+            if (CHAT_DISPLAY.verifyCommand(command)) 
                 CHAT_DISPLAY.commandHandler(command, command_body, STREAMER, ALL_VIEWERS);
-            }
             else
                 CHAT_DISPLAY.addSystemMessage(`Invalid command: ${command}`);
 

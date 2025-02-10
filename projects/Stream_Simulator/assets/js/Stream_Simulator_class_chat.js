@@ -410,7 +410,7 @@ class ChatDisplay {
             popup.style.height = '140px';
         }
         else if (user.getChatHistory().length == 0) {
-            chatHistory.textContent = `${user.getUsername()} has not chatted here`;
+            chatHistory.textContent = `${user.getUsername()} has not chatted here today`;
             chatHistory.style.textAlign = 'center';
             chatHistory.style.color = 'white';
             chatHistory.style.fontSize = '13.5px';
@@ -423,9 +423,13 @@ class ChatDisplay {
                 this.#processMessageContent(chat, chatlog)
                 chatHistory.appendChild(chatlog);
             }
+            chatHistory.style.height = `215px`;
+            //chatHistory.scrollTop = chatHistory.scrollHeight;
+            setTimeout(() => {
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }, 0);
         }
         popup.appendChild(chatHistory);
-        chatHistory.scrollTop = chatHistory.scrollHeight
 
         document.body.appendChild(popup);
         // Enable dragging
@@ -815,7 +819,7 @@ class ChatDisplay {
                 if (username[0] == "@") username = username.slice(1);
                 if (this.#viewersMap.has(username) && this.#viewersMap.get(username).vipViewer()) 
                     this.addSystemMessage(`${username} has been promoted to VIP.`);
-                    this.spamChat(VIEWERS, ['should have been me Saddies', 'did bro even sub??', 'how much for VIP', `who is you  @${username}`, `never seen this guy before wtf`])
+                    this.spamChat(VIEWERS, ['should have been me Saddies', 'did bro even sub??', 'how much for VIP', `who is you  @${username}`, `never seen this guy before wtf`]);
                 break;
 
             case '/unvip':
@@ -909,12 +913,17 @@ class ChatDisplay {
                 this.#showCommands();
                 break;
             case '/screencapture':
+                if (command_body.split(' ')[0] === 'YES') {
+                    document.getElementById('stream-button').disabled = false;
+                    return;
+                }
                 this.addSystemMessage(`Disclaimer: This tool uses the Screen Capture feature to display your screen content in real-time. Please note that this tool is hosted on GitHub Pages, which means it is a static website. As a static website, it does not include a backend server to store, process, or transmit any data.`);
                 this.addSystemMessage(`As a result:`);
                 this.addSystemMessage(`No data is stored or transmitted: All screen content displayed here is purely for visual purposes and is not saved, recorded, or shared anywhere.`);
                 this.addSystemMessage('No server-side processing: The screen capture is handled entirely by your browser, and no data leaves your device.');
                 this.addSystemMessage('Privacy: Your screen content remains private and is not accessible to anyone else.');
-                this.addSystemMessage(`By using this tool, you acknowledge and agree to these terms. If you have any concerns, please review your browser's permissions and settings before proceeding.`)
+                this.addSystemMessage(`By using this tool, you acknowledge and agree to these terms. If you have any concerns, please review your browser's permissions and settings before proceeding.`);
+                this.addSystemMessage(`This feature is disabled by default, to use this feature, type: /screencapture YES`);
                 break;
             default:
                 break;
@@ -924,19 +933,19 @@ class ChatDisplay {
     #showCommands() {
         this.addSystemMessage(`
             /username name: change your user name<br>
-            /viewcount number: set viewer count to any number from 1 - 999,999<br>
-            /yt URL: change the embedded YouTube video<br>
-            /spam word/"phrase" or both: trigger the chat to spam specified word(s) and/or phrase(s)<br>
             /title title: change stream title<br>
             /category category: change stream category<br>
             /mod name: make a viewer a moderator<br>
             /vip name: make a viewer a vip<br>
             /founder name: make a viewer a founder<br>
+            /ban: ban any viewer<br>
+            /viewcount number: set viewer count to any number from 1 - 999,999<br>
+            /yt URL: change the embedded YouTube video<br>
+            /spam word/"phrase" or both: trigger the chat to spam specified word(s) and/or phrase(s)<br>
             /gift name: gift a sub to a viewer<br>
             /giftrandom number: gifting 1 - 100 subs to random viewers<br>
             /giftrate 1-10: increase usual gifted sub by 1-10 times<br>
             /giftlog: show log of all gifter<br>
-            /ban: ban any viewer<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>
             /mute: mute all sub/prime/gift sound alert<br>
