@@ -938,14 +938,14 @@ class ChatDisplay {
             /mod name: make a viewer a moderator<br>
             /vip name: make a viewer a vip<br>
             /founder name: make a viewer a founder<br>
-            /ban: ban any viewer<br>
-            /viewcount number: set viewer count to any number from 1 - 999,999<br>
-            /yt URL: change the embedded YouTube video<br>
-            /spam word/"phrase" or both: trigger the chat to spam specified word(s) and/or phrase(s)<br>
+            /ban name: ban any viewer<br>
             /gift name: gift a sub to a viewer<br>
             /giftrandom number: gifting 1 - 100 subs to random viewers<br>
             /giftrate 1-10: increase usual gifted sub by 1-10 times<br>
             /giftlog: show log of all gifter<br>
+            /spam word/"phrase" or both: trigger the chat to spam specified word(s) and/or phrase(s)<br>
+            /viewcount number: set viewer count to any number from 1 - 999,999<br>
+            /yt URL: change the embedded YouTube video<br>
             /clearpopup: remove all user profile popups<br>
             /clear: clear chat<br>
             /mute: mute all sub/prime/gift sound alert<br>
