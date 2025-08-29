@@ -201,7 +201,7 @@
     /* text customize */
     margin: 0; 
     line-height: 1.25;
-    font-family: 'Ubuntu', monospace;
+    font-family: 'Ubuntu Mono', 'Ubuntu', monospace;
     font-size: 17px; 
     font-weight:100;
     padding: 0 1px;
