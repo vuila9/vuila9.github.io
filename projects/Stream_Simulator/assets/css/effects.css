@@ -21,22 +21,12 @@
     position: relative;
 }
 
-/* #youtube-player, #stream-capturer{
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    aspect-ratio: 16/9;
-    z-index: 2; 
-    background-color: purple; 
-} */
-
 #youtube-player, #stream-capturer {
     position: absolute;
     top: 0;
     left: 0;
-    max-height: 87%; /* 100% of #media-section minus #channel-info's height */
-    width: auto;                 /* width calculated from aspect-ratio */
+    max-height: 87%; 
+    /* width: auto;                 */
     aspect-ratio: 16/9;
     z-index: 2;
     background-color: purple;
