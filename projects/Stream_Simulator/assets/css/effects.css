@@ -2,7 +2,8 @@
 #stream-UI {
     display: flex;
     /* height: calc(100vh - 70px); */
-    height: 903px;
+    height: 93vh;
+    max-height: 903px;
     margin-left: 100px;
     margin-right: 100px;
     background-color: rgb(14, 14, 16);
@@ -20,7 +21,7 @@
     position: relative;
 }
 
-#youtube-player, #stream-capturer{
+/* #youtube-player, #stream-capturer{
     position: absolute; 
     top: 0; 
     left: 0; 
@@ -28,6 +29,17 @@
     aspect-ratio: 16/9;
     z-index: 2; 
     background-color: purple; 
+} */
+
+#youtube-player, #stream-capturer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-height: 87%; /* 100% of #media-section minus #channel-info's height */
+    width: auto;                 /* width calculated from aspect-ratio */
+    aspect-ratio: 16/9;
+    z-index: 2;
+    background-color: purple;
 }
 
 #sub-count-overlay {
