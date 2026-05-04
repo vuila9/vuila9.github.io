@@ -1,11 +1,12 @@
 
 #stream-UI {
     display: flex;
-    /* height: calc(100vh - 70px); */
     height: 93vh;
     max-height: 903px;
-    margin-left: 100px;
-    margin-right: 100px;
+    max-width: 1720px;  /* your current content width: 1920 - 100 - 100 */
+    margin-left: auto;
+    margin-right: auto;
+    width: calc(100% - 200px);  /* always leaves 100px on each side */
     background-color: rgb(14, 14, 16);
 }
 
