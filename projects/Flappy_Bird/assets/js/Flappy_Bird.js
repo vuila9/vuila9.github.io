@@ -44,7 +44,7 @@
     // Size against the stage (the frame now shrink-wraps the canvas, so we must
     // measure the outer container, not the frame, to avoid a feedback loop).
     const stage = cvs.parentElement.parentElement || cvs.parentElement;
-    const fs = document.fullscreenElement;
+    const fs = document.fullscreenElement || cvs.parentElement.classList.contains("flappy-fake-fullscreen");
     const availW = fs ? window.innerWidth : (stage.getBoundingClientRect().width || GW);
     const availH = fs ? window.innerHeight : 600;   // target play height on desktop
     let scale = availH / GH;
@@ -242,16 +242,38 @@
   requestAnimationFrame(loop);
 
   // ---- fullscreen toggle (optional button) ----
+  // iOS Safari has no Fullscreen API for arbitrary elements (requestFullscreen
+  // is undefined on a <div>, even prefixed), so we fall back to a CSS-only
+  // "fake fullscreen" that fixed-positions the frame over the viewport.
   const fsBtn = document.getElementById("flappy-fullscreen");
   if (fsBtn) {
+    const wrap = cvs.parentElement;
+    const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+
+    function exitFakeFullscreen() {
+      wrap.classList.remove("flappy-fake-fullscreen");
+      resize();
+    }
+    window.addEventListener("orientationchange", function () {
+      if (wrap.classList.contains("flappy-fake-fullscreen")) resize();
+    });
+
     fsBtn.addEventListener("click", function () {
-      const wrap = cvs.parentElement;
-      const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
-      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!req) {
+        // No real Fullscreen API (iOS Safari) — toggle the CSS fallback.
+        if (wrap.classList.contains("flappy-fake-fullscreen")) {
+          exitFakeFullscreen();
+        } else {
+          wrap.classList.add("flappy-fake-fullscreen");
+          resize();
+        }
+        return;
+      }
       if (!document.fullscreenElement) {
-        if (req) req.call(wrap);
-      } else {
-        if (exit) exit.call(document);
+        req.call(wrap);
+      } else if (exit) {
+        exit.call(document);
       }
     });
   }

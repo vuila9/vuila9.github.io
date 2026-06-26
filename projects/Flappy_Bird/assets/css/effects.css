@@ -39,6 +39,19 @@
     background: #000;
 }
 
+/* CSS-only fullscreen fallback for browsers without an element Fullscreen API
+   (iOS Safari never implements requestFullscreen on non-video elements). */
+#flappy-frame.flappy-fake-fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    background: #000;
+    z-index: 1000;
+}
+
 .flappy-controls {
     display: flex;
     gap: 0.5rem;
