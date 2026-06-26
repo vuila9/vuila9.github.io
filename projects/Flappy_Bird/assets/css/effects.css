@@ -1,0 +1,58 @@
+/* Flappy Bird — project-specific styles */
+
+/* Centered game stage, mirrors the in-page layout used by other canvas projects. */
+#flappy-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* The canvas's parent box: defines the area the game sizes itself into. */
+#flappy-frame {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 360px;
+    height: 600px;
+    background: #4ec0ca;            /* original sky colour, shown before load */
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+#flappy-canvas {
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    touch-action: none;
+    cursor: pointer;
+}
+
+/* When the frame goes fullscreen, fill the screen and keep the game centered. */
+#flappy-frame:fullscreen {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    border-radius: 0;
+    background: #000;
+}
+
+.flappy-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+#flappy-fullscreen {
+    cursor: pointer;
+}
+
+.flappy-hint {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin: 0;
+}

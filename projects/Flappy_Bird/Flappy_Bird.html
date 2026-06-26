@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Flappy Bird</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="Flappy_Bird_icon.svg" type="image/x-icon">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="stylesheet" href="assets/css/effects.css">
+	</head>
+
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+							<a href="https://vuila9.github.io/#main">
+								<button id="home-btn">&lt;&lt;</button>
+							</a>
+							<a><h1>Flappy Bird</h1></a>
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Game -->
+							<div id="flappy-stage">
+								<div id="flappy-frame">
+									<canvas id="flappy-canvas" width="288" height="512"
+										aria-label="Flappy Bird game canvas"></canvas>
+								</div>
+								<div class="flappy-controls">
+									<button id="flappy-fullscreen" title="Toggle fullscreen"
+										class="fas fa-expand"></button>
+								</div>
+								<p class="flappy-hint">Click, tap, or press Space to flap.</p>
+							</div>
+
+							<div>
+								<span class="submenu">Description</span>
+								<p>A faithful web revival of the classic Flappy Bird. The artwork and
+									sound effects are the originals, extracted from the 2014 Android
+									release; the game itself is re-implemented from scratch in vanilla
+									JavaScript on an HTML5 canvas so it runs in any modern browser
+									&mdash; including on a phone, where it can be added to the home
+									screen and played fullscreen.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Background</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('background-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="background-content">
+								<!-- TODO (John): write your dev story here.
+								     e.g. why you revived it, working from just an APK,
+								     the porting/rendering challenges, what you learned. -->
+								<p>I was just bored.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('features-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<!-- TODO (John): adjust this list to taste. -->
+								<ul>
+									<li><span class="effect-span"><b>Original assets</b>: sprites and sound effects pulled straight from the 2014 APK texture atlas.</span></li>
+									<li><span class="effect-span"><b>Flap</b> (click / tap / Spacebar): keep the bird airborne through the pipes.</span></li>
+									<li><span class="effect-span"><b>Score &amp; best</b>: local best score persists between sessions.</span></li>
+									<li><span class="effect-span"><b>Medals</b>: bronze, silver, gold and platinum awarded at score thresholds.</span></li>
+									<li><span class="effect-span"><b>Fullscreen</b> (button): expand the game to fill the screen.</span></li>
+									<li><span class="effect-span"><b>Frame-rate independent</b>: fixed 60Hz physics, so it plays the same on 60/120/144Hz displays.</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Future Improvements</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('future-improvement-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="future-improvement-content">
+								<!-- TODO (John): your ideas. -->
+								<ul>
+									<li><span class="effect-span">To be updated</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('github-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Flappy_Bird" target="_blank"><p>Source code</p></a>
+							</div>
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- project specifics -->
+			<script src="assets/js/flappy_assets.js"></script>
+			<script src="assets/js/Flappy_Bird.js"></script>
+	</body>
+</html>

@@ -12,6 +12,12 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
+            imageSrc: "assets/img/program_icons/flappy_tile.jpg",
+            title: "Flappy Bird",
+            description: "A web revival of the classic Flappy Bird, using the original 2014 assets and re-implemented in vanilla JavaScript.",
+            link: "projects/Flappy_Bird/Flappy_Bird.html"
+        },
+        {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
             title: "Stream Simulator",
             description: "A streaming simulator that lets you role-play as a streamer with any audience size.",
