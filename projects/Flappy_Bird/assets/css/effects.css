@@ -12,16 +12,14 @@
 /* The canvas's parent box: defines the area the game sizes itself into. */
 #flappy-frame {
     position: relative;
-    display: flex;
+    display: inline-flex;          /* shrink-to-fit the canvas, no side gutters */
     align-items: center;
     justify-content: center;
-    width: 100%;
-    max-width: 360px;
-    height: 600px;
     background: #4ec0ca;            /* original sky colour, shown before load */
     border-radius: 6px;
     overflow: hidden;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    line-height: 0;                /* remove inline-canvas baseline gap */
 }
 
 #flappy-canvas {

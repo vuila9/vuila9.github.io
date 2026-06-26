@@ -41,10 +41,12 @@
   // ---- canvas sizing: fit inside the canvas's parent box, keep aspect ratio ----
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
-    const box = cvs.parentElement.getBoundingClientRect();
-    const availW = box.width || GW;
-    // cap height so the game stays a sensible size on tall desktop columns
-    const availH = (window.fullscreenElement ? window.innerHeight : Math.min(box.height || GH * 1.2, 640)) || GH;
+    // Size against the stage (the frame now shrink-wraps the canvas, so we must
+    // measure the outer container, not the frame, to avoid a feedback loop).
+    const stage = cvs.parentElement.parentElement || cvs.parentElement;
+    const fs = document.fullscreenElement;
+    const availW = fs ? window.innerWidth : (stage.getBoundingClientRect().width || GW);
+    const availH = fs ? window.innerHeight : 600;   // target play height on desktop
     let scale = availH / GH;
     if (GW * scale > availW) scale = availW / GW;
     cvs.style.height = (GH * scale) + "px";
@@ -242,12 +244,14 @@
   // ---- fullscreen toggle (optional button) ----
   const fsBtn = document.getElementById("flappy-fullscreen");
   if (fsBtn) {
-    fsBtn.addEventListener("click", () => {
+    fsBtn.addEventListener("click", function () {
       const wrap = cvs.parentElement;
+      const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
       if (!document.fullscreenElement) {
-        (wrap.requestFullscreen || wrap.webkitRequestFullscreen || (() => {})).call(wrap);
+        if (req) req.call(wrap);
       } else {
-        (document.exitFullscreen || document.webkitExitFullscreen || (() => {})).call(document);
+        if (exit) exit.call(document);
       }
     });
   }
