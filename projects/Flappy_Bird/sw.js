@@ -1,5 +1,5 @@
 // Service worker for the Flappy Bird standalone web app.
-// Scope is this folder (registered from play.html as "sw.js"), so it only
+// Scope is this folder (registered from webapp.html as "sw.js"), so it only
 // controls /projects/Flappy_Bird/.
 //
 // Strategy: NETWORK-FIRST. When online, always fetch the latest file and refresh
@@ -8,9 +8,9 @@
 // never reach an installed app because it keeps serving stale cached code.
 //
 // Bump CACHE whenever the precached file list changes.
-const CACHE = "flappy-v15";
+const CACHE = "flappy-v16";
 const ASSETS = [
-  "./play.html",
+  "./webapp.html",
   "./manifest.webmanifest",
   "./assets/css/effects.css",
   "./assets/js/flappy_assets.js",

@@ -2,7 +2,7 @@
   "name": "Flappy Bird",
   "short_name": "Flappy Bird",
   "description": "A faithful web revival of the classic Flappy Bird.",
-  "start_url": "./play.html",
+  "start_url": "./webapp.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
