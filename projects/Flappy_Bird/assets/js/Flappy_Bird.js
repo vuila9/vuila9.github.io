@@ -448,21 +448,25 @@
     pauseBtn.innerHTML = PAUSE_SVG;
     pauseBtn.style.display = "none";
 
+    // SOUND + SHOW FPS toggle rows, shared by the Options and Paused panels.
+    const TOGGLE_ROWS =
+      '<label class="flappy-setting-row">'
+        + '<span class="flappy-setting-label">SOUND</span>'
+        + '<input type="checkbox" class="flappy-toggle" data-key="sound">'
+        + '<span class="flappy-switch" aria-hidden="true"></span>'
+      + '</label>'
+      + '<label class="flappy-setting-row">'
+        + '<span class="flappy-setting-label">SHOW FPS</span>'
+        + '<input type="checkbox" class="flappy-toggle" data-key="fps">'
+        + '<span class="flappy-switch" aria-hidden="true"></span>'
+      + '</label>';
+
     const overlay = document.createElement("div");
     overlay.className = "flappy-settings-overlay";
     overlay.innerHTML =
       '<div class="flappy-settings-panel" role="dialog" aria-label="Settings">'
         + '<div class="flappy-settings-title">OPTIONS</div>'
-        + '<label class="flappy-setting-row">'
-          + '<span class="flappy-setting-label">SOUND</span>'
-          + '<input type="checkbox" class="flappy-toggle" data-key="sound">'
-          + '<span class="flappy-switch" aria-hidden="true"></span>'
-        + '</label>'
-        + '<label class="flappy-setting-row">'
-          + '<span class="flappy-setting-label">SHOW FPS</span>'
-          + '<input type="checkbox" class="flappy-toggle" data-key="fps">'
-          + '<span class="flappy-switch" aria-hidden="true"></span>'
-        + '</label>'
+        + TOGGLE_ROWS
         + '<button type="button" class="flappy-settings-close">CLOSE</button>'
       + '</div>';
 
@@ -471,6 +475,7 @@
     pauseOverlay.innerHTML =
       '<div class="flappy-settings-panel" role="dialog" aria-label="Paused">'
         + '<div class="flappy-settings-title">PAUSED</div>'
+        + TOGGLE_ROWS
         + '<button type="button" class="flappy-settings-close flappy-resume">RESUME</button>'
       + '</div>';
 
@@ -479,14 +484,15 @@
     frame.appendChild(overlay);
     frame.appendChild(pauseOverlay);
 
-    const soundInput = overlay.querySelector('[data-key="sound"]');
-    const fpsInput = overlay.querySelector('[data-key="fps"]');
     const closeBtn = overlay.querySelector(".flappy-settings-close");
     const resumeBtn = pauseOverlay.querySelector(".flappy-resume");
+    // Both panels carry the same toggles; keep every copy in sync with `settings`.
+    const soundInputs = frame.querySelectorAll('.flappy-toggle[data-key="sound"]');
+    const fpsInputs = frame.querySelectorAll('.flappy-toggle[data-key="fps"]');
 
     function syncInputs() {
-      soundInput.checked = !settings.muted;
-      fpsInput.checked = settings.showFps;
+      soundInputs.forEach((i) => { i.checked = !settings.muted; });
+      fpsInputs.forEach((i) => { i.checked = settings.showFps; });
     }
     function openSettings() { syncInputs(); overlay.classList.add("open"); paused = true; }
     function closeSettings() { overlay.classList.remove("open"); paused = false; }
@@ -494,18 +500,21 @@
     gear.addEventListener("click", openSettings);
     closeBtn.addEventListener("click", closeSettings);
     overlay.addEventListener("click", (e) => { if (e.target === overlay) closeSettings(); });
-    soundInput.addEventListener("change", () => {
-      settings.muted = !soundInput.checked;
+    soundInputs.forEach((i) => i.addEventListener("change", () => {
+      settings.muted = !i.checked;
       localStorage.setItem("fb_muted", settings.muted ? "1" : "0");
-    });
-    fpsInput.addEventListener("change", () => {
-      settings.showFps = fpsInput.checked;
+      syncInputs();
+    }));
+    fpsInputs.forEach((i) => i.addEventListener("change", () => {
+      settings.showFps = i.checked;
       localStorage.setItem("fb_showfps", settings.showFps ? "1" : "0");
-    });
+      syncInputs();
+    }));
 
     // Pause (in-game) → hard freeze + PAUSED panel. Resume → 3-2-1 countdown then play.
     function pauseGame() {
       if (state !== STATE.PLAY || paused || countdown > 0) return;
+      syncInputs();
       paused = true;
       pauseOverlay.classList.add("open");
     }
