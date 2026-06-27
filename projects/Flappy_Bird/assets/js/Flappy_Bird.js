@@ -50,6 +50,10 @@
   }
 
   // ---- user settings (persisted in localStorage) ----
+  // Shown in the Options panel to confirm a deploy is live. Bump this together
+  // with CACHE in sw.js so the number always matches the service-worker version.
+  const APP_VERSION = "0.29";
+
   const settings = {
     muted: localStorage.getItem("fb_muted") === "1",
     showFps: localStorage.getItem("fb_showfps") === "1",
@@ -554,6 +558,7 @@
         + '<div class="flappy-settings-title">OPTIONS</div>'
         + TOGGLE_ROWS
         + '<button type="button" class="flappy-settings-close">CLOSE</button>'
+        + '<div class="flappy-version">v' + APP_VERSION + '</div>'
       + '</div>';
 
     const pauseOverlay = document.createElement("div");

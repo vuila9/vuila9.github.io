@@ -31,15 +31,18 @@
 				-webkit-tap-highlight-color: transparent;
 			}
 			#flappy-frame {
-				/* inset:0 alone (no explicit width/height) stretches the frame to all
-				   four viewport edges. With viewport-fit=cover that's the full screen
-				   incl. under the home indicator — an explicit 100dvh would cap it
-				   short on iOS standalone and leave a black bar at the bottom. */
+				/* iOS standalone keeps the layout viewport ABOVE the home indicator,
+				   so inset:0 / 100dvh stop short. Anchor to the top and extend the
+				   height by the bottom safe-area inset to reach under the home
+				   indicator. background is a TEMP red diagnostic (see chat note). */
 				position: fixed;
-				inset: 0;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: calc(100% + env(safe-area-inset-bottom, 0px));
 				max-width: none;
 				border-radius: 0;
-				background: #000;
+				background: #e03030;
 				display: flex;
 				align-items: center;
 				justify-content: center;

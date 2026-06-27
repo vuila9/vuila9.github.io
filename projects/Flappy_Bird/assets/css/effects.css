@@ -216,3 +216,12 @@
 }
 
 .flappy-resume { background: #73bf2e; }  /* "go" green for resume */
+
+.flappy-version {
+    margin-top: 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #543847;
+    opacity: 0.5;
+}
