@@ -109,8 +109,12 @@
     const fs = document.fullscreenElement
       || cvs.parentElement.classList.contains("flappy-fake-fullscreen")
       || document.body.classList.contains("flappy-app");
-    const availW = fs ? window.innerWidth : (stage.getBoundingClientRect().width || GW);
-    const availH = fs ? window.innerHeight : 600;   // target play height on desktop
+    // In fullscreen/app mode measure the frame itself (fixed at 100dvw/100dvh)
+    // rather than window.inner* — on iOS standalone the latter can fall short of
+    // the home-indicator area, leaving a black bar along the bottom.
+    const frameRect = cvs.parentElement.getBoundingClientRect();
+    const availW = fs ? frameRect.width : (stage.getBoundingClientRect().width || GW);
+    const availH = fs ? frameRect.height : 600;   // target play height on desktop
     // Grow the world to the screen aspect when filling the screen, so there are
     // no bands: a taller-than-base screen grows the height (portrait phones), a
     // wider-than-base screen grows the width (16:9 monitors in fullscreen).
