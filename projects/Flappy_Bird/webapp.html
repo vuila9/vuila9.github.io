@@ -31,14 +31,12 @@
 				-webkit-tap-highlight-color: transparent;
 			}
 			#flappy-frame {
+				/* inset:0 alone (no explicit width/height) stretches the frame to all
+				   four viewport edges. With viewport-fit=cover that's the full screen
+				   incl. under the home indicator — an explicit 100dvh would cap it
+				   short on iOS standalone and leave a black bar at the bottom. */
 				position: fixed;
 				inset: 0;
-				/* dvw/dvh track the visible viewport on iOS (excludes the bars when
-				   shown); vw/vh is the fallback for older engines. */
-				width: 100vw;
-				width: 100dvw;
-				height: 100vh;
-				height: 100dvh;
 				max-width: none;
 				border-radius: 0;
 				background: #000;

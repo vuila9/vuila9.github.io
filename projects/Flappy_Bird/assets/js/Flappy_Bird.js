@@ -238,7 +238,7 @@
       if (frames % PIPE_INTERVAL === 0) spawnPipe();
       for (const p of pipes) {
         p.x -= SPEED;
-        if (!p.passed && p.x + PIPE_W < bird.x) { p.passed = true; score += 10; play("point"); }   // TEMP: +10/pipe for medal testing (revert to score++ )
+        if (!p.passed && p.x + PIPE_W < bird.x) { p.passed = true; score++; play("point"); }
       }
       // Pipes are ordered left-to-right and exit on the left first; shift the
       // front one out in place instead of allocating a new array each frame.
