@@ -41,6 +41,12 @@
     im.src = ASSETS.sprites[k];
   }
 
+  // ---- user settings (persisted in localStorage) ----
+  const settings = {
+    muted: localStorage.getItem("fb_muted") === "1",
+    showFps: localStorage.getItem("fb_showfps") === "1",
+  };
+
   // ---- sounds (Web Audio) ----
   // HTMLAudioElement.play() causes main-thread hitches on iOS. Web Audio decodes
   // each effect once into a buffer and fires it through a lightweight source node,
@@ -63,7 +69,7 @@
     }
   }
   function play(name) {
-    if (!audioCtx) return;
+    if (settings.muted || !audioCtx) return;
     const b = BUFFERS[name];
     if (!b) return;
     const src = audioCtx.createBufferSource();
@@ -114,17 +120,20 @@
   // ---- game state ----
   const STATE = { READY: 0, PLAY: 1, DEAD: 2 };
   let state = STATE.READY;
-  let bird = { x: 80, y: 240, vy: 0, rot: 0, frame: 0 };
+  // py/prot are the previous-step y/rotation, used to interpolate the render
+  // between 60Hz simulation steps so motion is smooth at any refresh rate.
+  let bird = { x: 80, y: 240, vy: 0, rot: 0, frame: 0, py: 240, prot: 0 };
   const GRAV = 0.30, FLAP = -5.6, MAXV = 10;
   let pipes = [], frames = 0, score = 0, best = +(localStorage.getItem("fb_best") || 0);
   const GAP = 110, PIPE_W = 52, PIPE_INTERVAL = 90, SPEED = 1.6;
-  let groundX = 0, dayNight = "day";
+  let groundX = 0, groundPrev = 0, dayNight = "day";
   let birdColor = 0;                  // 0,1,2 bird colour sets
   let deadTimer = 0, flashAlpha = 0;
   let medalIdx = -1, scoreReveal = 0;
 
   function reset() {
-    bird = { x: 80, y: 240, vy: 0, rot: 0, frame: 0 };
+    bird = { x: 80, y: 240, vy: 0, rot: 0, frame: 0, py: 240, prot: 0 };
+    groundPrev = groundX;
     pipes = []; frames = 0; score = 0; deadTimer = 0; flashAlpha = 0; scoreReveal = 0;
     dayNight = Math.random() < 0.5 ? "day" : "night";
     birdColor = Math.floor(Math.random() * 3);
@@ -149,7 +158,7 @@
   function spawnPipe() {
     const minTop = 40, maxTop = FLOOR_Y - GAP - 60;
     const topH = Math.floor(minTop + Math.random() * (maxTop - minTop));
-    pipes.push({ x: GW + 10, topH, passed: false });
+    pipes.push({ x: GW + 10, topH, passed: false, px: GW + 10 });
   }
 
   function hit() {
@@ -166,7 +175,12 @@
 
   function update() {
     frames++;
-    groundX = (groundX - SPEED) % 24;
+    // Snapshot the previous render state so the loop can interpolate between
+    // 60Hz steps (smooth 120fps visuals without changing the simulation).
+    bird.py = bird.y; bird.prot = bird.rot;
+    groundPrev = groundX;
+    for (const p of pipes) p.px = p.x;
+    groundX -= SPEED;                 // continuous; wrapped to one tile at draw time
     if (state === STATE.READY) {
       bird.y = 240 + Math.sin(frames / 10) * 6;
       bird.frame = Math.floor(frames / 6) % 3;
@@ -235,23 +249,29 @@
     }
   }
 
-  function render() {
+  function render(alpha) {
     // background
     drawSprite(dayNight === "day" ? "bg_day" : "bg_night", 0, 0, GW, GH);
     // pipes — green set only; each sprite is a complete pipe, drawn whole so the
     // cap always meets the gap edge and the shaft fills the rest (no slicing).
     for (const p of pipes) {
+      const px = p.px + (p.x - p.px) * alpha;        // interpolated position
       const downIm = IMG["pipe_down"], upIm = IMG["pipe_up"];
       const PH = downIm.height;        // 320, tall enough to cover any gap
-      ctx.drawImage(downIm, p.x, p.topH - PH, PIPE_W, PH);          // top pipe
-      ctx.drawImage(upIm, p.x, p.topH + GAP, PIPE_W, PH);          // bottom pipe
+      ctx.drawImage(downIm, px, p.topH - PH, PIPE_W, PH);          // top pipe
+      ctx.drawImage(upIm, px, p.topH + GAP, PIPE_W, PH);          // bottom pipe
     }
-    // ground (tiled)
+    // ground (tiled) — interpolate the continuous scroll, wrap at the 24px period
     const land = IMG["land"];
-    if (land) for (let x = Math.floor(groundX); x < GW; x += land.width) ctx.drawImage(land, x, FLOOR_Y);
+    if (land) {
+      const ig = groundPrev + (groundX - groundPrev) * alpha;
+      for (let x = ig % 24; x < GW; x += land.width) ctx.drawImage(land, x, FLOOR_Y);
+    }
     // bird
+    const by = bird.py + (bird.y - bird.py) * alpha;
+    const brot = bird.prot + (bird.rot - bird.prot) * alpha;
     ctx.save();
-    ctx.translate(bird.x, bird.y); ctx.rotate(bird.rot * Math.PI / 180);
+    ctx.translate(bird.x, by); ctx.rotate(brot * Math.PI / 180);
     drawCentered("bird" + birdColor + "_" + bird.frame, 0, 0, 1);
     ctx.restore();
 
@@ -282,24 +302,36 @@
   // display refresh rate (60/120/144Hz all behave identically). ----
   const STEP = 1000 / 60;
   let lastT = performance.now(), acc = 0;
-  // Diagnostic FPS readout — append ?fps to the URL (e.g. play.html?fps) to show
-  // the measured frame rate in the top-left. Lets us tell a real perf problem
-  // from a stale-cache one without guessing.
-  const SHOW_FPS = /[?&]fps\b/.test(location.search);
+  let paused = false;                 // hard freeze (settings or pause panel open)
+  let countdown = 0;                  // ms left on the 3-2-1 resume countdown
+  let syncChrome = () => {};          // shows gear (menu) vs pause (in-game) button
+  // FPS readout — toggled in settings, drawn top-left.
   let fpsAccum = 0, fpsFrames = 0, fpsValue = 0;
   function loop(now) {
     if (ready) {
       let dt = now - lastT; lastT = now;
       if (dt > 250) dt = 250;          // clamp after a tab-switch / stall
-      acc += dt;
-      let steps = 0;
-      while (acc >= STEP && steps < 5) { update(); acc -= STEP; steps++; }
-      render();
-      if (SHOW_FPS) {
+      if (paused) {
+        acc = 0;                       // hard freeze; no catch-up on resume
+      } else if (countdown > 0) {
+        countdown -= dt;               // frozen during the 3-2-1 resume countdown
+        if (countdown < 0) countdown = 0;
+        acc = 0;
+      } else {
+        acc += dt;
+        let steps = 0;
+        while (acc >= STEP && steps < 5) { update(); acc -= STEP; steps++; }
+      }
+      let alpha = acc / STEP;          // fraction into the next sim step
+      if (alpha > 1) alpha = 1;
+      render(alpha);
+      if (countdown > 0) drawNumber(Math.ceil(countdown / 1000), GW / 2, GH / 2 - 24, "big");
+      if (settings.showFps) {
         fpsFrames++; fpsAccum += dt;
         if (fpsAccum >= 500) { fpsValue = Math.round(fpsFrames * 1000 / fpsAccum); fpsFrames = 0; fpsAccum = 0; }
-        drawNumber(fpsValue, 24, 6, "big");
+        drawNumber(fpsValue, 16, 8, "score");
       }
+      syncChrome();
     } else {
       lastT = now;
       ctx.fillStyle = "#4ec0ca"; ctx.fillRect(0, 0, GW, GH);
@@ -342,4 +374,117 @@
       }
     });
   }
+
+  // ---- settings UI: gear button + Options panel (injected, so it shows on any
+  // page that hosts the game). Toggles sound + the FPS readout; opening pauses. ----
+  (function buildSettings() {
+    const frame = cvs.parentElement;
+    if (!frame) return;
+    if (getComputedStyle(frame).position === "static") frame.style.position = "relative";
+
+    const GEAR_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+      + '<path d="M19.14 12.94c.04-.31.06-.62.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64'
+      + 'l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96c-.5-.38-1.04-.7-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42'
+      + 'h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.58.24-1.12.56-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22'
+      + 'L2.74 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.62-.06.94s.02.63.06.94l-2.03 1.58'
+      + 'a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.43.34.69.22l2.39-.96c.5.38 1.04.7 1.62.94l.36 2.54'
+      + 'c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.58-.24 1.12-.56 1.62-.94l2.39.96'
+      + 'c.26.12.55.02.69-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2'
+      + ' 3.6 3.6 0 0 1 0 7.2z"/></svg>';
+
+    const gear = document.createElement("button");
+    gear.type = "button";
+    gear.className = "flappy-gear";
+    gear.setAttribute("aria-label", "Settings");
+    gear.innerHTML = GEAR_SVG;
+
+    const PAUSE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+      + '<rect x="6" y="5" width="4" height="14" rx="1"></rect>'
+      + '<rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>';
+    const pauseBtn = document.createElement("button");
+    pauseBtn.type = "button";
+    pauseBtn.className = "flappy-gear flappy-pause";
+    pauseBtn.setAttribute("aria-label", "Pause");
+    pauseBtn.innerHTML = PAUSE_SVG;
+    pauseBtn.style.display = "none";
+
+    const overlay = document.createElement("div");
+    overlay.className = "flappy-settings-overlay";
+    overlay.innerHTML =
+      '<div class="flappy-settings-panel" role="dialog" aria-label="Settings">'
+        + '<div class="flappy-settings-title">OPTIONS</div>'
+        + '<label class="flappy-setting-row">'
+          + '<span class="flappy-setting-label">SOUND</span>'
+          + '<input type="checkbox" class="flappy-toggle" data-key="sound">'
+          + '<span class="flappy-switch" aria-hidden="true"></span>'
+        + '</label>'
+        + '<label class="flappy-setting-row">'
+          + '<span class="flappy-setting-label">SHOW FPS</span>'
+          + '<input type="checkbox" class="flappy-toggle" data-key="fps">'
+          + '<span class="flappy-switch" aria-hidden="true"></span>'
+        + '</label>'
+        + '<button type="button" class="flappy-settings-close">CLOSE</button>'
+      + '</div>';
+
+    const pauseOverlay = document.createElement("div");
+    pauseOverlay.className = "flappy-settings-overlay";
+    pauseOverlay.innerHTML =
+      '<div class="flappy-settings-panel" role="dialog" aria-label="Paused">'
+        + '<div class="flappy-settings-title">PAUSED</div>'
+        + '<button type="button" class="flappy-settings-close flappy-resume">RESUME</button>'
+      + '</div>';
+
+    frame.appendChild(gear);
+    frame.appendChild(pauseBtn);
+    frame.appendChild(overlay);
+    frame.appendChild(pauseOverlay);
+
+    const soundInput = overlay.querySelector('[data-key="sound"]');
+    const fpsInput = overlay.querySelector('[data-key="fps"]');
+    const closeBtn = overlay.querySelector(".flappy-settings-close");
+    const resumeBtn = pauseOverlay.querySelector(".flappy-resume");
+
+    function syncInputs() {
+      soundInput.checked = !settings.muted;
+      fpsInput.checked = settings.showFps;
+    }
+    function openSettings() { syncInputs(); overlay.classList.add("open"); paused = true; }
+    function closeSettings() { overlay.classList.remove("open"); paused = false; }
+
+    gear.addEventListener("click", openSettings);
+    closeBtn.addEventListener("click", closeSettings);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeSettings(); });
+    soundInput.addEventListener("change", () => {
+      settings.muted = !soundInput.checked;
+      localStorage.setItem("fb_muted", settings.muted ? "1" : "0");
+    });
+    fpsInput.addEventListener("change", () => {
+      settings.showFps = fpsInput.checked;
+      localStorage.setItem("fb_showfps", settings.showFps ? "1" : "0");
+    });
+
+    // Pause (in-game) → hard freeze + PAUSED panel. Resume → 3-2-1 countdown then play.
+    pauseBtn.addEventListener("click", () => {
+      if (state !== STATE.PLAY) return;
+      paused = true;
+      pauseOverlay.classList.add("open");
+    });
+    resumeBtn.addEventListener("click", () => {
+      pauseOverlay.classList.remove("open");
+      paused = false;
+      countdown = 3000;
+    });
+
+    // Gear on menu/game-over, pause during play, neither while a panel is open or
+    // the countdown is running. Guarded so the DOM is touched only on change.
+    let mode = "";
+    syncChrome = function () {
+      const next = (paused || countdown > 0) ? "none" : (state === STATE.PLAY ? "pause" : "gear");
+      if (next === mode) return;
+      mode = next;
+      gear.style.display = next === "gear" ? "flex" : "none";
+      pauseBtn.style.display = next === "pause" ? "flex" : "none";
+    };
+    syncChrome();
+  })();
 })();

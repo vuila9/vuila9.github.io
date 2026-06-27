@@ -81,3 +81,138 @@
     opacity: 0.6;
     margin: 0;
 }
+
+/* ---- Settings (gear button + Options panel), styled to match the game's
+   chunky retro look: cream panel, dark-brown outlines, green switches. ---- */
+.flappy-gear {
+    position: absolute;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #fff;
+    background: #4ec0ca;             /* sky blue */
+    border: 3px solid #543847;       /* dark brown outline */
+    border-radius: 8px;
+    box-shadow: 0 3px 0 #543847, 0 4px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 20;
+    -webkit-tap-highlight-color: transparent;
+}
+.flappy-gear svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+.flappy-gear:hover { filter: brightness(1.08); }
+.flappy-gear:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #543847, 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.flappy-settings-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 30;
+    -webkit-tap-highlight-color: transparent;
+}
+.flappy-settings-overlay.open { display: flex; }
+
+.flappy-settings-panel {
+    width: min(82%, 280px);
+    box-sizing: border-box;
+    padding: 18px 16px 16px;
+    background: #ded895;             /* cream, like the in-game panels */
+    border: 4px solid #543847;
+    border-radius: 12px;
+    box-shadow: 0 6px 0 #543847, 0 12px 22px rgba(0, 0, 0, 0.45);
+    color: #543847;
+    font-family: "Trebuchet MS", Verdana, Geneva, sans-serif;
+    text-align: center;
+}
+.flappy-settings-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 0 #fff;
+}
+.flappy-setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 2px;
+    cursor: pointer;
+    user-select: none;
+}
+.flappy-setting-label {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+}
+.flappy-toggle {                     /* hide the real checkbox; the span is the UI */
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.flappy-switch {
+    position: relative;
+    flex: none;
+    width: 52px;
+    height: 28px;
+    background: #b9ab74;             /* off */
+    border: 3px solid #543847;
+    border-radius: 999px;
+    transition: background 0.15s ease;
+}
+.flappy-switch::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 22px;
+    height: 22px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 2px solid #543847;
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+}
+.flappy-toggle:checked ~ .flappy-switch { background: #73bf2e; }  /* on = pipe green */
+.flappy-toggle:checked ~ .flappy-switch::after { transform: translateX(24px); }
+.flappy-toggle:focus-visible ~ .flappy-switch {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.flappy-settings-close {
+    margin-top: 16px;
+    padding: 8px 24px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #fff;
+    background: #f3920a;             /* orange, like the in-game buttons */
+    border: 3px solid #543847;
+    border-radius: 8px;
+    box-shadow: 0 3px 0 #543847;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+}
+.flappy-settings-close:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #543847;
+}
+
+.flappy-resume { background: #73bf2e; }  /* "go" green for resume */
