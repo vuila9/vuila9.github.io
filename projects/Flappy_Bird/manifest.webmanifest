@@ -1,0 +1,25 @@
+{
+  "name": "Flappy Bird",
+  "short_name": "Flappy Bird",
+  "description": "A faithful web revival of the classic Flappy Bird.",
+  "start_url": "./play.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#4ec0ca",
+  "theme_color": "#4ec0ca",
+  "icons": [
+    {
+      "src": "../../assets/img/program_icons/flappy_tile.jpg",
+      "sizes": "225x225",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "Flappy_Bird_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

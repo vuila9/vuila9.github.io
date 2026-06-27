@@ -31,11 +31,28 @@
   }
 
   // ---- sounds ----
+  // Preload a small pool of Audio elements per effect. The previous code did
+  // `new Audio(dataURI)` on *every* play, which re-decodes the base64 each time —
+  // a real per-flap stutter on mobile. Here each sound is decoded once up front
+  // and replayed round-robin so rapid repeats (wing) don't cut each other off.
   const SFX = { wing: "sfx_wing", point: "sfx_point", hit: "sfx_hit", die: "sfx_die", swoosh: "sfx_swooshing" };
   let audioOK = false;
+  const POOL_N = 3;
+  const SFX_POOL = {};
+  for (const name in SFX) {
+    const uri = ASSETS.sounds[SFX[name]];
+    const pool = [];
+    for (let i = 0; i < POOL_N; i++) {
+      const a = new Audio(uri); a.volume = 0.5; a.preload = "auto"; pool.push(a);
+    }
+    SFX_POOL[name] = { pool, i: 0 };
+  }
   function play(name) {
     if (!audioOK) return;
-    try { const a = new Audio(ASSETS.sounds[SFX[name]]); a.volume = 0.5; a.play().catch(() => {}); } catch (e) {}
+    const slot = SFX_POOL[name]; if (!slot) return;
+    const a = slot.pool[slot.i];
+    slot.i = (slot.i + 1) % slot.pool.length;
+    try { a.currentTime = 0; a.play().catch(() => {}); } catch (e) {}
   }
 
   // ---- canvas sizing: fit inside the canvas's parent box, keep aspect ratio ----
@@ -44,7 +61,12 @@
     // Size against the stage (the frame now shrink-wraps the canvas, so we must
     // measure the outer container, not the frame, to avoid a feedback loop).
     const stage = cvs.parentElement.parentElement || cvs.parentElement;
-    const fs = document.fullscreenElement || cvs.parentElement.classList.contains("flappy-fake-fullscreen");
+    // "Fullscreen" sizing applies when: a real fullscreen is active, the CSS
+    // fake-fullscreen is toggled, or the page is the standalone web-app
+    // (body.flappy-app) where the game owns the whole viewport by default.
+    const fs = document.fullscreenElement
+      || cvs.parentElement.classList.contains("flappy-fake-fullscreen")
+      || document.body.classList.contains("flappy-app");
     const availW = fs ? window.innerWidth : (stage.getBoundingClientRect().width || GW);
     const availH = fs ? window.innerHeight : 600;   // target play height on desktop
     let scale = availH / GH;
@@ -58,6 +80,9 @@
   }
   window.addEventListener("resize", resize);
   document.addEventListener("fullscreenchange", resize);
+  // Orientation flips don't always emit a timely "resize" on mobile; re-fit after
+  // the viewport settles. Harmless on desktop.
+  window.addEventListener("orientationchange", () => setTimeout(resize, 100));
 
   // ---- game state ----
   const STATE = { READY: 0, PLAY: 1, DEAD: 2 };
@@ -255,9 +280,6 @@
       wrap.classList.remove("flappy-fake-fullscreen");
       resize();
     }
-    window.addEventListener("orientationchange", function () {
-      if (wrap.classList.contains("flappy-fake-fullscreen")) resize();
-    });
 
     fsBtn.addEventListener("click", function () {
       if (!req) {

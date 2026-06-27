@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Flappy Bird</title>
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+		<meta name="description" content="A faithful web revival of the classic Flappy Bird." />
+		<meta name="theme-color" content="#4ec0ca" />
+
+		<!-- PWA / Add to Home Screen: launches chrome-free in standalone mode -->
+		<link rel="manifest" href="manifest.webmanifest" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Flappy Bird" />
+		<link rel="apple-touch-icon" href="../../assets/img/program_icons/flappy_tile.jpg" />
+		<link rel="icon" href="Flappy_Bird_icon.svg" type="image/svg+xml" />
+
+		<link rel="stylesheet" href="assets/css/effects.css" />
+		<style>
+			/* Standalone app shell — the game owns the whole viewport. No theme CSS
+			   or scroll scripts are loaded here, which is what keeps it smooth on
+			   mobile compared with the full project page. */
+			html, body {
+				margin: 0;
+				height: 100%;
+				background: #000;
+				overflow: hidden;
+				overscroll-behavior: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+			#flappy-frame {
+				position: fixed;
+				inset: 0;
+				/* dvw/dvh track the visible viewport on iOS (excludes the bars when
+				   shown); vw/vh is the fallback for older engines. */
+				width: 100vw;
+				width: 100dvw;
+				height: 100vh;
+				height: 100dvh;
+				max-width: none;
+				border-radius: 0;
+				background: #000;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#flappy-canvas {
+				display: block;
+				touch-action: none;
+				image-rendering: pixelated;
+				image-rendering: crisp-edges;
+			}
+		</style>
+	</head>
+
+	<body class="flappy-app">
+		<div id="flappy-stage">
+			<div id="flappy-frame">
+				<canvas id="flappy-canvas" width="288" height="512"
+					aria-label="Flappy Bird game canvas"></canvas>
+			</div>
+		</div>
+
+		<!-- game (no theme scripts: this is the lean, fast app build) -->
+		<script src="assets/js/flappy_assets.js"></script>
+		<script src="assets/js/Flappy_Bird.js"></script>
+		<script>
+			// Register the service worker so the app is installable and loads its
+			// assets from cache (faster, and works offline once visited).
+			if ("serviceWorker" in navigator) {
+				window.addEventListener("load", function () {
+					navigator.serviceWorker.register("sw.js").catch(function () {});
+				});
+			}
+		</script>
+	</body>
+</html>
