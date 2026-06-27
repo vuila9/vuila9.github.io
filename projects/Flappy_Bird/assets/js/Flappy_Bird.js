@@ -20,39 +20,59 @@
   ctx.imageSmoothingEnabled = false;
 
   // ---- load images ----
+  // Each sprite is rasterised into an offscreen canvas once it loads. iOS Safari
+  // evicts decoded data-URI images under memory pressure and re-decodes them on
+  // the next drawImage — a classic source of *random* frame hitches. A
+  // canvas-backed source stays resident in memory and draws without re-decoding.
   const IMG = {};
   let toLoad = 0, loaded = 0, ready = false;
   for (const k in ASSETS.sprites) {
     toLoad++;
+    const key = k;
     const im = new Image();
-    im.onload = () => { if (++loaded >= toLoad) ready = true; };
+    im.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = im.naturalWidth;
+      c.height = im.naturalHeight;
+      c.getContext("2d").drawImage(im, 0, 0);
+      IMG[key] = c;
+      if (++loaded >= toLoad) ready = true;
+    };
     im.src = ASSETS.sprites[k];
-    IMG[k] = im;
   }
 
-  // ---- sounds ----
-  // Preload a small pool of Audio elements per effect. The previous code did
-  // `new Audio(dataURI)` on *every* play, which re-decodes the base64 each time —
-  // a real per-flap stutter on mobile. Here each sound is decoded once up front
-  // and replayed round-robin so rapid repeats (wing) don't cut each other off.
+  // ---- sounds (Web Audio) ----
+  // HTMLAudioElement.play() causes main-thread hitches on iOS. Web Audio decodes
+  // each effect once into a buffer and fires it through a lightweight source node,
+  // which never janks the render loop and lets sounds overlap freely. The context
+  // is created/resumed on the first tap (browsers require a user gesture).
   const SFX = { wing: "sfx_wing", point: "sfx_point", hit: "sfx_hit", die: "sfx_die", swoosh: "sfx_swooshing" };
-  let audioOK = false;
-  const POOL_N = 3;
-  const SFX_POOL = {};
-  for (const name in SFX) {
-    const uri = ASSETS.sounds[SFX[name]];
-    const pool = [];
-    for (let i = 0; i < POOL_N; i++) {
-      const a = new Audio(uri); a.volume = 0.5; a.preload = "auto"; pool.push(a);
+  let audioCtx = null;
+  const BUFFERS = {};
+  function initAudio() {
+    if (audioCtx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    audioCtx = new AC();
+    for (const name in SFX) {
+      fetch(ASSETS.sounds[SFX[name]])
+        .then((r) => r.arrayBuffer())
+        .then((buf) => audioCtx.decodeAudioData(buf))
+        .then((decoded) => { BUFFERS[name] = decoded; })
+        .catch(() => {});
     }
-    SFX_POOL[name] = { pool, i: 0 };
   }
   function play(name) {
-    if (!audioOK) return;
-    const slot = SFX_POOL[name]; if (!slot) return;
-    const a = slot.pool[slot.i];
-    slot.i = (slot.i + 1) % slot.pool.length;
-    try { a.currentTime = 0; a.play().catch(() => {}); } catch (e) {}
+    if (!audioCtx) return;
+    const b = BUFFERS[name];
+    if (!b) return;
+    const src = audioCtx.createBufferSource();
+    src.buffer = b;
+    const g = audioCtx.createGain();
+    g.gain.value = 0.5;
+    src.connect(g);
+    g.connect(audioCtx.destination);
+    src.start(0);
   }
 
   // ---- canvas sizing: fit inside the canvas's parent box, keep aspect ratio ----
@@ -113,7 +133,8 @@
   reset();
 
   function flap() {
-    if (!audioOK) audioOK = true;
+    initAudio();
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
     if (state === STATE.READY) { state = STATE.PLAY; bird.vy = FLAP; play("wing"); }
     else if (state === STATE.PLAY) { bird.vy = FLAP; bird.rot = -25; play("wing"); }
     else if (state === STATE.DEAD && deadTimer > 30) { play("swoosh"); reset(); }
@@ -196,18 +217,21 @@
 
   // type "big" = large in-game score font (font_048..057 = ASCII '0'..'9');
   // type "score" = small panel digits (number_score_00..09)
+  // No per-frame array/closure allocation here (called every frame for the live
+  // score and the FPS readout) — iterate the digits directly to avoid GC churn.
   function drawNumber(num, cx, y, type) {
-    const s = String(num);
-    if (type === "big") {
-      const glyphs = s.split("").map(d => IMG["font_0" + (48 + +d)]);
-      let tw = 0; glyphs.forEach(g => tw += g.width + 2); tw -= 2;
-      let x = cx - tw / 2;
-      glyphs.forEach(g => { ctx.drawImage(g, x, y); x += g.width + 2; });
-    } else {
-      const glyphs = s.split("").map(d => IMG["number_score_0" + d]);
-      let tw = 0; glyphs.forEach(g => tw += g.width + 1); tw -= 1;
-      let x = cx - tw / 2;
-      glyphs.forEach(g => { ctx.drawImage(g, x, y); x += g.width + 1; });
+    const s = "" + num;
+    const big = type === "big";
+    const pad = big ? 2 : 1;
+    let tw = -pad;
+    for (let i = 0; i < s.length; i++) {
+      const g = big ? IMG["font_0" + (48 + +s[i])] : IMG["number_score_0" + s[i]];
+      if (g) tw += g.width + pad;
+    }
+    let x = cx - tw / 2;
+    for (let i = 0; i < s.length; i++) {
+      const g = big ? IMG["font_0" + (48 + +s[i])] : IMG["number_score_0" + s[i]];
+      if (g) { ctx.drawImage(g, x, y); x += g.width + pad; }
     }
   }
 
