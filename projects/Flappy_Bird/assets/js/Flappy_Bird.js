@@ -57,7 +57,14 @@
 
   // ---- canvas sizing: fit inside the canvas's parent box, keep aspect ratio ----
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    // Backing-store supersampling factor. The full-screen background is blitted
+    // every frame, so fill rate is the main cost — and on a phone devicePixelRatio
+    // is often 3, making the canvas ~9x larger than a 1x render and stuttering
+    // badly. This is pixel art and stays crisp under CSS upscaling
+    // (image-rendering: pixelated), so on touch devices we render at 1x (game
+    // resolution) for a huge fill-rate win. Desktop keeps 2x for smooth edges.
+    const coarse = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+    const dpr = coarse ? 1 : Math.min(window.devicePixelRatio || 1, 2);
     // Size against the stage (the frame now shrink-wraps the canvas, so we must
     // measure the outer container, not the frame, to avoid a feedback loop).
     const stage = cvs.parentElement.parentElement || cvs.parentElement;
@@ -154,7 +161,9 @@
         p.x -= SPEED;
         if (!p.passed && p.x + PIPE_W < bird.x) { p.passed = true; score++; play("point"); }
       }
-      pipes = pipes.filter(p => p.x > -PIPE_W - 5);
+      // Pipes are ordered left-to-right and exit on the left first; shift the
+      // front one out in place instead of allocating a new array each frame.
+      while (pipes.length && pipes[0].x <= -PIPE_W - 5) pipes.shift();
       // collision
       const bx = bird.x - 15, by = bird.y - 12, bw = 26, bh = 22;
       if (bird.y + 12 >= FLOOR_Y) { bird.y = FLOOR_Y - 12; hit(); }
