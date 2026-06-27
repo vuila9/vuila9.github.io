@@ -36,12 +36,13 @@
 			#flappy-frame {
 				/* Fills the layout viewport. iOS standalone clips fixed elements to
 				   ABOVE the home indicator; the strip below is painted by the body
-				   background (coloured to match the ground). */
+				   background (coloured to match the ground). Transparent so it shows
+				   no colour band behind Safari's toolbars in the browser. */
 				position: fixed;
 				inset: 0;
 				max-width: none;
 				border-radius: 0;
-				background: #4ec0ca;
+				background: transparent;
 				display: flex;
 				align-items: center;
 				justify-content: center;
