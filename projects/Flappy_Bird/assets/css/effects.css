@@ -120,7 +120,9 @@
     display: none;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.45);
+    /* Transparent (no dim) — still covers the screen so it captures taps and the
+       game doesn't flap behind it, but it won't darken the game. */
+    background: transparent;
     z-index: 30;
     -webkit-tap-highlight-color: transparent;
 }

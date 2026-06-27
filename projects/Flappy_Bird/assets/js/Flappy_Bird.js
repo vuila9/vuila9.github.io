@@ -52,7 +52,7 @@
   // ---- user settings (persisted in localStorage) ----
   // Shown in the Options panel to confirm a deploy is live. Bump this together
   // with CACHE in sw.js so the number always matches the service-worker version.
-  const APP_VERSION = "0.31";
+  const APP_VERSION = "0.34";
 
   const settings = {
     muted: localStorage.getItem("fb_muted") === "1",
@@ -181,14 +181,38 @@
     ensureShake();   // re-attach shake-to-pause if it was enabled in a prior session
     if (state === STATE.READY) { state = STATE.PLAY; bird.vy = FLAP; play("wing"); }
     else if (state === STATE.PLAY) { bird.vy = FLAP; bird.rot = -25; play("wing"); }
-    else if (state === STATE.DEAD && deadTimer > 30) { play("swoosh"); reset(); }
+  }
+
+  function tryRestart() {
+    if (state === STATE.DEAD && deadTimer > 30) { play("swoosh"); reset(); }
+  }
+
+  // Hit-test a pointer event against the on-canvas Play button (game-over panel).
+  function onPlayButton(e) {
+    const im = IMG["button_play"]; if (!im) return false;
+    const rect = cvs.getBoundingClientRect();
+    const pt = (e.touches && e.touches[0]) ? e.touches[0] : e;
+    const wx = (pt.clientX - rect.left) / rect.width * GW;
+    const wy = (pt.clientY - rect.top) / rect.height * GH;
+    const cx = GW / 2, cy = ay(300), pad = 6;   // small pad for easier tapping
+    return wx >= cx - im.width / 2 - pad && wx <= cx + im.width / 2 + pad
+        && wy >= cy - im.height / 2 - pad && wy <= cy + im.height / 2 + pad;
   }
 
   // Only react to taps/keys when the game has focus, so page scrolling still works.
-  function onTap(e) { e.preventDefault(); flap(); }
+  // On game over, only a tap on the Play button restarts — taps elsewhere do nothing.
+  function onTap(e) {
+    e.preventDefault();
+    if (state === STATE.DEAD) { if (onPlayButton(e)) tryRestart(); return; }
+    flap();
+  }
   cvs.addEventListener("touchstart", onTap, { passive: false });
   cvs.addEventListener("mousedown", onTap);
-  window.addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); flap(); } });
+  window.addEventListener("keydown", e => {
+    if (e.code !== "Space") return;
+    e.preventDefault();
+    if (state === STATE.DEAD) tryRestart(); else flap();
+  });
 
   function spawnPipe() {
     // Fixed vertical variability (the original's 40..230 band, ~190px), anchored a
@@ -457,7 +481,7 @@
       if (settings.showFps) {
         fpsFrames++; fpsAccum += dt;
         if (fpsAccum >= 500) { fpsValue = Math.round(fpsFrames * 1000 / fpsAccum); fpsFrames = 0; fpsAccum = 0; }
-        drawNumber(fpsValue, 16, 8, "score");
+        drawNumber(fpsValue, 16, 23, "score");
       }
       syncChrome();
     } else {
