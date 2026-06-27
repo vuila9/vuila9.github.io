@@ -297,6 +297,29 @@
     ctx.restore();
   }
 
+  // Glossy diagonal shine that periodically sweeps across high-tier medals
+  // (emerald+). Clipped to the medal disc; additive so it reads as a gleam.
+  function drawMedalShine(cx, cy, t) {
+    const period = 150, dur = 45, tt = t % period;   // sweep ~0.75s every ~2.5s
+    if (tt >= dur) return;
+    const p = tt / dur, r = 20, w = 0.18;
+    const cl = (v) => Math.min(1, Math.max(0, v));
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.clip();
+    const g = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);  // diagonal
+    g.addColorStop(0, "rgba(255,255,255,0)");
+    if (p - w > 0) g.addColorStop(cl(p - w), "rgba(255,255,255,0)");
+    g.addColorStop(cl(p), "rgba(255,255,255,0.6)");
+    if (p + w < 1) g.addColorStop(cl(p + w), "rgba(255,255,255,0)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - r, cy - r, 2 * r, 2 * r);
+    ctx.restore();
+  }
+
   // Tier name shown under the medal. Indexed by medalIdx (see hit()).
   const MEDAL_NAMES = ["PLATINUM", "GOLD", "SILVER", "BRONZE", "SAPPHIRE",
     "DIAMOND", "EMERALD", "RUBY", "OBSIDIAN", "RADIANT"];
@@ -387,6 +410,7 @@
         drawNumber(best, sx, py + 16, "score");
         if (medalIdx >= 0) {
           drawCentered("medals_" + medalIdx, px - 66, py + 2, 1);
+          if (medalIdx >= 6) drawMedalShine(px - 66, py + 2, frames);   // emerald+
           if (medalIdx >= 4) drawSparkles(px - 66, py + 2, frames);
           drawMedalLabel(medalIdx, px - 66, py + 37);
         }
