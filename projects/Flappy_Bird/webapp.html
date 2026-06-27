@@ -25,24 +25,23 @@
 			html, body {
 				margin: 0;
 				height: 100%;
-				background: #000;
+				/* iOS standalone paints this root background in the home-indicator
+				   strip below the (clipped) fixed frame. Match it to the ground dirt
+				   colour so that strip blends with the game instead of showing black. */
+				background: #ded895;
 				overflow: hidden;
 				overscroll-behavior: none;
 				-webkit-tap-highlight-color: transparent;
 			}
 			#flappy-frame {
-				/* iOS standalone keeps the layout viewport ABOVE the home indicator,
-				   so inset:0 / 100dvh stop short. Anchor to the top and extend the
-				   height by the bottom safe-area inset to reach under the home
-				   indicator. background is a TEMP red diagnostic (see chat note). */
+				/* Fills the layout viewport. iOS standalone clips fixed elements to
+				   ABOVE the home indicator; the strip below is painted by the body
+				   background (coloured to match the ground). */
 				position: fixed;
-				top: 0;
-				left: 0;
-				right: 0;
-				height: calc(100% + env(safe-area-inset-bottom, 0px));
+				inset: 0;
 				max-width: none;
 				border-radius: 0;
-				background: #e03030;
+				background: #4ec0ca;
 				display: flex;
 				align-items: center;
 				justify-content: center;

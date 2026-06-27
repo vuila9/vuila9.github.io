@@ -52,7 +52,7 @@
   // ---- user settings (persisted in localStorage) ----
   // Shown in the Options panel to confirm a deploy is live. Bump this together
   // with CACHE in sw.js so the number always matches the service-worker version.
-  const APP_VERSION = "0.29";
+  const APP_VERSION = "0.30";
 
   const settings = {
     muted: localStorage.getItem("fb_muted") === "1",
