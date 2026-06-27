@@ -53,6 +53,7 @@
   const settings = {
     muted: localStorage.getItem("fb_muted") === "1",
     showFps: localStorage.getItem("fb_showfps") === "1",
+    shake: localStorage.getItem("fb_shake") === "1",   // iOS webapp: shake to pause
   };
 
   // ---- sounds (Web Audio) ----
@@ -169,6 +170,7 @@
   function flap() {
     initAudio();
     if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    ensureShake();   // re-attach shake-to-pause if it was enabled in a prior session
     if (state === STATE.READY) { state = STATE.PLAY; bird.vy = FLAP; play("wing"); }
     else if (state === STATE.PLAY) { bird.vy = FLAP; bird.rot = -25; play("wing"); }
     else if (state === STATE.DEAD && deadTimer > 30) { play("swoosh"); reset(); }
@@ -345,6 +347,7 @@
   let paused = false;                 // hard freeze (settings or pause panel open)
   let countdown = 0;                  // ms left on the 3-2-1 resume countdown
   let syncChrome = () => {};          // shows gear (menu) vs pause (in-game) button
+  let ensureShake = () => {};         // (re)acquires shake-to-pause on a user gesture
   // FPS readout — toggled in settings, drawn top-left.
   let fpsAccum = 0, fpsFrames = 0, fpsValue = 0;
   function loop(now) {
@@ -448,18 +451,20 @@
     pauseBtn.innerHTML = PAUSE_SVG;
     pauseBtn.style.display = "none";
 
-    // SOUND + SHOW FPS toggle rows, shared by the Options and Paused panels.
-    const TOGGLE_ROWS =
+    // Shake-to-pause is iOS-only (DeviceMotionEvent.requestPermission is the iOS
+    // signal) and webapp-only (body.flappy-app), so its toggle only appears there.
+    const SHAKE_AVAILABLE = typeof DeviceMotionEvent !== "undefined"
+      && typeof DeviceMotionEvent.requestPermission === "function"
+      && document.body.classList.contains("flappy-app");
+    const row = (label, key) =>
       '<label class="flappy-setting-row">'
-        + '<span class="flappy-setting-label">SOUND</span>'
-        + '<input type="checkbox" class="flappy-toggle" data-key="sound">'
-        + '<span class="flappy-switch" aria-hidden="true"></span>'
-      + '</label>'
-      + '<label class="flappy-setting-row">'
-        + '<span class="flappy-setting-label">SHOW FPS</span>'
-        + '<input type="checkbox" class="flappy-toggle" data-key="fps">'
+        + '<span class="flappy-setting-label">' + label + '</span>'
+        + '<input type="checkbox" class="flappy-toggle" data-key="' + key + '">'
         + '<span class="flappy-switch" aria-hidden="true"></span>'
       + '</label>';
+    // Toggle rows shared by the Options and Paused panels.
+    const TOGGLE_ROWS = row("SOUND", "sound") + row("SHOW FPS", "fps")
+      + (SHAKE_AVAILABLE ? row("SHAKE TO PAUSE", "shake") : "");
 
     const overlay = document.createElement("div");
     overlay.className = "flappy-settings-overlay";
@@ -489,10 +494,12 @@
     // Both panels carry the same toggles; keep every copy in sync with `settings`.
     const soundInputs = frame.querySelectorAll('.flappy-toggle[data-key="sound"]');
     const fpsInputs = frame.querySelectorAll('.flappy-toggle[data-key="fps"]');
+    const shakeInputs = frame.querySelectorAll('.flappy-toggle[data-key="shake"]');
 
     function syncInputs() {
       soundInputs.forEach((i) => { i.checked = !settings.muted; });
       fpsInputs.forEach((i) => { i.checked = settings.showFps; });
+      shakeInputs.forEach((i) => { i.checked = settings.shake; });
     }
     function openSettings() { syncInputs(); overlay.classList.add("open"); paused = true; }
     function closeSettings() { overlay.classList.remove("open"); paused = false; }
@@ -510,6 +517,49 @@
       localStorage.setItem("fb_showfps", settings.showFps ? "1" : "0");
       syncInputs();
     }));
+
+    // Shake-to-pause (iOS webapp only). A deliberate shake during play pauses the
+    // game; motion access is requested on the toggle tap (a required user gesture).
+    let shakeAttached = false, lax = null, lay = null, laz = null, lastShakeT = 0;
+    const SHAKE_THRESHOLD = 25;        // sum of |Δaccel| (m/s²) for a deliberate shake
+    function onMotion(e) {
+      if (!settings.shake) return;
+      const a = e.accelerationIncludingGravity;
+      if (!a || a.x == null) return;
+      if (lax !== null) {
+        const delta = Math.abs(a.x - lax) + Math.abs(a.y - lay) + Math.abs(a.z - laz);
+        if (delta > SHAKE_THRESHOLD && Date.now() - lastShakeT > 1000) {
+          lastShakeT = Date.now();
+          pauseGame();                 // self-guards: only pauses during active play
+        }
+      }
+      lax = a.x; lay = a.y; laz = a.z;
+    }
+    function enableShake() {
+      return DeviceMotionEvent.requestPermission().then((res) => {
+        if (res !== "granted") return false;
+        if (!shakeAttached) { window.addEventListener("devicemotion", onMotion); shakeAttached = true; }
+        return true;
+      }).catch(() => false);
+    }
+    if (SHAKE_AVAILABLE) {
+      shakeInputs.forEach((i) => i.addEventListener("change", () => {
+        if (i.checked) {
+          enableShake().then((ok) => {     // ok=false if the user denies access
+            settings.shake = ok;
+            localStorage.setItem("fb_shake", ok ? "1" : "0");
+            syncInputs();
+          });
+        } else {
+          settings.shake = false;
+          localStorage.setItem("fb_shake", "0");
+          syncInputs();
+        }
+      }));
+      // Re-attach on the first flap if shake was left enabled in a prior session
+      // (motion access can only be (re)requested from a user gesture).
+      ensureShake = function () { if (settings.shake && !shakeAttached) enableShake(); };
+    }
 
     // Pause (in-game) → hard freeze + PAUSED panel. Resume → 3-2-1 countdown then play.
     function pauseGame() {
