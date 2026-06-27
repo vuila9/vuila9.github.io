@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
-            imageSrc: "assets/img/program_icons/flappy_tile.jpg",
+            imageSrc: "assets/img/program_icons/flappy_tile.png",
             title: "Flappy Bird",
             description: "A web revival of the classic Flappy Bird, using the original 2014 assets and re-implemented in vanilla JavaScript.",
             link: "projects/Flappy_Bird/Flappy_Bird.html"

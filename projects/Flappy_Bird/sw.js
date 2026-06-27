@@ -4,11 +4,10 @@
 // visits and the app works offline once it has been opened.
 //
 // Bump CACHE when any cached file changes so clients pick up the new version.
-const CACHE = "flappy-v1";
+const CACHE = "flappy-v2";
 const ASSETS = [
   "./play.html",
   "./manifest.webmanifest",
-  "./Flappy_Bird_icon.svg",
   "./assets/css/effects.css",
   "./assets/js/flappy_assets.js",
   "./assets/js/Flappy_Bird.js"

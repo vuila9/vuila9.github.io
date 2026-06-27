@@ -10,16 +10,16 @@
   "theme_color": "#4ec0ca",
   "icons": [
     {
-      "src": "../../assets/img/program_icons/flappy_tile.jpg",
-      "sizes": "225x225",
-      "type": "image/jpeg",
-      "purpose": "any"
+      "src": "../../assets/img/program_icons/flappy_tile.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "Flappy_Bird_icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
+      "src": "../../assets/img/program_icons/flappy_tile.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
