@@ -258,6 +258,11 @@
   // display refresh rate (60/120/144Hz all behave identically). ----
   const STEP = 1000 / 60;
   let lastT = performance.now(), acc = 0;
+  // Diagnostic FPS readout — append ?fps to the URL (e.g. play.html?fps) to show
+  // the measured frame rate in the top-left. Lets us tell a real perf problem
+  // from a stale-cache one without guessing.
+  const SHOW_FPS = /[?&]fps\b/.test(location.search);
+  let fpsAccum = 0, fpsFrames = 0, fpsValue = 0;
   function loop(now) {
     if (ready) {
       let dt = now - lastT; lastT = now;
@@ -266,6 +271,11 @@
       let steps = 0;
       while (acc >= STEP && steps < 5) { update(); acc -= STEP; steps++; }
       render();
+      if (SHOW_FPS) {
+        fpsFrames++; fpsAccum += dt;
+        if (fpsAccum >= 500) { fpsValue = Math.round(fpsFrames * 1000 / fpsAccum); fpsFrames = 0; fpsAccum = 0; }
+        drawNumber(fpsValue, 24, 6, "big");
+      }
     } else {
       lastT = now;
       ctx.fillStyle = "#4ec0ca"; ctx.fillRect(0, 0, GW, GH);
