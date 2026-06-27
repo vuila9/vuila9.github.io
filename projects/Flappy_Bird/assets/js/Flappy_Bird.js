@@ -11,8 +11,16 @@
   "use strict";
 
   // ---- logical resolution: classic Flappy Bird playfield ----
-  const GW = 288, GH = 512;           // game world (original bg size)
-  const FLOOR_Y = 400;                // top of ground band
+  // The world grows in fullscreen to match the screen aspect (no letterbox/
+  // pillarbox): GH grows on tall/portrait screens (phones), GW grows on wide/
+  // landscape screens (16:9 monitors). The ground band keeps a constant height
+  // anchored to the bottom; the sky fills the rest.
+  const BASE_GW = 288;                // original world width
+  const BASE_GH = 512;                // original world height
+  const FLOOR_BAND = 112;             // ground-band height (BASE_GH - 400)
+  let GW = BASE_GW;                   // world width — grows on landscape screens
+  let GH = BASE_GH;                   // world height — grows on portrait screens
+  let FLOOR_Y = GH - FLOOR_BAND;      // top of ground band — recomputed in resize()
 
   const cvs = document.getElementById("flappy-canvas");
   if (!cvs) return;                   // nothing to do if the canvas is absent
@@ -102,6 +110,17 @@
       || document.body.classList.contains("flappy-app");
     const availW = fs ? window.innerWidth : (stage.getBoundingClientRect().width || GW);
     const availH = fs ? window.innerHeight : 600;   // target play height on desktop
+    // Grow the world to the screen aspect when filling the screen, so there are
+    // no bands: a taller-than-base screen grows the height (portrait phones), a
+    // wider-than-base screen grows the width (16:9 monitors in fullscreen).
+    GW = BASE_GW;
+    GH = BASE_GH;
+    if (fs) {
+      const aspect = availW / availH;
+      if (aspect > BASE_GW / BASE_GH) GW = Math.round(BASE_GH * aspect);  // widen
+      else GH = Math.round(BASE_GW / aspect);                            // heighten
+    }
+    FLOOR_Y = GH - FLOOR_BAND;
     let scale = availH / GH;
     if (GW * scale > availW) scale = availW / GW;
     cvs.style.height = (GH * scale) + "px";
@@ -131,8 +150,14 @@
   let deadTimer = 0, flashAlpha = 0;
   let medalIdx = -1, scoreReveal = 0;
 
+  // Map an original-layout y (designed for the 512-tall world) into the current
+  // world: the playfield is pinned to the bottom and the extra height becomes sky
+  // on top. This keeps the bird, pipe-gap band, and UI identical to the original
+  // 0.56-aspect game no matter how tall the screen is.
+  function ay(y) { return y + (GH - BASE_GH); }
+
   function reset() {
-    bird = { x: 80, y: 240, vy: 0, rot: 0, frame: 0, py: 240, prot: 0 };
+    bird = { x: 80, y: ay(240), vy: 0, rot: 0, frame: 0, py: ay(240), prot: 0 };
     groundPrev = groundX;
     pipes = []; frames = 0; score = 0; deadTimer = 0; flashAlpha = 0; scoreReveal = 0;
     dayNight = Math.random() < 0.5 ? "day" : "night";
@@ -156,7 +181,10 @@
   window.addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); flap(); } });
 
   function spawnPipe() {
-    const minTop = 40, maxTop = FLOOR_Y - GAP - 60;
+    // Fixed vertical variability (the original's 40..230 band, ~190px), anchored a
+    // constant distance above the ground via ay(). A taller screen adds sky on top
+    // but never widens the gap-placement range, so difficulty matches the original.
+    const minTop = ay(40), maxTop = ay(230);
     const topH = Math.floor(minTop + Math.random() * (maxTop - minTop));
     pipes.push({ x: GW + 10, topH, passed: false, px: GW + 10 });
   }
@@ -166,11 +194,14 @@
     state = STATE.DEAD; deadTimer = 0; flashAlpha = 1; play("hit");
     setTimeout(() => play("die"), 250);
     if (score > best) { best = score; localStorage.setItem("fb_best", best); }
-    if (score >= 40) medalIdx = 3;
-    else if (score >= 30) medalIdx = 2;
-    else if (score >= 20) medalIdx = 1;
-    else if (score >= 10) medalIdx = 0;
-    else medalIdx = -1;
+    // Medal reflects THIS run's score. NB: the sprite indices are not in tier
+    // order — measured colours are medals_0=platinum, _1=gold, _2=silver,
+    // _3=bronze — so map thresholds to the matching sprite explicitly.
+    if (score >= 40) medalIdx = 0;        // platinum
+    else if (score >= 30) medalIdx = 1;   // gold
+    else if (score >= 20) medalIdx = 2;   // silver
+    else if (score >= 10) medalIdx = 3;   // bronze
+    else medalIdx = -1;                   // no medal under 10
   }
 
   function update() {
@@ -182,7 +213,7 @@
     for (const p of pipes) p.px = p.x;
     groundX -= SPEED;                 // continuous; wrapped to one tile at draw time
     if (state === STATE.READY) {
-      bird.y = 240 + Math.sin(frames / 10) * 6;
+      bird.y = ay(240) + Math.sin(frames / 10) * 6;
       bird.frame = Math.floor(frames / 6) % 3;
       return;
     }
@@ -257,9 +288,18 @@
     for (const p of pipes) {
       const px = p.px + (p.x - p.px) * alpha;        // interpolated position
       const downIm = IMG["pipe_down"], upIm = IMG["pipe_up"];
-      const PH = downIm.height;        // 320, tall enough to cover any gap
-      ctx.drawImage(downIm, px, p.topH - PH, PIPE_W, PH);          // top pipe
-      ctx.drawImage(upIm, px, p.topH + GAP, PIPE_W, PH);          // bottom pipe
+      const PH = downIm.height;        // native sprite height
+      // Draw each pipe sprite at native size (cap undistorted), then extend the
+      // shaft to the screen edge with a stretched end-slice — needed because GH
+      // (and thus the distance to the ground/top) grows beyond PH in app mode.
+      // Top pipe: cap meets the gap at p.topH, shaft runs up to the top edge.
+      const topY = p.topH - PH;
+      ctx.drawImage(downIm, px, topY, PIPE_W, PH);
+      if (topY > 0) ctx.drawImage(downIm, 0, 0, downIm.width, 2, px, 0, PIPE_W, topY);
+      // Bottom pipe: cap meets the gap at p.topH + GAP, shaft runs down to ground.
+      const botY = p.topH + GAP, botEnd = botY + PH;
+      ctx.drawImage(upIm, px, botY, PIPE_W, PH);
+      if (botEnd < FLOOR_Y) ctx.drawImage(upIm, 0, upIm.height - 2, upIm.width, 2, px, botEnd, PIPE_W, FLOOR_Y - botEnd);
     }
     // ground (tiled) — interpolate the continuous scroll, wrap at the 24px period
     const land = IMG["land"];
@@ -276,22 +316,22 @@
     ctx.restore();
 
     if (state === STATE.READY) {
-      drawCentered("text_ready", GW / 2, 150, 1);
-      drawCentered("tutorial", GW / 2, 250, 1);
+      drawCentered("text_ready", GW / 2, ay(150), 1);
+      drawCentered("tutorial", GW / 2, ay(250), 1);
     }
     if (state === STATE.PLAY) {
       drawNumber(score, GW / 2, 40, "big");
     }
     if (state === STATE.DEAD) {
-      drawCentered("text_game_over", GW / 2, 120, 1);
+      drawCentered("text_game_over", GW / 2, ay(120), 1);
       if (deadTimer > 20) {
-        const px = GW / 2, py = 200;
+        const px = GW / 2, py = ay(200);
         drawCentered("score_panel", px, py, 1);
         const sx = px + 72;
         drawNumber(score, sx, py - 27, "score");
         drawNumber(best, sx, py + 16, "score");
         if (medalIdx >= 0) drawCentered("medals_" + medalIdx, px - 66, py + 2, 1);
-        drawCentered("button_play", GW / 2, 300, 1);
+        drawCentered("button_play", GW / 2, ay(300), 1);
       }
     }
     // hit flash
@@ -464,15 +504,25 @@
     });
 
     // Pause (in-game) → hard freeze + PAUSED panel. Resume → 3-2-1 countdown then play.
-    pauseBtn.addEventListener("click", () => {
-      if (state !== STATE.PLAY) return;
+    function pauseGame() {
+      if (state !== STATE.PLAY || paused || countdown > 0) return;
       paused = true;
       pauseOverlay.classList.add("open");
-    });
-    resumeBtn.addEventListener("click", () => {
+    }
+    function resumeGame() {
+      if (!pauseOverlay.classList.contains("open")) return;
       pauseOverlay.classList.remove("open");
       paused = false;
       countdown = 3000;
+    }
+    pauseBtn.addEventListener("click", pauseGame);
+    resumeBtn.addEventListener("click", resumeGame);
+    // P key toggles pause / resume during play.
+    window.addEventListener("keydown", (e) => {
+      if (e.code !== "KeyP") return;
+      e.preventDefault();
+      if (pauseOverlay.classList.contains("open")) resumeGame();
+      else pauseGame();
     });
 
     // Gear on menu/game-over, pause during play, neither while a panel is open or

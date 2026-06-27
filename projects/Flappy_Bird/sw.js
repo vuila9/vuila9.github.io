@@ -8,7 +8,7 @@
 // never reach an installed app because it keeps serving stale cached code.
 //
 // Bump CACHE whenever the precached file list changes.
-const CACHE = "flappy-v8";
+const CACHE = "flappy-v14";
 const ASSETS = [
   "./play.html",
   "./manifest.webmanifest",
