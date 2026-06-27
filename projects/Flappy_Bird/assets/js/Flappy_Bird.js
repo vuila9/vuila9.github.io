@@ -196,10 +196,17 @@
     state = STATE.DEAD; deadTimer = 0; flashAlpha = 1; play("hit");
     setTimeout(() => play("die"), 250);
     if (score > best) { best = score; localStorage.setItem("fb_best", best); }
-    // Medal reflects THIS run's score. NB: the sprite indices are not in tier
-    // order — measured colours are medals_0=platinum, _1=gold, _2=silver,
-    // _3=bronze — so map thresholds to the matching sprite explicitly.
-    if (score >= 40) medalIdx = 0;        // platinum
+    // Medal reflects THIS run's score. Sprite indices aren't in tier order:
+    // medals_0=platinum, _1=gold, _2=silver, _3=bronze (original art), and
+    // _4..9 = sapphire/diamond/emerald/ruby/obsidian/radiant (generated).
+    // Sapphire and above (medalIdx >= 4) get the sparkle effect.
+    if (score >= 100) medalIdx = 9;       // radiant
+    else if (score >= 90) medalIdx = 8;   // obsidian
+    else if (score >= 80) medalIdx = 7;   // ruby
+    else if (score >= 70) medalIdx = 6;   // emerald
+    else if (score >= 60) medalIdx = 5;   // diamond
+    else if (score >= 50) medalIdx = 4;   // sapphire
+    else if (score >= 40) medalIdx = 0;   // platinum
     else if (score >= 30) medalIdx = 1;   // gold
     else if (score >= 20) medalIdx = 2;   // silver
     else if (score >= 10) medalIdx = 3;   // bronze
@@ -227,7 +234,7 @@
       if (frames % PIPE_INTERVAL === 0) spawnPipe();
       for (const p of pipes) {
         p.x -= SPEED;
-        if (!p.passed && p.x + PIPE_W < bird.x) { p.passed = true; score++; play("point"); }
+        if (!p.passed && p.x + PIPE_W < bird.x) { p.passed = true; score += 10; play("point"); }   // TEMP: +10/pipe for medal testing (revert to score++ )
       }
       // Pipes are ordered left-to-right and exit on the left first; shift the
       // front one out in place instead of allocating a new array each frame.
@@ -260,6 +267,48 @@
     const im = IMG[name]; if (!im) return;
     const w = im.width * (scale || 1), h = im.height * (scale || 1);
     ctx.drawImage(im, cx - w / 2, cy - h / 2, w, h);
+  }
+
+  // Twinkling 4-point sparkles for high-tier medals (sapphire+). t = frame count.
+  function drawSparkle(cx, cy, r) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r);
+    ctx.quadraticCurveTo(cx + r * 0.16, cy - r * 0.16, cx + r, cy);
+    ctx.quadraticCurveTo(cx + r * 0.16, cy + r * 0.16, cx, cy + r);
+    ctx.quadraticCurveTo(cx - r * 0.16, cy + r * 0.16, cx - r, cy);
+    ctx.quadraticCurveTo(cx - r * 0.16, cy - r * 0.16, cx, cy - r);
+    ctx.fill();
+  }
+  const SPARKLES = [[-20, -15, 0], [18, -13, 1.7], [13, 16, 3.1], [-15, 15, 4.5], [3, -22, 2.3], [21, 3, 5.2]];
+  function drawSparkles(cx, cy, t) {
+    ctx.save();
+    ctx.fillStyle = "#fff";
+    for (let i = 0; i < SPARKLES.length; i++) {
+      const s = SPARKLES[i];
+      const tw = (Math.sin(t * 0.12 + s[2]) + 1) / 2;   // 0..1 twinkle
+      if (tw <= 0.12) continue;
+      ctx.globalAlpha = tw;
+      drawSparkle(cx + s[0], cy + s[1], 2 + tw * 4);
+    }
+    ctx.restore();
+  }
+
+  // Tier name shown under the medal. Indexed by medalIdx (see hit()).
+  const MEDAL_NAMES = ["PLATINUM", "GOLD", "SILVER", "BRONZE", "SAPPHIRE",
+    "DIAMOND", "EMERALD", "RUBY", "OBSIDIAN", "RADIANT"];
+  function drawMedalLabel(idx, cx, cy) {
+    const name = MEDAL_NAMES[idx]; if (!name) return;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "800 12px 'Trebuchet MS', Verdana, Geneva, sans-serif";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#543847";   // dark-brown outline (matches the score digits)
+    ctx.fillStyle = "#fff";
+    ctx.lineWidth = 3;
+    ctx.strokeText(name, cx, cy);
+    ctx.fillText(name, cx, cy);
+    ctx.restore();
   }
 
   // type "big" = large in-game score font (font_048..057 = ASCII '0'..'9');
@@ -332,7 +381,11 @@
         const sx = px + 72;
         drawNumber(score, sx, py - 27, "score");
         drawNumber(best, sx, py + 16, "score");
-        if (medalIdx >= 0) drawCentered("medals_" + medalIdx, px - 66, py + 2, 1);
+        if (medalIdx >= 0) {
+          drawCentered("medals_" + medalIdx, px - 66, py + 2, 1);
+          if (medalIdx >= 4) drawSparkles(px - 66, py + 2, frames);
+          drawMedalLabel(medalIdx, px - 66, py + 37);
+        }
         drawCentered("button_play", GW / 2, ay(300), 1);
       }
     }
