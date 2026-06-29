@@ -12,6 +12,12 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
+            imageSrc: "projects/Bejeweled2/Bejeweled2_icon.svg",
+            title: "Bejeweled 2",
+            description: "A web revival of the classic match-3 game Bejeweled 2, using the original assets and re-implemented in vanilla JavaScript.",
+            link: "projects/Bejeweled2/Bejeweled2.html"
+        },
+        {
             imageSrc: "assets/img/program_icons/flappy_tile.png",
             title: "Flappy Bird",
             description: "A web revival of the classic Flappy Bird, using the original 2014 assets and re-implemented in vanilla JavaScript.",

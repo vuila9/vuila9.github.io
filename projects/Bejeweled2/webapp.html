@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Bejeweled 2</title>
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+		<meta name="description" content="A faithful web revival of the classic Bejeweled 2." />
+		<meta name="theme-color" content="#0a1740" />
+
+		<!-- PWA / Add to Home Screen: launches chrome-free in standalone mode -->
+		<link rel="manifest" href="manifest.webmanifest" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Bejeweled 2" />
+		<link rel="apple-touch-icon" href="Bejeweled2_icon.svg" />
+		<link rel="icon" href="Bejeweled2_icon.svg" type="image/svg+xml" />
+
+		<link rel="stylesheet" href="assets/css/effects.css" />
+		<style>
+			/* Standalone app shell — the game owns the whole viewport. No theme CSS
+			   or scroll scripts are loaded here, which is what keeps it smooth on
+			   mobile compared with the full project page. */
+			html, body {
+				margin: 0;
+				height: 100%;
+				/* iOS standalone paints this root background in the home-indicator
+				   strip below the (clipped) fixed frame. Match it to the game's deep
+				   cosmic background so that strip blends in instead of showing black. */
+				background: #0a1740;
+				overflow: hidden;
+				overscroll-behavior: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+			#bj-frame {
+				/* Fills the layout viewport. iOS standalone clips fixed elements to
+				   ABOVE the home indicator; the strip below is painted by the body
+				   background (coloured to match the game). Transparent so it shows
+				   no colour band behind Safari's toolbars in the browser. */
+				position: fixed;
+				inset: 0;
+				max-width: none;
+				border-radius: 0;
+				background: transparent;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#bj-canvas {
+				display: block;
+				touch-action: none;
+			}
+		</style>
+	</head>
+
+	<body class="bj-app">
+		<div id="bj-stage">
+			<div id="bj-frame">
+				<canvas id="bj-canvas" width="512" height="600"
+					aria-label="Bejeweled 2 game canvas"></canvas>
+			</div>
+		</div>
+
+		<!-- game (no theme scripts: this is the lean, fast app build) -->
+		<script src="assets/js/bejeweled_assets.js"></script>
+		<script src="assets/js/Bejeweled2.js"></script>
+		<script>
+			// Register the service worker so the app is installable and loads its
+			// assets from cache (faster, and works offline once visited).
+			if ("serviceWorker" in navigator) {
+				window.addEventListener("load", function () {
+					navigator.serviceWorker.register("sw.js").catch(function () {});
+				});
+			}
+		</script>
+	</body>
+</html>

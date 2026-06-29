@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Bejeweled 2 Web App &mdash; Play the Classic Match-3 Game Free, Online &amp; Offline</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+
+		<!-- ===== SEO / search & social metadata ===== -->
+		<meta name="description" content="Play Bejeweled 2 free in your browser - a faithful web app remake of the classic match-3 gem-swapping game with the original sprites and sounds. Works on desktop and mobile, installs to your home screen, and is fully playable offline." />
+		<meta name="keywords" content="bejeweled 2, bejeweled, bejeweled web app, bejeweled online, play bejeweled, match 3 game, gem game, html5 bejeweled, bejeweled browser, free bejeweled, bejeweled unblocked" />
+		<meta name="author" content="vuila9" />
+		<meta name="robots" content="index, follow" />
+		<link rel="canonical" href="https://vuila9.github.io/projects/Bejeweled2/Bejeweled2.html" />
+
+		<!-- Open Graph (link previews on Facebook, Discord, iMessage, etc.) -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="vuila9" />
+		<meta property="og:title" content="Bejeweled 2 Web App - Play Free, Online & Offline" />
+		<meta property="og:description" content="A faithful browser remake of the classic Bejeweled 2, with original sprites and sounds. Installable to your home screen and fully playable offline." />
+		<meta property="og:url" content="https://vuila9.github.io/projects/Bejeweled2/Bejeweled2.html" />
+		<meta property="og:image" content="https://vuila9.github.io/projects/Bejeweled2/Bejeweled2_icon.svg" />
+
+		<!-- Twitter card -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="Bejeweled 2 Web App - Play Free, Online & Offline" />
+		<meta name="twitter:description" content="A faithful browser remake of the classic Bejeweled 2 - installable and fully playable offline." />
+		<meta name="twitter:image" content="https://vuila9.github.io/projects/Bejeweled2/Bejeweled2_icon.svg" />
+
+		<!-- Structured data: tell search engines this page is a playable game -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "VideoGame",
+			"name": "Bejeweled 2 Web App",
+			"alternateName": "Bejeweled 2 Online",
+			"url": "https://vuila9.github.io/projects/Bejeweled2/Bejeweled2.html",
+			"image": "https://vuila9.github.io/projects/Bejeweled2/Bejeweled2_icon.svg",
+			"description": "A faithful web app remake of the classic Bejeweled 2 with the original sprites and sounds. Playable in any modern browser on desktop and mobile, installable to the home screen, and fully playable offline.",
+			"genre": ["Puzzle", "Match 3", "Casual"],
+			"gamePlatform": ["Web browser", "iOS", "Android", "Desktop", "Opensource"],
+			"applicationCategory": "GameApplication",
+			"operatingSystem": "Any (modern web browser)",
+			"author": { "@type": "Person", "name": "vuila9" },
+			"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+		}
+		</script>
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="Bejeweled2_icon.svg" type="image/svg+xml">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="stylesheet" href="assets/css/effects.css">
+	</head>
+
+	<body class="is-preload">
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+							<a href="https://vuila9.github.io/#main">
+								<button id="home-btn">&lt;&lt;</button>
+							</a>
+							<a><h1>Bejeweled 2</h1></a>
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Game -->
+							<div id="bj-stage">
+								<div id="bj-frame">
+									<canvas id="bj-canvas" width="512" height="600"
+										aria-label="Bejeweled 2 game canvas"></canvas>
+								</div>
+								<div class="bj-controls">
+									<button id="bj-fullscreen" title="Toggle fullscreen"
+										class="fas fa-expand"></button>
+									<a id="bj-open-app" href="webapp.html" target="_blank"
+										title="Open the standalone full-screen app">Open as app &#8599;</a>
+								</div>
+								<p class="bj-hint">Click or tap a gem, then an adjacent gem, to swap them.
+									Match 3 or more in a row or column to clear them.
+									On mobile, open the app and use your browser's
+									&ldquo;Add to Home Screen&rdquo; for true fullscreen.</p>
+							</div>
+
+							<div>
+								<span class="submenu">Description</span>
+								<p>A faithful web revival of the classic Bejeweled 2. The artwork and
+									sound effects are the originals, extracted from the Android
+									release; the game itself is re-implemented from scratch in vanilla
+									JavaScript on an HTML5 canvas so it runs in any modern browser
+									&mdash; including on a phone, a tablet, where it can be added to the home
+									screen and played fullscreen.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Background</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('background-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="background-content">
+								<p>The game was made with the assisted of Claude AI.</p>
+								<p>After successfully reviving Flappy Bird as a web app, I wanted to try the same approach on a different genre &mdash; a match-3 puzzle game. Bejeweled 2 was the obvious pick: it is the game that defined the entire match-3 category, it works completely offline as a single-player title, and an old standalone Android APK is preserved on the internet, which means all of its original assets are available to extract.</p>
+								<p>The process mirrors the Flappy Bird project. I pulled the original sprites and sound effects from the APK, then re-implemented the game logic &mdash; the gem grid, swapping, match detection, cascading, and scoring &mdash; from scratch in vanilla JavaScript on an HTML5 canvas. Because the game is not a live-service title, a static website hosted on my GitHub Pages portfolio is all it needs.</p>
+								<p>As with Flappy Bird, the goal was to make it feel like a native app. Safari lets you add a web app to your Home Screen and launch it as a standalone, full-screen application, and once it has loaded the first time it can be played entirely offline. See the setup instructions below to achieve this.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">iOS App Setup Instruction</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('instruction-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="instruction-content">
+								<p>Quick disclaimer: Android users can always get the vanilla game by installing the APK file, so yes you are being left out on this one.</p>
+								<p>Before we get started, open the <a href="https://vuila9.github.io/projects/Bejeweled2/webapp.html" target="_blank">webapp version</a> on Safari browser, because apparently only Safari can do this.</p>
+								<p>The version of the game on this current page is not a webapp version, make sure you only do the next step once you open the webapp version of the game on a new tab.</p>
+								<figure class="doc-img">
+									<img src="./assets/img/img1.png" alt="step1">
+									<figcaption>Step 1: Look anywhere on the interface for this button</figcaption>
+								</figure>
+								<figure class="doc-img">
+									<img src="./assets/img/img2.png" alt="step2">
+									<figcaption>Step 2: Need to expand the option list to see this button</figcaption>
+								</figure>
+								<figure class="doc-img">
+									<img src="./assets/img/img3.png" alt="step3">
+									<figcaption>Step 3: Make sure this option is checked, click Add and done</figcaption>
+								</figure>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('features-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<ul>
+									<li><span class="effect-span"><b>Original assets</b>: gem sprites and sound effects pulled straight from the Android APK.</span></li>
+									<li><span class="effect-span"><b>Swap</b> (click / tap): select a gem and an adjacent gem to swap them and make a match.</span></li>
+									<li><span class="effect-span"><b>Cascades</b>: chained matches from falling gems award bonus points.</span></li>
+									<li><span class="effect-span"><b>Levels</b>: a progress meter fills as you clear gems; filling it advances the level, awards a bonus, and raises the next target.</span></li>
+									<li><span class="effect-span"><b>Score &amp; best</b>: local best score persists between sessions.</span></li>
+									<li><span class="effect-span"><b>Fullscreen</b> (button): expand the game to fill the screen.</span></li>
+									<li><span class="effect-span"><b>Esc</b> (keyboard): exit fullscreen.</span></li>
+									<li><span class="effect-span"><b>Offline playable</b>: Once loaded up the first time, the game can be fully played without internet. (only applied after adding the game as a native app)</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Why you can play offline after the first time?</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('faq-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="faq-content">
+								<p>The first time you open the game with internet, your mobile device quietly saves a complete copy of the game onto the device - all the pictures, sounds, and the game itself. Adding it to your Home Screen turns that saved copy into an app icon, just like a real app.</p>
+								<p>After that, whenever you tap the icon, the game runs from the copy already on your phone instead of downloading anything. That's why it opens instantly and works perfectly even in airplane mode or with no signal.</p>
+								<p>Occasionally, I will come back and update the game, if connected to internet, the game will be automatically update to a newer version seamlessly without needing to redo the setup steps.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Future Improvements</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('future-improvement-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="future-improvement-content">
+								<ul>
+									<li><span class="effect-span">Additional game modes (Endless, Puzzle, Action).</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('github-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Bejeweled2" target="_blank"><p>Source code</p></a>
+							</div>
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- project specifics -->
+			<script src="assets/js/bejeweled_assets.js"></script>
+			<script src="assets/js/Bejeweled2.js"></script>
+	</body>
+</html>

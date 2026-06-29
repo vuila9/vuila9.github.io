@@ -1,0 +1,19 @@
+{
+  "name": "Bejeweled 2",
+  "short_name": "Bejeweled 2",
+  "description": "A faithful web revival of the classic Bejeweled 2.",
+  "start_url": "./webapp.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a1740",
+  "theme_color": "#0a1740",
+  "icons": [
+    {
+      "src": "Bejeweled2_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

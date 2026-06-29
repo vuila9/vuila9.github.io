@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Bejeweled 2 gem icon">
+	<!-- Placeholder app icon: a faceted gem on a deep cosmic background.
+	     Swap this for the original Bejeweled 2 icon extracted from the APK
+	     in the next step. -->
+	<rect width="512" height="512" rx="96" fill="#0a1740"/>
+	<g transform="translate(256 268)">
+		<!-- diamond body -->
+		<polygon points="0,-150 130,-40 0,170 -130,-40" fill="#39c0ff"/>
+		<!-- top facets -->
+		<polygon points="0,-150 -55,-40 -130,-40" fill="#7fe0ff"/>
+		<polygon points="0,-150 55,-40 130,-40" fill="#1f8fd6"/>
+		<polygon points="-55,-40 55,-40 0,-150" fill="#aef0ff"/>
+		<!-- bottom facets -->
+		<polygon points="-130,-40 -55,-40 0,170" fill="#1670b0"/>
+		<polygon points="130,-40 55,-40 0,170" fill="#0d4f80"/>
+		<polygon points="-55,-40 55,-40 0,170" fill="#2aa6e6"/>
+		<!-- highlight -->
+		<polygon points="-20,-120 10,-120 -10,-50 -35,-50" fill="#ffffff" opacity="0.65"/>
+	</g>
+</svg>

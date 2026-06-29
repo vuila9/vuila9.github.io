@@ -1,0 +1,229 @@
+/* Bejeweled 2 — project-specific styles */
+
+/* Centered game stage, mirrors the in-page layout used by other canvas projects. */
+#bj-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* The canvas's parent box: defines the area the game sizes itself into. */
+#bj-frame {
+    position: relative;
+    display: inline-flex;          /* shrink-to-fit the canvas, no side gutters */
+    align-items: center;
+    justify-content: center;
+    background: #0a1740;            /* deep cosmic background, shown before load */
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    line-height: 0;                /* remove inline-canvas baseline gap */
+}
+
+#bj-canvas {
+    display: block;
+    touch-action: none;
+    cursor: pointer;
+}
+
+/* When the frame goes fullscreen, fill the screen and keep the game centered. */
+#bj-frame:fullscreen {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    border-radius: 0;
+    background: #000;
+}
+
+/* CSS-only fullscreen fallback for browsers without an element Fullscreen API
+   (iOS Safari never implements requestFullscreen on non-video elements). */
+#bj-frame.bj-fake-fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    background: #000;
+    z-index: 1000;
+}
+
+.bj-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+#bj-fullscreen {
+    cursor: pointer;
+}
+
+#bj-open-app {
+    font-size: 0.85rem;
+    text-decoration: none;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+#bj-open-app:hover {
+    opacity: 1;
+}
+
+.bj-hint {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin: 0;
+}
+
+/* ---- Settings (gear button + Options panel), styled to match the game's
+   jewelled look: deep cosmic panel, gold outlines, gem-green switches. ---- */
+.bj-gear {
+    position: absolute;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #fff;
+    background: #1b2a6b;             /* sapphire blue */
+    border: 3px solid #f3c200;       /* gold outline */
+    border-radius: 8px;
+    box-shadow: 0 3px 0 #b08a00, 0 4px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 20;
+    -webkit-tap-highlight-color: transparent;
+}
+.bj-gear svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+.bj-gear:hover { filter: brightness(1.08); }
+.bj-gear:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #b08a00, 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.bj-settings-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    /* Transparent (no dim) — still covers the screen so it captures taps and the
+       game doesn't react behind it, but it won't darken the game. */
+    background: transparent;
+    z-index: 30;
+    -webkit-tap-highlight-color: transparent;
+}
+.bj-settings-overlay.open { display: flex; }
+
+.bj-settings-panel {
+    width: min(82%, 280px);
+    box-sizing: border-box;
+    padding: 18px 16px 16px;
+    background: #14225a;             /* deep blue, like the in-game panels */
+    border: 4px solid #f3c200;
+    border-radius: 12px;
+    box-shadow: 0 6px 0 #b08a00, 0 12px 22px rgba(0, 0, 0, 0.45);
+    color: #ffe9a8;
+    font-family: "Trebuchet MS", Verdana, Geneva, sans-serif;
+    text-align: center;
+}
+.bj-settings-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+.bj-setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 2px;
+    cursor: pointer;
+    user-select: none;
+}
+.bj-setting-label {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+}
+.bj-toggle {                     /* hide the real checkbox; the span is the UI */
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.bj-switch {
+    position: relative;
+    flex: none;
+    width: 52px;
+    height: 28px;
+    background: #3a3f66;             /* off */
+    border: 3px solid #f3c200;
+    border-radius: 999px;
+    transition: background 0.15s ease;
+}
+.bj-switch::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 1px;
+    width: 22px;
+    height: 22px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 2px solid #b08a00;
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+}
+.bj-toggle:checked ~ .bj-switch { background: #2ec27e; }  /* on = emerald green */
+.bj-toggle:checked ~ .bj-switch::after { transform: translateX(24px); }
+.bj-toggle:focus-visible ~ .bj-switch {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+.bj-settings-close {
+    display: block;
+    width: fit-content;
+    margin: 14px auto 0;
+    padding: 8px 24px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #1b1140;
+    background: #f3c200;             /* gold, like the in-game buttons */
+    border: 3px solid #b08a00;
+    border-radius: 8px;
+    box-shadow: 0 3px 0 #8a6a00;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+}
+.bj-settings-close:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #8a6a00;
+}
+
+.bj-resume { background: #2ec27e; }  /* "go" green for resume */
+
+.bj-version {
+    margin-top: 12px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffe9a8;
+    opacity: 0.5;
+}
