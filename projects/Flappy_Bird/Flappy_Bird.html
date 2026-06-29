@@ -53,7 +53,7 @@
 									sound effects are the originals, extracted from the 2014 Android
 									release; the game itself is re-implemented from scratch in vanilla
 									JavaScript on an HTML5 canvas so it runs in any modern browser
-									&mdash; including on a phone, where it can be added to the home
+									&mdash; including on a phone, a tablet, where it can be added to the home
 									screen and played fullscreen.</p>
 							</div>
 
@@ -64,10 +64,20 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="background-content">
-								<!-- TODO (John): write your dev story here.
-								     e.g. why you revived it, working from just an APK,
-								     the porting/rendering challenges, what you learned. -->
-								<p>I was just bored.</p>
+								<p>The game was made with the assisted of Claude AI.</p>
+								<p>Where do I begin? Originally, my goal was to revive the game as a native iOS app so I could play it on my phone. However, I don't own a Mac, and developing an iOS application requires building it on macOS. After discussing it with Claude, it suggested turning the game into a web app instead. Since web apps need to be hosted online, I realized I already had the perfect place for it: my GitHub Pages portfolio. Because the game isn't a live service title, a static website was all it needed.</p>
+								<p>At first, the process was fairly straightforward. I had already downloaded the game's APK (version 1.3) from an online archive. Once I got the vanilla version running, I immediately noticed something was off: the score digits weren't centered. I asked Claude to help fix it, and to my surprise, it did. The next issue was much more noticeable. The game's animations were running way too fast. As a gamer, I recognized the problem instantly. I was developing on a machine with a 144 Hz monitor, while the original game had been designed around a fixed 60 Hz refresh rate. As a result, the animation speed was scaling with the display's refresh rate. Claude helped me fix that as well with a relatively simple adjustment. That's when it hit me: I had full control over the game. Since I had access to all of its assets, I could modify virtually anything.</p>
+								<p>I started by adding several quality-of-life features, including a pause menu, sound toggle, FPS counter toggle, and, most importantly, full landscape mode support. But I didn't stop there. My original goal had always been to make it feel like a native iOS app. Fortunately, Safari allows users to add a web app to their Home Screen, launching it as a standalone application. After a lot of experimentation to make it behave like a true full-screen app, I finally got everything working the way I wanted. The end result is a web app that runs smoothly and feels remarkably close to a native application, making the game fully playable on most modern Apple devices.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">iOS App Setup Instruction</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('instruction-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="instruction-content">
+								<p>Quick disclaimer: Android users can always get the vanilla game by installing the APK file, so yes you are being left out on this one.</p>
 							</div>
 
 							<div class="container">
@@ -77,14 +87,14 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="features-content">
-								<!-- TODO (John): adjust this list to taste. -->
 								<ul>
 									<li><span class="effect-span"><b>Original assets</b>: sprites and sound effects pulled straight from the 2014 APK texture atlas.</span></li>
 									<li><span class="effect-span"><b>Flap</b> (click / tap / Spacebar): keep the bird airborne through the pipes.</span></li>
 									<li><span class="effect-span"><b>Score &amp; best</b>: local best score persists between sessions.</span></li>
-									<li><span class="effect-span"><b>Medals</b>: bronze, silver, gold and platinum awarded at score thresholds.</span></li>
+									<li><span class="effect-span"><b>Medals</b>: bronze, silver, gold, platinum, and more awarded at score thresholds.</span></li>
 									<li><span class="effect-span"><b>Fullscreen</b> (button): expand the game to fill the screen.</span></li>
-									<li><span class="effect-span"><b>Frame-rate independent</b>: fixed 60Hz physics, so it plays the same on 60/120/144Hz displays.</span></li>
+									<li><span class="effect-span"><b>Esc</b> (keyboard): exit fullscreen.</span></li>
+									<li><span class="effect-span"><b>Frame-rate independent</b>: fixed 60Hz physics, so it plays the same on 60/120/144/280Hz displays.</span></li>
 								</ul>
 							</div>
 
@@ -95,9 +105,8 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="future-improvement-content">
-								<!-- TODO (John): your ideas. -->
 								<ul>
-									<li><span class="effect-span">To be updated</span></li>
+									<li><span class="effect-span">Fully auto-play feature.</span></li>
 								</ul>
 							</div>
 

@@ -180,7 +180,7 @@
 .flappy-switch::after {
     content: "";
     position: absolute;
-    top: 1px;
+    top: 0;
     left: 1px;
     width: 22px;
     height: 22px;
@@ -198,7 +198,9 @@
 }
 
 .flappy-settings-close {
-    margin-top: 16px;
+    display: block;
+    width: fit-content;
+    margin: 14px auto 0;
     padding: 8px 24px;
     font-family: inherit;
     font-size: 15px;

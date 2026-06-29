@@ -52,7 +52,7 @@
   // ---- user settings (persisted in localStorage) ----
   // Shown in the Options panel to confirm a deploy is live. Bump this together
   // with CACHE in sw.js so the number always matches the service-worker version.
-  const APP_VERSION = "0.34";
+  const APP_VERSION = "0.39";
 
   const settings = {
     muted: localStorage.getItem("fb_muted") === "1",
@@ -130,6 +130,17 @@
       else GH = Math.round(BASE_GW / aspect);                            // heighten
     }
     FLOOR_Y = GH - FLOOR_BAND;
+    // A viewport reshape (fullscreen toggle / phone rotation) changes the world
+    // size, leaving the active pipes and bird at coordinates that no longer fit.
+    // Mid-play, clear the field, recentre the bird, and auto-pause for a clean
+    // resume (score is kept). Guarded by prevGW so it never fires on first sizing.
+    if (prevGW !== 0 && (GW !== prevGW || GH !== prevGH) && state === STATE.PLAY) {
+      pipes.length = 0;
+      bird.y = bird.py = ay(240);
+      bird.vy = 0; bird.rot = bird.prot = 0;
+      requestPause();
+    }
+    prevGW = GW; prevGH = GH;
     let scale = availH / GH;
     if (GW * scale > availW) scale = availW / GW;
     cvs.style.height = (GH * scale) + "px";
@@ -457,6 +468,8 @@
   let countdown = 0;                  // ms left on the 3-2-1 resume countdown
   let syncChrome = () => {};          // shows gear (menu) vs pause (in-game) button
   let ensureShake = () => {};         // (re)acquires shake-to-pause on a user gesture
+  let requestPause = () => {};        // pauses the game (assigned by the settings UI)
+  let prevGW = 0, prevGH = 0;         // last world size, to detect viewport reshapes
   // FPS readout — toggled in settings, drawn top-left.
   let fpsAccum = 0, fpsFrames = 0, fpsValue = 0;
   function loop(now) {
@@ -481,7 +494,7 @@
       if (settings.showFps) {
         fpsFrames++; fpsAccum += dt;
         if (fpsAccum >= 500) { fpsValue = Math.round(fpsFrames * 1000 / fpsAccum); fpsFrames = 0; fpsAccum = 0; }
-        drawNumber(fpsValue, 16, 23, "score");
+        drawNumber(fpsValue, 26, 28, "score");
       }
       syncChrome();
     } else {
@@ -507,6 +520,15 @@
       wrap.classList.remove("flappy-fake-fullscreen");
       resize();
     }
+
+    // Esc leaves fullscreen — the toggle button sits outside the fullscreened
+    // frame so it's unreachable while active. (Real fullscreen also exits on Esc
+    // natively; this additionally covers the iOS CSS fake-fullscreen.)
+    window.addEventListener("keydown", function (e) {
+      if (e.code !== "Escape") return;
+      if (document.fullscreenElement && exit) exit.call(document);
+      else if (wrap.classList.contains("flappy-fake-fullscreen")) exitFakeFullscreen();
+    });
 
     fsBtn.addEventListener("click", function () {
       if (!req) {
@@ -686,6 +708,7 @@
     }
     pauseBtn.addEventListener("click", pauseGame);
     resumeBtn.addEventListener("click", resumeGame);
+    requestPause = pauseGame;   // let resize() auto-pause on a viewport reshape
     // P key toggles pause / resume during play.
     window.addEventListener("keydown", (e) => {
       if (e.code !== "KeyP") return;
