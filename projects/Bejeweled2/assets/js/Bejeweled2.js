@@ -337,21 +337,46 @@
 		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) offset[r][c] = { dx: 0, dy: 0 };
 	}
 
-	// ---- Player swap attempt ----
+	// Resolve a swap whose opening slide has already played (offsets back to 0,
+	// model not yet swapped): commit it, or bounce it back if it makes no match.
+	async function afterSlide(a, b) {
+		swapCells(a, b);
+		if (findMatches().size > 0) {
+			await resolveBoard();
+		} else {
+			sndSwapBad();
+			await animateSwap(a, b);   // bounce back
+			swapCells(a, b);
+		}
+	}
+
+	// ---- Tap-tap swap: play the full slide from rest, then resolve. ----
 	async function trySwap(a, b) {
 		if (busy) return;
 		busy = true;
 		selected = null;
 		await animateSwap(a, b);
-		swapCells(a, b);
-		if (findMatches().size > 0) {
-			await resolveBoard();
-		} else {
-			// illegal move: swap back
-			sndSwapBad();
-			await animateSwap(a, b);
-			swapCells(a, b);
-		}
+		await afterSlide(a, b);
+		busy = false;
+	}
+
+	// Commit a live drag: finish the slide from wherever the gem currently sits
+	// (the player dragged it partway), then resolve. `a` is the dragged gem, `b`
+	// the neighbour it's being pushed into.
+	async function commitDrag(a, b) {
+		busy = true;
+		selected = null;
+		const horiz = a.r === b.r;
+		const full = horiz ? (b.c - a.c) * GEM : (b.r - a.r) * GEM;
+		const cur0 = horiz ? offset[a.r][a.c].dx : offset[a.r][a.c].dy;
+		await tween(90, (p) => {
+			const cur = cur0 + (full - cur0) * p;
+			offset[a.r][a.c] = horiz ? { dx: cur, dy: 0 } : { dx: 0, dy: cur };
+			offset[b.r][b.c] = horiz ? { dx: -cur, dy: 0 } : { dx: 0, dy: -cur };
+		}, easeOutQuad);
+		offset[a.r][a.c] = { dx: 0, dy: 0 };
+		offset[b.r][b.c] = { dx: 0, dy: 0 };
+		await afterSlide(a, b);
 		busy = false;
 	}
 
@@ -359,49 +384,121 @@
 		return (Math.abs(a.r - b.r) + Math.abs(a.c - b.c)) === 1;
 	}
 
-	// ---- Input (pointer: covers mouse + touch). Tap-select or drag-swipe. ----
-	let pointerDown = null; // {r,c,x,y}
+	// ---- Input (pointer: covers mouse + touch) ----
+	// Two ways to play, both fire as early as possible:
+	//   • Drag: press a gem and move toward a neighbour — the swap fires the instant
+	//     you cross a small threshold, without waiting for release.
+	//   • Tap-tap: tap a gem, then tap an adjacent gem.
+	let pointerDown = null;          // {r,c,x,y} armed drag origin (internal coords)
+	let dragPreview = null;          // {a, b} cells currently shown mid-drag
+	const COMMIT_FRACTION = 0.5;     // drag this far toward a neighbour to commit
 
-	function cellFromEvent(e) {
+	function pointFromEvent(e) {
 		const rect = canvas.getBoundingClientRect();
 		const sx = CANVAS_W / rect.width, sy = CANVAS_H / rect.height;
-		const x = (e.clientX - rect.left) * sx;
-		const y = (e.clientY - rect.top) * sy;
-		if (y < BOARD_Y) return null;
-		const c = Math.floor((x - BOARD_X) / GEM);
-		const r = Math.floor((y - BOARD_Y) / GEM);
+		return { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy };
+	}
+
+	function cellFromEvent(e) {
+		const p = pointFromEvent(e);
+		if (p.y < BOARD_Y) return null;
+		const c = Math.floor((p.x - BOARD_X) / GEM);
+		const r = Math.floor((p.y - BOARD_Y) / GEM);
 		if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return null;
-		return { r, c, x, y };
+		return { r, c, x: p.x, y: p.y };
 	}
 
 	function onPointerDown(e) {
 		if (busy || !assetsReady) return;
 		const cell = cellFromEvent(e);
 		if (!cell) return;
-		pointerDown = cell;
+		// tap-tap: a gem is already selected and this one is adjacent → swap now
 		if (selected && adjacent(selected, cell)) {
-			trySwap(selected, cell);
-		} else {
-			selected = { r: cell.r, c: cell.c };
-			sndSelect();
+			const a = selected;
+			selected = null;
+			pointerDown = null;
+			trySwap(a, cell);
+			return;
+		}
+		// otherwise select this gem and arm a drag from here
+		selected = { r: cell.r, c: cell.c };
+		pointerDown = cell;
+		if (canvas.setPointerCapture) { try { canvas.setPointerCapture(e.pointerId); } catch (err) {} }
+		sndSelect();
+	}
+
+	// Reset the offsets of the cells currently shown mid-drag back to home.
+	function clearDragOffsets() {
+		if (!dragPreview) return;
+		const { a, b } = dragPreview;
+		if (a) offset[a.r][a.c] = { dx: 0, dy: 0 };
+		if (b) offset[b.r][b.c] = { dx: 0, dy: 0 };
+	}
+
+	function onPointerMove(e) {
+		if (busy || !pointerDown || !assetsReady) return;
+		const p = pointFromEvent(e);
+		const dx = p.x - pointerDown.x, dy = p.y - pointerDown.y;
+		// dominant axis decides which neighbour we're heading toward
+		const horiz = Math.abs(dx) >= Math.abs(dy);
+		const dir = horiz ? (dx > 0 ? 1 : -1) : (dy > 0 ? 1 : -1);
+		const tr = pointerDown.r + (horiz ? 0 : dir);
+		const tc = pointerDown.c + (horiz ? dir : 0);
+		const onBoard = tr >= 0 && tr < ROWS && tc >= 0 && tc < COLS;
+
+		// distance along the active axis, clamped to a single cell (can't go past
+		// the edge when there's no neighbour that way)
+		let m = horiz ? dx : dy;
+		if (!onBoard) m = 0;
+		m = Math.max(-GEM, Math.min(GEM, m));
+
+		const a = { r: pointerDown.r, c: pointerDown.c };
+		const b = onBoard ? { r: tr, c: tc } : null;
+
+		// the dragged gem follows the pointer; the neighbour slides the other way
+		clearDragOffsets();
+		offset[a.r][a.c] = horiz ? { dx: m, dy: 0 } : { dx: 0, dy: m };
+		if (b) offset[b.r][b.c] = horiz ? { dx: -m, dy: 0 } : { dx: 0, dy: -m };
+		dragPreview = { a, b };
+
+		// commit once dragged at least halfway toward the neighbour
+		if (b && Math.abs(m) >= GEM * COMMIT_FRACTION) {
+			pointerDown = null;
+			dragPreview = null;       // commitDrag now owns these offsets
+			commitDrag(a, b);
 		}
 	}
 
-	function onPointerUp(e) {
-		if (busy || !pointerDown) { pointerDown = null; return; }
-		const cell = cellFromEvent(e);
-		if (cell) {
-			const dr = cell.r - pointerDown.r, dc = cell.c - pointerDown.c;
-			// treat a drag onto an adjacent cell as a swipe-swap
-			if (Math.abs(dr) + Math.abs(dc) === 1) {
-				trySwap({ r: pointerDown.r, c: pointerDown.c }, { r: cell.r, c: cell.c });
-			}
-		}
+	function onPointerUp() {
 		pointerDown = null;
+		if (dragPreview && !busy) {
+			const { a, b } = dragPreview;
+			dragPreview = null;
+			snapBack(a, b);           // released before committing → ease home
+		} else {
+			dragPreview = null;
+		}
+	}
+
+	// Ease a half-finished drag back to its resting position.
+	async function snapBack(a, b) {
+		busy = true;
+		const ax = offset[a.r][a.c].dx, ay = offset[a.r][a.c].dy;
+		const bx = b ? offset[b.r][b.c].dx : 0, by = b ? offset[b.r][b.c].dy : 0;
+		await tween(90, (p) => {
+			const k = 1 - p;
+			offset[a.r][a.c] = { dx: ax * k, dy: ay * k };
+			if (b) offset[b.r][b.c] = { dx: bx * k, dy: by * k };
+		}, easeOutQuad);
+		offset[a.r][a.c] = { dx: 0, dy: 0 };
+		if (b) offset[b.r][b.c] = { dx: 0, dy: 0 };
+		busy = false;
 	}
 
 	canvas.addEventListener("pointerdown", (e) => { e.preventDefault(); onPointerDown(e); });
-	canvas.addEventListener("pointerup", (e) => { e.preventDefault(); onPointerUp(e); });
+	canvas.addEventListener("pointermove", (e) => { e.preventDefault(); onPointerMove(e); });
+	canvas.addEventListener("pointerup", (e) => { e.preventDefault(); onPointerUp(); });
+	canvas.addEventListener("pointercancel", onPointerUp);
 	canvas.style.touchAction = "none";
 
 	// ---- Rendering ----
@@ -489,30 +586,34 @@
 		ctx.restore();
 	}
 
-	function drawGems() {
-		for (let r = 0; r < ROWS; r++) {
-			for (let c = 0; c < COLS; c++) {
-				const t = grid[r][c];
-				if (t === -1) continue;
-				const img = gemImgs[t];
-				const off = offset[r][c] || { dx: 0, dy: 0 };
-				const s = scale[r][c] == null ? 1 : scale[r][c];
-				const homeX = BOARD_X + c * GEM, homeY = BOARD_Y + r * GEM;
-				const cx = homeX + GEM / 2 + off.dx;
-				const cy = homeY + GEM / 2 + off.dy;
-				const size = GEM * s;
-				if (img) {
-					ctx.drawImage(img, cx - size / 2, cy - size / 2, size, size);
-				} else {
-					ctx.fillStyle = ["#fff", "#e44", "#fd0", "#3c6", "#39f", "#b3f", "#f93"][t % 7];
-					ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
-				}
-			}
+	function drawGemAt(r, c) {
+		const t = grid[r][c];
+		if (t === -1) return;
+		const img = gemImgs[t];
+		const off = offset[r][c] || { dx: 0, dy: 0 };
+		const s = scale[r][c] == null ? 1 : scale[r][c];
+		const homeX = BOARD_X + c * GEM, homeY = BOARD_Y + r * GEM;
+		const cx = homeX + GEM / 2 + off.dx;
+		const cy = homeY + GEM / 2 + off.dy;
+		const size = GEM * s;
+		if (img) {
+			ctx.drawImage(img, cx - size / 2, cy - size / 2, size, size);
+		} else {
+			ctx.fillStyle = ["#fff", "#e44", "#fd0", "#3c6", "#39f", "#b3f", "#f93"][t % 7];
+			ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
 		}
 	}
 
+	function drawGems() {
+		for (let r = 0; r < ROWS; r++) {
+			for (let c = 0; c < COLS; c++) drawGemAt(r, c);
+		}
+		// keep the gem being dragged above its neighbours
+		if (dragPreview && dragPreview.a) drawGemAt(dragPreview.a.r, dragPreview.a.c);
+	}
+
 	function drawSelection() {
-		if (!selected) return;
+		if (!selected || dragPreview) return;
 		const x = BOARD_X + selected.c * GEM, y = BOARD_Y + selected.r * GEM;
 		const pulse = 2 + Math.sin(selPulse * 6) * 1.5;
 		ctx.strokeStyle = "rgba(255, 233, 168, 0.95)";
