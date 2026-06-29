@@ -78,3 +78,67 @@ select {
     align-items: center;    /* Align vertically in the center */
     gap: 10px;              /* Optional gap between elements */
 }
+
+/* ===== DOCUMENTATION FIGURES + CLICK-TO-ENLARGE LIGHTBOX ===== */
+/* Use <figure class="doc-img"><img src="..."><figcaption>...</figcaption></figure>.
+   A figure on its own is centered and stacks vertically; wrap several in
+   <div class="doc-row"> to lay them side by side (wraps to stacked on mobile). */
+figure.doc-img {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 16px auto;          /* centered; stacks vertically by default */
+    text-align: center;
+}
+figure.doc-img img {
+    display: block;
+    /* Thumbnail size by default (full size shown in the lightbox on click).
+       Override per-image with an inline style, e.g. style="max-width:520px". */
+    max-width: min(100%, 360px);
+    height: auto;
+    margin: 0 auto;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    cursor: zoom-in;            /* hint that it enlarges on click */
+}
+figure.doc-img figcaption {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    font-style: italic;
+    opacity: 0.75;
+}
+
+.doc-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 16px;
+}
+.doc-row > figure.doc-img { margin: 0; }   /* gap handles spacing in a row */
+
+.doc-lightbox {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    cursor: zoom-out;
+}
+.doc-lightbox.open { display: flex; }
+.doc-lightbox-inner { text-align: center; max-width: 95vw; }
+.doc-lightbox-img {
+    max-width: 95vw;
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+.doc-lightbox-cap {
+    margin-top: 10px;
+    color: #eee;
+    font-size: 0.9rem;
+}

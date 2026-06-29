@@ -68,6 +68,7 @@
 								<p>Where do I begin? Originally, my goal was to revive the game as a native iOS app so I could play it on my phone. However, I don't own a Mac, and developing an iOS application requires building it on macOS. After discussing it with Claude, it suggested turning the game into a web app instead. Since web apps need to be hosted online, I realized I already had the perfect place for it: my GitHub Pages portfolio. Because the game isn't a live service title, a static website was all it needed.</p>
 								<p>At first, the process was fairly straightforward. I had already downloaded the game's APK (version 1.3) from an online archive. Once I got the vanilla version running, I immediately noticed something was off: the score digits weren't centered. I asked Claude to help fix it, and to my surprise, it did. The next issue was much more noticeable. The game's animations were running way too fast. As a gamer, I recognized the problem instantly. I was developing on a machine with a 144 Hz monitor, while the original game had been designed around a fixed 60 Hz refresh rate. As a result, the animation speed was scaling with the display's refresh rate. Claude helped me fix that as well with a relatively simple adjustment. That's when it hit me: I had full control over the game. Since I had access to all of its assets, I could modify virtually anything.</p>
 								<p>I started by adding several quality-of-life features, including a pause menu, sound toggle, FPS counter toggle, and, most importantly, full landscape mode support. But I didn't stop there. My original goal had always been to make it feel like a native iOS app. Fortunately, Safari allows users to add a web app to their Home Screen, launching it as a standalone application. After a lot of experimentation to make it behave like a true full-screen app, I finally got everything working the way I wanted. The end result is a web app that runs smoothly and feels remarkably close to a native application, making the game fully playable on most modern Apple devices.</p>
+								<p>Another great feature is that once you've launched the game for the first time and added it as a native app, you can play it entirely offline without an internet connection. See the setup instructions below to achieve this.</p>
 							</div>
 
 							<div class="container">
@@ -78,6 +79,20 @@
 							</div>
 							<div class="expandable-content" id="instruction-content">
 								<p>Quick disclaimer: Android users can always get the vanilla game by installing the APK file, so yes you are being left out on this one.</p>
+								<p>Before we get started, open the <a href="https://vuila9.github.io/projects/Flappy_Bird/webapp.html" target="_blank">webapp version</a> on Safari browser, because apparently only Safari can do this.</p>
+								<p>The version of the game on this current page is not a webapp version, make sure you only do the next step once you open the webpapp version of the game on a new tab.</p>
+								<figure class="doc-img">
+									<img src="./assets/img/img1.png" alt="step1">
+									<figcaption>Step 1: Look anywhere on the interface for this button</figcaption>
+								</figure>
+								<figure class="doc-img">
+									<img src="./assets/img/img2.png" alt="step2">
+									<figcaption>Step 2: Need to expand the option list to see this button</figcaption>
+								</figure>
+								<figure class="doc-img">
+									<img src="./assets/img/img3.png" alt="step3">
+									<figcaption>Step 3: Make sure this option is checked, click Add and done</figcaption>
+								</figure>
 							</div>
 
 							<div class="container">
@@ -95,7 +110,20 @@
 									<li><span class="effect-span"><b>Fullscreen</b> (button): expand the game to fill the screen.</span></li>
 									<li><span class="effect-span"><b>Esc</b> (keyboard): exit fullscreen.</span></li>
 									<li><span class="effect-span"><b>Frame-rate independent</b>: fixed 60Hz physics, so it plays the same on 60/120/144/280Hz displays.</span></li>
+									<li><span class="effect-span"><b>Offline playable</b>: Once loaded up the first time, the game can be fully played without internet. (only applied after adding the game as as a native app)</span></li>
 								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Why you can play offline after the first time?</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('faq-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="faq-content">
+								<p>The first time you open the game with internet, your mobile device quietly saves a complete copy of the game onto the device - all the pictures, sounds, and the game itself. Adding it to your Home Screen turns that saved copy into an app icon, just like a real app.</p>
+								<p>After that, whenever you tap the icon, the game runs from the copy already on your phone instead of downloading anything. That's why it opens instantly and works perfectly even in airplane mode or with no signal.</p>
+								<p>Occasionally, I will come back and update the game, if connected to internet, the game will be automatically update to a newer version seamlessly without needing to redo the setup steps.</p>
 							</div>
 
 							<div class="container">
