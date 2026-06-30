@@ -32,16 +32,6 @@
 	const gemFrames = [];      // gemFrames[t] = [Image, ...] idle-rotation frames
 	let bgImg = null;
 	let assetsReady = false;
-	let animTime = 0;          // shared idle-animation clock (seconds)
-	const ANIM_FPS = 9;        // gem rotation speed
-
-	// Offscreen buffer used to composite the two cross-faded frames at full opacity
-	// before blitting — compositing them straight onto the board would let the
-	// background bleed through mid-blend and visibly dim the gem.
-	const blendCanvas = document.createElement("canvas");
-	blendCanvas.width = GEM;
-	blendCanvas.height = GEM;
-	const bctx = blendCanvas.getContext("2d");
 
 	let loadTotal = 0, loadDone = 0;   // asset-load progress for the loading screen
 
@@ -72,21 +62,18 @@
 		assetsReady = true;
 	}
 
-	// Idle-animation state for gem type `t` at board cell (r,c): the two consecutive
-	// frames straddling the current time and a 0..1 blend factor between them. Drawing
-	// them cross-faded turns the 10-frame flipbook into smooth, continuous motion
-	// instead of a hard frame-to-frame snap. A per-cell phase offset keeps the board
-	// shimmering instead of pulsing in unison.
+	const SPIN_FPS = 14;       // flipbook speed for the selected gem's spin
+
+	// Gem image for type `t` at cell (r,c). Gems sit still on their front-facing frame
+	// except the currently selected one, which spins through the rotation flipbook.
 	function gemAnimState(t, r, c) {
 		const frames = gemFrames[t];
 		if (!frames || frames.length === 0) return { a: gemImgs[t], b: null, f: 0 };
-		if (frames.length === 1) return { a: frames[0], b: null, f: 0 };
-		const phase = (r * COLS + c) % frames.length;
-		const pos = animTime * ANIM_FPS + phase;
-		const base = Math.floor(pos);
-		const i = ((base % frames.length) + frames.length) % frames.length;
-		const j = (i + 1) % frames.length;
-		return { a: frames[i], b: frames[j], f: pos - base };
+		if (frames.length > 1 && selected && selected.r === r && selected.c === c) {
+			const i = Math.floor(selPulse * SPIN_FPS) % frames.length;
+			return { a: frames[i], b: null, f: 0 };
+		}
+		return { a: frames[0], b: null, f: 0 };
 	}
 
 	// ---- Tiny WebAudio feedback (original SFX are locked in PopCap .jet format;
@@ -640,21 +627,7 @@
 			ctx.fillRect(dx, dy, size, size);
 			return;
 		}
-		if (st.b && st.f > 0.001) {
-			// Cross-fade the two straddling frames in the offscreen buffer first:
-			// frame A as an opaque base, frame B drawn over it at alpha f. In the
-			// gem's interior this lerps A→B while staying fully opaque, so the gem
-			// never dims; then blit the composite to the board.
-			bctx.clearRect(0, 0, GEM, GEM);
-			bctx.globalAlpha = 1;
-			bctx.drawImage(st.a, 0, 0, GEM, GEM);
-			bctx.globalAlpha = st.f;
-			bctx.drawImage(st.b, 0, 0, GEM, GEM);
-			bctx.globalAlpha = 1;
-			ctx.drawImage(blendCanvas, dx, dy, size, size);
-		} else {
-			ctx.drawImage(st.a, dx, dy, size, size);
-		}
+		ctx.drawImage(st.a, dx, dy, size, size);
 	}
 
 	function drawGems() {
@@ -742,7 +715,6 @@
 		lastT = now;
 		if (raw > 0) fps = fps * 0.9 + (1 / raw) * 0.1;
 		selPulse += dt;
-		animTime += dt;
 		if (levelFlash > 0) levelFlash = Math.max(0, levelFlash - dt);
 		render();
 		requestAnimationFrame(frame);
