@@ -28,28 +28,65 @@
 	const NUM_TYPES = (BJ_ASSETS.gems || []).length || 7;
 
 	// ---- Asset loading ----
-	const gemImgs = [];
+	const gemImgs = [];        // gemImgs[t] = static fallback frame
+	const gemFrames = [];      // gemFrames[t] = [Image, ...] idle-rotation frames
 	let bgImg = null;
 	let assetsReady = false;
+	let animTime = 0;          // shared idle-animation clock (seconds)
+	const ANIM_FPS = 9;        // gem rotation speed
+
+	// Offscreen buffer used to composite the two cross-faded frames at full opacity
+	// before blitting — compositing them straight onto the board would let the
+	// background bleed through mid-blend and visibly dim the gem.
+	const blendCanvas = document.createElement("canvas");
+	blendCanvas.width = GEM;
+	blendCanvas.height = GEM;
+	const bctx = blendCanvas.getContext("2d");
+
+	let loadTotal = 0, loadDone = 0;   // asset-load progress for the loading screen
 
 	function loadImage(src) {
 		return new Promise((resolve) => {
 			const img = new Image();
-			img.onload = () => resolve(img);
-			img.onerror = () => resolve(null);
+			const done = (result) => { loadDone++; resolve(result); };
+			img.onload = () => done(img);
+			img.onerror = () => done(null);
 			img.src = src;
 		});
 	}
 
 	async function loadAssets() {
-		const gemPromises = (BJ_ASSETS.gems || []).map(loadImage);
-		const [gems, bg] = await Promise.all([
-			Promise.all(gemPromises),
+		const staticList = BJ_ASSETS.gems || [];
+		const frameLists = BJ_ASSETS.gemFrames || staticList.map((s) => [s]);
+		loadTotal = staticList.length + frameLists.reduce((n, l) => n + l.length, 0) +
+			(BJ_ASSETS.background ? 1 : 0);
+		loadDone = 0;
+		const [statics, frames, bg] = await Promise.all([
+			Promise.all(staticList.map(loadImage)),
+			Promise.all(frameLists.map((list) => Promise.all(list.map(loadImage)))),
 			BJ_ASSETS.background ? loadImage(BJ_ASSETS.background) : Promise.resolve(null)
 		]);
-		for (const g of gems) gemImgs.push(g);
+		for (const g of statics) gemImgs.push(g);
+		for (const list of frames) gemFrames.push(list.filter(Boolean));
 		bgImg = bg;
 		assetsReady = true;
+	}
+
+	// Idle-animation state for gem type `t` at board cell (r,c): the two consecutive
+	// frames straddling the current time and a 0..1 blend factor between them. Drawing
+	// them cross-faded turns the 10-frame flipbook into smooth, continuous motion
+	// instead of a hard frame-to-frame snap. A per-cell phase offset keeps the board
+	// shimmering instead of pulsing in unison.
+	function gemAnimState(t, r, c) {
+		const frames = gemFrames[t];
+		if (!frames || frames.length === 0) return { a: gemImgs[t], b: null, f: 0 };
+		if (frames.length === 1) return { a: frames[0], b: null, f: 0 };
+		const phase = (r * COLS + c) % frames.length;
+		const pos = animTime * ANIM_FPS + phase;
+		const base = Math.floor(pos);
+		const i = ((base % frames.length) + frames.length) % frames.length;
+		const j = (i + 1) % frames.length;
+		return { a: frames[i], b: frames[j], f: pos - base };
 	}
 
 	// ---- Tiny WebAudio feedback (original SFX are locked in PopCap .jet format;
@@ -96,6 +133,8 @@
 	let busy = false;         // true while animating (input blocked)
 	let selected = null;      // {r,c} currently selected gem
 	let selPulse = 0;         // selection highlight animation phase
+	let fps = 60;             // smoothed render frames-per-second
+	let showFPS = true;       // toggle with the 'F' key
 
 	// Per-gem visual offset/scale for animations (parallel to grid).
 	// offset = {dx,dy} in pixels added to the cell's home position.
@@ -589,18 +628,32 @@
 	function drawGemAt(r, c) {
 		const t = grid[r][c];
 		if (t === -1) return;
-		const img = gemImgs[t];
 		const off = offset[r][c] || { dx: 0, dy: 0 };
 		const s = scale[r][c] == null ? 1 : scale[r][c];
 		const homeX = BOARD_X + c * GEM, homeY = BOARD_Y + r * GEM;
-		const cx = homeX + GEM / 2 + off.dx;
-		const cy = homeY + GEM / 2 + off.dy;
+		const dx = homeX + GEM / 2 + off.dx - (GEM * s) / 2;
+		const dy = homeY + GEM / 2 + off.dy - (GEM * s) / 2;
 		const size = GEM * s;
-		if (img) {
-			ctx.drawImage(img, cx - size / 2, cy - size / 2, size, size);
-		} else {
+		const st = gemAnimState(t, r, c);
+		if (!st.a) {
 			ctx.fillStyle = ["#fff", "#e44", "#fd0", "#3c6", "#39f", "#b3f", "#f93"][t % 7];
-			ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+			ctx.fillRect(dx, dy, size, size);
+			return;
+		}
+		if (st.b && st.f > 0.001) {
+			// Cross-fade the two straddling frames in the offscreen buffer first:
+			// frame A as an opaque base, frame B drawn over it at alpha f. In the
+			// gem's interior this lerps A→B while staying fully opaque, so the gem
+			// never dims; then blit the composite to the board.
+			bctx.clearRect(0, 0, GEM, GEM);
+			bctx.globalAlpha = 1;
+			bctx.drawImage(st.a, 0, 0, GEM, GEM);
+			bctx.globalAlpha = st.f;
+			bctx.drawImage(st.b, 0, 0, GEM, GEM);
+			bctx.globalAlpha = 1;
+			ctx.drawImage(blendCanvas, dx, dy, size, size);
+		} else {
+			ctx.drawImage(st.a, dx, dy, size, size);
 		}
 	}
 
@@ -621,27 +674,75 @@
 		ctx.strokeRect(x + pulse, y + pulse, GEM - pulse * 2, GEM - pulse * 2);
 	}
 
+	// Cosmic loading screen shown until every asset has decoded. The bar tracks
+	// real progress (loadDone / loadTotal) so the wait reads as intentional.
+	function drawLoading() {
+		const g = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
+		g.addColorStop(0, "#0a1a44");
+		g.addColorStop(1, "#050a1f");
+		ctx.fillStyle = g;
+		ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+		const cx = CANVAS_W / 2, cy = CANVAS_H / 2;
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+
+		ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+		ctx.shadowBlur = 12;
+		ctx.fillStyle = "#ffe9a8";
+		ctx.font = "bold 40px 'Trebuchet MS', Verdana, sans-serif";
+		ctx.fillText("BEJEWELED 2", cx, cy - 64);
+		ctx.shadowBlur = 0;
+
+		const bw = Math.min(360, CANVAS_W - 80), bh = 16;
+		const bx = cx - bw / 2, by = cy - 8;
+		const p = loadTotal > 0 ? Math.min(1, loadDone / loadTotal) : 1;
+		ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+		roundRectPath(bx, by, bw, bh, 8); ctx.fill();
+		if (p > 0) {
+			ctx.fillStyle = "#f3c200";
+			roundRectPath(bx, by, Math.max(bh, bw * p), bh, 8); ctx.fill();
+		}
+		ctx.strokeStyle = "rgba(255, 233, 168, 0.6)";
+		ctx.lineWidth = 2;
+		roundRectPath(bx, by, bw, bh, 8); ctx.stroke();
+
+		ctx.fillStyle = "rgba(255, 233, 168, 0.85)";
+		ctx.font = "bold 16px 'Trebuchet MS', Verdana, sans-serif";
+		ctx.fillText("Loading " + Math.round(p * 100) + "%", cx, by + bh + 26);
+	}
+
 	function render() {
+		if (!assetsReady) { drawLoading(); return; }
 		drawBackground();
 		drawHUD();
-		if (assetsReady) drawGems();
+		drawGems();
 		drawSelection();
 		drawLevelFlash();
+		drawFPS();
+	}
 
-		if (!assetsReady) {
-			ctx.fillStyle = "#ffe9a8";
-			ctx.textAlign = "center";
-			ctx.textBaseline = "middle";
-			ctx.font = "16px 'Trebuchet MS', Verdana, sans-serif";
-			ctx.fillText("loading…", CANVAS_W / 2, BOARD_Y + BOARD_H / 2);
-		}
+	function drawFPS() {
+		if (!showFPS) return;
+		ctx.save();
+		ctx.textAlign = "left";
+		ctx.textBaseline = "top";
+		ctx.font = "bold 12px monospace";
+		ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+		ctx.fillRect(4, CANVAS_H - 20, 60, 16);
+		ctx.fillStyle = fps >= 50 ? "#7CFC7C" : fps >= 30 ? "#ffd34d" : "#ff6b6b";
+		ctx.fillText(Math.round(fps) + " fps", 8, CANVAS_H - 18);
+		ctx.restore();
 	}
 
 	let lastT = performance.now();
 	function frame(now) {
-		const dt = Math.min(0.05, (now - lastT) / 1000);
+		const raw = (now - lastT) / 1000;        // true frame time (for the FPS read)
+		const dt = Math.min(0.05, raw);           // clamped for stable game/animation
 		lastT = now;
+		if (raw > 0) fps = fps * 0.9 + (1 / raw) * 0.1;
 		selPulse += dt;
+		animTime += dt;
 		if (levelFlash > 0) levelFlash = Math.max(0, levelFlash - dt);
 		render();
 		requestAnimationFrame(frame);
@@ -679,6 +780,10 @@
 	}
 	window.addEventListener("resize", fitCanvas);
 	window.addEventListener("load", fitCanvas);
+	// 'F' toggles the FPS counter.
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "f" || e.key === "F") showFPS = !showFPS;
+	});
 	// Re-fit whenever the container's size settles (covers the template's preload
 	// fade-in, font loading, orientation changes, etc.).
 	if (window.ResizeObserver) {
