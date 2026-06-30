@@ -196,10 +196,13 @@
 }
 
 .bj-settings-close {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: fit-content;
     margin: 14px auto 0;
     padding: 8px 24px;
+    line-height: 1;
     font-family: inherit;
     font-size: 15px;
     font-weight: 800;
@@ -218,6 +221,15 @@
 }
 
 .bj-resume { background: #2ec27e; }  /* "go" green for resume */
+
+.bj-reset {
+    background: #7a1a1a;
+    color: #ffe9a8;
+    border-color: #c03030;
+    box-shadow: 0 3px 0 #4a0a0a;
+}
+.bj-reset:hover  { background: #9a2020; }
+.bj-reset:active { box-shadow: 0 1px 0 #4a0a0a; }
 
 .bj-version {
     margin-top: 12px;

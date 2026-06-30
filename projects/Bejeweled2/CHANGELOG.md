@@ -8,6 +8,42 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.0.15] - 2026-06-30
+### Added
+- Diagonal gloss sweep: a soft white sheen band drifts across the board from top-left to bottom-right every 6–14 seconds as a cosmetic idle effect.
+
+## [0.0.14] - 2026-06-30
+### Changed
+- FPS counter moved to top-left of the HUD, above the Best score, which shifted down to make room.
+- Level and current score are now centered in the HUD; Best score anchored top-left.
+
+## [0.0.13] - 2026-06-30
+### Added
+- Settings panel: gear button (top-right of canvas) opens an OPTIONS overlay with Sound, FPS Counter, and Debug Mode toggles, a Reset Best Score button, and a RESUME button. Works on both the project page and the standalone webapp.
+- Debug Mode toggle: when enabled, a selected gem can be swapped with any gem on the board, bypassing the adjacency check.
+- `DROP_MS` constant for tuning gem fall duration independently of other animations.
+- Animation speed multiplier (`gameSpeed`) applied to swap, clear, power-form, and fall tweens.
+
+## [0.0.12] - 2026-06-30
+### Changed
+- Cross/star gem now spawns at the intersection cell of T- and L-shaped matches instead of being triggered by a 5-in-a-row. The star arms also render in a second pass so they overlay neighboring gems correctly.
+
+## [0.0.11] - 2026-06-30
+### Changed
+- Star (cross gem) arm color now matches the gem it sits on: arms fade from white at the core to the gem's palette color at the tips.
+
+## [0.0.10] - 2026-06-30
+### Changed
+- Star (cross gem) arms are longer, brighter, and denser: arm reach increased ~65%, arm width widened, gradient replaced flat alpha for a proper tapered shine, and the core glow radius and brightness increased.
+
+## [0.0.9] - 2026-06-30
+### Fixed
+- Removed idle spin animation on gems; spinning now only plays on the currently selected gem.
+
+## [0.0.8] - 2026-06-30
+### Improved
+- Drag-to-swap feel and reliability on mobile (improved pointer tracking and commit logic).
+
 ## [0.0.7] - 2026-06-30
 ### Changed
 - Smoother idle animation: consecutive gem frames are now cross-faded (blended in an offscreen buffer to keep full opacity), turning the 10-frame flipbook into continuous motion instead of a hard frame-to-frame snap.

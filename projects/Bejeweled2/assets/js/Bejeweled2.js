@@ -80,6 +80,10 @@
 	//      these are light synthesized blips so the game isn't silent). ----
 	let audioCtx = null;
 	let muted = false;
+	let debugMode = false;
+	let gameSpeed = 1.5;   // animation speed multiplier
+	const DROP_MS = 300; // gem fall duration in ms (lower = faster drop)
+	function S(ms) { return ms / gameSpeed; }   // scale a tween duration by speed
 	function beep(freq, dur, vol) {
 		if (muted) return;
 		try {
@@ -101,6 +105,7 @@
 	const sndSwapBad = () => beep(160, 0.12, 0.06);
 	const sndMatch = (cascade) => beep(420 + cascade * 90, 0.12, 0.08);
 	const sndLevelUp = () => { beep(660, 0.16, 0.09); setTimeout(() => beep(990, 0.22, 0.09), 130); };
+	const sndExplode = () => { beep(140, 0.28, 0.1); setTimeout(() => beep(90, 0.3, 0.09), 40); };
 
 	// ---- Game state ----
 	let grid = [];            // grid[r][c] = type index, or -1 when empty
@@ -127,6 +132,21 @@
 	// offset = {dx,dy} in pixels added to the cell's home position.
 	let offset = [];          // offset[r][c] = {dx,dy}
 	let scale = [];           // scale[r][c] = 0..1 (for clear/spawn pops)
+	// power[r][c] tier: 0 = normal, 1 = bomb gem (4-in-a-row, clears 3x3),
+	// 2 = cross gem (T/L shape match, clears its whole row + column).
+	let power = [];
+	const POWER_MIN = 4;   // 4-in-a-row = bomb
+
+	// Explosion FX (purely cosmetic; updated each frame, drawn over the gems).
+	let blasts = [];          // expanding shockwave rings {x,y,age,dur,color}
+	let sparks = [];          // flung particles {x,y,vx,vy,age,dur,color,size}
+	let beams = [];           // cross-gem row/column light beams {r,c,age,dur,color}
+
+	// Diagonal gloss sweep — a white sheen band that drifts top-left → bottom-right
+	// over the board every so often (cosmetic idle effect).
+	let sheenAge = 0;           // 0..1 progress during the sweep
+	let sheenActive = false;
+	let sheenCooldown = 6 + Math.random() * 6;   // seconds until next sweep
 
 	function make2D(fn) {
 		const a = [];
@@ -151,6 +171,10 @@
 		}
 		offset = make2D(() => ({ dx: 0, dy: 0 }));
 		scale = make2D(() => 1);
+		power = make2D(() => 0);
+		blasts = [];
+		sparks = [];
+		beams = [];
 	}
 
 	// Would placing type t at (r,c) complete a run of 3 with already-filled cells?
@@ -160,9 +184,11 @@
 		return false;
 	}
 
-	// ---- Match detection: returns a Set of "r,c" keys to clear ----
-	function findMatches() {
-		const matched = new Set();
+	// ---- Match detection ----
+	// findRuns() returns every straight run of 3+ as { cells: [[r,c],...], len }.
+	// Run length is what tells a plain 3-match from a 4+ (which mints a power gem).
+	function findRuns() {
+		const runs = [];
 		// horizontal
 		for (let r = 0; r < ROWS; r++) {
 			let run = 1;
@@ -170,7 +196,11 @@
 				const same = c < COLS && grid[r][c] !== -1 && grid[r][c] === grid[r][c - 1];
 				if (same) { run++; }
 				else {
-					if (run >= 3) for (let k = c - run; k < c; k++) matched.add(r + "," + k);
+					if (run >= 3) {
+						const cells = [];
+						for (let k = c - run; k < c; k++) cells.push([r, k]);
+						runs.push({ cells, len: run });
+					}
 					run = 1;
 				}
 			}
@@ -182,11 +212,40 @@
 				const same = r < ROWS && grid[r][c] !== -1 && grid[r][c] === grid[r - 1][c];
 				if (same) { run++; }
 				else {
-					if (run >= 3) for (let k = r - run; k < r; k++) matched.add(k + "," + c);
+					if (run >= 3) {
+						const cells = [];
+						for (let k = r - run; k < r; k++) cells.push([k, c]);
+						runs.push({ cells, len: run });
+					}
 					run = 1;
 				}
 			}
 		}
+		return runs;
+	}
+
+	// Cells a detonating power gem at (r,c) destroys, by tier:
+	//   level 2 (cross) → its entire row + column; otherwise (bomb) → the 3x3 around it.
+	function blastCellsFor(r, c, level) {
+		const cells = [];
+		if (level === 2) {
+			for (let cc = 0; cc < COLS; cc++) cells.push([r, cc]);
+			for (let rr = 0; rr < ROWS; rr++) cells.push([rr, c]);
+		} else {
+			for (let dr = -1; dr <= 1; dr++) {
+				for (let dc = -1; dc <= 1; dc++) {
+					const nr = r + dr, nc = c + dc;
+					if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) cells.push([nr, nc]);
+				}
+			}
+		}
+		return cells;
+	}
+
+	// Flat set of "r,c" keys in any match — used by the move/shuffle guards.
+	function findMatches() {
+		const matched = new Set();
+		for (const run of findRuns()) for (const [r, c] of run.cells) matched.add(r + "," + c);
 		return matched;
 	}
 
@@ -214,12 +273,15 @@
 		const t = grid[a.r][a.c];
 		grid[a.r][a.c] = grid[b.r][b.c];
 		grid[b.r][b.c] = t;
+		const p = power[a.r][a.c];
+		power[a.r][a.c] = power[b.r][b.c];
+		power[b.r][b.c] = p;
 	}
 
 	// Animate a swap (visual offsets slide between the two homes).
 	async function animateSwap(a, b) {
 		const dx = (b.c - a.c) * GEM, dy = (b.r - a.r) * GEM;
-		await tween(140, (p) => {
+		await tween(S(140), (p) => {
 			offset[a.r][a.c] = { dx: dx * p, dy: dy * p };
 			offset[b.r][b.c] = { dx: -dx * p, dy: -dy * p };
 		}, easeOutQuad);
@@ -229,7 +291,7 @@
 
 	// Animate clearing a set of matched cells (shrink + fade), then null them out.
 	async function animateClear(matched) {
-		await tween(180, (p) => {
+		await tween(S(180), (p) => {
 			for (const key of matched) {
 				const [r, c] = key.split(",").map(Number);
 				scale[r][c] = 1 - p;
@@ -239,7 +301,17 @@
 			const [r, c] = key.split(",").map(Number);
 			grid[r][c] = -1;
 			scale[r][c] = 1;
+			power[r][c] = 0;
 		}
+	}
+
+	// Brief grow-and-settle pop when a cell upgrades into a power gem.
+	async function animatePowerForm(cells) {
+		await tween(S(180), (p) => {
+			const s = 1 + 0.3 * Math.sin(p * Math.PI);
+			for (const [r, c] of cells) scale[r][c] = s;
+		});
+		for (const [r, c] of cells) scale[r][c] = 1;
 	}
 
 	// Apply gravity + refill. Returns a list of fall animations to play.
@@ -252,16 +324,19 @@
 				if (grid[r][c] !== -1) {
 					if (write !== r) {
 						grid[write][c] = grid[r][c];
+						power[write][c] = power[r][c];   // a falling power gem keeps its upgrade
 						grid[r][c] = -1;
+						power[r][c] = 0;
 						falls.push({ r: write, c, dist: (write - r) * GEM });
 					}
 					write--;
 				}
 			}
-			// fill the rest from above with new gems
+			// fill the rest from above with new (never powered) gems
 			let spawnIndex = 1;
 			for (let r = write; r >= 0; r--) {
 				grid[r][c] = randType();
+				power[r][c] = 0;
 				falls.push({ r, c, dist: (write - r + spawnIndex) * GEM });
 				spawnIndex++;
 			}
@@ -273,27 +348,121 @@
 		if (!falls.length) return;
 		// set initial offsets (gems start above their home)
 		for (const f of falls) offset[f.r][f.c] = { dx: 0, dy: -f.dist };
-		await tween(260, (p) => {
+		await tween(DROP_MS, (p) => {
 			for (const f of falls) offset[f.r][f.c] = { dx: 0, dy: -f.dist * (1 - p) };
 		}, easeOutQuad);
 		for (const f of falls) offset[f.r][f.c] = { dx: 0, dy: 0 };
 	}
 
 	// Resolve the board: clear → fall → repeat, accumulating cascade score.
-	async function resolveBoard() {
+	// `movedCells` (the swapped pair, if any) biases which gem in a 4+ run is the
+	// one that survives as the new power gem — ideally the one the player moved.
+	async function resolveBoard(movedCells) {
+		movedCells = movedCells || [];
 		let cascade = 0;
 		while (true) {
-			const matched = findMatches();
-			if (matched.size === 0) break;
+			const runs = findRuns();
+			if (runs.length === 0) break;
 			cascade++;
-			sndMatch(cascade);
-			// scoring: 10 per gem, multiplied by the cascade depth
-			const gained = matched.size * 10 * cascade;
+
+			// Every cell in any run.
+			const matched = new Set();
+			for (const run of runs) for (const [r, c] of run.cells) matched.add(r + "," + c);
+
+			// Detonations: any power gem caught in a match blows up — a 3x3 (bomb) or
+			// its whole row + column (cross). Any power gem inside that blast detonates
+			// too (chain reaction).
+			const blastCenters = [];   // {r,c,t,level} for the explosion FX
+			const blast = new Set();   // every cell the blasts clear
+			const detonated = new Set();
+			const queue = [];
+			for (const key of matched) {
+				const [r, c] = key.split(",").map(Number);
+				if (power[r][c]) queue.push(key);
+			}
+			while (queue.length) {
+				const key = queue.pop();
+				if (detonated.has(key)) continue;
+				detonated.add(key);
+				const [pr, pc] = key.split(",").map(Number);
+				const lvl = power[pr][pc];
+				blastCenters.push({ r: pr, c: pc, t: grid[pr][pc], level: lvl });
+				for (const [nr, nc] of blastCellsFor(pr, pc, lvl)) {
+					const nk = nr + "," + nc;
+					blast.add(nk);
+					if (power[nr][nc] && !detonated.has(nk)) queue.push(nk);
+				}
+			}
+
+			// Detect T/L shapes: a horizontal and vertical run of the same gem type that
+			// share a cell. The intersection becomes a cross gem (level 2).
+			const hRuns = runs.filter(r => r.cells.length >= 2 && r.cells[0][0] === r.cells[1][0]);
+			const vRuns = runs.filter(r => r.cells.length >= 2 && r.cells[0][1] === r.cells[1][1]);
+			const crossKeeps = new Set();  // "r,c" keys that become cross gems
+			for (const hr of hRuns) {
+				for (const vr of vRuns) {
+					// find shared cell (same gem type is guaranteed since both are matched)
+					const inter = hr.cells.find(([r, c]) => vr.cells.some(([vr2, vc]) => vr2 === r && vc === c));
+					if (inter) crossKeeps.add(inter[0] + "," + inter[1]);
+				}
+			}
+
+			// Mint a power gem from each 4+ run (bomb), or any run involved in a T/L shape
+			// (cross). Prefer the moved gem as the keep cell; otherwise the run's middle.
+			// A cell already doomed by a blast can't survive as a keep candidate.
+			const keepSet = new Set();
+			const newPowers = [];   // [r, c, level]
+
+			// First pass: cross gems from T/L intersections
+			for (const key of crossKeeps) {
+				if (blast.has(key)) continue;
+				if (keepSet.has(key)) continue;
+				keepSet.add(key);
+				const [r, c] = key.split(",").map(Number);
+				newPowers.push([r, c, 2]);
+			}
+
+			// Second pass: bomb gems from 4+ straight runs (skip runs already producing a cross)
+			for (const run of runs) {
+				if (run.len < POWER_MIN) continue;
+				// if this run contributed to a cross, skip it (cross takes priority)
+				const contributesToCross = run.cells.some(([r, c]) => crossKeeps.has(r + "," + c));
+				if (contributesToCross) continue;
+				const cands = run.cells.filter(([r, c]) => !blast.has(r + "," + c));
+				if (cands.length === 0) continue;
+				let keep = cands.find(([r, c]) => movedCells.some((m) => m.r === r && m.c === c));
+				if (!keep) keep = cands[Math.floor(cands.length / 2)];
+				const kk = keep[0] + "," + keep[1];
+				if (keepSet.has(kk)) continue;
+				keepSet.add(kk);
+				newPowers.push([keep[0], keep[1], 1]);
+			}
+
+			// Final clear = matches + blasts, minus the cells kept as power gems.
+			const clearSet = new Set();
+			for (const key of matched) if (!keepSet.has(key)) clearSet.add(key);
+			for (const key of blast) if (!keepSet.has(key)) clearSet.add(key);
+
+			// scoring: 10 per cleared gem, multiplied by the cascade depth
+			const gained = clearSet.size * 10 * cascade;
 			score += gained;
 			levelProgress += gained;
 			updateBest();
 			if (levelProgress >= levelTarget) levelUp();
-			await animateClear(matched);
+
+			if (blastCenters.length) {
+				sndExplode();
+				for (const b of blastCenters) {
+					if (b.level === 2) spawnCrossBlast(b.r, b.c, b.t);
+					else spawnExplosion(b.r, b.c, b.t);
+				}
+			} else {
+				sndMatch(cascade);
+			}
+
+			for (const [r, c, level] of newPowers) power[r][c] = level;   // upgrade survivors
+			await animateClear(clearSet);
+			if (newPowers.length) await animatePowerForm(newPowers);
 			const falls = collapseAndRefill();
 			await animateFalls(falls);
 		}
@@ -355,6 +524,7 @@
 			for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) grid[r][c] = flat[k++];
 			if (++tries > 200) { initGrid(); break; }
 		} while (findMatches().size > 0 || !hasAnyMove());
+		power = make2D(() => 0);   // a fresh shuffle has no power gems
 		// little settle animation
 		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) offset[r][c] = { dx: 0, dy: -GEM };
 		await tween(220, (p) => {
@@ -368,7 +538,8 @@
 	async function afterSlide(a, b) {
 		swapCells(a, b);
 		if (findMatches().size > 0) {
-			await resolveBoard();
+			// `b` now holds the gem the player dragged — prefer it as the power-gem keep.
+			await resolveBoard([b, a]);
 		} else {
 			sndSwapBad();
 			await animateSwap(a, b);   // bounce back
@@ -439,7 +610,8 @@
 		const cell = cellFromEvent(e);
 		if (!cell) return;
 		// tap-tap: a gem is already selected and this one is adjacent → swap now
-		if (selected && adjacent(selected, cell)) {
+		// (in debug mode any gem on the board is a valid swap target)
+		if (selected && (debugMode || adjacent(selected, cell))) {
 			const a = selected;
 			selected = null;
 			pointerDown = null;
@@ -562,22 +734,21 @@
 
 		ctx.textBaseline = "middle";
 
-		// top row: LEVEL (left) and Best (right)
+		// top-left: Best score (shifted down to leave room for FPS counter above)
 		ctx.textAlign = "left";
-		ctx.fillStyle = "#ffe9a8";
-		ctx.font = "bold 22px 'Trebuchet MS', Verdana, sans-serif";
-		ctx.fillText("LEVEL " + level, 16, 20);
-
-		ctx.textAlign = "right";
 		ctx.fillStyle = "#9ec7ff";
 		ctx.font = "bold 16px 'Trebuchet MS', Verdana, sans-serif";
-		ctx.fillText("Best: " + best, CANVAS_W - 16, 20);
+		ctx.fillText("Best: " + best, 16, 36);
 
-		// score
-		ctx.textAlign = "left";
+		// center: LEVEL and Score stacked
+		ctx.textAlign = "center";
+		ctx.fillStyle = "#ffe9a8";
+		ctx.font = "bold 22px 'Trebuchet MS', Verdana, sans-serif";
+		ctx.fillText("LEVEL " + level, CANVAS_W / 2, 20);
+
 		ctx.fillStyle = "#ffffff";
 		ctx.font = "bold 24px 'Trebuchet MS', Verdana, sans-serif";
-		ctx.fillText("Score: " + score, 16, 47);
+		ctx.fillText("Score: " + score, CANVAS_W / 2, 47);
 
 		// progress meter toward the next level
 		const bx = 16, by = 66, bw = CANVAS_W - 32, bh = 14;
@@ -621,13 +792,218 @@
 		const dx = homeX + GEM / 2 + off.dx - (GEM * s) / 2;
 		const dy = homeY + GEM / 2 + off.dy - (GEM * s) / 2;
 		const size = GEM * s;
+		const ccx = dx + size / 2, ccy = dy + size / 2;
+		if (power[r][c] === 1) drawPowerGlow(ccx, ccy, t);   // bomb: halo behind the gem
 		const st = gemAnimState(t, r, c);
 		if (!st.a) {
-			ctx.fillStyle = ["#fff", "#e44", "#fd0", "#3c6", "#39f", "#b3f", "#f93"][t % 7];
+			ctx.fillStyle = GEM_PALETTE[t % 7];
 			ctx.fillRect(dx, dy, size, size);
-			return;
+		} else {
+			ctx.drawImage(st.a, dx, dy, size, size);
 		}
-		ctx.drawImage(st.a, dx, dy, size, size);
+		// cross shine drawn in a second pass in drawGems() so it overlaps neighbors
+	}
+
+	// Gem colours for FX/fallback, and a tiny 3-digit-hex → rgba() helper.
+	const GEM_PALETTE = ["#fff", "#e44", "#fd0", "#3c6", "#39f", "#b3f", "#f93"];
+	function hexToRgba(h, a) {
+		const n = h.slice(1);
+		const r = parseInt(n[0] + n[0], 16), g = parseInt(n[1] + n[1], 16), b = parseInt(n[2] + n[2], 16);
+		return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+	}
+
+	// Pulsing coloured halo behind a bomb gem (level 1) so it reads as "special".
+	function drawPowerGlow(cx, cy, t) {
+		const col = GEM_PALETTE[((t % 7) + 7) % 7];
+		const pulse = 0.55 + 0.45 * Math.abs(Math.sin(selPulse * 3));
+		const rad = GEM * 0.78;
+		const g = ctx.createRadialGradient(cx, cy, GEM * 0.12, cx, cy, rad);
+		g.addColorStop(0, hexToRgba(col, 0));
+		g.addColorStop(0.55, hexToRgba(col, 0));
+		g.addColorStop(0.78, hexToRgba(col, 0.5 * pulse));
+		g.addColorStop(1, hexToRgba(col, 0));
+		ctx.save();
+		ctx.globalCompositeOperation = "lighter";
+		ctx.fillStyle = g;
+		ctx.beginPath();
+		ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+	}
+
+	// Translucent sparkle "shine" drawn ON TOP of a cross gem (level 2): two crossing
+	// needles whose arms expand and contract back and forth, with a brightness twinkle.
+	// Low alpha so the gem clearly shows through. No background aura.
+	function drawCrossShine(cx, cy, gemType) {
+		const t = selPulse;
+		const expand = 0.5 + 0.5 * Math.sin(t * 3);         // arms pulse in and out
+		const twinkle = 0.5 + 0.5 * Math.sin(t * 6);        // brightness flicker
+		const R = GEM * (0.48 + 0.42 * expand);              // longer arms
+		const w = GEM * 0.10;                                 // wider/denser arms
+		const gemCol = GEM_PALETTE[((gemType % 7) + 7) % 7]; // gem tint color
+		ctx.save();
+		ctx.globalCompositeOperation = "lighter";
+		ctx.translate(cx, cy);
+		const spike = (vx, vy, wx, wy) => {
+			// white-to-gem-color taper: bright white core fading into gem hue at tips
+			const grad = ctx.createLinearGradient(0, 0, vx, vy);
+			grad.addColorStop(0,   hexToRgba("#fff", 0.85 + 0.15 * twinkle));
+			grad.addColorStop(0.25, hexToRgba("#fff", 0.6 + 0.2 * twinkle));
+			grad.addColorStop(0.6, hexToRgba(gemCol, 0.55 + 0.2 * twinkle));
+			grad.addColorStop(1,   hexToRgba(gemCol, 0));
+			ctx.fillStyle = grad;
+			ctx.beginPath();
+			ctx.moveTo(vx, vy);
+			ctx.lineTo(wx, wy);
+			ctx.lineTo(-vx, -vy);
+			ctx.lineTo(-wx, -wy);
+			ctx.closePath();
+			ctx.fill();
+		};
+		spike(0, -R, w, 0);   // vertical needle
+		spike(-R, 0, 0, w);   // horizontal needle
+		ctx.restore();
+		ctx.save();
+		ctx.globalCompositeOperation = "lighter";
+		const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, GEM * 0.32);
+		core.addColorStop(0,    hexToRgba("#fff", 0.9 + 0.1 * twinkle));
+		core.addColorStop(0.35, hexToRgba(gemCol, 0.45 + 0.35 * twinkle));
+		core.addColorStop(1,    hexToRgba(gemCol, 0));
+		ctx.fillStyle = core;
+		ctx.beginPath();
+		ctx.arc(cx, cy, GEM * 0.32, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+	}
+
+	// ---- Explosion FX ----
+	function spawnExplosion(r, c, t) {
+		const col = GEM_PALETTE[((t % 7) + 7) % 7];
+		const cx = BOARD_X + c * GEM + GEM / 2, cy = BOARD_Y + r * GEM + GEM / 2;
+		blasts.push({ x: cx, y: cy, age: 0, dur: 0.55, color: col });
+		const N = 16;
+		for (let i = 0; i < N; i++) {
+			const ang = (i / N) * Math.PI * 2 + Math.random() * 0.3;
+			const sp = 200 + Math.random() * 300;
+			sparks.push({
+				x: cx, y: cy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+				age: 0, dur: 0.45 + Math.random() * 0.35, color: col, size: 2 + Math.random() * 2.5
+			});
+		}
+	}
+
+	// Cross gem: light beams sweep down the full row and column, plus a center pop.
+	function spawnCrossBlast(r, c, t) {
+		const col = GEM_PALETTE[((t % 7) + 7) % 7];
+		beams.push({ r, c, age: 0, dur: 0.5, color: col });
+		const cx = BOARD_X + c * GEM + GEM / 2, cy = BOARD_Y + r * GEM + GEM / 2;
+		for (let i = 0; i < 12; i++) {
+			const ang = Math.random() * Math.PI * 2;
+			const sp = 160 + Math.random() * 220;
+			sparks.push({
+				x: cx, y: cy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+				age: 0, dur: 0.4 + Math.random() * 0.3, color: col, size: 2 + Math.random() * 2.5
+			});
+		}
+	}
+
+	function updateFX(dt) {
+		for (const b of blasts) b.age += dt;
+		if (blasts.length) blasts = blasts.filter((b) => b.age < b.dur);
+		for (const bm of beams) bm.age += dt;
+		if (beams.length) beams = beams.filter((bm) => bm.age < bm.dur);
+		for (const s of sparks) {
+			s.age += dt;
+			s.x += s.vx * dt; s.y += s.vy * dt;
+			s.vy += 260 * dt;   // gravity
+			s.vx *= 0.98;
+		}
+		if (sparks.length) sparks = sparks.filter((s) => s.age < s.dur);
+
+		// sheen sweep
+		if (sheenActive) {
+			sheenAge += dt / 1.4;   // sweep duration ~1.4s
+			if (sheenAge >= 1) { sheenActive = false; sheenAge = 0; sheenCooldown = 6 + Math.random() * 8; }
+		} else {
+			sheenCooldown -= dt;
+			if (sheenCooldown <= 0) { sheenActive = true; sheenAge = 0; }
+		}
+	}
+
+	function drawSheen() {
+		if (!sheenActive) return;
+		// The band sweeps diagonally: offset goes from -(BOARD_W+BOARD_H) to +(BOARD_W+BOARD_H)
+		const diag = BOARD_W + BOARD_H;
+		const offset = -diag + sheenAge * diag * 2.4;
+		const bandW = diag * 0.22;   // width of the gloss stripe
+
+		ctx.save();
+		// clip to the board area only
+		ctx.beginPath();
+		ctx.rect(BOARD_X, BOARD_Y, BOARD_W, BOARD_H);
+		ctx.clip();
+
+		// rotate 45° around board centre to sweep top-left → bottom-right
+		const cx = BOARD_X + BOARD_W / 2, cy = BOARD_Y + BOARD_H / 2;
+		ctx.translate(cx, cy);
+		ctx.rotate(Math.PI / 4);
+
+		// gradient perpendicular to the sweep direction (now horizontal after rotate)
+		const grad = ctx.createLinearGradient(offset - bandW, 0, offset + bandW, 0);
+		grad.addColorStop(0,    "rgba(255,255,255,0)");
+		grad.addColorStop(0.35, "rgba(255,255,255,0.06)");
+		grad.addColorStop(0.5,  "rgba(255,255,255,0.18)");
+		grad.addColorStop(0.65, "rgba(255,255,255,0.06)");
+		grad.addColorStop(1,    "rgba(255,255,255,0)");
+		ctx.fillStyle = grad;
+		ctx.fillRect(offset - bandW, -diag, bandW * 2, diag * 2);
+		ctx.restore();
+	}
+
+	function drawFX() {
+		ctx.save();
+		ctx.globalCompositeOperation = "lighter";
+		// Cross-gem beams: full-board row/column bars with a bright white core.
+		for (const bm of beams) {
+			const p = bm.age / bm.dur, al = 1 - p;
+			const cy = BOARD_Y + bm.r * GEM + GEM / 2;
+			const cx = BOARD_X + bm.c * GEM + GEM / 2;
+			const th = GEM * (0.12 + 0.55 * Math.sin(Math.min(1, p) * Math.PI));
+			ctx.fillStyle = hexToRgba(bm.color, 0.5 * al);
+			ctx.fillRect(BOARD_X, cy - th / 2, BOARD_W, th);
+			ctx.fillRect(cx - th / 2, BOARD_Y, th, BOARD_H);
+			const cth = th * 0.35;
+			ctx.fillStyle = hexToRgba("#fff", 0.7 * al);
+			ctx.fillRect(BOARD_X, cy - cth / 2, BOARD_W, cth);
+			ctx.fillRect(cx - cth / 2, BOARD_Y, cth, BOARD_H);
+		}
+		for (const b of blasts) {
+			const p = b.age / b.dur, al = 1 - p;
+			const rad = GEM * 0.3 + GEM * 2.6 * p;
+			ctx.strokeStyle = hexToRgba(b.color, 0.6 * al);
+			ctx.lineWidth = 2 + 6 * al;
+			ctx.beginPath();
+			ctx.arc(b.x, b.y, rad, 0, Math.PI * 2);
+			ctx.stroke();
+			if (p < 0.35) {
+				const fa = (0.35 - p) / 0.35;
+				const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, GEM * 1.3);
+				g.addColorStop(0, hexToRgba("#fff", 0.8 * fa));
+				g.addColorStop(1, hexToRgba(b.color, 0));
+				ctx.fillStyle = g;
+				ctx.beginPath();
+				ctx.arc(b.x, b.y, GEM * 1.3, 0, Math.PI * 2);
+				ctx.fill();
+			}
+		}
+		for (const s of sparks) {
+			const al = 1 - s.age / s.dur;
+			ctx.fillStyle = hexToRgba(s.color, al);
+			ctx.beginPath();
+			ctx.arc(s.x, s.y, s.size * al + 0.5, 0, Math.PI * 2);
+			ctx.fill();
+		}
+		ctx.restore();
 	}
 
 	function drawGems() {
@@ -636,6 +1012,18 @@
 		}
 		// keep the gem being dragged above its neighbours
 		if (dragPreview && dragPreview.a) drawGemAt(dragPreview.a.r, dragPreview.a.c);
+		// second pass: draw cross shines on top of all gems so arms overlap neighbors
+		for (let r = 0; r < ROWS; r++) {
+			for (let c = 0; c < COLS; c++) {
+				if (power[r][c] !== 2 || grid[r][c] === -1) continue;
+				const t = grid[r][c];
+				const off = offset[r][c] || { dx: 0, dy: 0 };
+				const s = scale[r][c] == null ? 1 : scale[r][c];
+				const ccx = BOARD_X + c * GEM + GEM / 2 + off.dx;
+				const ccy = BOARD_Y + r * GEM + GEM / 2 + off.dy;
+				drawCrossShine(ccx, ccy, t);
+			}
+		}
 	}
 
 	function drawSelection() {
@@ -690,6 +1078,8 @@
 		drawBackground();
 		drawHUD();
 		drawGems();
+		drawSheen();
+		drawFX();
 		drawSelection();
 		drawLevelFlash();
 		drawFPS();
@@ -702,9 +1092,9 @@
 		ctx.textBaseline = "top";
 		ctx.font = "bold 12px monospace";
 		ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-		ctx.fillRect(4, CANVAS_H - 20, 60, 16);
+		ctx.fillRect(4, 4, 60, 16);
 		ctx.fillStyle = fps >= 50 ? "#7CFC7C" : fps >= 30 ? "#ffd34d" : "#ff6b6b";
-		ctx.fillText(Math.round(fps) + " fps", 8, CANVAS_H - 18);
+		ctx.fillText(Math.round(fps) + " fps", 8, 4);
 		ctx.restore();
 	}
 
@@ -715,6 +1105,7 @@
 		lastT = now;
 		if (raw > 0) fps = fps * 0.9 + (1 / raw) * 0.1;
 		selPulse += dt;
+		updateFX(dt);
 		if (levelFlash > 0) levelFlash = Math.max(0, levelFlash - dt);
 		render();
 		requestAnimationFrame(frame);
@@ -784,6 +1175,49 @@
 		frame_el.classList.toggle("bj-fake-fullscreen");
 		fitCanvas();
 	}
+
+	// ---- Settings panel ----
+	(function initSettings() {
+		const overlay  = document.getElementById("bj-settings-overlay");
+		const gearBtn  = document.getElementById("bj-gear");
+		const closeBtn = document.getElementById("bj-settings-close");
+		const soundChk = document.getElementById("bj-sound-toggle");
+		const fpsChk   = document.getElementById("bj-fps-toggle");
+		const debugChk = document.getElementById("bj-debug-toggle");
+		const resetBtn = document.getElementById("bj-reset-best");
+		if (!overlay || !gearBtn) return;
+
+		function openSettings()  { overlay.classList.add("open"); }
+		function closeSettings() { overlay.classList.remove("open"); }
+
+		gearBtn.addEventListener("click", openSettings);
+		closeBtn.addEventListener("click", closeSettings);
+		overlay.addEventListener("click", (e) => { if (e.target === overlay) closeSettings(); });
+
+		// Sync toggles to current state
+		if (soundChk) {
+			soundChk.checked = !muted;
+			soundChk.addEventListener("change", () => { muted = !soundChk.checked; });
+		}
+		if (fpsChk) {
+			fpsChk.checked = showFPS;
+			fpsChk.addEventListener("change", () => { showFPS = fpsChk.checked; });
+		}
+		if (debugChk) {
+			debugChk.checked = debugMode;
+			debugChk.addEventListener("change", () => { debugMode = debugChk.checked; });
+		}
+
+		// Reset best score
+		if (resetBtn) {
+			resetBtn.addEventListener("click", () => {
+				best = 0;
+				try { localStorage.removeItem("bj2_best"); } catch (e) {}
+				resetBtn.textContent = "Reset!";
+				setTimeout(() => { resetBtn.textContent = "Reset Best Score"; }, 1200);
+			});
+		}
+	})();
 
 	// ---- Boot ----
 	initGrid();
