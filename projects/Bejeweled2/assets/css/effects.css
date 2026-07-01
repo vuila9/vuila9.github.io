@@ -85,26 +85,31 @@
    share .bj-icon-btn for the common box styling and only override `right` to
    line up in a row. ---- */
 .bj-icon-btn {
+    /* --bj-ui-scale (set from JS in fitCanvas) shrinks these in lockstep with the
+       canvas whenever it renders below its logical resolution, so the buttons can
+       never end up taller than the HUD strip they're meant to sit inside of. */
     position: absolute;
-    top: calc(10px + env(safe-area-inset-top, 0px));
-    width: 40px;
-    height: 40px;
+    top: calc(10px * var(--bj-ui-scale, 1) + env(safe-area-inset-top, 0px));
+    width: calc(40px * var(--bj-ui-scale, 1));
+    height: calc(40px * var(--bj-ui-scale, 1));
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     color: #fff;
     background: #1b2a6b;             /* sapphire blue */
-    border: 3px solid #f3c200;       /* gold outline */
-    border-radius: 8px;
+    border-width: calc(3px * var(--bj-ui-scale, 1));
+    border-style: solid;
+    border-color: #f3c200;           /* gold outline */
+    border-radius: calc(8px * var(--bj-ui-scale, 1));
     box-shadow: 0 3px 0 #b08a00, 0 4px 6px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     z-index: 20;
     -webkit-tap-highlight-color: transparent;
 }
 .bj-icon-btn svg {
-    width: 22px;
-    height: 22px;
+    width: calc(22px * var(--bj-ui-scale, 1));
+    height: calc(22px * var(--bj-ui-scale, 1));
     display: block;
 }
 .bj-icon-btn:hover { filter: brightness(1.08); }
@@ -113,8 +118,8 @@
     box-shadow: 0 1px 0 #b08a00, 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.bj-gear { right: calc(10px + env(safe-area-inset-right, 0px)); }
-.bj-gamemode { right: calc(58px + env(safe-area-inset-right, 0px)); }
+.bj-gear { right: calc(10px * var(--bj-ui-scale, 1) + env(safe-area-inset-right, 0px)); }
+.bj-gamemode { right: calc(58px * var(--bj-ui-scale, 1) + env(safe-area-inset-right, 0px)); }
 
 .bj-settings-overlay {
     position: absolute;

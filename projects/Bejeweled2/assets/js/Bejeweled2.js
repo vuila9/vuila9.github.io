@@ -96,6 +96,10 @@
 		if (muted) return;
 		try {
 			if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+			// Mobile browsers (iOS Safari, Chrome Android) create the context suspended
+			// until explicitly resumed — without this, scheduled tones are silently
+			// dropped and the game reads as randomly/inconsistently silent.
+			if (audioCtx.state === "suspended") audioCtx.resume();
 			const t = audioCtx.currentTime;
 			const osc = audioCtx.createOscillator();
 			const gain = audioCtx.createGain();
@@ -1397,8 +1401,15 @@
 			availW = window.innerWidth;
 			availH = window.innerHeight;
 			// Landscape fullscreen/app: widen the board so it fills the screen
-			// instead of leaving empty gutters on either side.
-			setColumns(availW > availH ? WIDE_COLS : NORMAL_COLS);
+			// instead of leaving empty gutters on either side. Prefer the
+			// orientation media query over comparing innerWidth/innerHeight —
+			// on iOS Safari those can briefly report stale/mismatched values
+			// (e.g. mid-toolbar-collapse) and falsely flip the board to WIDE
+			// while the device is actually portrait.
+			const landscape = window.matchMedia
+				? window.matchMedia("(orientation: landscape)").matches
+				: availW > availH;
+			setColumns(landscape ? WIDE_COLS : NORMAL_COLS);
 		} else {
 			setColumns(NORMAL_COLS);
 			// #bj-frame is inline-flex (shrink-to-fit), so measure a stable block
@@ -1419,8 +1430,14 @@
 		if (h > availH) { h = availH; w = h * ar; }
 		canvas.style.width = Math.round(w) + "px";
 		canvas.style.height = Math.round(h) + "px";
+		// Belt-and-suspenders: shrink the overlaid icon buttons in lockstep with the
+		// canvas whenever it renders below its logical resolution (e.g. a WIDE_COLS
+		// board squeezed into a portrait screen), so the fixed-size buttons can never
+		// end up bigger than the HUD strip they're supposed to sit inside of.
+		if (frame_el) frame_el.style.setProperty("--bj-ui-scale", Math.min(1, w / CANVAS_W));
 	}
 	window.addEventListener("resize", fitCanvas);
+	window.addEventListener("orientationchange", fitCanvas);
 	window.addEventListener("load", fitCanvas);
 	// 'F' toggles the FPS counter.
 	document.addEventListener("keydown", (e) => {
