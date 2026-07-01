@@ -8,6 +8,10 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.1.35] - 2026-07-01
+### Changed
+- In Timed mode, detonating a Timer buff now grants time only once and wipes every other Timer buff currently on the board, instead of banking time for each buff caught in a clear. Multiple buffs can still spawn, but only the first collected one pays out.
+
 ## [0.1.34] - 2026-07-01
 ### Changed
 - FPS Counter now defaults to off for new players (was on), matching Debug Mode. The choice is still persisted across sessions once toggled, whether from Settings or the 'F' key.

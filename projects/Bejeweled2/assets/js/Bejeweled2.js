@@ -17,7 +17,7 @@
 
 	// Shown in the Options panel to confirm a deploy is live. Bump this together
 	// with CACHE in sw.js so the number always matches the service-worker version.
-	const APP_VERSION = "0.1.34";
+	const APP_VERSION = "0.1.35";
 
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
 	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,
@@ -745,20 +745,26 @@
 	}
 
 	// Checks a set of "r,c" keys about to be cleared for any Timer buffs and, in
-	// Timed mode, adds TIMER_BUFF_SECONDS to the clock for each one collected.
+	// Timed mode, adds TIMER_BUFF_SECONDS to the clock. Only a single buff is ever
+	// collected per detonation: the first one found grants the time, and every
+	// other Timer buff still sitting on the board is wiped away with it.
 	function collectTimerBuffs(clearedKeys) {
 		if (gameMode !== "timed") return;
-		let collected = 0;
+		let collected = false;
 		for (const key of clearedKeys) {
 			const [r, c] = key.split(",").map(Number);
 			if (timerBuff[r][c]) {
 				timerBuff[r][c] = false;
-				collected++;
-				spawnTimeBuffPopup(r, c);
+				if (!collected) spawnTimeBuffPopup(r, c);
+				collected = true;
 			}
 		}
-		if (collected > 0) {
-			timeLeft += TIMER_BUFF_SECONDS * collected;
+		if (collected) {
+			// Detonating one buff clears the rest of the field's buffs too.
+			for (let r = 0; r < ROWS; r++) {
+				for (let c = 0; c < COLS; c++) timerBuff[r][c] = false;
+			}
+			timeLeft += TIMER_BUFF_SECONDS;
 			sndTimeBuff();
 		}
 	}
