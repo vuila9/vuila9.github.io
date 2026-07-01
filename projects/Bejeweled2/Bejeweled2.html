@@ -95,11 +95,16 @@
 										<div class="bj-settings-panel">
 											<div class="bj-settings-title">OPTIONS</div>
 
-											<label class="bj-setting-row">
+											<div class="bj-setting-row">
 												<span class="bj-setting-label">Sound</span>
-												<input type="checkbox" class="bj-toggle" id="bj-sound-toggle" checked>
-												<span class="bj-switch"></span>
-											</label>
+												<div class="bj-sound-controls">
+													<input type="range" class="bj-volume-slider" id="bj-volume-slider" min="0" max="150" value="100">
+													<label class="bj-toggle-wrap">
+														<input type="checkbox" class="bj-toggle" id="bj-sound-toggle" checked>
+														<span class="bj-switch"></span>
+													</label>
+												</div>
+											</div>
 
 											<label class="bj-setting-row">
 												<span class="bj-setting-label">Haptics</span>
@@ -116,6 +121,16 @@
 											<label class="bj-setting-row">
 												<span class="bj-setting-label">Debug Mode</span>
 												<input type="checkbox" class="bj-toggle" id="bj-debug-toggle">
+												<span class="bj-switch"></span>
+											</label>
+
+											<!-- Timed mode only: a zero-latency "bot" that always plays a legal move
+												 the instant one exists (still at normal swap speed), to benchmark the
+												 highest score achievable if decision time weren't a factor. Hidden
+												 outside Timed mode. -->
+											<label class="bj-setting-row" id="bj-autoplay-row">
+												<span class="bj-setting-label">Auto-Play</span>
+												<input type="checkbox" class="bj-toggle" id="bj-autoplay-toggle">
 												<span class="bj-switch"></span>
 											</label>
 
@@ -171,10 +186,6 @@
 												<div class="bj-timeup-row">
 													<span>Level reached</span>
 													<span id="bj-timeup-level">1</span>
-												</div>
-												<div class="bj-timeup-row">
-													<span>Best level</span>
-													<span id="bj-timeup-best-level">1</span>
 												</div>
 												<div class="bj-timeup-row">
 													<span>Score</span>

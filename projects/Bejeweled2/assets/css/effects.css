@@ -195,6 +195,56 @@
     width: 0;
     height: 0;
 }
+/* Sound row: volume slider + mute toggle side by side. The toggle keeps its own
+   small <label> wrapper (bj-toggle-wrap) so it still forwards clicks onto the
+   zero-size checkbox — the outer row is a plain <div> now that it holds two
+   separate controls instead of just one. */
+.bj-sound-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.bj-toggle-wrap {
+    display: flex;
+    cursor: pointer;
+}
+.bj-volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 84px;
+    height: 6px;
+    border-radius: 999px;
+    background: #3a3f66;
+    outline: none;
+    cursor: pointer;
+}
+.bj-volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f3c200;
+    border: 2px solid #b08a00;
+    cursor: pointer;
+}
+.bj-volume-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: #3a3f66;
+}
+.bj-volume-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f3c200;
+    border: 2px solid #b08a00;
+    cursor: pointer;
+}
+.bj-volume-slider:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
 .bj-switch {
     position: relative;
     flex: none;

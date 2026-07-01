@@ -105,32 +105,132 @@
 	try { gameMode = localStorage.getItem("bj2_mode") || "endless"; } catch (e) {}
 	const DROP_MS = 300; // gem fall duration in ms (lower = faster drop)
 	function S(ms) { return ms / gameSpeed; }   // scale a tween duration by speed
+	function ensureAudioCtx() {
+		if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+		// Mobile browsers (iOS Safari, Chrome Android) create the context suspended
+		// until explicitly resumed — without this, scheduled tones are silently
+		// dropped and the game reads as randomly/inconsistently silent.
+		if (audioCtx.state === "suspended") audioCtx.resume();
+		return audioCtx;
+	}
+	// Master gain multiplier applied to every sound effect's own `vol` — adjustable
+	// via the Settings volume slider (0-150%, persisted), independent of the mute
+	// toggle. SFX_VOLUME_DEFAULT is the multiplier at the slider's 100% position.
+	const SFX_VOLUME_DEFAULT = 1.8;
+	let sfxVolume = SFX_VOLUME_DEFAULT;
+	try {
+		const savedPct = parseInt(localStorage.getItem("bj2_volume"), 10);
+		if (!isNaN(savedPct)) sfxVolume = (savedPct / 100) * SFX_VOLUME_DEFAULT;
+	} catch (e) {}
 	function beep(freq, dur, vol) {
 		if (muted) return;
 		try {
-			if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-			// Mobile browsers (iOS Safari, Chrome Android) create the context suspended
-			// until explicitly resumed — without this, scheduled tones are silently
-			// dropped and the game reads as randomly/inconsistently silent.
-			if (audioCtx.state === "suspended") audioCtx.resume();
-			const t = audioCtx.currentTime;
-			const osc = audioCtx.createOscillator();
-			const gain = audioCtx.createGain();
+			const ctx = ensureAudioCtx();
+			const t = ctx.currentTime;
+			const osc = ctx.createOscillator();
+			const gain = ctx.createGain();
 			osc.type = "sine";
 			osc.frequency.setValueAtTime(freq, t);
 			gain.gain.setValueAtTime(0.0001, t);
-			gain.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+			gain.gain.exponentialRampToValueAtTime(vol * sfxVolume, t + 0.01);
 			gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-			osc.connect(gain).connect(audioCtx.destination);
+			osc.connect(gain).connect(ctx.destination);
 			osc.start(t);
 			osc.stop(t + dur + 0.02);
+		} catch (e) { /* audio not available */ }
+	}
+	// Like beep(), but with a configurable waveform and an optional frequency
+	// sweep (freq -> opts.freqEnd) — needed for the laser/sparkle detonation FX,
+	// which a flat sine beep can't express.
+	function tone(freq, dur, vol, opts) {
+		if (muted) return;
+		opts = opts || {};
+		try {
+			const ctx = ensureAudioCtx();
+			const t = ctx.currentTime;
+			const osc = ctx.createOscillator();
+			const gain = ctx.createGain();
+			osc.type = opts.type || "sine";
+			osc.frequency.setValueAtTime(freq, t);
+			if (opts.freqEnd) osc.frequency.exponentialRampToValueAtTime(opts.freqEnd, t + dur);
+			gain.gain.setValueAtTime(0.0001, t);
+			gain.gain.exponentialRampToValueAtTime(vol * sfxVolume, t + (opts.attack || 0.01));
+			gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+			osc.connect(gain).connect(ctx.destination);
+			osc.start(t);
+			osc.stop(t + dur + 0.02);
+		} catch (e) { /* audio not available */ }
+	}
+	// A short filtered white-noise burst. Most laptop/tablet speakers can't
+	// reproduce much below ~150-200Hz at all — a lone low sine tone down there
+	// either disappears or turns into buzzy cone-distortion instead of a clean
+	// thump (headphones don't have this problem, which is why the same sound can
+	// feel satisfying on one and weak/bad on the other). Layering in broadband
+	// noise (filtered down to a low-passed "thud" via `filterFreq`) gives impact
+	// sounds texture that small drivers CAN reproduce, so there's still a
+	// convincing hit even when the deep sine underneath gets lost.
+	function noiseBurst(dur, vol, opts) {
+		if (muted) return;
+		opts = opts || {};
+		try {
+			const ctx = ensureAudioCtx();
+			const t = ctx.currentTime;
+			const n = Math.max(1, Math.floor(ctx.sampleRate * dur));
+			const buffer = ctx.createBuffer(1, n, ctx.sampleRate);
+			const data = buffer.getChannelData(0);
+			for (let i = 0; i < n; i++) data[i] = Math.random() * 2 - 1;
+			const src = ctx.createBufferSource();
+			src.buffer = buffer;
+			const filter = ctx.createBiquadFilter();
+			filter.type = "lowpass";
+			filter.frequency.value = opts.filterFreq || 700;
+			const gain = ctx.createGain();
+			gain.gain.setValueAtTime(0.0001, t);
+			gain.gain.exponentialRampToValueAtTime(vol * sfxVolume, t + (opts.attack || 0.002));
+			gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+			src.connect(filter).connect(gain).connect(ctx.destination);
+			src.start(t);
+			src.stop(t + dur + 0.02);
 		} catch (e) { /* audio not available */ }
 	}
 	const sndSelect = () => beep(440, 0.08, 0.05);
 	const sndSwapBad = () => beep(160, 0.12, 0.06);
 	const sndMatch = (cascade) => beep(420 + cascade * 90, 0.12, 0.08);
 	const sndLevelUp = () => { beep(660, 0.16, 0.09); setTimeout(() => beep(990, 0.22, 0.09), 130); };
-	const sndExplode = () => { beep(140, 0.28, 0.1); setTimeout(() => beep(90, 0.3, 0.09), 40); };
+	// Bomb gem (3x3 clear): a filtered noise "crack" for texture that survives
+	// weak speakers, under the original low sine double-thud for weight/warmth
+	// on systems that can actually reproduce it (headphones, decent speakers).
+	const sndExplode = () => {
+		noiseBurst(0.16, 0.15, { filterFreq: 500 });
+		beep(170, 0.28, 0.11);
+		setTimeout(() => beep(110, 0.3, 0.09), 40);
+	};
+	// Cross gem (row+column clear): a proper sci-fi blaster zap — a square-wave
+	// layer for buzzy grit and a detuned sawtooth layer underneath for body, both
+	// sweeping from a bright peak down to a low thud together with a near-instant
+	// attack, so it lands as one punchy "PEW" instead of a thin single tone. A
+	// bright noise "crack" up front reads as a snap on any speaker, and the sub
+	// layer's floor is kept a bit higher than the bomb/hyper's since this sound
+	// leans on the square/sawtooth grit for its identity, not pure low end.
+	const sndCross = () => {
+		noiseBurst(0.05, 0.09, { filterFreq: 3000, attack: 0.001 });
+		tone(1000, 0.26, 0.11, { type: "square", freqEnd: 55, attack: 0.004 });
+		tone(650, 0.26, 0.08, { type: "sawtooth", freqEnd: 35, attack: 0.004 });
+		tone(120, 0.3, 0.12, { type: "sine", freqEnd: 55, attack: 0.006 });
+	};
+	// Hyper gem (color bomb): a weighty sub-bass "whomp" for impact, topped with
+	// a quick ascending sparkle arpeggio — a little "jackpot" fanfare distinct
+	// from the bomb's thud and the cross's zap. A low-passed noise layer gives
+	// the whomp a felt "thump" even on speakers that can't move enough air for
+	// the sine underneath — the sparkle arpeggio itself sits well above the
+	// weak-speaker danger zone already, so it needs no changes.
+	const sndHyper = () => {
+		noiseBurst(0.22, 0.14, { filterFreq: 350 });
+		tone(130, 0.4, 0.12, { type: "sine", freqEnd: 60 });
+		[523, 659, 784, 1047, 1319].forEach((f, i) => {
+			setTimeout(() => tone(f, 0.18, 0.055, { type: "triangle" }), i * 45);
+		});
+	};
 
 	// Haptic feedback on special-gem detonation. Real Taptic Engine access from a web
 	// page isn't exposed on iOS (Safari/WKWebView never implemented the Vibration API,
@@ -199,6 +299,13 @@
 		const s = Math.max(0, Math.ceil(totalSeconds));
 		return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
 	}
+
+	// Auto-Play (Timed mode only, toggled from Settings): a zero-latency "bot" that
+	// plays the first legal move it finds the instant one exists, via the ordinary
+	// trySwap() — so the swap itself still takes normal animation time, only the
+	// "decide where to move" step is instant. Meant to benchmark the highest score
+	// achievable if decision time weren't a factor, not to find the *optimal* move.
+	let autoPlayEnabled = false;
 
 	let busy = false;         // true while animating (input blocked)
 	let selected = null;      // {r,c} currently selected gem
@@ -593,12 +700,13 @@
 			if (levelProgress >= levelTarget) levelUp();
 
 			if (blastCenters.length) {
-				sndExplode();
 				hapticBuzz(Math.max(...blastCenters.map((b) => b.level)));
+				// Each detonating power gem gets its own sound (a chain reaction with
+				// several going off together will layer them, which is the point).
 				for (const b of blastCenters) {
-					if (b.level === 3) spawnHyperBlast(b.r, b.c, b.t);
-					else if (b.level === 2) spawnCrossBlast(b.r, b.c, b.t);
-					else spawnExplosion(b.r, b.c, b.t);
+					if (b.level === 3) { sndHyper(); spawnHyperBlast(b.r, b.c, b.t); }
+					else if (b.level === 2) { sndCross(); spawnCrossBlast(b.r, b.c, b.t); }
+					else { sndExplode(); spawnExplosion(b.r, b.c, b.t); }
 				}
 			} else {
 				sndMatch(cascade);
@@ -657,11 +765,13 @@
 		for (const key of blast) clearSet.add(key);
 
 		spawnHyperBlast(otherCell.r, otherCell.c, targetColor);
+		// Any bomb/cross gem swept up in the wake gets its own sound too, same as a
+		// normal cascade chain reaction.
 		for (const b of blastCenters) {
-			if (b.level === 2) spawnCrossBlast(b.r, b.c, b.t);
-			else spawnExplosion(b.r, b.c, b.t);
+			if (b.level === 2) { sndCross(); spawnCrossBlast(b.r, b.c, b.t); }
+			else { sndExplode(); spawnExplosion(b.r, b.c, b.t); }
 		}
-		sndExplode();
+		sndHyper();   // the hyper gem's own detonation
 		hapticBuzz(3);   // hyper-gem activation is always the strongest tier
 
 		const gained = clearSet.size * 10;
@@ -708,10 +818,8 @@
 		if (!overlay) return;
 		const lvlEl = document.getElementById("bj-timeup-level");
 		const scoreEl = document.getElementById("bj-timeup-score");
-		const bestLvlEl = document.getElementById("bj-timeup-best-level");
 		if (lvlEl) lvlEl.textContent = String(level);
 		if (scoreEl) scoreEl.textContent = String(score);
-		if (bestLvlEl) bestLvlEl.textContent = String(bestLevel);
 		overlay.classList.add("open");
 	}
 	function hideTimeUp() {
@@ -728,15 +836,17 @@
 		showTimeUp();
 	}
 
-	// Finds a gem with a legal move, returning the cell to highlight as a hint — the
-	// gem that actually needs to move, not just either half of the swap — or null if
-	// no legal move exists.
-	function findHintMove() {
+	// Scans for a legal swap, returning { a, b, hit } — the two cells involved and
+	// which one is the "hit" (the gem that actually needs to move, not just either
+	// half of the swap) — or null if no legal move exists on the whole board.
+	// Shared by the idle hint (only cares about `hit`) and Auto-Play (needs the
+	// actual `a`/`b` pair to swap).
+	function findLegalMove() {
 		const test = (a, b) => {
 			// A hyper gem always has a legal move: swapping it with any neighbour
 			// detonates it immediately, no 3-in-a-row required. It's the piece to move.
-			if (power[a.r][a.c] === 3) return a;
-			if (power[b.r][b.c] === 3) return b;
+			if (power[a.r][a.c] === 3) return { a, b, hit: a };
+			if (power[b.r][b.c] === 3) return { a, b, hit: b };
 			swapCells(a, b);
 			const matched = findMatches();
 			swapCells(a, b);
@@ -744,26 +854,34 @@
 			// Whichever post-swap position landed inside the match was filled by the
 			// OTHER original gem — that's the one to highlight, since it's the piece
 			// the player needs to move, not the one that just gets swapped out of the way.
-			return matched.has(a.r + "," + a.c) ? b : a;
+			const hit = matched.has(a.r + "," + a.c) ? b : a;
+			return { a, b, hit };
 		};
 		for (let r = 0; r < ROWS; r++) {
 			for (let c = 0; c < COLS; c++) {
 				if (c < COLS - 1) {
-					const hit = test({ r, c }, { r, c: c + 1 });
-					if (hit) return hit;
+					const found = test({ r, c }, { r, c: c + 1 });
+					if (found) return found;
 				}
 				if (r < ROWS - 1) {
-					const hit = test({ r, c }, { r: r + 1, c });
-					if (hit) return hit;
+					const found = test({ r, c }, { r: r + 1, c });
+					if (found) return found;
 				}
 			}
 		}
 		return null;
 	}
 
+	// Finds a gem with a legal move, returning the cell to highlight as a hint, or
+	// null if no legal move exists.
+	function findHintMove() {
+		const move = findLegalMove();
+		return move ? move.hit : null;
+	}
+
 	// Is there at least one swap that produces a match?
 	function hasAnyMove() {
-		return findHintMove() !== null;
+		return findLegalMove() !== null;
 	}
 
 	// No legal move remains: instead of scrambling the whole board, drop a hyper gem
@@ -1002,6 +1120,12 @@
 		ctx.fillStyle = "#9ec7ff";
 		ctx.font = "bold 16px 'Trebuchet MS', Verdana, sans-serif";
 		ctx.fillText("Best: " + best, 16, 36);
+
+		// Timed mode only: best level ever reached, stacked directly under "Best".
+		if (gameMode === "timed") {
+			ctx.font = "bold 12px 'Trebuchet MS', Verdana, sans-serif";
+			ctx.fillText("Best Lvl: " + bestLevel, 16, 52);
+		}
 
 		// top-right (Timed mode only): countdown clock, mirrors "Best" on the left.
 		// Right-aligned short of the gear/game-mode icon buttons (which float over
@@ -1510,13 +1634,21 @@
 		if (levelFlash > 0) levelFlash = Math.max(0, levelFlash - dt);
 		idleTime += dt;
 		if (!busy && !hint && !timedOver && idleTime >= HINT_IDLE_S) hint = findHintMove();
+		const overlayOpen = !!document.querySelector(".bj-settings-overlay.open");
 		// Timed mode's clock doesn't start until the first match clears (timedStarted),
 		// then keeps running through swap/cascade animations (that's the pressure the
 		// mode is built around) but pauses while any menu overlay is open, so opening
 		// Settings mid-run doesn't unfairly burn the clock.
-		if (gameMode === "timed" && timedStarted && !timedOver && !document.querySelector(".bj-settings-overlay.open")) {
+		if (gameMode === "timed" && timedStarted && !timedOver && !overlayOpen) {
 			timeLeft = Math.max(0, timeLeft - dt);
 			if (timeLeft <= 0) triggerTimeUp();
+		}
+		// Auto-Play: the instant a legal move exists and nothing else is animating,
+		// play it via the normal trySwap() (fire-and-forget — trySwap sets `busy`
+		// synchronously before its first await, so this can't double-fire next frame).
+		if (autoPlayEnabled && gameMode === "timed" && !timedOver && !busy && assetsReady && !overlayOpen) {
+			const move = findLegalMove();
+			if (move) trySwap(move.a, move.b);
 		}
 		render();
 		requestAnimationFrame(frame);
@@ -1627,16 +1759,29 @@
 		const gearBtn  = document.getElementById("bj-gear");
 		const closeBtn = document.getElementById("bj-settings-close");
 		const soundChk   = document.getElementById("bj-sound-toggle");
+		const volumeSlider = document.getElementById("bj-volume-slider");
 		const hapticChk  = document.getElementById("bj-haptics-toggle");
 		const fpsChk   = document.getElementById("bj-fps-toggle");
 		const debugChk = document.getElementById("bj-debug-toggle");
+		const autoplayRow = document.getElementById("bj-autoplay-row");
+		const autoplayChk = document.getElementById("bj-autoplay-toggle");
 		const resetBtn = document.getElementById("bj-reset-best");
 		const versionEl = document.getElementById("bj-version");
 		if (!overlay || !gearBtn) return;
 
 		if (versionEl) versionEl.textContent = "v" + APP_VERSION;
 
-		function openSettings()  { overlay.classList.add("open"); }
+		function openSettings() {
+			// Auto-Play only makes sense in Timed mode — re-check on every open since
+			// the active mode can change while Settings is closed.
+			if (autoplayRow) {
+				const show = gameMode === "timed";
+				autoplayRow.style.display = show ? "" : "none";
+				if (!show) autoPlayEnabled = false;
+				if (autoplayChk) autoplayChk.checked = autoPlayEnabled;
+			}
+			overlay.classList.add("open");
+		}
 		function closeSettings() { overlay.classList.remove("open"); }
 
 		gearBtn.addEventListener("click", openSettings);
@@ -1646,7 +1791,22 @@
 		// Sync toggles to current state
 		if (soundChk) {
 			soundChk.checked = !muted;
-			soundChk.addEventListener("change", () => { muted = !soundChk.checked; });
+			soundChk.addEventListener("change", () => {
+				muted = !soundChk.checked;
+				if (volumeSlider) volumeSlider.disabled = muted;
+			});
+		}
+		if (volumeSlider) {
+			volumeSlider.value = String(Math.round((sfxVolume / SFX_VOLUME_DEFAULT) * 100));
+			volumeSlider.disabled = muted;
+			// Live-update the multiplier while dragging; only play a preview blip
+			// once the user releases the slider, so dragging doesn't spam beeps.
+			volumeSlider.addEventListener("input", () => {
+				const pct = parseInt(volumeSlider.value, 10) || 0;
+				sfxVolume = (pct / 100) * SFX_VOLUME_DEFAULT;
+				try { localStorage.setItem("bj2_volume", String(pct)); } catch (e) {}
+			});
+			volumeSlider.addEventListener("change", () => sndSelect());
 		}
 		// Vibration is only meaningful on touch/mobile hardware — desktops have no
 		// Taptic/vibration motor, so hide the row there instead of showing a dead option.
@@ -1679,6 +1839,11 @@
 		if (debugChk) {
 			debugChk.checked = debugMode;
 			debugChk.addEventListener("change", () => { debugMode = debugChk.checked; });
+		}
+		if (autoplayChk) {
+			autoplayChk.addEventListener("change", () => {
+				autoPlayEnabled = autoplayChk.checked && gameMode === "timed";
+			});
 		}
 
 		// Reset best score (and best level, for modes that track one) for the

@@ -8,6 +8,50 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.1.20] - 2026-07-01
+### Added
+- Volume slider in Settings (0-150%) alongside the mute toggle, persisted across sessions and disabled while muted; overall sound effect loudness increased via a master volume multiplier.
+
+## [0.1.19] - 2026-07-01
+### Added
+- Distinct detonation sounds for cross gem (deep laser zap with a sub-bass layer) and hyper gem (bass "whomp" + rising sparkle arpeggio); previously both reused the bomb gem's explosion sound.
+
+## [0.1.18] - 2026-07-01
+### Added
+- Auto-Play toggle (Timed mode only, in Settings) — plays the first legal move the instant one exists, at normal swap speed, to benchmark the highest score achievable with zero decision time.
+
+## [0.1.17] - 2026-07-01
+### Changed
+- Timed mode's best-level record moved from the Time's Up screen into the HUD, shown directly under Best score (Timed mode only).
+
+## [0.1.16] - 2026-07-01
+### Fixed
+- Time's Up overlay's stat rows no longer overlap, for the same `line-height: 0` inheritance reason as the mode toast below.
+
+## [0.1.15] - 2026-07-01
+### Added
+- Timed game mode: one minute per level, resetting on level-up and not starting until the first match clears; a Time's Up overlay with level/score summary and a retry button; best score now tracked per mode instead of one shared value.
+
+## [0.1.14] - 2026-07-01
+### Fixed
+- Mode-selected toast text no longer overlaps itself — inherited `line-height: 0` from `#bj-frame` (used to remove the canvas's inline gap) was collapsing each line to zero height.
+
+## [0.1.13] - 2026-07-01
+### Changed
+- Selecting a game mode now shows a brief toast with its description instead of permanent subtext under each mode button.
+
+## [0.1.12] - 2026-07-01
+### Fixed
+- Game Mode buttons' two-line text (name + description) no longer clips or misaligns — the template's button reset (fixed height/line-height/overflow/white-space, sized for one line of uppercase text) was cutting it off.
+
+## [0.1.11] - 2026-07-01
+### Fixed
+- Restored intended text colors on RESUME, Reset Best Score, and the gear/game-mode icon buttons, and redesigned the Game Mode panel's buttons (centered text, gradient backgrounds, glowing active state) — the template's global `button { color: #585858 !important }` rule had been silently graying all of them out.
+
+## [0.1.10] - 2026-07-01
+### Added
+- Game Mode selector: Endless (the existing default) is now explicitly named and selectable from the Game Mode panel; Timed/Puzzle/Lightning listed as disabled "coming soon" entries.
+
 ## [0.1.9] - 2026-07-01
 ### Changed
 - Board background now loads from `assets/img/background.jpg` instead of the embedded base64 JPEG in `bejeweled_assets.js`.
