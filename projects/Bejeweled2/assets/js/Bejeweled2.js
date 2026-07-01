@@ -94,6 +94,15 @@
 	let hapticsEnabled = true;
 	try { hapticsEnabled = localStorage.getItem("bj2_haptics") !== "0"; } catch (e) {}
 	let gameSpeed = 1.5;   // animation speed multiplier
+
+	// ---- Game mode ----
+	// "endless": classic play, levels/progress meter, no limit.
+	// "timed": one minute per level (see TIMED_SECONDS below); running out ends
+	// the run (see triggerTimeUp()).
+	// Other modes (puzzle, lightning, ...) are still stubbed in the Game Mode
+	// panel as disabled "coming soon" entries until they're implemented.
+	let gameMode = "endless";
+	try { gameMode = localStorage.getItem("bj2_mode") || "endless"; } catch (e) {}
 	const DROP_MS = 300; // gem fall duration in ms (lower = faster drop)
 	function S(ms) { return ms / gameSpeed; }   // scale a tween duration by speed
 	function beep(freq, dur, vol) {
@@ -141,7 +150,30 @@
 	let grid = [];            // grid[r][c] = type index, or -1 when empty
 	let score = 0;
 	let best = 0;
-	try { best = parseInt(localStorage.getItem("bj2_best") || "0", 10) || 0; } catch (e) {}
+	// Best score is tracked per mode (Endless scores dwarf Timed ones, so a shared
+	// "Best" would be meaningless in Timed) — Endless keeps the original "bj2_best"
+	// key so existing players don't lose their saved best on this update.
+	function bestKey() { return gameMode === "endless" ? "bj2_best" : "bj2_best_" + gameMode; }
+	function loadBest() {
+		try { best = parseInt(localStorage.getItem(bestKey()) || "0", 10) || 0; } catch (e) { best = 0; }
+	}
+	loadBest();
+
+	// Best level reached — shown alongside best score on the Timed mode's Time's Up
+	// screen (Timed's levels reset each run, so it's worth tracking separately from
+	// the best score).
+	let bestLevel = 0;
+	function bestLevelKey() { return "bj2_bestlevel_" + gameMode; }
+	function loadBestLevel() {
+		try { bestLevel = parseInt(localStorage.getItem(bestLevelKey()) || "0", 10) || 0; } catch (e) { bestLevel = 0; }
+	}
+	function updateBestLevel() {
+		if (level > bestLevel) {
+			bestLevel = level;
+			try { localStorage.setItem(bestLevelKey(), String(bestLevel)); } catch (e) {}
+		}
+	}
+	loadBestLevel();
 
 	// ---- Level / progress (Bejeweled 2 Classic style) ----
 	// Clearing gems fills a progress meter; filling it advances the level, awards a
@@ -151,6 +183,22 @@
 	let levelTarget = computeTarget(1);
 	let levelFlash = 0;           // seconds left on the "Level Up!" celebration
 	function computeTarget(lv) { return 300 + (lv - 1) * 200; }
+
+	// ---- Timed mode ----
+	// One minute per level; clearing the level's progress meter resets the clock
+	// back to the full minute for the next level (see levelUp()). Running out
+	// freezes the board and shows the Time's Up overlay (see triggerTimeUp()).
+	// The clock doesn't actually count down until the player's first match clears
+	// (see resolveBoard()/resolveHyperSwap()), so studying the opening board for a
+	// move doesn't eat into the minute.
+	const TIMED_SECONDS = 60;
+	let timeLeft = TIMED_SECONDS;
+	let timedOver = false;
+	let timedStarted = false;
+	function formatTime(totalSeconds) {
+		const s = Math.max(0, Math.ceil(totalSeconds));
+		return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+	}
 
 	let busy = false;         // true while animating (input blocked)
 	let selected = null;      // {r,c} currently selected gem
@@ -226,12 +274,39 @@
 		canvas.width = CANVAS_W;
 		canvas.height = CANVAS_H;
 		initGrid();
+		resetInputState();
+	}
+
+	// Clears selection/drag/hint state — shared by anything that deals the board a
+	// fresh hand (resizing the board, or starting a new mode run).
+	function resetInputState() {
 		selected = null;
 		busy = false;
 		pointerDown = null;
 		dragPreview = null;
 		hint = null;
 		idleTime = 0;
+	}
+
+	// Switches to `mode` and starts a brand-new run of it: score/level/board reset,
+	// and (for Timed) the clock resets to a fresh minute. Used both when picking a
+	// mode from the Game Mode panel and when retrying after Time's Up.
+	function startNewRun(mode) {
+		gameMode = mode;
+		try { localStorage.setItem("bj2_mode", gameMode); } catch (e) {}
+		loadBest();
+		loadBestLevel();
+		score = 0;
+		level = 1;
+		levelProgress = 0;
+		levelTarget = computeTarget(1);
+		levelFlash = 0;
+		timeLeft = TIMED_SECONDS;
+		timedOver = false;
+		timedStarted = false;
+		hideTimeUp();
+		initGrid();
+		resetInputState();
 	}
 
 	// Would placing type t at (r,c) complete a run of 3 with already-filled cells?
@@ -429,6 +504,7 @@
 			const runs = findRuns();
 			if (runs.length === 0) break;
 			cascade++;
+			if (gameMode === "timed") timedStarted = true;   // clock starts on the first match
 
 			// Every cell in any run.
 			const matched = new Set();
@@ -543,6 +619,7 @@
 	// activation (distinct from the cascade-triggered detonation power gems get when
 	// caught inside someone else's match). No 3-in-a-row is required to trigger it.
 	async function resolveHyperSwap(otherCell, targetColor) {
+		if (gameMode === "timed") timedStarted = true;   // clock starts on the first match
 		// Base clear: every gem of the swapped-into color, plus the hyper gem itself
 		// (now sitting wherever the swap placed it).
 		const matched = new Set();
@@ -606,7 +683,7 @@
 	function updateBest() {
 		if (score > best) {
 			best = score;
-			try { localStorage.setItem("bj2_best", String(best)); } catch (e) {}
+			try { localStorage.setItem(bestKey(), String(best)); } catch (e) {}
 		}
 	}
 
@@ -618,9 +695,37 @@
 			levelTarget = computeTarget(level);
 			score += level * 250;     // level-completion bonus
 			updateBest();
+			updateBestLevel();
 			levelFlash = 1.6;
 			sndLevelUp();
+			if (gameMode === "timed") timeLeft = TIMED_SECONDS;   // fresh minute for the new level
 		}
+	}
+
+	// ---- Timed mode: Time's Up overlay ----
+	function showTimeUp() {
+		const overlay = document.getElementById("bj-timeup-overlay");
+		if (!overlay) return;
+		const lvlEl = document.getElementById("bj-timeup-level");
+		const scoreEl = document.getElementById("bj-timeup-score");
+		const bestLvlEl = document.getElementById("bj-timeup-best-level");
+		if (lvlEl) lvlEl.textContent = String(level);
+		if (scoreEl) scoreEl.textContent = String(score);
+		if (bestLvlEl) bestLvlEl.textContent = String(bestLevel);
+		overlay.classList.add("open");
+	}
+	function hideTimeUp() {
+		const overlay = document.getElementById("bj-timeup-overlay");
+		if (overlay) overlay.classList.remove("open");
+	}
+	// The clock hit zero: freeze the board (further swaps are blocked via the
+	// `timedOver` check in onPointerDown) and show the Time's Up overlay.
+	function triggerTimeUp() {
+		if (timedOver) return;
+		timedOver = true;
+		updateBest();
+		updateBestLevel();
+		showTimeUp();
 	}
 
 	// Finds a gem with a legal move, returning the cell to highlight as a hint — the
@@ -761,6 +866,7 @@
 	}
 
 	function onPointerDown(e) {
+		if (timedOver) return;
 		idleTime = 0;
 		hint = null;
 		if (busy || !assetsReady) return;
@@ -896,6 +1002,16 @@
 		ctx.fillStyle = "#9ec7ff";
 		ctx.font = "bold 16px 'Trebuchet MS', Verdana, sans-serif";
 		ctx.fillText("Best: " + best, 16, 36);
+
+		// top-right (Timed mode only): countdown clock, mirrors "Best" on the left.
+		// Right-aligned short of the gear/game-mode icon buttons (which float over
+		// the canvas's top-right corner) so the two never overlap.
+		if (gameMode === "timed") {
+			ctx.textAlign = "right";
+			ctx.fillStyle = timeLeft <= 10 ? "#ff6b6b" : "#9ec7ff";
+			ctx.font = "bold 16px 'Trebuchet MS', Verdana, sans-serif";
+			ctx.fillText(formatTime(timeLeft), CANVAS_W - 106, 36);
+		}
 
 		// center: LEVEL and Score stacked
 		ctx.textAlign = "center";
@@ -1393,7 +1509,15 @@
 		updateFX(dt);
 		if (levelFlash > 0) levelFlash = Math.max(0, levelFlash - dt);
 		idleTime += dt;
-		if (!busy && !hint && idleTime >= HINT_IDLE_S) hint = findHintMove();
+		if (!busy && !hint && !timedOver && idleTime >= HINT_IDLE_S) hint = findHintMove();
+		// Timed mode's clock doesn't start until the first match clears (timedStarted),
+		// then keeps running through swap/cascade animations (that's the pressure the
+		// mode is built around) but pauses while any menu overlay is open, so opening
+		// Settings mid-run doesn't unfairly burn the clock.
+		if (gameMode === "timed" && timedStarted && !timedOver && !document.querySelector(".bj-settings-overlay.open")) {
+			timeLeft = Math.max(0, timeLeft - dt);
+			if (timeLeft <= 0) triggerTimeUp();
+		}
 		render();
 		requestAnimationFrame(frame);
 	}
@@ -1557,30 +1681,74 @@
 			debugChk.addEventListener("change", () => { debugMode = debugChk.checked; });
 		}
 
-		// Reset best score
+		// Reset best score (and best level, for modes that track one) for the
+		// currently active mode
 		if (resetBtn) {
 			resetBtn.addEventListener("click", () => {
 				best = 0;
-				try { localStorage.removeItem("bj2_best"); } catch (e) {}
+				bestLevel = 0;
+				try { localStorage.removeItem(bestKey()); } catch (e) {}
+				try { localStorage.removeItem(bestLevelKey()); } catch (e) {}
 				resetBtn.textContent = "Reset!";
 				setTimeout(() => { resetBtn.textContent = "Reset Best Score"; }, 1200);
 			});
 		}
 	})();
 
-	// ---- Game Mode panel (placeholder; modes to be added) ----
+	// ---- Game Mode panel ----
 	(function initGameMode() {
 		const overlay = document.getElementById("bj-gamemode-overlay");
 		const modeBtn = document.getElementById("bj-gamemode");
 		const closeBtn = document.getElementById("bj-gamemode-close");
+		const modeBtns = Array.from(overlay ? overlay.querySelectorAll(".bj-mode-btn[data-mode]") : []);
+		const toast = document.getElementById("bj-mode-toast");
+		const toastName = document.getElementById("bj-mode-toast-name");
+		const toastDesc = document.getElementById("bj-mode-toast-desc");
 		if (!overlay || !modeBtn) return;
 
 		function openGameMode()  { overlay.classList.add("open"); }
 		function closeGameMode() { overlay.classList.remove("open"); }
 
+		function syncActiveButton() {
+			for (const btn of modeBtns) btn.classList.toggle("active", btn.dataset.mode === gameMode);
+		}
+		syncActiveButton();
+
+		// Brief popup confirming the picked mode + a one-line description, shown over
+		// the board once the panel closes (replaces the always-visible subtext that
+		// used to sit under each mode button).
+		let toastTimer = null;
+		function showModeToast(name, desc) {
+			if (!toast) return;
+			toastName.textContent = name;
+			toastDesc.textContent = desc || "";
+			toast.classList.add("show");
+			clearTimeout(toastTimer);
+			toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+		}
+
+		for (const btn of modeBtns) {
+			btn.addEventListener("click", () => {
+				// Picking a mode (even the one already active) starts a brand-new run of
+				// it — necessary for Timed, where re-selecting it should reset the clock
+				// and level rather than leave a stale run in place.
+				startNewRun(btn.dataset.mode);
+				syncActiveButton();
+				closeGameMode();
+				showModeToast(btn.querySelector(".bj-mode-name").textContent, btn.dataset.desc);
+			});
+		}
+
 		modeBtn.addEventListener("click", openGameMode);
 		if (closeBtn) closeBtn.addEventListener("click", closeGameMode);
 		overlay.addEventListener("click", (e) => { if (e.target === overlay) closeGameMode(); });
+	})();
+
+	// ---- Timed mode: Time's Up panel ----
+	(function initTimeUp() {
+		const retryBtn = document.getElementById("bj-timeup-retry");
+		if (!retryBtn) return;
+		retryBtn.addEventListener("click", () => startNewRun("timed"));
 	})();
 
 	// ---- Boot ----

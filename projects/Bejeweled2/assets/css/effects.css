@@ -114,7 +114,10 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    color: #fff;
+    /* !important: the template's global `button` rule (main.css) forces
+       color: #585858 !important on every <button>, which would otherwise
+       gray out these icons instead of the intended white/gold theme. */
+    color: #fff !important;
     background: #1b2a6b;             /* sapphire blue */
     border-width: calc(3px * var(--bj-ui-scale, 1));
     border-style: solid;
@@ -130,7 +133,7 @@
     height: calc(22px * var(--bj-ui-scale, 1));
     display: block;
 }
-.bj-icon-btn:hover { filter: brightness(1.08); }
+.bj-icon-btn:hover { color: #fff !important; filter: brightness(1.08); }
 .bj-icon-btn:active {
     transform: translateY(2px);
     box-shadow: 0 1px 0 #b08a00, 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -234,7 +237,7 @@
     font-size: 15px;
     font-weight: 800;
     letter-spacing: 1px;
-    color: #1b1140;
+    color: #1b1140 !important;       /* !important: overrides main.css's global button rule */
     background: #f3c200;             /* gold, like the in-game buttons */
     border: 3px solid #b08a00;
     border-radius: 8px;
@@ -242,6 +245,7 @@
     text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.25);
     cursor: pointer;
 }
+.bj-settings-close:hover { color: #1b1140 !important; }
 .bj-settings-close:active {
     transform: translateY(2px);
     box-shadow: 0 1px 0 #8a6a00;
@@ -251,12 +255,144 @@
 
 .bj-reset {
     background: #7a1a1a;
-    color: #ffe9a8;
+    color: #ffe9a8 !important;       /* !important: overrides main.css's global button rule */
     border-color: #c03030;
     box-shadow: 0 3px 0 #4a0a0a;
 }
-.bj-reset:hover  { background: #9a2020; }
+.bj-reset:hover  { background: #9a2020; color: #ffe9a8 !important; }
 .bj-reset:active { box-shadow: 0 1px 0 #4a0a0a; }
+
+.bj-mode-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.bj-mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 100%;
+    box-sizing: border-box;
+    /* main.css's global button rule sets a fixed height/line-height + overflow:
+       hidden sized for a single line of uppercase text — override them so this
+       two-line (name + description) button can size to its content and center
+       both lines vertically instead of getting clipped/pinned to the top. */
+    height: auto;
+    line-height: normal;
+    overflow: visible;
+    white-space: normal;             /* main.css forces nowrap; the description needs to wrap */
+    padding: 10px 12px;
+    font-family: inherit;
+    text-align: center;
+    color: #cfe0ff !important;       /* !important: overrides main.css's global button rule */
+    background: linear-gradient(180deg, #24337c 0%, #16214f 100%);
+    border: 3px solid #3a4a90;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+.bj-mode-btn:hover:not(:disabled):not(.active) {
+    color: #cfe0ff !important;       /* !important: overrides main.css's global button:hover rule */
+    border-color: #6ea8ff;
+    transform: translateY(-1px);
+}
+.bj-mode-btn.active:hover { color: #1b1140 !important; }
+.bj-mode-btn.active {
+    color: #1b1140 !important;       /* !important: overrides main.css's global button rule */
+    background: linear-gradient(180deg, #ffe27a 0%, #f3c200 100%);
+    border-color: #ffef9e;
+    box-shadow: 0 0 0 2px #b08a00 inset, 0 0 14px rgba(243, 194, 0, 0.65);
+}
+.bj-mode-btn.active .bj-mode-desc { opacity: 0.85; }
+.bj-mode-btn:active:not(:disabled) { transform: translateY(1px); }
+.bj-mode-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.bj-mode-name {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+}
+.bj-mode-btn.active .bj-mode-name { text-shadow: none; }
+.bj-mode-desc {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+/* Mode-selected toast: brief popup confirming the picked mode + its description,
+   shown over the board after the Game Mode overlay closes, auto-dismissing itself. */
+.bj-mode-toast {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    box-sizing: border-box;
+    width: min(80%, 280px);
+    padding: 14px 18px;
+    background: #14225a;
+    border: 3px solid #f3c200;
+    border-radius: 12px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+    color: #ffe9a8;
+    text-align: center;
+    font-family: "Trebuchet MS", Verdana, Geneva, sans-serif;
+    /* #bj-frame sets line-height: 0 (to remove the canvas's inline baseline
+       gap), which this toast would otherwise inherit — collapsing the name
+       and description lines to near-zero height and making them overlap. */
+    line-height: normal;
+    z-index: 40;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.94);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.bj-mode-toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+.bj-mode-toast-name {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+.bj-mode-toast-desc {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+/* Timed mode: Time's Up stat rows (level reached / final score) */
+.bj-timeup-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0 4px;
+}
+.bj-timeup-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    /* #bj-frame sets line-height: 0 (to remove the canvas's inline baseline gap);
+       inherited here it collapses each label/value to a zero-height line box,
+       making adjacent rows overlap instead of stacking. */
+    line-height: normal;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.bj-timeup-row span:last-child {
+    font-size: 19px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+}
 
 .bj-version {
     margin-top: 12px;

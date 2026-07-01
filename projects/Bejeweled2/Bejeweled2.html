@@ -128,12 +128,61 @@
 										</div>
 									</div>
 
-									<!-- Game Mode overlay (placeholder panel; modes to be added) -->
+									<!-- Game Mode overlay -->
 									<div class="bj-settings-overlay" id="bj-gamemode-overlay">
 										<div class="bj-settings-panel">
 											<div class="bj-settings-title">GAME MODE</div>
 
+											<div class="bj-mode-list">
+												<button class="bj-mode-btn" id="bj-mode-endless" data-mode="endless"
+													data-desc="Classic play &mdash; clear gems, level up, no limit.">
+													<span class="bj-mode-name">Endless</span>
+												</button>
+												<button class="bj-mode-btn" id="bj-mode-timed" data-mode="timed"
+													data-desc="One minute per level &mdash; clear it before the clock runs out.">
+													<span class="bj-mode-name">Timed</span>
+												</button>
+												<button class="bj-mode-btn" disabled>
+													<span class="bj-mode-name">Puzzle</span>
+													<span class="bj-mode-desc">Coming soon</span>
+												</button>
+												<button class="bj-mode-btn" disabled>
+													<span class="bj-mode-name">Lightning</span>
+													<span class="bj-mode-desc">Coming soon</span>
+												</button>
+											</div>
+
 											<button class="bj-settings-close bj-resume" id="bj-gamemode-close">RESUME</button>
+										</div>
+									</div>
+
+									<!-- Mode-selected toast: brief description popup shown after picking a mode -->
+									<div class="bj-mode-toast" id="bj-mode-toast">
+										<div class="bj-mode-toast-name" id="bj-mode-toast-name"></div>
+										<div class="bj-mode-toast-desc" id="bj-mode-toast-desc"></div>
+									</div>
+
+									<!-- Timed mode: shown when the 1-minute clock runs out -->
+									<div class="bj-settings-overlay" id="bj-timeup-overlay">
+										<div class="bj-settings-panel">
+											<div class="bj-settings-title">TIME'S UP!</div>
+
+											<div class="bj-timeup-stats">
+												<div class="bj-timeup-row">
+													<span>Level reached</span>
+													<span id="bj-timeup-level">1</span>
+												</div>
+												<div class="bj-timeup-row">
+													<span>Best level</span>
+													<span id="bj-timeup-best-level">1</span>
+												</div>
+												<div class="bj-timeup-row">
+													<span>Score</span>
+													<span id="bj-timeup-score">0</span>
+												</div>
+											</div>
+
+											<button class="bj-settings-close bj-resume" id="bj-timeup-retry">TRY AGAIN</button>
 										</div>
 									</div>
 
