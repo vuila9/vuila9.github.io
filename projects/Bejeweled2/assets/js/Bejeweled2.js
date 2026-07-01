@@ -99,10 +99,15 @@
 	// "endless": classic play, levels/progress meter, no limit.
 	// "timed": one minute per level (see TIMED_SECONDS below); running out ends
 	// the run (see triggerTimeUp()).
+	// "rush": a single 15-second clock (see RUSH_STARTING_SECONDS below) that's kept
+	// alive by playing fast — see the Rush mode block further down.
 	// Other modes (puzzle, lightning, ...) are still stubbed in the Game Mode
 	// panel as disabled "coming soon" entries until they're implemented.
 	let gameMode = "endless";
 	try { gameMode = localStorage.getItem("bj2_mode") || "endless"; } catch (e) {}
+	// Modes that run off the shared clock/Time's-Up plumbing (HUD countdown,
+	// timedStarted/timedOver gating, per-mode best-score key).
+	function usesClock() { return gameMode === "timed" || gameMode === "rush"; }
 	const DROP_MS = 300; // gem fall duration in ms (lower = faster drop)
 	function S(ms) { return ms / gameSpeed; }   // scale a tween duration by speed
 	function ensureAudioCtx() {
@@ -298,7 +303,7 @@
 	// (see resolveBoard()/resolveHyperSwap()), so studying the opening board for a
 	// move doesn't eat into the minute.
 	const TIMED_SECONDS = 60;
-	let timeLeft = TIMED_SECONDS;
+	let timeLeft = TIMED_SECONDS;   // corrected below, once RUSH_STARTING_SECONDS exists, if gameMode is "rush"
 	let timedOver = false;
 	let timedStarted = false;
 	function formatTime(totalSeconds) {
@@ -306,18 +311,46 @@
 		return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
 	}
 
-	// Auto-Play (Timed mode only, toggled from Settings): a zero-latency "bot" that
-	// plays the first legal move it finds the instant one exists, via the ordinary
-	// trySwap() — so the swap itself still takes normal animation time, only the
-	// "decide where to move" step is instant. Meant to benchmark the highest score
-	// achievable if decision time weren't a factor, not to find the *optimal* move.
+	// ---- Rush mode ----
+	// A single clock for the whole run (no per-level reset), starting at
+	// RUSH_STARTING_SECONDS. Every successful match opens/refreshes a
+	// RUSH_COMBO_WINDOW-second "quick match" window; if the next match lands
+	// before that window closes, whatever's left of it is added to the clock —
+	// so chaining matches quickly recovers close to the full window, while a
+	// slow follow-up recovers less. Completing a level adds a flat
+	// RUSH_LEVEL_BONUS on top (see levelUp()).
+	const RUSH_STARTING_SECONDS = 15;
+	const RUSH_COMBO_WINDOW = 4;
+	const RUSH_LEVEL_BONUS = 5;
+	let rushComboRemaining = 0;   // seconds left in the current quick-match window
+	// gameMode is loaded from localStorage before timeLeft's initial declaration
+	// above ran, so if the saved mode was Rush, correct the clock to Rush's
+	// starting time instead of leaving it at Timed's.
+	if (gameMode === "rush") timeLeft = RUSH_STARTING_SECONDS;
+
+	// Rush mode only: called once per successful match (each cascade step in
+	// resolveBoard()/resolveHyperSwap() counts as one). Banks whatever's left of
+	// the previous quick-match window, then opens a fresh one.
+	function applyRushMatchBonus() {
+		if (gameMode !== "rush") return;
+		if (rushComboRemaining > 0) timeLeft += rushComboRemaining;
+		rushComboRemaining = RUSH_COMBO_WINDOW;
+	}
+
+	// Auto-Play (Timed/Rush mode only, toggled from Settings): a zero-latency "bot"
+	// that plays a legal move the instant one exists, via the ordinary trySwap() —
+	// so the swap itself still takes normal animation time, only the "decide where
+	// to move" step is instant. It prefers whichever legal move detonates/collects
+	// a power gem (bomb/cross/hyper) or a Timer buff over a plain 3-match — see
+	// findBestAutoPlayMove() — but otherwise isn't hunting for the *optimal* move.
 	let autoPlayEnabled = false;
 
 	let busy = false;         // true while animating (input blocked)
 	let selected = null;      // {r,c} currently selected gem
 	let selPulse = 0;         // selection highlight animation phase
 	let fps = 60;             // smoothed render frames-per-second
-	let showFPS = true;       // toggle with the 'F' key
+	let showFPS = false;      // toggle with the 'F' key; off by default, persisted after that
+	try { showFPS = localStorage.getItem("bj2_show_fps") === "1"; } catch (e) {}
 
 	// ---- Hint: after 10s with no player input, highlight a legal move ----
 	let idleTime = 0;         // seconds since the last player input
@@ -425,12 +458,79 @@
 		levelProgress = 0;
 		levelTarget = computeTarget(1);
 		levelFlash = 0;
-		timeLeft = TIMED_SECONDS;
+		timeLeft = gameMode === "rush" ? RUSH_STARTING_SECONDS : TIMED_SECONDS;
+		rushComboRemaining = 0;
 		timedOver = false;
 		timedStarted = false;
 		hideTimeUp();
 		initGrid();
 		resetInputState();
+		saveState();   // immediately overwrite any stale save from a previous run/mode
+	}
+
+	// ---- Save / resume ----
+	// Persists enough state to resume a run across a reload or tab close: the
+	// board layout, score/level progress, and (for Timed/Rush) the clock. Saved
+	// after every settled move, on a light interval (to keep a ticking clock
+	// reasonably fresh even between moves), and on tab hide; restored at boot
+	// instead of dealing a fresh board when a valid save exists for the
+	// currently active mode.
+	const SAVE_KEY = "bj2_save";
+	function saveState() {
+		try {
+			localStorage.setItem(SAVE_KEY, JSON.stringify({
+				v: 1, mode: gameMode, cols: COLS,
+				grid, power, timerBuff,
+				score, level, levelProgress, levelTarget,
+				timeLeft, rushComboRemaining, timedStarted, timedOver,
+			}));
+		} catch (e) {}
+	}
+	// Reads back a save, or null if there isn't one, it's from a different mode,
+	// or it's malformed (a schema change, corrupted storage, etc.).
+	function loadSavedState() {
+		try {
+			const raw = localStorage.getItem(SAVE_KEY);
+			if (!raw) return null;
+			const state = JSON.parse(raw);
+			if (!state || state.v !== 1 || state.mode !== gameMode) return null;
+			if (!Array.isArray(state.grid) || state.grid.length !== ROWS) return null;
+			return state;
+		} catch (e) { return null; }
+	}
+	// Restores score/level/clock unconditionally. The board layout itself
+	// (grid/power/timerBuff) is only restored when its column count matches the
+	// current one — a size change (e.g. switching in/out of fullscreen between
+	// sessions) means the old board can't be reflowed, so a fresh one is dealt
+	// instead while the score/level/clock still carry over.
+	function restoreState(state) {
+		score = state.score;
+		level = state.level;
+		levelProgress = state.levelProgress;
+		levelTarget = state.levelTarget;
+		timeLeft = state.timeLeft;
+		rushComboRemaining = state.rushComboRemaining || 0;
+		// Always resume paused, even if the clock had already started before the
+		// reload — same as a brand-new run, the countdown only resumes once the
+		// player clears its first match on the restored board.
+		timedStarted = false;
+		timedOver = !!state.timedOver;
+		if (state.cols === COLS && Array.isArray(state.grid[0]) && state.grid[0].length === COLS) {
+			grid = state.grid;
+			power = state.power;
+			timerBuff = state.timerBuff;
+			offset = make2D(() => ({ dx: 0, dy: 0 }));
+			scale = make2D(() => 1);
+			blasts = [];
+			sparks = [];
+			beams = [];
+			timeBuffPopups = [];
+		} else {
+			initGrid();
+		}
+		loadBest();
+		loadBestLevel();
+		if (timedOver) showTimeUp();
 	}
 
 	// Would placing type t at (r,c) complete a run of 3 with already-filled cells?
@@ -673,7 +773,7 @@
 			const runs = findRuns();
 			if (runs.length === 0) break;
 			cascade++;
-			if (gameMode === "timed") timedStarted = true;   // clock starts on the first match
+			if (usesClock()) timedStarted = true;   // clock starts on the first match
 
 			// Every cell in any run.
 			const matched = new Set();
@@ -755,6 +855,10 @@
 			for (const key of blast) if (!keepSet.has(key)) clearSet.add(key);
 
 			collectTimerBuffs(clearSet);   // Timed mode: +10s per Timer buff cleared away
+			// Rush mode: only the match the player's swap directly produced banks
+			// time — not the automatic chain-reaction matches formed by gems falling
+			// into place afterward (movedCells is empty for those follow-up passes).
+			if (cascade === 1 && movedCells.length > 0) applyRushMatchBonus();
 
 			// scoring: 10 per cleared gem, multiplied by the cascade depth
 			const gained = clearSet.size * 10 * cascade;
@@ -792,7 +896,7 @@
 	// activation (distinct from the cascade-triggered detonation power gems get when
 	// caught inside someone else's match). No 3-in-a-row is required to trigger it.
 	async function resolveHyperSwap(otherCell, targetColor) {
-		if (gameMode === "timed") timedStarted = true;   // clock starts on the first match
+		if (usesClock()) timedStarted = true;   // clock starts on the first match
 		// Base clear: every gem of the swapped-into color, plus the hyper gem itself
 		// (now sitting wherever the swap placed it).
 		const matched = new Set();
@@ -830,6 +934,7 @@
 		for (const key of blast) clearSet.add(key);
 
 		collectTimerBuffs(clearSet);   // Timed mode: +10s per Timer buff cleared away
+		applyRushMatchBonus();         // Rush mode: quick-match time recovery (this detonation is the player's swap, not a fall-triggered cascade)
 
 		spawnHyperBlast(otherCell.r, otherCell.c, targetColor);
 		// Any bomb/cross gem swept up in the wake gets its own sound too, same as a
@@ -877,6 +982,7 @@
 			levelFlash = 1.6;
 			sndLevelUp();
 			if (gameMode === "timed") timeLeft = TIMED_SECONDS;   // fresh minute for the new level
+			else if (gameMode === "rush") timeLeft += RUSH_LEVEL_BONUS;   // flat time bonus, clock keeps running
 		}
 	}
 
@@ -902,6 +1008,7 @@
 		updateBest();
 		updateBestLevel();
 		showTimeUp();
+		saveState();   // so a reload lands back on the Time's Up screen, not a live board
 	}
 
 	// Scans for a legal swap, returning { a, b, hit } — the two cells involved and
@@ -952,6 +1059,52 @@
 		return findLegalMove() !== null;
 	}
 
+	// Auto-Play only: scores a candidate swap by how "special" the resulting match
+	// is, so the bot can prefer detonating/collecting power gems and Timer buffs
+	// over a plain 3-match. Higher is better; null means the swap isn't legal.
+	function scoreAutoPlayMove(a, b) {
+		// A hyper gem swap always wins outright — it clears every gem of the target
+		// color on the board, the single biggest play available.
+		if (power[a.r][a.c] === 3) return { a, b, hit: a, score: Infinity };
+		if (power[b.r][b.c] === 3) return { a, b, hit: b, score: Infinity };
+		swapCells(a, b);
+		const runs = findRuns();
+		if (runs.length === 0) { swapCells(a, b); return null; }
+		const matched = new Set();
+		for (const run of runs) for (const [r, c] of run.cells) matched.add(r + "," + c);
+		const hit = matched.has(a.r + "," + a.c) ? b : a;
+		// Weight any power gem caught in the match by its tier (bomb < cross < hyper)
+		// and add a flat bonus per Timer buff swept up — both outrank a plain match
+		// (score 0), and a bigger/rarer catch outranks a smaller one. Must read
+		// power/timerBuff *before* reverting the swap below — a and b themselves
+		// may carry a power gem into (or out of) the matched cells.
+		let score = 0;
+		for (const key of matched) {
+			const [r, c] = key.split(",").map(Number);
+			if (power[r][c]) score += power[r][c];
+			if (timerBuff[r][c]) score += 1;
+		}
+		swapCells(a, b);
+		return { a, b, hit, score };
+	}
+
+	// Auto-Play only: scans every legal swap on the board and returns the
+	// highest-scoring one (see scoreAutoPlayMove), or null if none exist.
+	function findBestAutoPlayMove() {
+		let best = null;
+		const consider = (a, b) => {
+			const cand = scoreAutoPlayMove(a, b);
+			if (cand && (!best || cand.score > best.score)) best = cand;
+		};
+		for (let r = 0; r < ROWS; r++) {
+			for (let c = 0; c < COLS; c++) {
+				if (c < COLS - 1) consider({ r, c }, { r, c: c + 1 });
+				if (r < ROWS - 1) consider({ r, c }, { r: r + 1, c });
+			}
+		}
+		return best;
+	}
+
 	// No legal move remains: instead of scrambling the whole board, drop a hyper gem
 	// on a random cell as an escape hatch. The player detonates it themselves (swap it
 	// into any neighbor) to clear a chunk of the board, which naturally opens up new
@@ -995,6 +1148,7 @@
 		await animateSwap(a, b);
 		await afterSlide(a, b);
 		busy = false;
+		saveState();
 	}
 
 	// Commit a live drag: finish the slide from wherever the gem currently sits
@@ -1021,6 +1175,7 @@
 		offset[b.r][b.c] = { dx: 0, dy: 0 };
 		await afterSlide(a, b);
 		busy = false;
+		saveState();
 	}
 
 	function adjacent(a, b) {
@@ -1189,16 +1344,16 @@
 		ctx.font = "bold 16px 'Trebuchet MS', Verdana, sans-serif";
 		ctx.fillText("Best: " + best, 16, 36);
 
-		// Timed mode only: best level ever reached, stacked directly under "Best".
-		if (gameMode === "timed") {
+		// Timed/Rush only: best level ever reached, stacked directly under "Best".
+		if (usesClock()) {
 			ctx.font = "bold 12px 'Trebuchet MS', Verdana, sans-serif";
 			ctx.fillText("Best Lvl: " + bestLevel, 16, 52);
 		}
 
-		// top-right (Timed mode only): countdown clock, mirrors "Best" on the left.
+		// top-right (Timed/Rush only): countdown clock, mirrors "Best" on the left.
 		// Right-aligned short of the gear/game-mode icon buttons (which float over
 		// the canvas's top-right corner) so the two never overlap.
-		if (gameMode === "timed") {
+		if (usesClock()) {
 			ctx.textAlign = "right";
 			ctx.fillStyle = timeLeft <= 10 ? "#ff6b6b" : "#9ec7ff";
 			ctx.font = "bold 16px 'Trebuchet MS', Verdana, sans-serif";
@@ -1769,19 +1924,23 @@
 		idleTime += dt;
 		if (!busy && !hint && !timedOver && idleTime >= HINT_IDLE_S) hint = findHintMove();
 		const overlayOpen = !!document.querySelector(".bj-settings-overlay.open");
-		// Timed mode's clock doesn't start until the first match clears (timedStarted),
+		// Timed/Rush's clock doesn't start until the first match clears (timedStarted),
 		// then keeps running through swap/cascade animations (that's the pressure the
 		// mode is built around) but pauses while any menu overlay is open, so opening
 		// Settings mid-run doesn't unfairly burn the clock.
-		if (gameMode === "timed" && timedStarted && !timedOver && !overlayOpen) {
+		if (usesClock() && timedStarted && !timedOver && !overlayOpen) {
 			timeLeft = Math.max(0, timeLeft - dt);
+			// Rush mode: the quick-match bonus window ticks down alongside the clock;
+			// once it hits 0 the next match banks nothing extra until it clears again.
+			if (gameMode === "rush" && rushComboRemaining > 0) rushComboRemaining = Math.max(0, rushComboRemaining - dt);
 			if (timeLeft <= 0) triggerTimeUp();
 		}
 		// Auto-Play: the instant a legal move exists and nothing else is animating,
-		// play it via the normal trySwap() (fire-and-forget — trySwap sets `busy`
-		// synchronously before its first await, so this can't double-fire next frame).
-		if (autoPlayEnabled && gameMode === "timed" && !timedOver && !busy && assetsReady && !overlayOpen) {
-			const move = findLegalMove();
+		// play the highest-scoring one via the normal trySwap() (fire-and-forget —
+		// trySwap sets `busy` synchronously before its first await, so this can't
+		// double-fire next frame).
+		if (autoPlayEnabled && usesClock() && !timedOver && !busy && assetsReady && !overlayOpen) {
+			const move = findBestAutoPlayMove();
 			if (move) trySwap(move.a, move.b);
 		}
 		render();
@@ -1856,7 +2015,12 @@
 	window.addEventListener("load", fitCanvas);
 	// 'F' toggles the FPS counter.
 	document.addEventListener("keydown", (e) => {
-		if (e.key === "f" || e.key === "F") showFPS = !showFPS;
+		if (e.key === "f" || e.key === "F") {
+			showFPS = !showFPS;
+			try { localStorage.setItem("bj2_show_fps", showFPS ? "1" : "0"); } catch (err) {}
+			const fpsChk = document.getElementById("bj-fps-toggle");
+			if (fpsChk) fpsChk.checked = showFPS;
+		}
 	});
 	// Re-fit whenever the container's size settles (covers the template's preload
 	// fade-in, font loading, orientation changes, etc.).
@@ -1906,10 +2070,10 @@
 		if (versionEl) versionEl.textContent = "v" + APP_VERSION;
 
 		function openSettings() {
-			// Auto-Play only makes sense in Timed mode — re-check on every open since
-			// the active mode can change while Settings is closed.
+			// Auto-Play only makes sense in Timed/Rush mode — re-check on every open
+			// since the active mode can change while Settings is closed.
 			if (autoplayRow) {
-				const show = gameMode === "timed";
+				const show = usesClock();
 				autoplayRow.style.display = show ? "" : "none";
 				if (!show) autoPlayEnabled = false;
 				if (autoplayChk) autoplayChk.checked = autoPlayEnabled;
@@ -1968,7 +2132,10 @@
 		}
 		if (fpsChk) {
 			fpsChk.checked = showFPS;
-			fpsChk.addEventListener("change", () => { showFPS = fpsChk.checked; });
+			fpsChk.addEventListener("change", () => {
+				showFPS = fpsChk.checked;
+				try { localStorage.setItem("bj2_show_fps", showFPS ? "1" : "0"); } catch (e) {}
+			});
 		}
 		if (debugChk) {
 			debugChk.checked = debugMode;
@@ -1976,7 +2143,7 @@
 		}
 		if (autoplayChk) {
 			autoplayChk.addEventListener("change", () => {
-				autoPlayEnabled = autoplayChk.checked && gameMode === "timed";
+				autoPlayEnabled = autoplayChk.checked && usesClock();
 			});
 		}
 
@@ -2047,13 +2214,50 @@
 	(function initTimeUp() {
 		const retryBtn = document.getElementById("bj-timeup-retry");
 		if (!retryBtn) return;
-		retryBtn.addEventListener("click", () => startNewRun("timed"));
+		// Retry the mode that actually just ran (Timed or Rush), not always Timed.
+		retryBtn.addEventListener("click", () => startNewRun(gameMode));
 	})();
 
+	// Asks whether to continue a just-restored run or discard it for a fresh one.
+	// The overlay itself blocks input into the board underneath (same as the
+	// Settings/Game Mode/Time's Up overlays), so nothing is clickable until the
+	// player picks one.
+	function showResumePrompt() {
+		const overlay = document.getElementById("bj-resume-overlay");
+		const continueBtn = document.getElementById("bj-resume-continue");
+		const restartBtn = document.getElementById("bj-resume-restart");
+		if (!overlay || !continueBtn || !restartBtn) return;
+		const levelEl = document.getElementById("bj-resume-level");
+		const scoreEl = document.getElementById("bj-resume-score");
+		if (levelEl) levelEl.textContent = String(level);
+		if (scoreEl) scoreEl.textContent = String(score);
+		overlay.classList.add("open");
+		continueBtn.addEventListener("click", () => overlay.classList.remove("open"), { once: true });
+		restartBtn.addEventListener("click", () => {
+			overlay.classList.remove("open");
+			startNewRun(gameMode);   // discards the restored run and deals a fresh one
+		}, { once: true });
+	}
+
 	// ---- Boot ----
-	initGrid();
-	fitCanvas();
+	fitCanvas();   // settle COLS for this viewport first, so a save's `cols` can be compared against it
+	const savedAtBoot = loadSavedState();
+	if (savedAtBoot) restoreState(savedAtBoot); else initGrid();
+	resetInputState();
 	render();                       // paint an initial frame immediately
 	requestAnimationFrame(frame);
 	loadAssets().then(() => { fitCanvas(); render(); });
+	// Skip the prompt if the restored run had already ended (the Time's Up
+	// overlay, shown by restoreState() above, already offers its own retry) or
+	// if the score is still 0 — a fresh, barely-touched board isn't worth asking
+	// about, just let the player start playing it directly.
+	if (savedAtBoot && !timedOver && score !== 0) showResumePrompt();
+
+	// Keep a ticking Timed/Rush clock's save reasonably fresh between moves
+	// (the other save points only fire on a settled swap or Time's Up). Skipped
+	// while `busy` so a mid-animation grid (with transient cleared cells) never
+	// gets persisted.
+	setInterval(() => { if (!busy) saveState(); }, 1000);
+	// Best-effort final save if the tab is closed/backgrounded mid-run.
+	document.addEventListener("visibilitychange", () => { if (document.hidden && !busy) saveState(); });
 })();

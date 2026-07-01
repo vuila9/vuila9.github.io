@@ -8,6 +8,46 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.1.34] - 2026-07-01
+### Changed
+- FPS Counter now defaults to off for new players (was on), matching Debug Mode. The choice is still persisted across sessions once toggled, whether from Settings or the 'F' key.
+
+## [0.1.33] - 2026-07-01
+### Added
+- A "WELCOME BACK" prompt now appears at boot whenever a saved in-progress run is found, showing its level/score and offering CONTINUE (resume it, already the default) or START OVER (discard it and deal a fresh board). Skipped if the saved run had already ended, since the Time's Up screen covers that case with its own retry button.
+
+### Changed
+- Rush mode's level-completion bonus is now 5 seconds (was 15s).
+- Rush mode's quick-match time bonus is capped lower: the window is now 4 seconds (was 6s), so a match banks at most ~4s instead of ~6s.
+
+## [0.1.31] - 2026-07-01
+### Changed
+- A resumed Timed/Rush run always comes back with its clock paused, even if the clock had already started ticking before the reload — same as a brand-new run, it only resumes once the player clears a match on the restored board.
+
+## [0.1.30] - 2026-07-01
+### Added
+- The current run now resumes after a reload or tab close instead of always dealing a fresh board: board layout, score, level progress, and (for Timed/Rush) the clock are saved after every settled move, on a 1-second interval, and when the tab is hidden, then restored at boot. If the saved board's column count no longer matches the viewport (e.g. fullscreen/orientation changed between sessions), a fresh board is dealt but score/level/clock still carry over.
+
+## [0.1.29] - 2026-07-01
+### Fixed
+- Rush mode's clock showed Timed's 1:00 on first load (or after a hard refresh) whenever Rush was the last-selected mode, instead of Rush's own starting time — `timeLeft`'s initial value wasn't mode-aware. Also, the Time's Up "Try Again" button always restarted in Timed mode regardless of which mode had actually just ended.
+
+## [0.1.28] - 2026-07-01
+### Fixed
+- Rush mode's quick-match time bonus now only triggers on the match the player's swap directly produces — automatic chain-reaction matches formed by gems falling into place afterward no longer bank time.
+
+## [0.1.27] - 2026-07-01
+### Changed
+- Rush mode now starts with a 15-second clock (was 90s) and its "quick match" bonus window is 6 seconds (was 5s).
+
+## [0.1.26] - 2026-07-01
+### Changed
+- Auto-Play is now available in Rush mode as well as Timed, and its move-picking now prefers whichever legal swap detonates a power gem (bomb/cross/hyper) or collects a Timer buff over a plain 3-match, instead of just playing the first legal move it finds.
+
+## [0.1.25] - 2026-07-01
+### Added
+- Rush game mode: starts with a 90-second clock (no per-level reset). Every successful match opens a 5-second "quick match" window; landing the next match before it closes banks whatever time was left in it, rewarding fast chaining. Completing a level adds a flat 15 seconds on top.
+
 ## [0.1.24] - 2026-07-01
 ### Fixed
 - Timer buff's clock badge is now centered on the gem instead of floating above it.

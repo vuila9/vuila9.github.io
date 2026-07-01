@@ -114,7 +114,7 @@
 
 											<label class="bj-setting-row">
 												<span class="bj-setting-label">FPS Counter</span>
-												<input type="checkbox" class="bj-toggle" id="bj-fps-toggle" checked>
+												<input type="checkbox" class="bj-toggle" id="bj-fps-toggle">
 												<span class="bj-switch"></span>
 											</label>
 
@@ -124,10 +124,10 @@
 												<span class="bj-switch"></span>
 											</label>
 
-											<!-- Timed mode only: a zero-latency "bot" that always plays a legal move
-												 the instant one exists (still at normal swap speed), to benchmark the
-												 highest score achievable if decision time weren't a factor. Hidden
-												 outside Timed mode. -->
+											<!-- Timed/Rush mode only: a zero-latency "bot" that always plays a legal
+												 move the instant one exists (still at normal swap speed), preferring
+												 whichever move detonates/collects a power gem or Timer buff. Hidden
+												 outside Timed/Rush mode. -->
 											<label class="bj-setting-row" id="bj-autoplay-row">
 												<span class="bj-setting-label">Auto-Play</span>
 												<input type="checkbox" class="bj-toggle" id="bj-autoplay-toggle">
@@ -150,12 +150,16 @@
 
 											<div class="bj-mode-list">
 												<button class="bj-mode-btn" id="bj-mode-endless" data-mode="endless"
-													data-desc="Classic play &mdash; clear gems, level up, no limit.">
+													data-desc="Classic play, clear gems, level up, no limit.">
 													<span class="bj-mode-name">Endless</span>
 												</button>
 												<button class="bj-mode-btn" id="bj-mode-timed" data-mode="timed"
-													data-desc="One minute per level &mdash; clear it before the clock runs out.">
+													data-desc="One minute per level, clear it before the clock runs out.">
 													<span class="bj-mode-name">Timed</span>
+												</button>
+												<button class="bj-mode-btn" id="bj-mode-rush" data-mode="rush"
+													data-desc="15 seconds on the clock, quick matches earn time back 1-3s, levels add 5s.">
+													<span class="bj-mode-name">Rush</span>
 												</button>
 												<button class="bj-mode-btn" disabled>
 													<span class="bj-mode-name">Puzzle</span>
@@ -194,6 +198,28 @@
 											</div>
 
 											<button class="bj-settings-close bj-resume" id="bj-timeup-retry">TRY AGAIN</button>
+										</div>
+									</div>
+
+									<!-- Shown at boot when a saved in-progress run is found: pick up where it left
+										 off, or discard it and deal a fresh board. -->
+									<div class="bj-settings-overlay" id="bj-resume-overlay">
+										<div class="bj-settings-panel">
+											<div class="bj-settings-title">WELCOME BACK</div>
+
+											<div class="bj-timeup-stats">
+												<div class="bj-timeup-row">
+													<span>Level</span>
+													<span id="bj-resume-level">1</span>
+												</div>
+												<div class="bj-timeup-row">
+													<span>Score</span>
+													<span id="bj-resume-score">0</span>
+												</div>
+											</div>
+
+											<button class="bj-settings-close bj-resume" id="bj-resume-continue">CONTINUE</button>
+											<button class="bj-settings-close bj-reset" id="bj-resume-restart">START OVER</button>
 										</div>
 									</div>
 
