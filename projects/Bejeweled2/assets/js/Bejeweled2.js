@@ -508,6 +508,7 @@
 	}
 
 	// Reshuffle all gems (keep playing) until there's a move and no free matches.
+	// Replaced with a special gem where it will act as a "reshuffle" to ensure seamless experience
 	async function reshuffle() {
 		const flat = [];
 		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) flat.push(grid[r][c]);
