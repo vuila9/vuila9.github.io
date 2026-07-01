@@ -33,19 +33,28 @@
 				overscroll-behavior: none;
 				-webkit-tap-highlight-color: transparent;
 			}
-			#bj-frame {
-				/* Fills the layout viewport. iOS standalone clips fixed elements to
-				   ABOVE the home indicator; the strip below is painted by the body
-				   background (coloured to match the game). Transparent so it shows
-				   no colour band behind Safari's toolbars in the browser. */
+			#bj-stage {
+				/* Fills the layout viewport and centers #bj-frame within it. iOS
+				   standalone clips fixed elements to ABOVE the home indicator; the
+				   strip below is painted by the body background (coloured to match
+				   the game). This has to live on #bj-stage rather than #bj-frame:
+				   #bj-frame shrink-wraps to the canvas (so the icon buttons, which
+				   are absolutely positioned against it, land on the canvas's actual
+				   corner) — stretching #bj-frame to the full viewport would instead
+				   pin the buttons to the screen's corner, floating away from the
+				   board whenever the canvas is letterboxed. */
 				position: fixed;
 				inset: 0;
+				height: 100%;
+				justify-content: center;
+			}
+			#bj-frame {
+				/* Transparent so it shows no colour band behind Safari's toolbars
+				   in the browser, and no rounded "card" look in true fullscreen. */
 				max-width: none;
 				border-radius: 0;
 				background: transparent;
-				display: flex;
-				align-items: center;
-				justify-content: center;
+				box-shadow: none;
 			}
 			#bj-canvas {
 				display: block;
@@ -82,6 +91,12 @@
 						<label class="bj-setting-row">
 							<span class="bj-setting-label">Sound</span>
 							<input type="checkbox" class="bj-toggle" id="bj-sound-toggle" checked>
+							<span class="bj-switch"></span>
+						</label>
+
+						<label class="bj-setting-row">
+							<span class="bj-setting-label">Haptics</span>
+							<input type="checkbox" class="bj-toggle" id="bj-haptics-toggle" checked>
 							<span class="bj-switch"></span>
 						</label>
 

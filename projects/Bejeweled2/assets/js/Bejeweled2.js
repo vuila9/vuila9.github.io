@@ -87,6 +87,8 @@
 	let audioCtx = null;
 	let muted = false;
 	let debugMode = false;
+	let hapticsEnabled = true;
+	try { hapticsEnabled = localStorage.getItem("bj2_haptics") !== "0"; } catch (e) {}
 	let gameSpeed = 1.5;   // animation speed multiplier
 	const DROP_MS = 300; // gem fall duration in ms (lower = faster drop)
 	function S(ms) { return ms / gameSpeed; }   // scale a tween duration by speed
@@ -112,6 +114,20 @@
 	const sndMatch = (cascade) => beep(420 + cascade * 90, 0.12, 0.08);
 	const sndLevelUp = () => { beep(660, 0.16, 0.09); setTimeout(() => beep(990, 0.22, 0.09), 130); };
 	const sndExplode = () => { beep(140, 0.28, 0.1); setTimeout(() => beep(90, 0.3, 0.09), 40); };
+
+	// Haptic feedback on special-gem detonation. Real Taptic Engine access from a web
+	// page isn't exposed on iOS (Safari/WKWebView never implemented the Vibration API,
+	// even for home-screen-installed PWAs) — this uses the standard navigator.vibrate(),
+	// which works on Android/other browsers that support it and is a silent no-op
+	// everywhere else, so it costs nothing to leave wired up for whenever/if iOS adds it.
+	function hapticBuzz(level) {
+		if (!hapticsEnabled || !navigator.vibrate) return;
+		try {
+			if (level === 3) navigator.vibrate([25, 30, 45]);   // hyper: triple pulse
+			else if (level === 2) navigator.vibrate(30);        // cross
+			else navigator.vibrate(18);                          // bomb
+		} catch (e) { /* vibration not available */ }
+	}
 
 	// ---- Game state ----
 	let grid = [];            // grid[r][c] = type index, or -1 when empty
@@ -494,6 +510,7 @@
 
 			if (blastCenters.length) {
 				sndExplode();
+				hapticBuzz(Math.max(...blastCenters.map((b) => b.level)));
 				for (const b of blastCenters) {
 					if (b.level === 3) spawnHyperBlast(b.r, b.c, b.t);
 					else if (b.level === 2) spawnCrossBlast(b.r, b.c, b.t);
@@ -560,6 +577,7 @@
 			else spawnExplosion(b.r, b.c, b.t);
 		}
 		sndExplode();
+		hapticBuzz(3);   // hyper-gem activation is always the strongest tier
 
 		const gained = clearSet.size * 10;
 		score += gained;
@@ -1442,7 +1460,8 @@
 		const overlay  = document.getElementById("bj-settings-overlay");
 		const gearBtn  = document.getElementById("bj-gear");
 		const closeBtn = document.getElementById("bj-settings-close");
-		const soundChk = document.getElementById("bj-sound-toggle");
+		const soundChk   = document.getElementById("bj-sound-toggle");
+		const hapticChk  = document.getElementById("bj-haptics-toggle");
 		const fpsChk   = document.getElementById("bj-fps-toggle");
 		const debugChk = document.getElementById("bj-debug-toggle");
 		const resetBtn = document.getElementById("bj-reset-best");
@@ -1459,6 +1478,23 @@
 		if (soundChk) {
 			soundChk.checked = !muted;
 			soundChk.addEventListener("change", () => { muted = !soundChk.checked; });
+		}
+		// Vibration is only meaningful on touch/mobile hardware — desktops have no
+		// Taptic/vibration motor, so hide the row there instead of showing a dead option.
+		const isMobileDevice = navigator.maxTouchPoints > 0 || "ontouchstart" in window ||
+			(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+		if (hapticChk) {
+			const row = hapticChk.closest(".bj-setting-row");
+			if (!isMobileDevice) {
+				if (row) row.style.display = "none";
+			} else {
+				hapticChk.checked = hapticsEnabled;
+				hapticChk.addEventListener("change", () => {
+					hapticsEnabled = hapticChk.checked;
+					try { localStorage.setItem("bj2_haptics", hapticsEnabled ? "1" : "0"); } catch (e) {}
+					if (hapticsEnabled) hapticBuzz(1);   // quick confirmation buzz on enable
+				});
+			}
 		}
 		if (fpsChk) {
 			fpsChk.checked = showFPS;
