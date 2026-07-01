@@ -8,7 +8,7 @@
 // never reach an installed app because it keeps serving stale cached code.
 //
 // Bump CACHE whenever the precached file list changes.
-const CACHE = "bejeweled2-v8";
+const CACHE = "bejeweled2-v9";
 const ASSETS = [
   "./webapp.html",
   "./manifest.webmanifest",

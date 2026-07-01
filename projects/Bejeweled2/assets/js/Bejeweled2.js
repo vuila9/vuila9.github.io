@@ -17,7 +17,7 @@
 
 	// Shown in the Options panel to confirm a deploy is live. Bump this together
 	// with CACHE in sw.js so the number always matches the service-worker version.
-	const APP_VERSION = "0.8";
+	const APP_VERSION = "0.9";
 
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
 	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,
@@ -804,18 +804,13 @@
 		const a = { r: pointerDown.r, c: pointerDown.c };
 		const b = onBoard ? { r: tr, c: tc } : null;
 
-		// the dragged gem follows the pointer; the neighbour slides the other way
+		// the dragged gem follows the pointer; the neighbour slides the other way.
+		// Purely visual while held — nothing commits until release (onPointerUp),
+		// so the player can drag past the threshold and still pull back to cancel.
 		clearDragOffsets();
 		offset[a.r][a.c] = horiz ? { dx: m, dy: 0 } : { dx: 0, dy: m };
 		if (b) offset[b.r][b.c] = horiz ? { dx: -m, dy: 0 } : { dx: 0, dy: -m };
 		dragPreview = { a, b };
-
-		// commit once dragged at least halfway toward the neighbour
-		if (b && Math.abs(m) >= GEM * COMMIT_FRACTION) {
-			pointerDown = null;
-			dragPreview = null;       // commitDrag now owns these offsets
-			commitDrag(a, b);
-		}
 	}
 
 	function onPointerUp() {
@@ -823,7 +818,12 @@
 		if (dragPreview && !busy) {
 			const { a, b } = dragPreview;
 			dragPreview = null;
-			snapBack(a, b);           // released before committing → ease home
+			// Commit if released at least halfway toward the neighbour (same
+			// threshold as before), otherwise ease back to the resting position.
+			const horiz = b && a.r === b.r;
+			const m = b ? (horiz ? offset[a.r][a.c].dx : offset[a.r][a.c].dy) : 0;
+			if (b && Math.abs(m) >= GEM * COMMIT_FRACTION) commitDrag(a, b);
+			else snapBack(a, b);
 		} else {
 			dragPreview = null;
 		}
@@ -1522,11 +1522,18 @@
 		}
 		// Vibration is only meaningful on touch/mobile hardware — desktops have no
 		// Taptic/vibration motor, so hide the row there instead of showing a dead option.
+		// Also require an actual navigator.vibrate implementation: iOS WebKit (Safari,
+		// and every other iOS browser — they're all WebKit under the hood) has never
+		// shipped the Vibration API, on any iOS version, in any context including
+		// installed Home Screen apps. Without this check the toggle would show up on
+		// iPhones and silently do nothing when enabled, which is worse than not
+		// offering it at all.
 		const isMobileDevice = navigator.maxTouchPoints > 0 || "ontouchstart" in window ||
 			(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+		const hapticsSupported = isMobileDevice && "vibrate" in navigator;
 		if (hapticChk) {
 			const row = hapticChk.closest(".bj-setting-row");
-			if (!isMobileDevice) {
+			if (!hapticsSupported) {
 				if (row) row.style.display = "none";
 			} else {
 				hapticChk.checked = hapticsEnabled;

@@ -25,10 +25,13 @@
 			html, body {
 				margin: 0;
 				height: 100%;
-				/* iOS standalone paints this root background in the home-indicator
-				   strip below the (clipped) fixed frame. Match it to the game's deep
-				   cosmic background so that strip blends in instead of showing black. */
-				background: #0a1740;
+				/* #bj-frame is transparent here (see below), so this is what shows in
+				   the letterbox gutter around the canvas — including the iOS standalone
+				   home-indicator strip below the (clipped) fixed frame. Use the game's
+				   own background art, cover-cropped at native resolution, instead of a
+				   flat color, so the gutter reads as part of the scene rather than a
+				   solid bar. #0a1740 is the fallback if the image fails to load. */
+				background: #0a1740 url("assets/img/background.jpg") center / cover no-repeat;
 				overflow: hidden;
 				overscroll-behavior: none;
 				-webkit-tap-highlight-color: transparent;
