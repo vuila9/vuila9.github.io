@@ -91,11 +91,16 @@
 					<div class="bj-settings-panel">
 						<div class="bj-settings-title">OPTIONS</div>
 
-						<label class="bj-setting-row">
+						<div class="bj-setting-row">
 							<span class="bj-setting-label">Sound</span>
-							<input type="checkbox" class="bj-toggle" id="bj-sound-toggle" checked>
-							<span class="bj-switch"></span>
-						</label>
+							<div class="bj-sound-controls">
+								<input type="range" class="bj-volume-slider" id="bj-volume-slider" min="0" max="150" value="100">
+								<label class="bj-toggle-wrap">
+									<input type="checkbox" class="bj-toggle" id="bj-sound-toggle" checked>
+									<span class="bj-switch"></span>
+								</label>
+							</div>
+						</div>
 
 						<label class="bj-setting-row">
 							<span class="bj-setting-label">Haptics</span>
@@ -115,6 +120,16 @@
 							<span class="bj-switch"></span>
 						</label>
 
+						<!-- Timed mode only: a zero-latency "bot" that always plays a legal move
+							 the instant one exists (still at normal swap speed), to benchmark the
+							 highest score achievable if decision time weren't a factor. Hidden
+							 outside Timed mode. -->
+						<label class="bj-setting-row" id="bj-autoplay-row">
+							<span class="bj-setting-label">Auto-Play</span>
+							<input type="checkbox" class="bj-toggle" id="bj-autoplay-toggle">
+							<span class="bj-switch"></span>
+						</label>
+
 						<div class="bj-setting-row" style="justify-content:center">
 							<button class="bj-settings-close bj-reset" id="bj-reset-best">Reset Best Score</button>
 						</div>
@@ -124,12 +139,57 @@
 					</div>
 				</div>
 
-				<!-- Game Mode overlay (placeholder panel; modes to be added) -->
+				<!-- Game Mode overlay -->
 				<div class="bj-settings-overlay" id="bj-gamemode-overlay">
 					<div class="bj-settings-panel">
 						<div class="bj-settings-title">GAME MODE</div>
 
+						<div class="bj-mode-list">
+							<button class="bj-mode-btn" id="bj-mode-endless" data-mode="endless"
+								data-desc="Classic play &mdash; clear gems, level up, no limit.">
+								<span class="bj-mode-name">Endless</span>
+							</button>
+							<button class="bj-mode-btn" id="bj-mode-timed" data-mode="timed"
+								data-desc="One minute per level &mdash; clear it before the clock runs out.">
+								<span class="bj-mode-name">Timed</span>
+							</button>
+							<button class="bj-mode-btn" disabled>
+								<span class="bj-mode-name">Puzzle</span>
+								<span class="bj-mode-desc">Coming soon</span>
+							</button>
+							<button class="bj-mode-btn" disabled>
+								<span class="bj-mode-name">Lightning</span>
+								<span class="bj-mode-desc">Coming soon</span>
+							</button>
+						</div>
+
 						<button class="bj-settings-close bj-resume" id="bj-gamemode-close">RESUME</button>
+					</div>
+				</div>
+
+				<!-- Mode-selected toast: brief description popup shown after picking a mode -->
+				<div class="bj-mode-toast" id="bj-mode-toast">
+					<div class="bj-mode-toast-name" id="bj-mode-toast-name"></div>
+					<div class="bj-mode-toast-desc" id="bj-mode-toast-desc"></div>
+				</div>
+
+				<!-- Timed mode: shown when the 1-minute clock runs out -->
+				<div class="bj-settings-overlay" id="bj-timeup-overlay">
+					<div class="bj-settings-panel">
+						<div class="bj-settings-title">TIME'S UP!</div>
+
+						<div class="bj-timeup-stats">
+							<div class="bj-timeup-row">
+								<span>Level reached</span>
+								<span id="bj-timeup-level">1</span>
+							</div>
+							<div class="bj-timeup-row">
+								<span>Score</span>
+								<span id="bj-timeup-score">0</span>
+							</div>
+						</div>
+
+						<button class="bj-settings-close bj-resume" id="bj-timeup-retry">TRY AGAIN</button>
 					</div>
 				</div>
 
