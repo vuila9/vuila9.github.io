@@ -15,6 +15,10 @@
 	if (!canvas) return;
 	const ctx = canvas.getContext("2d");
 
+	// Shown in the Options panel to confirm a deploy is live. Bump this together
+	// with CACHE in sw.js so the number always matches the service-worker version.
+	const APP_VERSION = "0.8";
+
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
 	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,
 	// so the board fills more of the wide viewport instead of leaving empty side gutters.
@@ -1499,7 +1503,10 @@
 		const fpsChk   = document.getElementById("bj-fps-toggle");
 		const debugChk = document.getElementById("bj-debug-toggle");
 		const resetBtn = document.getElementById("bj-reset-best");
+		const versionEl = document.getElementById("bj-version");
 		if (!overlay || !gearBtn) return;
+
+		if (versionEl) versionEl.textContent = "v" + APP_VERSION;
 
 		function openSettings()  { overlay.classList.add("open"); }
 		function closeSettings() { overlay.classList.remove("open"); }
