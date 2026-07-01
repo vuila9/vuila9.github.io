@@ -8,6 +8,22 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.1.24] - 2026-07-01
+### Fixed
+- Timer buff's clock badge is now centered on the gem instead of floating above it.
+
+## [0.1.23] - 2026-07-01
+### Added
+- Timed mode: each successful match has a 15% chance to bless a random gem with a Timer buff (pulsing cyan glow + clock badge). Clearing it in a later match adds 10 seconds to the clock, with a floating "+10s" popup and a dedicated chime.
+
+## [0.1.22] - 2026-07-01
+### Fixed
+- `webapp.html` (the standalone PWA app shell) had fallen out of sync with the main project page — it duplicates the settings/game-mode markup separately and was missing the volume slider, Auto-Play toggle, the real mode-select list, the mode-selection toast, and the Time's Up overlay. Re-synced.
+
+## [0.1.21] - 2026-07-01
+### Changed
+- Bomb, cross, and hyper detonation sounds now layer in filtered white-noise texture and sit on slightly higher pitch floors, so they read as a clean hit on weak/small speakers (most laptop speakers can't reproduce much below ~150-200Hz cleanly) instead of a thin or buzzy tone.
+
 ## [0.1.20] - 2026-07-01
 ### Added
 - Volume slider in Settings (0-150%) alongside the mute toggle, persisted across sessions and disabled while muted; overall sound effect loudness increased via a master volume multiplier.

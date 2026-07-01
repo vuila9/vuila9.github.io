@@ -231,6 +231,12 @@
 			setTimeout(() => tone(f, 0.18, 0.055, { type: "triangle" }), i * 45);
 		});
 	};
+	// Timed mode: collecting a Timer buff — a quick bright ascending chime,
+	// distinct from the level-up fanfare so it reads as "bonus time", not "level".
+	const sndTimeBuff = () => {
+		beep(880, 0.1, 0.09);
+		setTimeout(() => beep(1320, 0.14, 0.08), 90);
+	};
 
 	// Haptic feedback on special-gem detonation. Real Taptic Engine access from a web
 	// page isn't exposed on iOS (Safari/WKWebView never implemented the Vibration API,
@@ -329,10 +335,19 @@
 	const POWER_MIN = 4;   // 4-in-a-row = bomb
 	const HYPER_MIN = 5;   // 5-in-a-row = hyper (color bomb)
 
+	// Timed mode only: a small chance per successful match to bless a random gem
+	// with a "Timer" buff (parallel to `power`, since any plain gem can carry one
+	// regardless of its own power tier). Clearing that cell in a later match adds
+	// TIMER_BUFF_SECONDS to the clock — see maybeSpawnTimerBuff()/collectTimerBuffs().
+	let timerBuff = [];        // timerBuff[r][c] = true if that cell carries the buff
+	const TIMER_BUFF_CHANCE = 0.15;
+	const TIMER_BUFF_SECONDS = 10;
+
 	// Explosion FX (purely cosmetic; updated each frame, drawn over the gems).
 	let blasts = [];          // expanding shockwave rings {x,y,age,dur,color}
 	let sparks = [];          // flung particles {x,y,vx,vy,age,dur,color,size}
 	let beams = [];           // cross-gem row/column light beams {r,c,age,dur,color}
+	let timeBuffPopups = [];  // floating "+10s" text {x,y,age,dur} after a buff is collected
 
 	// Diagonal gloss sweep — a white sheen band that drifts top-left → bottom-right
 	// over the board every so often (cosmetic idle effect).
@@ -364,9 +379,11 @@
 		offset = make2D(() => ({ dx: 0, dy: 0 }));
 		scale = make2D(() => 1);
 		power = make2D(() => 0);
+		timerBuff = make2D(() => false);
 		blasts = [];
 		sparks = [];
 		beams = [];
+		timeBuffPopups = [];
 	}
 
 	// Switch the board width (NORMAL_COLS <-> WIDE_COLS) and deal a fresh board at the
@@ -572,18 +589,21 @@
 					if (write !== r) {
 						grid[write][c] = grid[r][c];
 						power[write][c] = power[r][c];   // a falling power gem keeps its upgrade
+						timerBuff[write][c] = timerBuff[r][c];   // ...and so does a Timer buff
 						grid[r][c] = -1;
 						power[r][c] = 0;
+						timerBuff[r][c] = false;
 						falls.push({ r: write, c, dist: (write - r) * GEM });
 					}
 					write--;
 				}
 			}
-			// fill the rest from above with new (never powered) gems
+			// fill the rest from above with new (never powered, never buffed) gems
 			let spawnIndex = 1;
 			for (let r = write; r >= 0; r--) {
 				grid[r][c] = randType();
 				power[r][c] = 0;
+				timerBuff[r][c] = false;
 				falls.push({ r, c, dist: (write - r + spawnIndex) * GEM });
 				spawnIndex++;
 			}
@@ -599,6 +619,48 @@
 			for (const f of falls) offset[f.r][f.c] = { dx: 0, dy: -f.dist * (1 - p) };
 		}, easeOutQuad);
 		for (const f of falls) offset[f.r][f.c] = { dx: 0, dy: 0 };
+	}
+
+	// Timed mode only: after the board settles from a cascade, a small chance to
+	// bless one random plain (unpowered, not-already-buffed) gem with a Timer
+	// buff. Restricted to power === 0 cells purely so a single gem never has to
+	// show two overlapping glows at once.
+	function maybeSpawnTimerBuff() {
+		if (gameMode !== "timed") return;
+		if (Math.random() >= TIMER_BUFF_CHANCE) return;
+		const candidates = [];
+		for (let r = 0; r < ROWS; r++) {
+			for (let c = 0; c < COLS; c++) {
+				if (grid[r][c] !== -1 && power[r][c] === 0 && !timerBuff[r][c]) candidates.push([r, c]);
+			}
+		}
+		if (!candidates.length) return;
+		const [r, c] = candidates[Math.floor(Math.random() * candidates.length)];
+		timerBuff[r][c] = true;
+	}
+
+	function spawnTimeBuffPopup(r, c) {
+		const cx = BOARD_X + c * GEM + GEM / 2, cy = BOARD_Y + r * GEM + GEM / 2;
+		timeBuffPopups.push({ x: cx, y: cy, age: 0, dur: 0.9 });
+	}
+
+	// Checks a set of "r,c" keys about to be cleared for any Timer buffs and, in
+	// Timed mode, adds TIMER_BUFF_SECONDS to the clock for each one collected.
+	function collectTimerBuffs(clearedKeys) {
+		if (gameMode !== "timed") return;
+		let collected = 0;
+		for (const key of clearedKeys) {
+			const [r, c] = key.split(",").map(Number);
+			if (timerBuff[r][c]) {
+				timerBuff[r][c] = false;
+				collected++;
+				spawnTimeBuffPopup(r, c);
+			}
+		}
+		if (collected > 0) {
+			timeLeft += TIMER_BUFF_SECONDS * collected;
+			sndTimeBuff();
+		}
 	}
 
 	// Resolve the board: clear → fall → repeat, accumulating cascade score.
@@ -692,6 +754,8 @@
 			for (const key of matched) if (!keepSet.has(key)) clearSet.add(key);
 			for (const key of blast) if (!keepSet.has(key)) clearSet.add(key);
 
+			collectTimerBuffs(clearSet);   // Timed mode: +10s per Timer buff cleared away
+
 			// scoring: 10 per cleared gem, multiplied by the cascade depth
 			const gained = clearSet.size * 10 * cascade;
 			score += gained;
@@ -717,6 +781,7 @@
 			if (newPowers.length) await animatePowerForm(newPowers);
 			const falls = collapseAndRefill();
 			await animateFalls(falls);
+			maybeSpawnTimerBuff();   // Timed mode: small chance to bless a random gem
 		}
 		// guarantee the board always has a legal move
 		if (!hasAnyMove()) await spawnHyperGem();
@@ -764,6 +829,8 @@
 		const clearSet = new Set(matched);
 		for (const key of blast) clearSet.add(key);
 
+		collectTimerBuffs(clearSet);   // Timed mode: +10s per Timer buff cleared away
+
 		spawnHyperBlast(otherCell.r, otherCell.c, targetColor);
 		// Any bomb/cross gem swept up in the wake gets its own sound too, same as a
 		// normal cascade chain reaction.
@@ -787,6 +854,7 @@
 		await animateClear(clearSet);
 		const falls = collapseAndRefill();
 		await animateFalls(falls);
+		maybeSpawnTimerBuff();   // Timed mode: small chance to bless a random gem
 		await resolveBoard([]);   // let any resulting cascades play out
 	}
 
@@ -1347,6 +1415,44 @@
 		ctx.restore();
 	}
 
+	// Timed mode: a pulsing cyan halo + tiny clock badge on whichever gem
+	// currently carries the Timer buff — deliberately a cool cyan/green rather
+	// than the gold/rainbow power-gem palette so it never reads as a bomb/cross/
+	// hyper gem, since it can sit on top of any plain colored gem.
+	function drawTimerBuffGlow(cx, cy) {
+		const pulse = 0.55 + 0.45 * Math.abs(Math.sin(selPulse * 4));
+		const rad = GEM * 0.42;
+		ctx.save();
+		ctx.globalCompositeOperation = "lighter";
+		const g = ctx.createRadialGradient(cx, cy, GEM * 0.1, cx, cy, rad);
+		g.addColorStop(0, `rgba(90, 235, 205, ${0.5 * pulse})`);
+		g.addColorStop(1, "rgba(90, 235, 205, 0)");
+		ctx.fillStyle = g;
+		ctx.beginPath();
+		ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+
+		// Clock-face badge centered on the gem.
+		const badgeY = cy, badgeR = GEM * 0.22;
+		ctx.save();
+		ctx.fillStyle = "#e9fff9";
+		ctx.strokeStyle = "#0d6b5c";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.arc(cx, badgeY, badgeR, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.stroke();
+		ctx.lineWidth = 1.6;
+		ctx.beginPath();
+		ctx.moveTo(cx, badgeY);
+		ctx.lineTo(cx, badgeY - badgeR * 0.55);
+		ctx.moveTo(cx, badgeY);
+		ctx.lineTo(cx + badgeR * 0.45, badgeY);
+		ctx.stroke();
+		ctx.restore();
+	}
+
 	// ---- Explosion FX ----
 	function spawnExplosion(r, c, t) {
 		const col = GEM_PALETTE[((t % 7) + 7) % 7];
@@ -1406,6 +1512,8 @@
 		if (blasts.length) blasts = blasts.filter((b) => b.age < b.dur);
 		for (const bm of beams) bm.age += dt;
 		if (beams.length) beams = beams.filter((bm) => bm.age < bm.dur);
+		for (const p of timeBuffPopups) p.age += dt;
+		if (timeBuffPopups.length) timeBuffPopups = timeBuffPopups.filter((p) => p.age < p.dur);
 		for (const s of sparks) {
 			s.age += dt;
 			s.x += s.vx * dt; s.y += s.vy * dt;
@@ -1500,18 +1608,42 @@
 		ctx.restore();
 	}
 
+	// Floating "+10s" text after collecting a Timer buff. Drawn with normal
+	// (not "lighter") blending and a dark outline so it stays legible over
+	// busy/bright gems, unlike the additive glow FX in drawFX().
+	function drawTimeBuffPopups() {
+		for (const p of timeBuffPopups) {
+			const prog = p.age / p.dur;
+			const alpha = 1 - prog;
+			const y = p.y - 26 * prog;
+			ctx.save();
+			ctx.globalAlpha = alpha;
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.font = "bold 20px 'Trebuchet MS', Verdana, sans-serif";
+			ctx.lineWidth = 3;
+			ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
+			ctx.strokeText("+10s", p.x, y);
+			ctx.fillStyle = "#7CFCC8";
+			ctx.fillText("+10s", p.x, y);
+			ctx.restore();
+		}
+	}
+
 	function drawGems() {
 		for (let r = 0; r < ROWS; r++) {
 			for (let c = 0; c < COLS; c++) drawGemAt(r, c);
 		}
 		// keep the gem being dragged above its neighbours
 		if (dragPreview && dragPreview.a) drawGemAt(dragPreview.a.r, dragPreview.a.c);
-		// second pass: draw bomb/hyper halos and cross shines on top of all gems so
-		// they overlap neighbors instead of sitting underneath them
+		// second pass: draw bomb/hyper halos, cross shines, and Timer buff glows on
+		// top of all gems so they overlap neighbors instead of sitting underneath
+		// them. Timer buff is checked independently of `power` since it can sit on
+		// top of any plain (unpowered) gem.
 		for (let r = 0; r < ROWS; r++) {
 			for (let c = 0; c < COLS; c++) {
+				if (grid[r][c] === -1) continue;
 				const p = power[r][c];
-				if (p === 0 || grid[r][c] === -1) continue;
 				const t = grid[r][c];
 				const off = offset[r][c] || { dx: 0, dy: 0 };
 				const ccx = BOARD_X + c * GEM + GEM / 2 + off.dx;
@@ -1519,6 +1651,7 @@
 				if (p === 1) drawPowerGlow(ccx, ccy, t);
 				else if (p === 2) drawCrossShine(ccx, ccy, t);
 				else if (p === 3) drawHyperGlow(ccx, ccy);
+				if (timerBuff[r][c]) drawTimerBuffGlow(ccx, ccy);
 			}
 		}
 	}
@@ -1606,6 +1739,7 @@
 		drawGems();
 		drawSheen();
 		drawFX();
+		drawTimeBuffPopups();
 		drawHint();
 		drawSelection();
 		drawLevelFlash();
