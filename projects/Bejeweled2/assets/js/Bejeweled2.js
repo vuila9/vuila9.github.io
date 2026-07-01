@@ -7,7 +7,7 @@
 //
 // First version scope: classic 8x8 endless board — select/swap, match-3 detection,
 // cascading clears with gravity + refill, combo scoring, best-score persistence,
-// and automatic reshuffle when no moves remain.
+// and a hyper gem spawned as an escape hatch when no moves remain.
 (function () {
 	"use strict";
 
@@ -65,11 +65,12 @@
 	const SPIN_FPS = 14;       // flipbook speed for the selected gem's spin
 
 	// Gem image for type `t` at cell (r,c). Gems sit still on their front-facing frame
-	// except the currently selected one, which spins through the rotation flipbook.
-	function gemAnimState(t, r, c) {
+	// except the currently selected one (or a `forceSpin` gem, e.g. a hyper gem), which
+	// spins through the rotation flipbook continuously.
+	function gemAnimState(t, r, c, forceSpin) {
 		const frames = gemFrames[t];
 		if (!frames || frames.length === 0) return { a: gemImgs[t], b: null, f: 0 };
-		if (frames.length > 1 && selected && selected.r === r && selected.c === c) {
+		if (frames.length > 1 && (forceSpin || (selected && selected.r === r && selected.c === c))) {
 			const i = Math.floor(selPulse * SPIN_FPS) % frames.length;
 			return { a: frames[i], b: null, f: 0 };
 		}
@@ -128,14 +129,21 @@
 	let fps = 60;             // smoothed render frames-per-second
 	let showFPS = true;       // toggle with the 'F' key
 
+	// ---- Hint: after 10s with no player input, highlight a legal move ----
+	let idleTime = 0;         // seconds since the last player input
+	let hint = null;          // {r,c} of the gem to highlight, once found
+	const HINT_IDLE_S = 10;
+
 	// Per-gem visual offset/scale for animations (parallel to grid).
 	// offset = {dx,dy} in pixels added to the cell's home position.
 	let offset = [];          // offset[r][c] = {dx,dy}
 	let scale = [];           // scale[r][c] = 0..1 (for clear/spawn pops)
 	// power[r][c] tier: 0 = normal, 1 = bomb gem (4-in-a-row, clears 3x3),
-	// 2 = cross gem (T/L shape match, clears its whole row + column).
+	// 2 = cross gem (T/L shape match, clears its whole row + column),
+	// 3 = hyper gem (5-in-a-row, clears every gem of that color on the board).
 	let power = [];
 	const POWER_MIN = 4;   // 4-in-a-row = bomb
+	const HYPER_MIN = 5;   // 5-in-a-row = hyper (color bomb)
 
 	// Explosion FX (purely cosmetic; updated each frame, drawn over the gems).
 	let blasts = [];          // expanding shockwave rings {x,y,age,dur,color}
@@ -225,10 +233,18 @@
 	}
 
 	// Cells a detonating power gem at (r,c) destroys, by tier:
+	//   level 3 (hyper) → every gem on the board matching its own color;
 	//   level 2 (cross) → its entire row + column; otherwise (bomb) → the 3x3 around it.
 	function blastCellsFor(r, c, level) {
 		const cells = [];
-		if (level === 2) {
+		if (level === 3) {
+			const t = grid[r][c];
+			for (let rr = 0; rr < ROWS; rr++) {
+				for (let cc = 0; cc < COLS; cc++) {
+					if (grid[rr][cc] === t) cells.push([rr, cc]);
+				}
+			}
+		} else if (level === 2) {
 			for (let cc = 0; cc < COLS; cc++) cells.push([r, cc]);
 			for (let rr = 0; rr < ROWS; rr++) cells.push([rr, c]);
 		} else {
@@ -422,7 +438,7 @@
 				newPowers.push([r, c, 2]);
 			}
 
-			// Second pass: bomb gems from 4+ straight runs (skip runs already producing a cross)
+			// Second pass: bomb/hyper gems from 4+ straight runs (skip runs already producing a cross)
 			for (const run of runs) {
 				if (run.len < POWER_MIN) continue;
 				// if this run contributed to a cross, skip it (cross takes priority)
@@ -435,7 +451,8 @@
 				const kk = keep[0] + "," + keep[1];
 				if (keepSet.has(kk)) continue;
 				keepSet.add(kk);
-				newPowers.push([keep[0], keep[1], 1]);
+				const lvl = run.len >= HYPER_MIN ? 3 : 1;
+				newPowers.push([keep[0], keep[1], lvl]);
 			}
 
 			// Final clear = matches + blasts, minus the cells kept as power gems.
@@ -453,7 +470,8 @@
 			if (blastCenters.length) {
 				sndExplode();
 				for (const b of blastCenters) {
-					if (b.level === 2) spawnCrossBlast(b.r, b.c, b.t);
+					if (b.level === 3) spawnHyperBlast(b.r, b.c, b.t);
+					else if (b.level === 2) spawnCrossBlast(b.r, b.c, b.t);
 					else spawnExplosion(b.r, b.c, b.t);
 				}
 			} else {
@@ -467,7 +485,71 @@
 			await animateFalls(falls);
 		}
 		// guarantee the board always has a legal move
-		if (!hasAnyMove()) await reshuffle();
+		if (!hasAnyMove()) await spawnHyperGem();
+	}
+
+	// A hyper gem swapped directly with a normal gem detonates immediately, clearing
+	// every gem of the color it was swapped into — this is the classic "color bomb"
+	// activation (distinct from the cascade-triggered detonation power gems get when
+	// caught inside someone else's match). No 3-in-a-row is required to trigger it.
+	async function resolveHyperSwap(otherCell, targetColor) {
+		// Base clear: every gem of the swapped-into color, plus the hyper gem itself
+		// (now sitting wherever the swap placed it).
+		const matched = new Set();
+		for (let r = 0; r < ROWS; r++) {
+			for (let c = 0; c < COLS; c++) {
+				if (grid[r][c] === targetColor || power[r][c] === 3) matched.add(r + "," + c);
+			}
+		}
+
+		// Any bomb/cross gem caught in that clear detonates too — the same
+		// chain-reaction rule a normal match applies (see resolveBoard).
+		const blastCenters = [];   // {r,c,t,level} for the explosion FX
+		const blast = new Set();
+		const detonated = new Set();
+		const queue = [];
+		for (const key of matched) {
+			const [r, c] = key.split(",").map(Number);
+			if (power[r][c] === 1 || power[r][c] === 2) queue.push(key);
+		}
+		while (queue.length) {
+			const key = queue.pop();
+			if (detonated.has(key)) continue;
+			detonated.add(key);
+			const [pr, pc] = key.split(",").map(Number);
+			const lvl = power[pr][pc];
+			blastCenters.push({ r: pr, c: pc, t: grid[pr][pc], level: lvl });
+			for (const [nr, nc] of blastCellsFor(pr, pc, lvl)) {
+				const nk = nr + "," + nc;
+				blast.add(nk);
+				if ((power[nr][nc] === 1 || power[nr][nc] === 2) && !detonated.has(nk)) queue.push(nk);
+			}
+		}
+
+		const clearSet = new Set(matched);
+		for (const key of blast) clearSet.add(key);
+
+		spawnHyperBlast(otherCell.r, otherCell.c, targetColor);
+		for (const b of blastCenters) {
+			if (b.level === 2) spawnCrossBlast(b.r, b.c, b.t);
+			else spawnExplosion(b.r, b.c, b.t);
+		}
+		sndExplode();
+
+		const gained = clearSet.size * 10;
+		score += gained;
+		levelProgress += gained;
+		updateBest();
+		if (levelProgress >= levelTarget) levelUp();
+
+		for (const key of clearSet) {
+			const [r, c] = key.split(",").map(Number);
+			power[r][c] = 0;
+		}
+		await animateClear(clearSet);
+		const falls = collapseAndRefill();
+		await animateFalls(falls);
+		await resolveBoard([]);   // let any resulting cascades play out
 	}
 
 	function updateBest() {
@@ -490,53 +572,68 @@
 		}
 	}
 
-	// Is there at least one swap that produces a match?
-	function hasAnyMove() {
+	// Finds a gem with a legal move, returning the cell to highlight as a hint — the
+	// gem that actually needs to move, not just either half of the swap — or null if
+	// no legal move exists.
+	function findHintMove() {
 		const test = (a, b) => {
+			// A hyper gem always has a legal move: swapping it with any neighbour
+			// detonates it immediately, no 3-in-a-row required. It's the piece to move.
+			if (power[a.r][a.c] === 3) return a;
+			if (power[b.r][b.c] === 3) return b;
 			swapCells(a, b);
-			const ok = findMatches().size > 0;
+			const matched = findMatches();
 			swapCells(a, b);
-			return ok;
+			if (matched.size === 0) return null;
+			// Whichever post-swap position landed inside the match was filled by the
+			// OTHER original gem — that's the one to highlight, since it's the piece
+			// the player needs to move, not the one that just gets swapped out of the way.
+			return matched.has(a.r + "," + a.c) ? b : a;
 		};
 		for (let r = 0; r < ROWS; r++) {
 			for (let c = 0; c < COLS; c++) {
-				if (c < COLS - 1 && test({ r, c }, { r, c: c + 1 })) return true;
-				if (r < ROWS - 1 && test({ r, c }, { r: r + 1, c })) return true;
+				if (c < COLS - 1) {
+					const hit = test({ r, c }, { r, c: c + 1 });
+					if (hit) return hit;
+				}
+				if (r < ROWS - 1) {
+					const hit = test({ r, c }, { r: r + 1, c });
+					if (hit) return hit;
+				}
 			}
 		}
-		return false;
+		return null;
 	}
 
-	// Reshuffle all gems (keep playing) until there's a move and no free matches.
-	// Replaced with a special gem where it will act as a "reshuffle" to ensure seamless experience
-	async function reshuffle() {
-		const flat = [];
-		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) flat.push(grid[r][c]);
-		// Try to land on a board with a legal move and no free matches. Cap the
-		// attempts so a pathological gem distribution can never hang the loop; if we
-		// exhaust them, rebuild from fresh random gems (which initGrid keeps clean).
-		let tries = 0;
-		do {
-			for (let i = flat.length - 1; i > 0; i--) {
-				const j = Math.floor(Math.random() * (i + 1));
-				[flat[i], flat[j]] = [flat[j], flat[i]];
-			}
-			let k = 0;
-			for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) grid[r][c] = flat[k++];
-			if (++tries > 200) { initGrid(); break; }
-		} while (findMatches().size > 0 || !hasAnyMove());
-		power = make2D(() => 0);   // a fresh shuffle has no power gems
-		// little settle animation
-		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) offset[r][c] = { dx: 0, dy: -GEM };
-		await tween(220, (p) => {
-			for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) offset[r][c] = { dx: 0, dy: -GEM * (1 - p) };
-		}, easeOutQuad);
-		for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) offset[r][c] = { dx: 0, dy: 0 };
+	// Is there at least one swap that produces a match?
+	function hasAnyMove() {
+		return findHintMove() !== null;
+	}
+
+	// No legal move remains: instead of scrambling the whole board, drop a hyper gem
+	// on a random cell as an escape hatch. The player detonates it themselves (swap it
+	// into any neighbor) to clear a chunk of the board, which naturally opens up new
+	// moves — a seamless, player-driven "reshuffle" instead of a jarring board reset.
+	async function spawnHyperGem() {
+		const r = Math.floor(Math.random() * ROWS);
+		const c = Math.floor(Math.random() * COLS);
+		power[r][c] = 3;
+		await animatePowerForm([[r, c]]);
 	}
 
 	// Resolve a swap whose opening slide has already played (offsets back to 0,
 	// model not yet swapped): commit it, or bounce it back if it makes no match.
 	async function afterSlide(a, b) {
+		// A hyper gem always commits on swap, regardless of whether a match forms —
+		// swapping it onto a gem detonates it against that gem's color.
+		const aHyper = power[a.r][a.c] === 3, bHyper = power[b.r][b.c] === 3;
+		if (aHyper || bHyper) {
+			const otherCell = aHyper ? b : a;
+			const targetColor = grid[otherCell.r][otherCell.c];
+			swapCells(a, b);
+			await resolveHyperSwap(otherCell, targetColor);
+			return;
+		}
 		swapCells(a, b);
 		if (findMatches().size > 0) {
 			// `b` now holds the gem the player dragged — prefer it as the power-gem keep.
@@ -607,6 +704,8 @@
 	}
 
 	function onPointerDown(e) {
+		idleTime = 0;
+		hint = null;
 		if (busy || !assetsReady) return;
 		const cell = cellFromEvent(e);
 		if (!cell) return;
@@ -794,15 +893,46 @@
 		const dy = homeY + GEM / 2 + off.dy - (GEM * s) / 2;
 		const size = GEM * s;
 		const ccx = dx + size / 2, ccy = dy + size / 2;
-		if (power[r][c] === 1) drawPowerGlow(ccx, ccy, t);   // bomb: halo behind the gem
-		const st = gemAnimState(t, r, c);
+		const isHyper = power[r][c] === 3;
+		// Hyper gems always render as the white gem model, recolored rainbow, regardless
+		// of the color type they matched from (that type still drives blast targeting).
+		const st = gemAnimState(isHyper ? 0 : t, r, c, isHyper);
 		if (!st.a) {
-			ctx.fillStyle = GEM_PALETTE[t % 7];
+			ctx.fillStyle = isHyper ? `hsl(${(selPulse * 60) % 360},85%,55%)` : GEM_PALETTE[t % 7];
 			ctx.fillRect(dx, dy, size, size);
+		} else if (isHyper) {
+			drawRainbowGem(st.a, dx, dy, size);
 		} else {
 			ctx.drawImage(st.a, dx, dy, size, size);
 		}
-		// cross shine drawn in a second pass in drawGems() so it overlaps neighbors
+		// bomb/hyper halo and cross shine are drawn in a second pass in drawGems() so
+		// they overlap neighboring gems instead of sitting underneath them
+	}
+
+	// Recolors the white gem sprite into a shifting rainbow while keeping its shading
+	// (highlights/shadows) intact — "color" blend takes hue/saturation from the
+	// gradient but luminosity from the gem art, then "destination-in" re-clips the
+	// result back to the gem's original silhouette (the blend fill covers the full
+	// square, including transparent corners).
+	const hyperBuf = document.createElement("canvas");
+	hyperBuf.width = GEM; hyperBuf.height = GEM;
+	const hyperCtx = hyperBuf.getContext("2d");
+	function drawRainbowGem(img, dx, dy, size) {
+		hyperCtx.clearRect(0, 0, GEM, GEM);
+		hyperCtx.globalCompositeOperation = "source-over";
+		hyperCtx.drawImage(img, 0, 0, GEM, GEM);
+		const hue = (selPulse * 60) % 360;
+		const grad = hyperCtx.createLinearGradient(0, 0, GEM, GEM);
+		grad.addColorStop(0, `hsl(${hue},90%,55%)`);
+		grad.addColorStop(0.5, `hsl(${(hue + 120) % 360},90%,55%)`);
+		grad.addColorStop(1, `hsl(${(hue + 240) % 360},90%,55%)`);
+		hyperCtx.globalCompositeOperation = "color";
+		hyperCtx.fillStyle = grad;
+		hyperCtx.fillRect(0, 0, GEM, GEM);
+		hyperCtx.globalCompositeOperation = "destination-in";
+		hyperCtx.drawImage(img, 0, 0, GEM, GEM);
+		hyperCtx.globalCompositeOperation = "source-over";
+		ctx.drawImage(hyperBuf, dx, dy, size, size);
 	}
 
 	// Gem colours for FX/fallback, and a tiny 3-digit-hex → rgba() helper.
@@ -829,6 +959,49 @@
 		ctx.beginPath();
 		ctx.arc(cx, cy, rad, 0, Math.PI * 2);
 		ctx.fill();
+		ctx.restore();
+	}
+
+	// Rotating rainbow-ring halo behind a hyper gem (level 3, 5-in-a-row). Built on an
+	// offscreen buffer: a conic gradient sweeps the full spectrum around the center,
+	// then a radial gradient is punched through it (destination-in) to leave a soft
+	// ring rather than a solid disc. The conic gradient's start angle advances every
+	// frame so the rainbow visibly spins, independent of gem selection. The ring itself
+	// is a one-way sonar ping: it grows outward from the gem, fading out as it reaches
+	// its largest size, then resets to the center and expands again.
+	const HALO_SIZE = GEM * 2;
+	const HALO_CYCLE_S = 1.4;   // seconds for one expand-and-fade ping
+	const haloBuf = document.createElement("canvas");
+	haloBuf.width = HALO_SIZE; haloBuf.height = HALO_SIZE;
+	const haloCtx = haloBuf.getContext("2d");
+	function drawHyperGlow(cx, cy) {
+		const hc = HALO_SIZE / 2;
+		haloCtx.clearRect(0, 0, HALO_SIZE, HALO_SIZE);
+		if (haloCtx.createConicGradient) {
+			const cg = haloCtx.createConicGradient(selPulse * 1.2, hc, hc);
+			for (let i = 0; i <= 6; i++) cg.addColorStop(i / 6, `hsl(${i * 60},95%,60%)`);
+			haloCtx.fillStyle = cg;
+		} else {
+			// Fallback for browsers without conic gradients: a single cycling hue.
+			haloCtx.fillStyle = `hsl(${(selPulse * 90) % 360},95%,60%)`;
+		}
+		haloCtx.fillRect(0, 0, HALO_SIZE, HALO_SIZE);
+		const cyclePos = (selPulse % HALO_CYCLE_S) / HALO_CYCLE_S;   // 0..1, repeating
+		const rad = GEM * 0.15 + GEM * 0.7 * cyclePos;                 // ping expands outward
+		const alpha = 1 - cyclePos;                                     // ...and fades as it grows
+		const bandW = GEM * 0.3;
+		const mask = haloCtx.createRadialGradient(hc, hc, Math.max(1, rad - bandW), hc, hc, rad);
+		mask.addColorStop(0, "rgba(255,255,255,0)");
+		mask.addColorStop(0.6, `rgba(255,255,255,${0.75 * alpha})`);
+		mask.addColorStop(1, "rgba(255,255,255,0)");
+		haloCtx.globalCompositeOperation = "destination-in";
+		haloCtx.fillStyle = mask;
+		haloCtx.fillRect(0, 0, HALO_SIZE, HALO_SIZE);
+		haloCtx.globalCompositeOperation = "source-over";
+
+		ctx.save();
+		ctx.globalCompositeOperation = "lighter";
+		ctx.drawImage(haloBuf, cx - hc, cy - hc);
 		ctx.restore();
 	}
 
@@ -905,6 +1078,29 @@
 				x: cx, y: cy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
 				age: 0, dur: 0.4 + Math.random() * 0.3, color: col, size: 2 + Math.random() * 2.5
 			});
+		}
+	}
+
+	// Hyper gem (color bomb): a big shockwave from the detonating gem, plus a smaller
+	// burst at every other gem on the board sharing its color.
+	function spawnHyperBlast(r, c, t) {
+		const col = GEM_PALETTE[((t % 7) + 7) % 7];
+		const cx = BOARD_X + c * GEM + GEM / 2, cy = BOARD_Y + r * GEM + GEM / 2;
+		blasts.push({ x: cx, y: cy, age: 0, dur: 0.7, color: col });
+		for (let rr = 0; rr < ROWS; rr++) {
+			for (let cc = 0; cc < COLS; cc++) {
+				if (grid[rr][cc] !== t) continue;
+				const tx = BOARD_X + cc * GEM + GEM / 2, ty = BOARD_Y + rr * GEM + GEM / 2;
+				blasts.push({ x: tx, y: ty, age: 0, dur: 0.4 + Math.random() * 0.2, color: col });
+				for (let i = 0; i < 6; i++) {
+					const ang = Math.random() * Math.PI * 2;
+					const sp = 100 + Math.random() * 180;
+					sparks.push({
+						x: tx, y: ty, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+						age: 0, dur: 0.35 + Math.random() * 0.3, color: col, size: 2 + Math.random() * 2
+					});
+				}
+			}
 		}
 	}
 
@@ -1013,16 +1209,19 @@
 		}
 		// keep the gem being dragged above its neighbours
 		if (dragPreview && dragPreview.a) drawGemAt(dragPreview.a.r, dragPreview.a.c);
-		// second pass: draw cross shines on top of all gems so arms overlap neighbors
+		// second pass: draw bomb/hyper halos and cross shines on top of all gems so
+		// they overlap neighbors instead of sitting underneath them
 		for (let r = 0; r < ROWS; r++) {
 			for (let c = 0; c < COLS; c++) {
-				if (power[r][c] !== 2 || grid[r][c] === -1) continue;
+				const p = power[r][c];
+				if (p === 0 || grid[r][c] === -1) continue;
 				const t = grid[r][c];
 				const off = offset[r][c] || { dx: 0, dy: 0 };
-				const s = scale[r][c] == null ? 1 : scale[r][c];
 				const ccx = BOARD_X + c * GEM + GEM / 2 + off.dx;
 				const ccy = BOARD_Y + r * GEM + GEM / 2 + off.dy;
-				drawCrossShine(ccx, ccy, t);
+				if (p === 1) drawPowerGlow(ccx, ccy, t);
+				else if (p === 2) drawCrossShine(ccx, ccy, t);
+				else if (p === 3) drawHyperGlow(ccx, ccy);
 			}
 		}
 	}
@@ -1034,6 +1233,35 @@
 		ctx.strokeStyle = "rgba(255, 233, 168, 0.95)";
 		ctx.lineWidth = 3;
 		ctx.strokeRect(x + pulse, y + pulse, GEM - pulse * 2, GEM - pulse * 2);
+	}
+
+	// After HINT_IDLE_S of no input, a soft golden glow + outline pulses on the gem
+	// that has a legal move available, to nudge an idle player without being intrusive.
+	function drawHint() {
+		if (!hint || busy) return;
+		const { r, c } = hint;
+		const x = BOARD_X + c * GEM, y = BOARD_Y + r * GEM;
+		const cx = x + GEM / 2, cy = y + GEM / 2;
+		const pulse = 0.5 + 0.5 * Math.sin(selPulse * 3);
+
+		ctx.save();
+		ctx.globalCompositeOperation = "lighter";
+		const g = ctx.createRadialGradient(cx, cy, GEM * 0.1, cx, cy, GEM * 0.65);
+		g.addColorStop(0, `rgba(255, 233, 168, ${0.55 * pulse})`);
+		g.addColorStop(1, "rgba(255, 233, 168, 0)");
+		ctx.fillStyle = g;
+		ctx.beginPath();
+		ctx.arc(cx, cy, GEM * 0.65, 0, Math.PI * 2);
+		ctx.fill();
+		ctx.restore();
+
+		ctx.save();
+		ctx.strokeStyle = `rgba(255, 233, 168, ${0.6 + 0.4 * pulse})`;
+		ctx.lineWidth = 3;
+		const inset = 4;
+		roundRectPath(x + inset, y + inset, GEM - inset * 2, GEM - inset * 2, 8);
+		ctx.stroke();
+		ctx.restore();
 	}
 
 	// Cosmic loading screen shown until every asset has decoded. The bar tracks
@@ -1081,6 +1309,7 @@
 		drawGems();
 		drawSheen();
 		drawFX();
+		drawHint();
 		drawSelection();
 		drawLevelFlash();
 		drawFPS();
@@ -1108,6 +1337,8 @@
 		selPulse += dt;
 		updateFX(dt);
 		if (levelFlash > 0) levelFlash = Math.max(0, levelFlash - dt);
+		idleTime += dt;
+		if (!busy && !hint && idleTime >= HINT_IDLE_S) hint = findHintMove();
 		render();
 		requestAnimationFrame(frame);
 	}
@@ -1218,6 +1449,21 @@
 				setTimeout(() => { resetBtn.textContent = "Reset Best Score"; }, 1200);
 			});
 		}
+	})();
+
+	// ---- Game Mode panel (placeholder; modes to be added) ----
+	(function initGameMode() {
+		const overlay = document.getElementById("bj-gamemode-overlay");
+		const modeBtn = document.getElementById("bj-gamemode");
+		const closeBtn = document.getElementById("bj-gamemode-close");
+		if (!overlay || !modeBtn) return;
+
+		function openGameMode()  { overlay.classList.add("open"); }
+		function closeGameMode() { overlay.classList.remove("open"); }
+
+		modeBtn.addEventListener("click", openGameMode);
+		if (closeBtn) closeBtn.addEventListener("click", closeGameMode);
+		overlay.addEventListener("click", (e) => { if (e.target === overlay) closeGameMode(); });
 	})();
 
 	// ---- Boot ----

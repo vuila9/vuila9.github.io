@@ -8,6 +8,46 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.1.9] - 2026-07-01
+### Changed
+- Board background now loads from `assets/img/background.jpg` instead of the embedded base64 JPEG in `bejeweled_assets.js`.
+
+## [0.1.8] - 2026-07-01
+### Added
+- Game Mode button (gamepad icon) next to the Settings gear, on both the project page and the standalone app. Opens a placeholder panel for now; mode options to follow.
+
+## [0.1.7] - 2026-07-01
+### Fixed
+- Hint now highlights the correct gem: the one that actually needs to move into the matching run, not just whichever half of the swap pair was scanned first. Previously it could point at the gem that gets swapped out of the way instead of the one that completes the match.
+
+## [0.1.6] - 2026-07-01
+### Added
+- Hint: after 10 seconds with no player input, a gem with a legal move pulses with a soft golden glow and outline. Disappears the moment the player interacts again.
+
+## [0.1.5] - 2026-07-01
+### Fixed
+- Bomb and hyper gem halos now draw in the same second pass as the cross gem's shine, after all gems are drawn, so they overlap neighboring gems instead of being painted over by them.
+
+## [0.1.4] - 2026-07-01
+### Fixed
+- Hyper gem detonation now chain-triggers any bomb or cross gem it catches in its color-wide clear (3x3 / row+column blast and matching FX), instead of just erasing them silently like a plain gem.
+
+## [0.1.3] - 2026-07-01
+### Fixed
+- Hyper gem now activates the classic way: swapping it directly onto any gem detonates it immediately (no 3-in-a-row required) and clears every gem on the board matching the color it was swapped into. Previously it only detonated when caught inside a later match, and swapping it onto a non-matching neighbor just bounced back like a normal illegal move. `hasAnyMove()` also now treats any hyper gem as guaranteeing a legal move, so the board won't wrongly reshuffle while one is in play.
+
+## [0.1.2] - 2026-07-01
+### Changed
+- Hyper gem halo now behaves like a sonar ping: it expands outward from the gem and fades out at its largest size, then resets to the center and expands again, instead of breathing in and out.
+
+## [0.1.1] - 2026-07-01
+### Changed
+- Hyper gem: dropped the spinning star overlay; the halo is now a true rotating rainbow ring (conic gradient masked into a ring shape) instead of a single pulsing hue; the gem itself now spins continuously through its rotation flipbook, independent of selection.
+
+## [0.1.0] - 2026-07-01
+### Added
+- Hyper gem (color bomb): a horizontal or vertical 5-in-a-row now mints a level-3 power gem, rendered as the white gem model recolored with a shifting rainbow (hue-cycled while keeping its original shading), plus a pulsing rainbow halo and rotating sparkle. When caught in a later match it detonates and clears every gem on the board sharing its original color, with a matching board-wide burst FX.
+
 ## [0.0.15] - 2026-06-30
 ### Added
 - Diagonal gloss sweep: a soft white sheen band drifts across the board from top-left to bottom-right every 6–14 seconds as a cosmetic idle effect.

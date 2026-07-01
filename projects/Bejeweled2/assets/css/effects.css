@@ -80,12 +80,13 @@
     margin: 0;
 }
 
-/* ---- Settings (gear button + Options panel), styled to match the game's
-   jewelled look: deep cosmic panel, gold outlines, gem-green switches. ---- */
-.bj-gear {
+/* ---- Top-right icon buttons (gear, game mode, ...), styled to match the game's
+   jewelled look: deep cosmic panel, gold outlines, gem-green switches. Buttons
+   share .bj-icon-btn for the common box styling and only override `right` to
+   line up in a row. ---- */
+.bj-icon-btn {
     position: absolute;
     top: calc(10px + env(safe-area-inset-top, 0px));
-    right: calc(10px + env(safe-area-inset-right, 0px));
     width: 40px;
     height: 40px;
     display: flex;
@@ -101,16 +102,19 @@
     z-index: 20;
     -webkit-tap-highlight-color: transparent;
 }
-.bj-gear svg {
+.bj-icon-btn svg {
     width: 22px;
     height: 22px;
     display: block;
 }
-.bj-gear:hover { filter: brightness(1.08); }
-.bj-gear:active {
+.bj-icon-btn:hover { filter: brightness(1.08); }
+.bj-icon-btn:active {
     transform: translateY(2px);
     box-shadow: 0 1px 0 #b08a00, 0 2px 4px rgba(0, 0, 0, 0.3);
 }
+
+.bj-gear { right: calc(10px + env(safe-area-inset-right, 0px)); }
+.bj-gamemode { right: calc(58px + env(safe-area-inset-right, 0px)); }
 
 .bj-settings-overlay {
     position: absolute;
