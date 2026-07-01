@@ -715,7 +715,13 @@
 		const horiz = a.r === b.r;
 		const full = horiz ? (b.c - a.c) * GEM : (b.r - a.r) * GEM;
 		const cur0 = horiz ? offset[a.r][a.c].dx : offset[a.r][a.c].dy;
-		await tween(90, (p) => {
+		// Scale the finishing slide by how far it actually has left to travel — since
+		// release now decides the commit (rather than mid-drag auto-commit), the gem
+		// is usually already sitting at (or near) the full offset by the time this
+		// runs, and a flat 90ms here would just be dead air before the match/clear
+		// animation starts.
+		const dur = Math.round(90 * Math.min(1, Math.abs(full - cur0) / GEM));
+		await tween(dur, (p) => {
 			const cur = cur0 + (full - cur0) * p;
 			offset[a.r][a.c] = horiz ? { dx: cur, dy: 0 } : { dx: 0, dy: cur };
 			offset[b.r][b.c] = horiz ? { dx: -cur, dy: 0 } : { dx: 0, dy: -cur };
@@ -1372,8 +1378,6 @@
 		ctx.textAlign = "left";
 		ctx.textBaseline = "top";
 		ctx.font = "bold 12px monospace";
-		ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-		ctx.fillRect(4, 4, 60, 16);
 		ctx.fillStyle = fps >= 50 ? "#7CFC7C" : fps >= 30 ? "#ffd34d" : "#ff6b6b";
 		ctx.fillText(Math.round(fps) + " fps", 8, 4);
 		ctx.restore();
