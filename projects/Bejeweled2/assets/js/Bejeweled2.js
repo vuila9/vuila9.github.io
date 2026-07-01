@@ -16,12 +16,17 @@
 	const ctx = canvas.getContext("2d");
 
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
-	const COLS = 8, ROWS = 8, GEM = 64;
+	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,
+	// so the board fills more of the wide viewport instead of leaving empty side gutters.
+	const NORMAL_COLS = 8, WIDE_COLS = 12;
+	let COLS = NORMAL_COLS;
+	const ROWS = 8, GEM = 64;
 	const HUD_H = 88;
 	const BOARD_X = 0, BOARD_Y = HUD_H;
-	const BOARD_W = COLS * GEM, BOARD_H = ROWS * GEM;
-	const CANVAS_W = BOARD_W;            // 512
-	const CANVAS_H = HUD_H + BOARD_H;    // 600
+	let BOARD_W = COLS * GEM;
+	const BOARD_H = ROWS * GEM;
+	let CANVAS_W = BOARD_W;              // 512
+	let CANVAS_H = HUD_H + BOARD_H;      // 600
 	canvas.width = CANVAS_W;
 	canvas.height = CANVAS_H;
 
@@ -183,6 +188,26 @@
 		blasts = [];
 		sparks = [];
 		beams = [];
+	}
+
+	// Switch the board width (NORMAL_COLS <-> WIDE_COLS) and deal a fresh board at the
+	// new size. Score/level/best carry over; the board layout itself resets, since there's
+	// no sane way to reflow an existing 8-wide board into a 12-wide one mid-game.
+	function setColumns(cols) {
+		if (cols === COLS) return;
+		COLS = cols;
+		BOARD_W = COLS * GEM;
+		CANVAS_W = BOARD_W;
+		CANVAS_H = HUD_H + BOARD_H;
+		canvas.width = CANVAS_W;
+		canvas.height = CANVAS_H;
+		initGrid();
+		selected = null;
+		busy = false;
+		pointerDown = null;
+		dragPreview = null;
+		hint = null;
+		idleTime = 0;
 	}
 
 	// Would placing type t at (r,c) complete a run of 3 with already-filled cells?
@@ -1353,7 +1378,11 @@
 		if (fs || isApp) {
 			availW = window.innerWidth;
 			availH = window.innerHeight;
+			// Landscape fullscreen/app: widen the board so it fills the screen
+			// instead of leaving empty gutters on either side.
+			setColumns(availW > availH ? WIDE_COLS : NORMAL_COLS);
 		} else {
+			setColumns(NORMAL_COLS);
 			// #bj-frame is inline-flex (shrink-to-fit), so measure a stable block
 			// ancestor instead — using the frame itself would be circular (→ 0px).
 			// Fall back to the viewport width when the container hasn't laid out yet
