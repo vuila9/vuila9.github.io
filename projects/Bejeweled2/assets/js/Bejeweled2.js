@@ -1434,7 +1434,24 @@
 		// canvas whenever it renders below its logical resolution (e.g. a WIDE_COLS
 		// board squeezed into a portrait screen), so the fixed-size buttons can never
 		// end up bigger than the HUD strip they're supposed to sit inside of.
-		if (frame_el) frame_el.style.setProperty("--bj-ui-scale", Math.min(1, w / CANVAS_W));
+		if (frame_el) {
+			frame_el.style.setProperty("--bj-ui-scale", Math.min(1, w / CANVAS_W));
+
+			// #bj-frame shrink-wraps the canvas and floats centered inside the
+			// full-screen #bj-stage, so it usually already has its own letterbox
+			// margin clearing the device notch/Dynamic Island. Only add CSS
+			// safe-area padding for whatever clearance that margin *doesn't*
+			// already cover, instead of always adding the full device inset
+			// (which would double up and push the buttons into the board).
+			const root = getComputedStyle(document.documentElement);
+			const satPx = parseFloat(root.getPropertyValue("--bj-sat")) || 0;
+			const sarPx = parseFloat(root.getPropertyValue("--bj-sar")) || 0;
+			const rect = frame_el.getBoundingClientRect();
+			const topGap = rect.top;
+			const rightGap = window.innerWidth - rect.right;
+			frame_el.style.setProperty("--bj-safe-top", Math.max(0, satPx - topGap) + "px");
+			frame_el.style.setProperty("--bj-safe-right", Math.max(0, sarPx - rightGap) + "px");
+		}
 	}
 	window.addEventListener("resize", fitCanvas);
 	window.addEventListener("orientationchange", fitCanvas);

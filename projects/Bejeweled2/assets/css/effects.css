@@ -1,5 +1,14 @@
 /* Bejeweled 2 — project-specific styles */
 
+/* Exposes the device's notch/Dynamic-Island insets as custom properties so
+   Bejeweled2.js can read them via getComputedStyle (env() itself isn't
+   readable from JS) and work out how much of that clearance #bj-frame's own
+   letterbox margin already provides — see --bj-safe-top/--bj-safe-right. */
+:root {
+    --bj-sat: env(safe-area-inset-top, 0px);
+    --bj-sar: env(safe-area-inset-right, 0px);
+}
+
 /* Centered game stage, mirrors the in-page layout used by other canvas projects. */
 #bj-stage {
     display: flex;
@@ -87,9 +96,14 @@
 .bj-icon-btn {
     /* --bj-ui-scale (set from JS in fitCanvas) shrinks these in lockstep with the
        canvas whenever it renders below its logical resolution, so the buttons can
-       never end up taller than the HUD strip they're meant to sit inside of. */
+       never end up taller than the HUD strip they're meant to sit inside of.
+       --bj-safe-top/--bj-safe-right (also from fitCanvas) are the notch/Dynamic
+       Island clearance MINUS whatever letterbox margin #bj-frame already has on
+       that side — #bj-frame floats centered rather than flush to the screen edge,
+       so blindly adding the full device inset here would double up on clearance
+       it already has and shove the buttons down into the board / too far right. */
     position: absolute;
-    top: calc(10px * var(--bj-ui-scale, 1) + env(safe-area-inset-top, 0px));
+    top: calc(10px * var(--bj-ui-scale, 1) + var(--bj-safe-top, 0px));
     width: calc(40px * var(--bj-ui-scale, 1));
     height: calc(40px * var(--bj-ui-scale, 1));
     display: flex;
@@ -118,8 +132,8 @@
     box-shadow: 0 1px 0 #b08a00, 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.bj-gear { right: calc(10px * var(--bj-ui-scale, 1) + env(safe-area-inset-right, 0px)); }
-.bj-gamemode { right: calc(58px * var(--bj-ui-scale, 1) + env(safe-area-inset-right, 0px)); }
+.bj-gear { right: calc(10px * var(--bj-ui-scale, 1) + var(--bj-safe-right, 0px)); }
+.bj-gamemode { right: calc(58px * var(--bj-ui-scale, 1) + var(--bj-safe-right, 0px)); }
 
 .bj-settings-overlay {
     position: absolute;
