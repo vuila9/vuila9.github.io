@@ -115,7 +115,7 @@
 						</label>
 
 						<label class="bj-setting-row">
-							<span class="bj-setting-label">Debug Mode</span>
+							<span class="bj-setting-label bj-debug-label" id="bj-debug-label">Debug Mode</span>
 							<input type="checkbox" class="bj-toggle" id="bj-debug-toggle">
 							<span class="bj-switch"></span>
 						</label>
@@ -138,6 +138,46 @@
 						<div class="bj-version" id="bj-version"></div>
 					</div>
 				</div>
+
+				<!-- Debug overlay: picks how Debug Mode lets you manipulate the board -->
+				<div class="bj-settings-overlay" id="bj-debug-overlay">
+					<div class="bj-settings-panel">
+						<div class="bj-settings-title">DEBUG</div>
+
+						<div class="bj-debugmode-list">
+							<label class="bj-setting-row bj-debugmode-row" data-debugmode="swap">
+								<span class="bj-setting-label">
+									Swap anywhere
+									<span class="bj-debugmode-desc">Tap or drag any gem onto any other gem.</span>
+								</span>
+								<input type="checkbox" class="bj-toggle bj-debugmode-toggle" id="bj-debugmode-swap">
+								<span class="bj-switch"></span>
+							</label>
+							<label class="bj-setting-row bj-debugmode-row" data-debugmode="spawn">
+								<span class="bj-setting-label">
+									Spawn any special
+									<span class="bj-debugmode-desc">Hold a gem, drag onto Bomb/Cross/Hyper to plant it.</span>
+								</span>
+								<input type="checkbox" class="bj-toggle bj-debugmode-toggle" id="bj-debugmode-spawn">
+								<span class="bj-switch"></span>
+							</label>
+							<label class="bj-setting-row bj-debugmode-row" data-debugmode="color">
+								<span class="bj-setting-label">
+									Change any color
+									<span class="bj-debugmode-desc">Hold a gem, drag onto a swatch to recolor it.</span>
+								</span>
+								<input type="checkbox" class="bj-toggle bj-debugmode-toggle" id="bj-debugmode-color">
+								<span class="bj-switch"></span>
+							</label>
+						</div>
+
+						<button class="bj-settings-close bj-resume" id="bj-debug-close">RESUME</button>
+					</div>
+				</div>
+
+				<!-- Debug hold-and-drag picker: floats above the held gem while using
+					 "Spawn any special" / "Change any color". Populated by BejeweledX.js. -->
+				<div class="bj-debug-picker" id="bj-debug-picker"></div>
 
 				<!-- Game Mode overlay -->
 				<div class="bj-settings-overlay" id="bj-gamemode-overlay">

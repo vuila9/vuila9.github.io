@@ -17,7 +17,7 @@
 
 	// Shown in the Options panel to confirm a deploy is live. Bump this together
 	// with CACHE in sw.js so the number always matches the service-worker version.
-	const APP_VERSION = "0.2.9";
+	const APP_VERSION = "0.2.11";
 
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
 	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,
@@ -91,6 +91,15 @@
 	let audioCtx = null;
 	let muted = false;
 	let debugMode = false;
+	// Debug Mode has three interaction styles, picked from the Debug sub-menu:
+	//   "swap"  - the original behaviour: any gem is a valid swap target.
+	//   "spawn" - hold a gem, drag onto the picker, drop on a special to plant it.
+	//   "color" - same hold/drag gesture, drop on a color swatch to recolor it.
+	let debugSubMode = "swap";
+	try {
+		const saved = localStorage.getItem("bj2_debug_submode");
+		if (saved === "spawn" || saved === "color") debugSubMode = saved;
+	} catch (e) {}
 	let hapticsEnabled = true;
 	try { hapticsEnabled = localStorage.getItem("bj2_haptics") !== "0"; } catch (e) {}
 	let gameSpeed = 1.5;   // animation speed multiplier
@@ -662,12 +671,14 @@
 	}
 
 	// Cells a detonating power gem at (r,c) destroys, by tier:
-	//   level 3 (hyper) → every gem on the board matching its own color;
+	//   level 3 (hyper) → every gem on the board matching its own color (or
+	//   `colorOverride` when set — a hyper set off by another power gem's blast
+	//   clears that gem's color instead of its own);
 	//   level 2 (cross) → its entire row + column; otherwise (bomb) → the 3x3 around it.
-	function blastCellsFor(r, c, level) {
+	function blastCellsFor(r, c, level, colorOverride) {
 		const cells = [];
 		if (level === 3) {
-			const t = grid[r][c];
+			const t = colorOverride != null ? colorOverride : grid[r][c];
 			for (let rr = 0; rr < ROWS; rr++) {
 				for (let cc = 0; cc < COLS; cc++) {
 					if (grid[rr][cc] === t) cells.push([rr, cc]);
@@ -883,22 +894,28 @@
 			const blastCenters = [];   // {r,c,t,level} for the explosion FX
 			const blast = new Set();   // every cell the blasts clear
 			const detonated = new Set();
+			// Each queue entry carries `srcColor`: the color of the power gem whose
+			// blast set this one off (null when triggered directly by the match).
+			// It only matters for hypers — a hyper hit by a bomb/cross blast clears
+			// THAT gem's color, not its own hidden one, and in a chain (bomb A →
+			// bomb B → hyper) it's the color of B, the gem that directly hit it.
 			const queue = [];
 			for (const key of matched) {
 				const [r, c] = key.split(",").map(Number);
-				if (power[r][c]) queue.push(key);
+				if (power[r][c]) queue.push({ key, srcColor: null });
 			}
 			while (queue.length) {
-				const key = queue.pop();
+				const { key, srcColor } = queue.pop();
 				if (detonated.has(key)) continue;
 				detonated.add(key);
 				const [pr, pc] = key.split(",").map(Number);
 				const lvl = power[pr][pc];
-				blastCenters.push({ r: pr, c: pc, t: grid[pr][pc], level: lvl });
-				for (const [nr, nc] of blastCellsFor(pr, pc, lvl)) {
+				const t = (lvl === 3 && srcColor != null) ? srcColor : grid[pr][pc];
+				blastCenters.push({ r: pr, c: pc, t, level: lvl });
+				for (const [nr, nc] of blastCellsFor(pr, pc, lvl, t)) {
 					const nk = nr + "," + nc;
 					blast.add(nk);
-					if (power[nr][nc] && !detonated.has(nk)) queue.push(nk);
+					if (power[nr][nc] && !detonated.has(nk)) queue.push({ key: nk, srcColor: t });
 				}
 			}
 
@@ -1006,14 +1023,19 @@
 	// every gem of the color it was swapped into — this is the classic "color bomb"
 	// activation (distinct from the cascade-triggered detonation power gems get when
 	// caught inside someone else's match). No 3-in-a-row is required to trigger it.
+	// A null targetColor means hyper-on-hyper: the entire board is cleared.
 	async function resolveHyperSwap(otherCell, targetColor) {
 		if (usesClock()) timedStarted = true;   // clock starts on the first match
 		// Base clear: every gem of the swapped-into color, plus the hyper gem itself
-		// (now sitting wherever the swap placed it).
+		// (now sitting wherever the swap placed it) — or simply every gem on the
+		// board for the hyper-on-hyper wipe.
 		const matched = new Set();
 		for (let r = 0; r < ROWS; r++) {
 			for (let c = 0; c < COLS; c++) {
-				if (grid[r][c] === targetColor || power[r][c] === 3) matched.add(r + "," + c);
+				const hit = targetColor === null
+					? grid[r][c] !== -1
+					: (grid[r][c] === targetColor || power[r][c] === 3);
+				if (hit) matched.add(r + "," + c);
 			}
 		}
 
@@ -1048,7 +1070,8 @@
 		checkTreasure(clearSet);       // Treasure Hunt: did this clear touch the hidden cell?
 		applyRushMatchBonus();         // Rush mode: quick-match time recovery (this detonation is the player's swap, not a fall-triggered cascade)
 
-		spawnHyperBlast(otherCell.r, otherCell.c, targetColor);
+		if (targetColor === null) spawnBoardWipe(otherCell.r, otherCell.c);
+		else spawnHyperBlast(otherCell.r, otherCell.c, targetColor);
 		// Any bomb/cross gem swept up in the wake gets its own sound too, same as a
 		// normal cascade chain reaction.
 		for (const b of blastCenters) {
@@ -1258,7 +1281,9 @@
 		const aHyper = power[a.r][a.c] === 3, bHyper = power[b.r][b.c] === 3;
 		if (aHyper || bHyper) {
 			const otherCell = aHyper ? b : a;
-			const targetColor = grid[otherCell.r][otherCell.c];
+			// Hyper + hyper: the classic Bejeweled 2 jackpot — the whole board is
+			// swept. Signalled by a null targetColor (see resolveHyperSwap).
+			const targetColor = (aHyper && bHyper) ? null : grid[otherCell.r][otherCell.c];
 			swapCells(a, b);
 			await resolveHyperSwap(otherCell, targetColor);
 			return;
@@ -1316,6 +1341,28 @@
 		return (Math.abs(a.r - b.r) + Math.abs(a.c - b.c)) === 1;
 	}
 
+	// ---- Debug Mode: "Spawn any special" / "Change any color" ----
+	// Both plant something on a held gem, then run it through the normal match
+	// pipeline exactly as if the player had just made that move.
+	async function debugSpecial(r, c, level) {
+		if (busy || grid[r][c] === -1) return;
+		busy = true;
+		power[r][c] = level;
+		await animatePowerForm([[r, c]]);
+		if (findMatches().size > 0) await resolveBoard([{ r, c }]);
+		busy = false;
+		saveState();
+	}
+	async function debugRecolor(r, c, t) {
+		if (busy || grid[r][c] === -1) return;
+		busy = true;
+		grid[r][c] = t;
+		power[r][c] = 0;
+		if (findMatches().size > 0) await resolveBoard([{ r, c }]);
+		busy = false;
+		saveState();
+	}
+
 	// ---- Input (pointer: covers mouse + touch) ----
 	// Two ways to play, both fire as early as possible:
 	//   • Drag: press a gem and move toward a neighbour — the swap fires the instant
@@ -1346,6 +1393,20 @@
 		hint = null;
 		if (busy || !assetsReady) return;
 		const cell = cellFromEvent(e);
+		// Debug Mode's "Spawn any special" / "Change any color": clicking a gem opens
+		// a picker above it (Bomb/Cross/Hyper, or the color swatches); clicking a
+		// different gem re-opens the picker there, and clicking anywhere else on the
+		// canvas (including empty board margin) closes it without doing anything.
+		// A separate flow entirely from the tap/drag swap below.
+		if (debugMode && debugSubMode !== "swap") {
+			if (!cell) { closeDebugPicker(); return; }
+			if (debugPickerOpen && debugPickerCell && debugPickerCell.r === cell.r && debugPickerCell.c === cell.c) {
+				closeDebugPicker();
+			} else {
+				openDebugPicker(cell);
+			}
+			return;
+		}
 		if (!cell) return;
 		// tap-tap: a gem is already selected and this one is adjacent → swap now
 		// (in debug mode any gem on the board is a valid swap target)
@@ -1363,6 +1424,64 @@
 		sndSelect();
 	}
 
+	// ---- Debug Mode: click-to-open picker (spawn special / change color) ----
+	const debugPickerEl = document.getElementById("bj-debug-picker");
+	let debugPickerOpen = false;
+	let debugPickerCell = null;   // {r,c} the gem the picker is currently open for
+
+	function openDebugPicker(cell) {
+		if (!debugPickerEl || grid[cell.r][cell.c] === -1) return;
+		debugPickerOpen = true;
+		debugPickerCell = { r: cell.r, c: cell.c };
+		selected = { r: cell.r, c: cell.c };
+		sndSelect();
+		if (hapticsEnabled) hapticBuzz(1);
+		debugPickerEl.innerHTML = debugSubMode === "spawn"
+			? `<button type="button" class="bj-debug-pick-btn bj-debug-pick-bomb" data-level="1" title="Bomb Gem">💣</button>
+			   <button type="button" class="bj-debug-pick-btn bj-debug-pick-cross" data-level="2" title="Cross Gem">➕</button>
+			   <button type="button" class="bj-debug-pick-btn bj-debug-pick-hyper" data-level="3" title="Hyper Gem">☢️</button>`
+			: GEM_PALETTE.map((col, i) =>
+				`<button type="button" class="bj-debug-pick-btn bj-debug-pick-color" data-color="${i}" style="background:${col}"></button>`
+			  ).join("");
+		const rect = canvas.getBoundingClientRect();
+		const sx = rect.width / CANVAS_W, sy = rect.height / CANVAS_H;
+		const cx = rect.left + (BOARD_X + cell.c * GEM + GEM / 2) * sx;
+		const cy = rect.top + (BOARD_Y + cell.r * GEM) * sy;
+		debugPickerEl.style.left = cx + "px";
+		debugPickerEl.style.top = cy + "px";
+		debugPickerEl.classList.add("open");
+	}
+
+	function closeDebugPicker() {
+		debugPickerOpen = false;
+		debugPickerCell = null;
+		selected = null;
+		if (debugPickerEl) debugPickerEl.classList.remove("open");
+	}
+
+	// Applying a special/color is a plain click on the picker itself, so it's wired
+	// as a normal DOM click listener rather than routed through canvas pointer events.
+	if (debugPickerEl) {
+		debugPickerEl.addEventListener("click", (e) => {
+			const btn = e.target.closest(".bj-debug-pick-btn");
+			const cell = debugPickerCell;
+			if (!btn || !cell) return;
+			if (debugSubMode === "spawn") debugSpecial(cell.r, cell.c, parseInt(btn.dataset.level, 10));
+			else debugRecolor(cell.r, cell.c, parseInt(btn.dataset.color, 10));
+			closeDebugPicker();
+		});
+	}
+
+	// Clicking anywhere outside the picker and the held gem closes it without
+	// applying anything — covers clicks on other UI (gear, game-mode button, etc.)
+	// that the canvas's own pointerdown handler never sees.
+	document.addEventListener("pointerdown", (e) => {
+		if (!debugPickerOpen) return;
+		if (debugPickerEl && debugPickerEl.contains(e.target)) return;
+		if (e.target === canvas) return;   // canvas's own handler decides (re-open / close / switch cell)
+		closeDebugPicker();
+	});
+
 	// Reset the offsets of the cells currently shown mid-drag back to home.
 	function clearDragOffsets() {
 		if (!dragPreview) return;
@@ -1372,6 +1491,7 @@
 	}
 
 	function onPointerMove(e) {
+		if (debugPickerOpen) return;   // click-driven now; no drag tracking while the picker is up
 		if (busy || !pointerDown || !assetsReady) return;
 		const p = pointFromEvent(e);
 		const dx = p.x - pointerDown.x, dy = p.y - pointerDown.y;
@@ -1401,6 +1521,7 @@
 	}
 
 	function onPointerUp() {
+		if (debugPickerOpen) return;   // click-driven now; nothing to resolve on release
 		pointerDown = null;
 		if (dragPreview && !busy) {
 			const { a, b } = dragPreview;
@@ -1433,8 +1554,8 @@
 
 	canvas.addEventListener("pointerdown", (e) => { e.preventDefault(); onPointerDown(e); });
 	canvas.addEventListener("pointermove", (e) => { e.preventDefault(); onPointerMove(e); });
-	canvas.addEventListener("pointerup", (e) => { e.preventDefault(); onPointerUp(); });
-	canvas.addEventListener("pointercancel", onPointerUp);
+	canvas.addEventListener("pointerup", (e) => { e.preventDefault(); onPointerUp(e); });
+	canvas.addEventListener("pointercancel", () => onPointerUp());
 	canvas.style.touchAction = "none";
 
 	// ---- Rendering ----
@@ -1797,6 +1918,30 @@
 				const tx = BOARD_X + cc * GEM + GEM / 2, ty = BOARD_Y + rr * GEM + GEM / 2;
 				blasts.push({ x: tx, y: ty, age: 0, dur: 0.4 + Math.random() * 0.2, color: col });
 				for (let i = 0; i < 6; i++) {
+					const ang = Math.random() * Math.PI * 2;
+					const sp = 100 + Math.random() * 180;
+					sparks.push({
+						x: tx, y: ty, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+						age: 0, dur: 0.35 + Math.random() * 0.3, color: col, size: 2 + Math.random() * 2
+					});
+				}
+			}
+		}
+	}
+
+	// Hyper-on-hyper board wipe: a big white shockwave from the swap point, plus a
+	// burst at every gem on the board in that gem's own color — the whole field
+	// lighting up at once is the point of the jackpot.
+	function spawnBoardWipe(r, c) {
+		const cx = BOARD_X + c * GEM + GEM / 2, cy = BOARD_Y + r * GEM + GEM / 2;
+		blasts.push({ x: cx, y: cy, age: 0, dur: 0.9, color: "#fff" });
+		for (let rr = 0; rr < ROWS; rr++) {
+			for (let cc = 0; cc < COLS; cc++) {
+				if (grid[rr][cc] === -1) continue;
+				const col = GEM_PALETTE[((grid[rr][cc] % 7) + 7) % 7];
+				const tx = BOARD_X + cc * GEM + GEM / 2, ty = BOARD_Y + rr * GEM + GEM / 2;
+				blasts.push({ x: tx, y: ty, age: 0, dur: 0.35 + Math.random() * 0.25, color: col });
+				for (let i = 0; i < 4; i++) {
 					const ang = Math.random() * Math.PI * 2;
 					const sp = 100 + Math.random() * 180;
 					sparks.push({
@@ -2358,6 +2503,17 @@
 			debugChk.checked = debugMode;
 			debugChk.addEventListener("change", () => { debugMode = debugChk.checked; });
 		}
+		// The "Debug Mode" label itself opens the Debug sub-menu (swap / spawn / color),
+		// separate from the checkbox next to it which just turns Debug Mode on/off.
+		const debugLabel = document.getElementById("bj-debug-label");
+		const debugOverlay = document.getElementById("bj-debug-overlay");
+		if (debugLabel && debugOverlay) {
+			debugLabel.addEventListener("click", (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				debugOverlay.classList.add("open");
+			});
+		}
 		if (autoplayChk) {
 			autoplayChk.addEventListener("change", () => {
 				autoPlayEnabled = autoplayChk.checked && usesClock();
@@ -2374,6 +2530,38 @@
 				try { localStorage.removeItem(bestLevelKey()); } catch (e) {}
 				resetBtn.textContent = "Reset!";
 				setTimeout(() => { resetBtn.textContent = "Reset Best Score"; }, 1200);
+			});
+		}
+	})();
+
+	// ---- Debug sub-menu panel (Swap anywhere / Spawn any special / Change any color) ----
+	// The three options are toggles, but only one style can be active at a time —
+	// checking one switches debugSubMode and un-checks the other two (radio behaviour).
+	(function initDebugMenu() {
+		const overlay = document.getElementById("bj-debug-overlay");
+		const closeBtn = document.getElementById("bj-debug-close");
+		const modeRows = Array.from(overlay ? overlay.querySelectorAll(".bj-debugmode-row[data-debugmode]") : []);
+		if (!overlay) return;
+
+		function closeDebugMenu() { overlay.classList.remove("open"); }
+		function syncToggles() {
+			for (const row of modeRows) {
+				const chk = row.querySelector(".bj-debugmode-toggle");
+				if (chk) chk.checked = row.dataset.debugmode === debugSubMode;
+			}
+		}
+		syncToggles();
+
+		if (closeBtn) closeBtn.addEventListener("click", closeDebugMenu);
+		overlay.addEventListener("click", (e) => { if (e.target === overlay) closeDebugMenu(); });
+
+		for (const row of modeRows) {
+			const chk = row.querySelector(".bj-debugmode-toggle");
+			if (!chk) continue;
+			chk.addEventListener("change", () => {
+				debugSubMode = row.dataset.debugmode;
+				try { localStorage.setItem("bj2_debug_submode", debugSubMode); } catch (e) {}
+				syncToggles();
 			});
 		}
 	})();

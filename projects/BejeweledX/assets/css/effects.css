@@ -189,6 +189,43 @@
     letter-spacing: 1px;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
 }
+.bj-debug-label {
+    text-decoration: underline dotted rgba(255, 233, 168, 0.6);
+    text-underline-offset: 3px;
+}
+.bj-debug-label:hover { color: #fff; }
+
+/* Debug sub-menu: three toggle rows (radio behaviour handled in JS) instead
+   of the Game Mode overlay's button list. */
+.bj-debugmode-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 4px;
+    text-align: left;
+}
+.bj-debugmode-row {
+    align-items: center;
+    padding: 8px 2px;
+}
+.bj-debugmode-row .bj-setting-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-right: 10px;
+    /* #bj-frame sets line-height: 0 (to remove the canvas's inline baseline gap);
+       inherited here it collapses the label + description to overlapping zero-height
+       lines instead of stacking them. */
+    line-height: normal;
+}
+.bj-debugmode-desc {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+    opacity: 0.75;
+}
+
 .bj-toggle {                     /* hide the real checkbox; the span is the UI */
     position: absolute;
     opacity: 0;
@@ -451,4 +488,42 @@
     letter-spacing: 1px;
     color: #ffe9a8;
     opacity: 0.5;
+}
+
+/* Debug Mode's click-to-open picker ("Spawn any special" / "Change any color"):
+   clicking a gem pops this up above it (Bomb/Cross/Hyper, or the color swatches);
+   clicking a button here applies it, clicking anywhere else closes it. Fixed to
+   the viewport since it tracks a canvas coordinate translated to screen space. */
+.bj-debug-picker {
+    position: fixed;
+    display: none;
+    gap: 8px;
+    padding: 6px;
+    transform: translate(-50%, calc(-100% - 14px));
+    background: #14225a;
+    border: 3px solid #f3c200;
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+    z-index: 50;
+}
+.bj-debug-picker.open { display: flex; }
+.bj-debug-pick-btn {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    border: 3px solid #3a4a90;
+    background: #1b2760;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.1s ease;
+}
+.bj-debug-pick-btn:hover {
+    border-color: #fff;
+    transform: scale(1.15);
 }

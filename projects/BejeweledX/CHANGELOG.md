@@ -8,6 +8,14 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.2.11] - 2026-07-02
+### Changed
+- A hyper gem set off by a bomb or cross gem's blast now clears the color of the gem that hit it, instead of its own hidden minted color (which the player can't see, making the old result look arbitrary). Chains resolve by the direct hitter: if bomb A detonates bomb B and B's blast reaches the hyper, the hyper clears B's color. Hypers caught directly in a regular match still clear their own color, and hyper-swap activation is unchanged. The hyper's blast FX now bursts in the color it actually clears.
+
+## [0.2.10] - 2026-07-02
+### Added
+- Swapping a hyper gem into another hyper gem now clears the ENTIRE board, matching the classic Bejeweled 2 jackpot. Previously it fell through the normal hyper-swap path and cleared only the gems matching the stationary hyper's hidden original color (invisible to the player, so the result looked arbitrary). The wipe gets its own FX: a big white shockwave from the swap point plus a burst at every gem in its own color. Scoring, timer-buff collection, treasure detection, and bomb/cross chain FX all run through the same clear as usual.
+
 ## [0.2.9] - 2026-07-02
 ### Fixed
 - Treasure Hunt: the Time's Up panel could pop up right on top of the "It was here!" chest reveal, hiding it. The panel now waits ~2.5 seconds (the reveal's duration) before appearing, so the treasure's location gets a clear moment on its own first; the board is already frozen during that beat. Reloading onto an ended run still shows the panel immediately.
