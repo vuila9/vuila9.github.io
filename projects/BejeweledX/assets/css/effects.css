@@ -16,6 +16,11 @@
     align-items: center;
     gap: 0.75rem;
     width: 100%;
+    /* iOS: a long-press (e.g. the debug hold gesture) must not start text
+       selection of the page or pop the magnifier/callout over the board */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 /* The canvas's parent box: defines the area the game sizes itself into. */
