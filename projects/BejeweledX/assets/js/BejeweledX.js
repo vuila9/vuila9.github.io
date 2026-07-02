@@ -1,4 +1,4 @@
-// Bejeweled 2 — game logic
+// Bejeweled X — game logic
 //
 // A faithful match-3 re-implementation in vanilla JavaScript on an HTML5 canvas,
 // using the original gem sprites + background extracted from the APK (BJ_ASSETS in
@@ -17,7 +17,7 @@
 
 	// Shown in the Options panel to confirm a deploy is live. Bump this together
 	// with CACHE in sw.js so the number always matches the service-worker version.
-	const APP_VERSION = "0.1.35";
+	const APP_VERSION = "0.2.0";
 
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
 	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,

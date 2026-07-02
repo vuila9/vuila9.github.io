@@ -1,7 +1,7 @@
-/* Bejeweled 2 — project-specific styles */
+/* Bejeweled X — project-specific styles */
 
 /* Exposes the device's notch/Dynamic-Island insets as custom properties so
-   Bejeweled2.js can read them via getComputedStyle (env() itself isn't
+   BejeweledX.js can read them via getComputedStyle (env() itself isn't
    readable from JS) and work out how much of that clearance #bj-frame's own
    letterbox margin already provides — see --bj-safe-top/--bj-safe-right. */
 :root {

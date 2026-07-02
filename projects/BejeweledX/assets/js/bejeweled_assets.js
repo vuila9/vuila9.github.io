@@ -1,4 +1,4 @@
-// Bejeweled 2 - asset bundle
+// Bejeweled X - asset bundle
 // Original gem sprites + background extracted from the Bejeweled 2 Android APK
 // (images600 atlas). gemFrames[t] is the gem's idle rotation animation (the
 // original in-game shimmer); gems[t] is frame 0 for static fallback / the icon.

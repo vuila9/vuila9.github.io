@@ -1,12 +1,16 @@
 # Changelog
 
-All notable changes to the Bejeweled 2 web app are documented here.
+All notable changes to the Bejeweled X web app are documented here.
 Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and satisfying these rules BEFORE ADDING CHANGES TO THE FILE:
 - Each following day, increase x of version #.x.0 by 1, x always starts at 0.
 - Each consecutive update, increase x of version #.#.x by 1
 - Each major update, increase x of version x.0.0 by 1 (only handled by dev)
 
 ---
+
+## [0.2.0] - 2026-07-02
+### Changed
+- Project renamed from "Bejeweled 2" to "Bejeweled X". Folder, file names, and all paths/references updated accordingly (`projects/Bejeweled2/` → `projects/BejeweledX/`, `Bejeweled2.html` → `BejeweledX.html`, `Bejeweled2.js` → `BejeweledX.js`, `Bejeweled2_icon.svg` → `BejeweledX_icon.svg`); service worker cache bumped to `bejeweledx-v10`. Mentions of the original PopCap game keep the "Bejeweled 2" name. Note: previously installed web apps and bookmarks pointing at the old `Bejeweled2` URL will no longer resolve.
 
 ## [0.1.35] - 2026-07-01
 ### Changed

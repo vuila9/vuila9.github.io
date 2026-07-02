@@ -1,6 +1,6 @@
-// Service worker for the Bejeweled 2 standalone web app.
+// Service worker for the Bejeweled X standalone web app.
 // Scope is this folder (registered from webapp.html as "sw.js"), so it only
-// controls /projects/Bejeweled2/.
+// controls /projects/BejeweledX/.
 //
 // Strategy: NETWORK-FIRST. When online, always fetch the latest file and refresh
 // the cache; only fall back to the cache when the network is unavailable (true
@@ -8,14 +8,14 @@
 // never reach an installed app because it keeps serving stale cached code.
 //
 // Bump CACHE whenever the precached file list changes.
-const CACHE = "bejeweled2-v9";
+const CACHE = "bejeweledx-v10";
 const ASSETS = [
   "./webapp.html",
   "./manifest.webmanifest",
-  "./Bejeweled2_icon.svg",
+  "./BejeweledX_icon.svg",
   "./assets/css/effects.css",
   "./assets/js/bejeweled_assets.js",
-  "./assets/js/Bejeweled2.js"
+  "./assets/js/BejeweledX.js"
 ];
 
 self.addEventListener("install", (e) => {
