@@ -7,6 +7,12 @@
       "runtimeArgs": ["-m", "http.server", "8000"],
       "port": 8000,
       "autoPort": true
+    },
+    {
+      "name": "static-alt",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8010"],
+      "port": 8010
     }
   ]
 }

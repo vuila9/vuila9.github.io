@@ -8,11 +8,12 @@
 // never reach an installed app because it keeps serving stale cached code.
 //
 // Bump CACHE whenever the precached file list changes.
-const CACHE = "bejeweledx-v12";
+const CACHE = "bejeweledx-v19";
 const ASSETS = [
   "./webapp.html",
   "./manifest.webmanifest",
   "./BejeweledX_icon.svg",
+  "./assets/img/treasure_chest.png",
   "./assets/css/effects.css",
   "./assets/js/bejeweled_assets.js",
   "./assets/js/BejeweledX.js"

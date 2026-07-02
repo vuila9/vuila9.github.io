@@ -17,7 +17,7 @@
 
 	// Shown in the Options panel to confirm a deploy is live. Bump this together
 	// with CACHE in sw.js so the number always matches the service-worker version.
-	const APP_VERSION = "0.2.2";
+	const APP_VERSION = "0.2.9";
 
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
 	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,
@@ -101,13 +101,15 @@
 	// the run (see triggerTimeUp()).
 	// "rush": a single 15-second clock (see RUSH_STARTING_SECONDS below) that's kept
 	// alive by playing fast — see the Rush mode block further down.
+	// "treasure": Treasure Hunt — a hidden treasure cell per round; clearing/blasting
+	// it reveals a chest, then a new round starts (see the Treasure Hunt block below).
 	// Other modes (puzzle, lightning, ...) are still stubbed in the Game Mode
 	// panel as disabled "coming soon" entries until they're implemented.
 	let gameMode = "endless";
 	try { gameMode = localStorage.getItem("bj2_mode") || "endless"; } catch (e) {}
 	// Modes that run off the shared clock/Time's-Up plumbing (HUD countdown,
 	// timedStarted/timedOver gating, per-mode best-score key).
-	function usesClock() { return gameMode === "timed" || gameMode === "rush"; }
+	function usesClock() { return gameMode === "timed" || gameMode === "rush" || gameMode === "treasure"; }
 	const DROP_MS = 300; // gem fall duration in ms (lower = faster drop)
 	function S(ms) { return ms / gameSpeed; }   // scale a tween duration by speed
 	function ensureAudioCtx() {
@@ -337,6 +339,67 @@
 		rushComboRemaining = RUSH_COMBO_WINDOW;
 	}
 
+	// ---- Treasure Hunt mode ----
+	// Each round hides a treasure on one random cell (never shown to the player).
+	// Triggering a clear that directly touches that cell — a match, or any power-gem
+	// blast area — finds the chest: it's revealed for a few seconds (input blocked,
+	// clock paused), then a new round begins with a fresh minute and a new hidden
+	// cell. No levels/score; the record is how many chests were found in a run.
+	const TREASURE_ROUND_SECONDS = 60;
+	const TREASURE_REVEAL_SECONDS = 2.5;
+	const TREASURE_TIMER_BUFF_SECONDS = 5;   // Timer buffs grant +5s here (vs +10s in Timed)
+	let treasureCell = null;    // {r,c} the hidden treasure location
+	let chestsFound = 0;        // chests found this run (the mode's "score")
+	let treasureReveal = null;  // {r,c,age,dur} while the found chest is being shown
+
+	let chestImg = null;
+	{
+		const img = new Image();
+		img.onload = () => { chestImg = img; };
+		img.src = "./assets/img/treasure_chest.png";
+	}
+
+	// Hide the treasure on a new random cell (never the one it was just found on).
+	function pickTreasureCell() {
+		let r, c;
+		do {
+			r = Math.floor(Math.random() * ROWS);
+			c = Math.floor(Math.random() * COLS);
+		} while (treasureCell && treasureCell.r === r && treasureCell.c === c);
+		treasureCell = { r, c };
+	}
+
+	// Fanfare when the chest is found — brighter/longer than the level-up chime.
+	const sndTreasure = () => {
+		[523, 659, 784, 1047].forEach((f, i) => {
+			setTimeout(() => beep(f, 0.16, 0.09), i * 110);
+		});
+	};
+
+	// Called with every set of "r,c" keys about to be cleared: if the hidden
+	// treasure cell is among them, the chest is found — start the reveal, bank the
+	// find, and set up the next round (fresh clock + new hidden cell).
+	function checkTreasure(clearedKeys) {
+		if (gameMode !== "treasure" || !treasureCell || treasureReveal) return;
+		if (!clearedKeys.has(treasureCell.r + "," + treasureCell.c)) return;
+		treasureReveal = { r: treasureCell.r, c: treasureCell.c, age: 0, dur: TREASURE_REVEAL_SECONDS };
+		chestsFound++;
+		updateBest();
+		sndTreasure();
+		timeLeft = TREASURE_ROUND_SECONDS;   // fresh minute for the next round
+		// The new round's clock stays paused until the player's first match, same
+		// as the start of a run — finding a chest earns a breather, not a head start
+		// for the countdown.
+		timedStarted = false;
+		// A new round starts clean: any Timer buffs left on the board belong to the
+		// finished round and are swept away with it.
+		for (let r = 0; r < ROWS; r++) {
+			for (let c = 0; c < COLS; c++) timerBuff[r][c] = false;
+		}
+		pickTreasureCell();
+		saveState();
+	}
+
 	// Auto-Play (Timed/Rush mode only, toggled from Settings): a zero-latency "bot"
 	// that plays a legal move the instant one exists, via the ordinary trySwap() —
 	// so the swap itself still takes normal animation time, only the "decide where
@@ -417,6 +480,9 @@
 		sparks = [];
 		beams = [];
 		timeBuffPopups = [];
+		// A fresh board needs a fresh hiding spot (also covers board-size changes,
+		// where the old cell's coordinates may no longer exist).
+		if (gameMode === "treasure") { treasureCell = null; pickTreasureCell(); }
 	}
 
 	// Switch the board width (NORMAL_COLS <-> WIDE_COLS) and deal a fresh board at the
@@ -451,6 +517,9 @@
 	function startNewRun(mode) {
 		gameMode = mode;
 		try { localStorage.setItem("bj2_mode", gameMode); } catch (e) {}
+		// Treasure Hunt is always 8 wide; leaving it can restore the wide landscape
+		// board. Re-fit before dealing so the run starts at the right size.
+		fitCanvas();
 		loadBest();
 		loadBestLevel();
 		score = 0;
@@ -460,6 +529,8 @@
 		levelFlash = 0;
 		timeLeft = gameMode === "rush" ? RUSH_STARTING_SECONDS : TIMED_SECONDS;
 		rushComboRemaining = 0;
+		chestsFound = 0;
+		treasureReveal = null;
 		timedOver = false;
 		timedStarted = false;
 		hideTimeUp();
@@ -483,6 +554,7 @@
 				grid, power, timerBuff,
 				score, level, levelProgress, levelTarget,
 				timeLeft, rushComboRemaining, timedStarted, timedOver,
+				treasureCell, chestsFound,
 			}));
 		} catch (e) {}
 	}
@@ -515,6 +587,8 @@
 		// player clears its first match on the restored board.
 		timedStarted = false;
 		timedOver = !!state.timedOver;
+		chestsFound = state.chestsFound || 0;
+		treasureReveal = null;
 		if (state.cols === COLS && Array.isArray(state.grid[0]) && state.grid[0].length === COLS) {
 			grid = state.grid;
 			power = state.power;
@@ -525,6 +599,13 @@
 			sparks = [];
 			beams = [];
 			timeBuffPopups = [];
+			if (gameMode === "treasure") {
+				// Restore the hiding spot with the board it belongs to; deal a new one
+				// if the save predates the field or holds junk.
+				const tc = state.treasureCell;
+				if (tc && tc.r >= 0 && tc.r < ROWS && tc.c >= 0 && tc.c < COLS) treasureCell = { r: tc.r, c: tc.c };
+				else { treasureCell = null; pickTreasureCell(); }
+			}
 		} else {
 			initGrid();
 		}
@@ -733,7 +814,7 @@
 	// buff. Restricted to power === 0 cells purely so a single gem never has to
 	// show two overlapping glows at once.
 	function maybeSpawnTimerBuff() {
-		if (gameMode !== "timed") return;
+		if (gameMode !== "timed" && gameMode !== "treasure") return;
 		if (Math.random() >= TIMER_BUFF_CHANCE) return;
 		const candidates = [];
 		for (let r = 0; r < ROWS; r++) {
@@ -746,9 +827,9 @@
 		timerBuff[r][c] = true;
 	}
 
-	function spawnTimeBuffPopup(r, c) {
+	function spawnTimeBuffPopup(r, c, seconds) {
 		const cx = BOARD_X + c * GEM + GEM / 2, cy = BOARD_Y + r * GEM + GEM / 2;
-		timeBuffPopups.push({ x: cx, y: cy, age: 0, dur: 0.9 });
+		timeBuffPopups.push({ x: cx, y: cy, age: 0, dur: 0.9, text: "+" + seconds + "s" });
 	}
 
 	// Checks a set of "r,c" keys about to be cleared for any Timer buffs and, in
@@ -756,13 +837,14 @@
 	// collected per detonation: the first one found grants the time, and every
 	// other Timer buff still sitting on the board is wiped away with it.
 	function collectTimerBuffs(clearedKeys) {
-		if (gameMode !== "timed") return;
+		if (gameMode !== "timed" && gameMode !== "treasure") return;
+		const seconds = gameMode === "treasure" ? TREASURE_TIMER_BUFF_SECONDS : TIMER_BUFF_SECONDS;
 		let collected = false;
 		for (const key of clearedKeys) {
 			const [r, c] = key.split(",").map(Number);
 			if (timerBuff[r][c]) {
 				timerBuff[r][c] = false;
-				if (!collected) spawnTimeBuffPopup(r, c);
+				if (!collected) spawnTimeBuffPopup(r, c, seconds);
 				collected = true;
 			}
 		}
@@ -771,7 +853,7 @@
 			for (let r = 0; r < ROWS; r++) {
 				for (let c = 0; c < COLS; c++) timerBuff[r][c] = false;
 			}
-			timeLeft += TIMER_BUFF_SECONDS;
+			timeLeft += seconds;
 			sndTimeBuff();
 		}
 	}
@@ -786,7 +868,10 @@
 			const runs = findRuns();
 			if (runs.length === 0) break;
 			cascade++;
-			if (usesClock()) timedStarted = true;   // clock starts on the first match
+			// The clock (re)starts only on a match the player made — not on automatic
+			// cascade follow-ups. This keeps it paused after anything that resets it
+			// (level up, chest found) until the player's next completed match.
+			if (usesClock() && cascade === 1 && movedCells.length > 0) timedStarted = true;
 
 			// Every cell in any run.
 			const matched = new Set();
@@ -817,13 +902,21 @@
 				}
 			}
 
+			// A run that contains a detonating power gem doesn't mint a new one — the
+			// run only reached power length by counting the old gem, and its detonation
+			// consumes that (e.g. `x o x x'`: swapping o next to a bomb x' shouldn't
+			// pay out both the blast and a fresh bomb).
+			const runHasDetonated = (run) => run.cells.some(([r, c]) => detonated.has(r + "," + c));
+
 			// Detect T/L shapes: a horizontal and vertical run of the same gem type that
 			// share a cell. The intersection becomes a cross gem (level 2).
 			const hRuns = runs.filter(r => r.cells.length >= 2 && r.cells[0][0] === r.cells[1][0]);
 			const vRuns = runs.filter(r => r.cells.length >= 2 && r.cells[0][1] === r.cells[1][1]);
 			const crossKeeps = new Set();  // "r,c" keys that become cross gems
 			for (const hr of hRuns) {
+				if (runHasDetonated(hr)) continue;
 				for (const vr of vRuns) {
+					if (runHasDetonated(vr)) continue;
 					// find shared cell (same gem type is guaranteed since both are matched)
 					const inter = hr.cells.find(([r, c]) => vr.cells.some(([vr2, vc]) => vr2 === r && vc === c));
 					if (inter) crossKeeps.add(inter[0] + "," + inter[1]);
@@ -848,6 +941,7 @@
 			// Second pass: bomb/hyper gems from 4+ straight runs (skip runs already producing a cross)
 			for (const run of runs) {
 				if (run.len < POWER_MIN) continue;
+				if (runHasDetonated(run)) continue;
 				// if this run contributed to a cross, skip it (cross takes priority)
 				const contributesToCross = run.cells.some(([r, c]) => crossKeeps.has(r + "," + c));
 				if (contributesToCross) continue;
@@ -867,18 +961,22 @@
 			for (const key of matched) if (!keepSet.has(key)) clearSet.add(key);
 			for (const key of blast) if (!keepSet.has(key)) clearSet.add(key);
 
-			collectTimerBuffs(clearSet);   // Timed mode: +10s per Timer buff cleared away
+			collectTimerBuffs(clearSet);   // Timed/Treasure mode: bonus time per Timer buff cleared away
+			checkTreasure(clearSet);       // Treasure Hunt: did this clear touch the hidden cell?
 			// Rush mode: only the match the player's swap directly produced banks
 			// time — not the automatic chain-reaction matches formed by gems falling
 			// into place afterward (movedCells is empty for those follow-up passes).
 			if (cascade === 1 && movedCells.length > 0) applyRushMatchBonus();
 
-			// scoring: 10 per cleared gem, multiplied by the cascade depth
-			const gained = clearSet.size * 10 * cascade;
-			score += gained;
-			levelProgress += gained;
-			updateBest();
-			if (levelProgress >= levelTarget) levelUp();
+			// scoring: 10 per cleared gem, multiplied by the cascade depth.
+			// Treasure Hunt has no score/levels — chests found is its only tally.
+			if (gameMode !== "treasure") {
+				const gained = clearSet.size * 10 * cascade;
+				score += gained;
+				levelProgress += gained;
+				updateBest();
+				if (levelProgress >= levelTarget) levelUp();
+			}
 
 			if (blastCenters.length) {
 				hapticBuzz(Math.max(...blastCenters.map((b) => b.level)));
@@ -946,7 +1044,8 @@
 		const clearSet = new Set(matched);
 		for (const key of blast) clearSet.add(key);
 
-		collectTimerBuffs(clearSet);   // Timed mode: +10s per Timer buff cleared away
+		collectTimerBuffs(clearSet);   // Timed/Treasure mode: bonus time per Timer buff cleared away
+		checkTreasure(clearSet);       // Treasure Hunt: did this clear touch the hidden cell?
 		applyRushMatchBonus();         // Rush mode: quick-match time recovery (this detonation is the player's swap, not a fall-triggered cascade)
 
 		spawnHyperBlast(otherCell.r, otherCell.c, targetColor);
@@ -959,11 +1058,13 @@
 		sndHyper();   // the hyper gem's own detonation
 		hapticBuzz(3);   // hyper-gem activation is always the strongest tier
 
-		const gained = clearSet.size * 10;
-		score += gained;
-		levelProgress += gained;
-		updateBest();
-		if (levelProgress >= levelTarget) levelUp();
+		if (gameMode !== "treasure") {
+			const gained = clearSet.size * 10;
+			score += gained;
+			levelProgress += gained;
+			updateBest();
+			if (levelProgress >= levelTarget) levelUp();
+		}
 
 		for (const key of clearSet) {
 			const [r, c] = key.split(",").map(Number);
@@ -977,8 +1078,10 @@
 	}
 
 	function updateBest() {
-		if (score > best) {
-			best = score;
+		// Treasure Hunt's record is chests found, not points.
+		const value = gameMode === "treasure" ? chestsFound : score;
+		if (value > best) {
+			best = value;
 			try { localStorage.setItem(bestKey(), String(best)); } catch (e) {}
 		}
 	}
@@ -995,8 +1098,11 @@
 			levelFlash = 1.6;
 			sndLevelUp();
 			if (gameMode === "timed") timeLeft = TIMED_SECONDS;   // fresh minute for the new level
-			else if (gameMode === "rush") timeLeft += RUSH_LEVEL_BONUS;   // flat time bonus, clock keeps running
+			else if (gameMode === "rush") timeLeft += RUSH_LEVEL_BONUS;   // flat time bonus
 		}
+		// Reaching a level pauses the clock until the player's first match of the
+		// new level (resolveBoard only re-arms it on a player-made match).
+		if (gameMode === "timed" || gameMode === "rush") timedStarted = false;
 	}
 
 	// ---- Timed mode: Time's Up overlay ----
@@ -1005,8 +1111,16 @@
 		if (!overlay) return;
 		const lvlEl = document.getElementById("bj-timeup-level");
 		const scoreEl = document.getElementById("bj-timeup-score");
+		// Treasure Hunt tracks neither level nor score — hide the level row and
+		// repurpose the score row as the chest tally.
+		const treasure = gameMode === "treasure";
+		if (lvlEl && lvlEl.parentElement) lvlEl.parentElement.style.display = treasure ? "none" : "";
 		if (lvlEl) lvlEl.textContent = String(level);
-		if (scoreEl) scoreEl.textContent = String(score);
+		if (scoreEl) {
+			const label = scoreEl.parentElement && scoreEl.parentElement.querySelector("span");
+			if (label && label !== scoreEl) label.textContent = treasure ? "Chest found" : "Score";
+			scoreEl.textContent = String(treasure ? chestsFound : score);
+		}
 		overlay.classList.add("open");
 	}
 	function hideTimeUp() {
@@ -1020,7 +1134,14 @@
 		timedOver = true;
 		updateBest();
 		updateBestLevel();
-		showTimeUp();
+		// Treasure Hunt: give the "It was here!" reveal a beat on its own before the
+		// panel comes up, since the centered panel can sit right on top of the chest.
+		// Guarded on timedOver in case a new run starts before the delay fires.
+		if (gameMode === "treasure" && treasureCell) {
+			setTimeout(() => { if (timedOver) showTimeUp(); }, TREASURE_REVEAL_SECONDS * 1000);
+		} else {
+			showTimeUp();
+		}
 		saveState();   // so a reload lands back on the Time's Up screen, not a live board
 	}
 
@@ -1220,7 +1341,7 @@
 	}
 
 	function onPointerDown(e) {
-		if (timedOver) return;
+		if (timedOver || treasureReveal) return;   // board frozen while the found chest is shown
 		idleTime = 0;
 		hint = null;
 		if (busy || !assetsReady) return;
@@ -1357,8 +1478,9 @@
 		ctx.font = "bold 16px 'Trebuchet MS', Verdana, sans-serif";
 		ctx.fillText("Best: " + best, 16, 36);
 
-		// Timed/Rush only: best level ever reached, stacked directly under "Best".
-		if (usesClock()) {
+		// Timed/Rush only: best level ever reached, stacked directly under "Best"
+		// (Treasure Hunt has no levels, so nothing to show there).
+		if (usesClock() && gameMode !== "treasure") {
 			ctx.font = "bold 12px 'Trebuchet MS', Verdana, sans-serif";
 			ctx.fillText("Best Lvl: " + bestLevel, 16, 52);
 		}
@@ -1373,8 +1495,19 @@
 			ctx.fillText(formatTime(timeLeft), CANVAS_W - 106, 36);
 		}
 
-		// center: LEVEL and Score stacked
+		// center: LEVEL and Score stacked — except Treasure Hunt, which has no
+		// levels/score and shows the chest tally instead (and no progress meter).
 		ctx.textAlign = "center";
+		if (gameMode === "treasure") {
+			ctx.fillStyle = "#ffe9a8";
+			ctx.font = "bold 22px 'Trebuchet MS', Verdana, sans-serif";
+			ctx.fillText("TREASURE HUNT", CANVAS_W / 2, 26);
+
+			ctx.fillStyle = "#ffffff";
+			ctx.font = "bold 24px 'Trebuchet MS', Verdana, sans-serif";
+			ctx.fillText("Chests: " + chestsFound, CANVAS_W / 2, 58);
+			return;
+		}
 		ctx.fillStyle = "#ffe9a8";
 		ctx.font = "bold 22px 'Trebuchet MS', Verdana, sans-serif";
 		ctx.fillText("LEVEL " + level, CANVAS_W / 2, 20);
@@ -1791,11 +1924,71 @@
 			ctx.font = "bold 20px 'Trebuchet MS', Verdana, sans-serif";
 			ctx.lineWidth = 3;
 			ctx.strokeStyle = "rgba(0, 0, 0, 0.55)";
-			ctx.strokeText("+10s", p.x, y);
+			ctx.strokeText(p.text, p.x, y);
 			ctx.fillStyle = "#7CFCC8";
-			ctx.fillText("+10s", p.x, y);
+			ctx.fillText(p.text, p.x, y);
 			ctx.restore();
 		}
+	}
+
+	// Treasure Hunt: the found chest popping out of its hiding spot — a golden glow
+	// under the chest sprite, with a quick grow-in and a fade over its final moments.
+	// (Debug Mode also outlines the *hidden* cell so the mode can be tested.)
+	function drawTreasure() {
+		if (gameMode !== "treasure") return;
+		if (debugMode && treasureCell && !treasureReveal) {
+			const x = BOARD_X + treasureCell.c * GEM, y = BOARD_Y + treasureCell.r * GEM;
+			ctx.save();
+			ctx.strokeStyle = "rgba(255, 215, 90, 0.9)";
+			ctx.setLineDash([6, 5]);
+			ctx.lineWidth = 2;
+			ctx.strokeRect(x + 3, y + 3, GEM - 6, GEM - 6);
+			ctx.restore();
+		}
+		// Time's Up: reveal where the treasure was hiding, so the player can see
+		// how close they were. Stays up as long as the Time's Up screen shows.
+		if (timedOver && treasureCell) {
+			drawChestAt(treasureCell.r, treasureCell.c, 1, 1, "It was here!");
+			return;
+		}
+		if (!treasureReveal) return;
+		const { r, c, age, dur } = treasureReveal;
+		const popIn = easeOutQuad(Math.min(1, age / 0.3));            // quick grow-in
+		const fade = age > dur - 0.4 ? Math.max(0, (dur - age) / 0.4) : 1;   // fade at the end
+		drawChestAt(r, c, popIn, fade, "Chest found!");
+	}
+
+	// Golden glow + chest sprite on cell (r,c) with a label — shared by the
+	// found-chest reveal and the Time's Up "it was here" reveal.
+	function drawChestAt(r, c, popIn, fade, label) {
+		const cx = BOARD_X + c * GEM + GEM / 2, cy = BOARD_Y + r * GEM + GEM / 2;
+		ctx.save();
+		ctx.globalAlpha = fade;
+		const glow = ctx.createRadialGradient(cx, cy, GEM * 0.1, cx, cy, GEM * 1.2);
+		glow.addColorStop(0, "rgba(255, 220, 120, 0.75)");
+		glow.addColorStop(1, "rgba(255, 220, 120, 0)");
+		ctx.fillStyle = glow;
+		ctx.beginPath();
+		ctx.arc(cx, cy, GEM * 1.2, 0, Math.PI * 2);
+		ctx.fill();
+		const size = GEM * (0.5 + 0.7 * popIn);
+		if (chestImg) ctx.drawImage(chestImg, cx - size / 2, cy - size / 2, size, size);
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.font = "bold 22px 'Trebuchet MS', Verdana, sans-serif";
+		ctx.lineWidth = 4;
+		ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
+		// Keep the label fully on the canvas: clamp horizontally by its measured
+		// width (edge columns), and flip it below the chest on the top row (where
+		// "above" would land in the HUD).
+		const halfW = ctx.measureText(label).width / 2 + 8;
+		const tx = Math.max(halfW, Math.min(CANVAS_W - halfW, cx));
+		let ty = cy - GEM * 0.95;
+		if (ty < BOARD_Y + 14) ty = cy + GEM * 0.95;
+		ctx.strokeText(label, tx, ty);
+		ctx.fillStyle = "#ffe9a8";
+		ctx.fillText(label, tx, ty);
+		ctx.restore();
 	}
 
 	function drawGems() {
@@ -1907,6 +2100,7 @@
 		drawGems();
 		drawSheen();
 		drawFX();
+		drawTreasure();
 		drawTimeBuffPopups();
 		drawHint();
 		drawSelection();
@@ -1933,6 +2127,13 @@
 		if (raw > 0) fps = fps * 0.9 + (1 / raw) * 0.1;
 		selPulse += dt;
 		updateFX(dt);
+		// Treasure Hunt: run down the chest-reveal pause (input blocked + clock
+		// paused while it shows); the next round's hiding spot was already picked
+		// the moment the chest was found.
+		if (treasureReveal) {
+			treasureReveal.age += dt;
+			if (treasureReveal.age >= treasureReveal.dur) treasureReveal = null;
+		}
 		if (levelFlash > 0) levelFlash = Math.max(0, levelFlash - dt);
 		idleTime += dt;
 		if (!busy && !hint && !timedOver && idleTime >= HINT_IDLE_S) hint = findHintMove();
@@ -1941,7 +2142,7 @@
 		// then keeps running through swap/cascade animations (that's the pressure the
 		// mode is built around) but pauses while any menu overlay is open, so opening
 		// Settings mid-run doesn't unfairly burn the clock.
-		if (usesClock() && timedStarted && !timedOver && !overlayOpen) {
+		if (usesClock() && timedStarted && !timedOver && !overlayOpen && !treasureReveal) {
 			timeLeft = Math.max(0, timeLeft - dt);
 			// Rush mode: the quick-match bonus window ticks down alongside the clock;
 			// once it hits 0 the next match banks nothing extra until it clears again.
@@ -1952,7 +2153,7 @@
 		// play the highest-scoring one via the normal trySwap() (fire-and-forget —
 		// trySwap sets `busy` synchronously before its first await, so this can't
 		// double-fire next frame).
-		if (autoPlayEnabled && usesClock() && !timedOver && !busy && assetsReady && !overlayOpen) {
+		if (autoPlayEnabled && usesClock() && !timedOver && !busy && assetsReady && !overlayOpen && !treasureReveal) {
 			const move = findBestAutoPlayMove();
 			if (move) trySwap(move.a, move.b);
 		}
@@ -1979,7 +2180,10 @@
 			const landscape = window.matchMedia
 				? window.matchMedia("(orientation: landscape)").matches
 				: availW > availH;
-			setColumns(landscape ? WIDE_COLS : NORMAL_COLS);
+			// Treasure Hunt always stays on the classic 8x8 board: widening would
+			// deal a fresh board (and a fresh hiding spot), wiping the run's state
+			// just for rotating the screen or toggling fullscreen.
+			setColumns(gameMode === "treasure" ? NORMAL_COLS : (landscape ? WIDE_COLS : NORMAL_COLS));
 		} else {
 			setColumns(NORMAL_COLS);
 			// #bj-frame is inline-flex (shrink-to-fit), so measure a stable block
@@ -2242,8 +2446,15 @@
 		if (!overlay || !continueBtn || !restartBtn) return;
 		const levelEl = document.getElementById("bj-resume-level");
 		const scoreEl = document.getElementById("bj-resume-score");
+		// Same relabeling as the Time's Up screen: Treasure Hunt has no level/score.
+		const treasure = gameMode === "treasure";
+		if (levelEl && levelEl.parentElement) levelEl.parentElement.style.display = treasure ? "none" : "";
 		if (levelEl) levelEl.textContent = String(level);
-		if (scoreEl) scoreEl.textContent = String(score);
+		if (scoreEl) {
+			const label = scoreEl.parentElement && scoreEl.parentElement.querySelector("span");
+			if (label && label !== scoreEl) label.textContent = treasure ? "Chest found" : "Score";
+			scoreEl.textContent = String(treasure ? chestsFound : score);
+		}
 		overlay.classList.add("open");
 		continueBtn.addEventListener("click", () => overlay.classList.remove("open"), { once: true });
 		restartBtn.addEventListener("click", () => {
@@ -2264,7 +2475,11 @@
 	// overlay, shown by restoreState() above, already offers its own retry) or
 	// if the score is still 0 — a fresh, barely-touched board isn't worth asking
 	// about, just let the player start playing it directly.
-	if (savedAtBoot && !timedOver && score !== 0) showResumePrompt();
+	// "Worth asking about" per mode: any score for Endless/Timed/Rush; for Treasure
+	// Hunt (which has no score) any chest found, or a round already underway (its
+	// clock had started — i.e. the player had matched at least once).
+	if (savedAtBoot && !timedOver &&
+		(gameMode === "treasure" ? (chestsFound !== 0 || savedAtBoot.timedStarted) : score !== 0)) showResumePrompt();
 
 	// Keep a ticking Timed/Rush clock's save reasonably fresh between moves
 	// (the other save points only fire on a settled swap or Time's Up). Skipped

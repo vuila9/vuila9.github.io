@@ -8,6 +8,39 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.2.9] - 2026-07-02
+### Fixed
+- Treasure Hunt: the Time's Up panel could pop up right on top of the "It was here!" chest reveal, hiding it. The panel now waits ~2.5 seconds (the reveal's duration) before appearing, so the treasure's location gets a clear moment on its own first; the board is already frozen during that beat. Reloading onto an ended run still shows the panel immediately.
+
+## [0.2.8] - 2026-07-02
+### Fixed
+- Treasure Hunt: reloading mid-run now shows the "WELCOME BACK" continue/start-over prompt like the other modes. It previously only appeared with at least one chest found, because the shared check looked for a non-zero score — which Treasure Hunt never has. A saved run now also counts as in-progress when its round clock had started (the player had matched at least once).
+
+## [0.2.7] - 2026-07-02
+### Changed
+- Treasure Hunt: finding a chest now sweeps every Timer buff off the board along with it — each new round starts clean, with only buffs spawned during that round collectable.
+
+## [0.2.6] - 2026-07-02
+### Changed
+- Treasure Hunt: finding a chest now pauses the round clock past the reveal — the new round's timer only starts counting once the player completes their first match, same as the start of a run.
+- Timed/Rush: reaching a new level now pauses the clock the same way, resuming on the player's first match of the new level. To support this, the clock is only (re)armed by a match the player made — automatic cascade follow-ups no longer restart a paused clock.
+
+## [0.2.5] - 2026-07-02
+### Changed
+- Treasure Hunt: when the round clock runs out, the treasure's hiding spot is now revealed on the board ("It was here!") behind the Time's Up screen.
+- Treasure Hunt: the board always stays 8x8 — rotating to landscape or entering fullscreen no longer widens it to 12 columns (which dealt a fresh board and wiped the run's state mid-hunt). Switching to another mode restores the normal responsive sizing.
+
+### Fixed
+- Treasure Hunt: the "Chest found!" label is no longer cut off when the chest is on an edge column (clamped by its measured text width) or the top row (label flips below the chest instead of vanishing into the HUD).
+
+## [0.2.4] - 2026-07-02
+### Added
+- New game mode: **Treasure Hunt**. Each round hides a treasure under one random tile (invisible to the player); triggering a match or any power-gem blast whose impact area directly covers that tile finds the chest. The chest sprite (`treasure_chest.png`) is revealed on the spot for ~2.5 seconds — the board is frozen and the round clock paused while it shows — then a new treasure hides under another random tile and the next round begins with a fresh 1-minute clock. Timer buffs spawn in this mode too and grant +5s (vs Timed's +10s). No levels or score: the HUD's progress bar/level/score are replaced by a "Chests" tally, and the best record (plus the Time's Up screen) shows only chests found. Debug Mode outlines the hidden tile for testing.
+
+## [0.2.3] - 2026-07-02
+### Fixed
+- A match that detonates an existing power gem no longer also mints a new one from the same run (e.g. `x o x x'` with bomb `x'`: swapping `o` aside made a 4-run that both detonated the bomb and crowned a surviving `x` as a fresh bomb). A run containing a detonating power gem is now excluded from bomb/hyper minting, and likewise from T/L cross minting.
+
 ## [0.2.2] - 2026-07-02
 ### Fixed
 - Game could freeze permanently after committing a drag-swap that was already at full offset on release (often noticed when detonating a power gem). The finishing slide's duration scaled to 0, and a zero-length tween divided by zero — producing NaN/Infinity draw offsets that crashed the render loop (`createRadialGradient` non-finite error). Zero-length tweens now jump straight to their end state, and tween progress is clamped so an early rAF timestamp can't go negative.
