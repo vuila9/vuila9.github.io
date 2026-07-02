@@ -490,10 +490,10 @@
     opacity: 0.5;
 }
 
-/* Debug Mode's click-to-open picker ("Spawn any special" / "Change any color"):
-   clicking a gem pops this up above it (Bomb/Cross/Hyper, or the color swatches);
-   clicking a button here applies it, clicking anywhere else closes it. Fixed to
-   the viewport since it tracks a canvas coordinate translated to screen space. */
+/* Debug Mode's hold-and-drag picker ("Spawn any special" / "Change any color"):
+   holding a gem pops this up above it (Bomb/Cross/Hyper, or the color swatches);
+   drag onto a button and release to apply it, release elsewhere to close. Fixed
+   to the viewport since it tracks a canvas coordinate translated to screen space. */
 .bj-debug-picker {
     position: fixed;
     display: none;
@@ -509,9 +509,10 @@
 .bj-debug-picker.open { display: flex; }
 .bj-debug-pick-btn {
     box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /* grid + place-items keeps the emoji glyph dead-center regardless of its
+       baseline metrics (flex centering let some emoji sit off-center) */
+    display: grid;
+    place-items: center;
     width: 40px;
     height: 40px;
     padding: 0;
@@ -520,10 +521,16 @@
     background: #1b2760;
     font-size: 20px;
     line-height: 1;
+    text-align: center;
     cursor: pointer;
     transition: transform 0.1s ease, border-color 0.1s ease;
 }
-.bj-debug-pick-btn:hover {
+/* inline SVG icon (block kills the inline-baseline gap so grid centers it exactly) */
+.bj-debug-pick-btn svg { display: block; }
+/* .hover is toggled from JS while dragging over a button (the canvas holds
+   pointer capture, so native :hover never fires during the drag) */
+.bj-debug-pick-btn:hover,
+.bj-debug-pick-btn.hover {
     border-color: #fff;
     transform: scale(1.15);
 }

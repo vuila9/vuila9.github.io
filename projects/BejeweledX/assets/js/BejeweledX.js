@@ -91,14 +91,23 @@
 	let audioCtx = null;
 	let muted = false;
 	let debugMode = false;
-	// Debug Mode has three interaction styles, picked from the Debug sub-menu:
-	//   "swap"  - the original behaviour: any gem is a valid swap target.
-	//   "spawn" - hold a gem, drag onto the picker, drop on a special to plant it.
-	//   "color" - same hold/drag gesture, drop on a color swatch to recolor it.
-	let debugSubMode = "swap";
+	// Debug Mode has three tools, toggled independently from the Debug sub-menu
+	// (any combination can be on at once):
+	//   swap  - the original behaviour: any gem is a valid swap target.
+	//   spawn - hold a gem, drag onto the picker, drop on a special to plant it.
+	//   color - tap a gem to open the swatches, tap a swatch to recolor it.
+	// With both spawn and color on, a hold-drag plants a special while a plain
+	// tap (press + release on the same gem) opens the color swatches instead.
+	let debugModes = { swap: true, spawn: false, color: false };
 	try {
-		const saved = localStorage.getItem("bj2_debug_submode");
-		if (saved === "spawn" || saved === "color") debugSubMode = saved;
+		const saved = JSON.parse(localStorage.getItem("bj2_debug_modes"));
+		if (saved && typeof saved === "object") {
+			debugModes = { swap: !!saved.swap, spawn: !!saved.spawn, color: !!saved.color };
+		} else {
+			// migrate from the old single-choice setting
+			const old = localStorage.getItem("bj2_debug_submode");
+			if (old === "spawn" || old === "color") debugModes = { swap: false, spawn: old === "spawn", color: old === "color" };
+		}
 	} catch (e) {}
 	let hapticsEnabled = true;
 	try { hapticsEnabled = localStorage.getItem("bj2_haptics") !== "0"; } catch (e) {}
@@ -126,9 +135,28 @@
 		// Mobile browsers (iOS Safari, Chrome Android) create the context suspended
 		// until explicitly resumed — without this, scheduled tones are silently
 		// dropped and the game reads as randomly/inconsistently silent.
-		if (audioCtx.state === "suspended") audioCtx.resume();
+		// iOS also uses a non-standard "interrupted" state after the app is
+		// backgrounded; treat anything that isn't "running" as needing a resume.
+		if (audioCtx.state !== "running") audioCtx.resume();
 		return audioCtx;
 	}
+	// iOS WebKit only unlocks audio from a "qualifying" user gesture (touchend,
+	// mouseup, click, keydown). Gameplay taps arrive as pointerdown with
+	// preventDefault() — which suppresses the synthetic click — so on a fresh
+	// page the context could stay suspended until some real button (e.g. the
+	// Settings gear) was clicked. Resume from touchend/click until it's running.
+	function unlockAudioOnGesture() {
+		const unlock = () => {
+			const ctx = ensureAudioCtx();
+			if (ctx.state === "running") {
+				document.removeEventListener("touchend", unlock, true);
+				document.removeEventListener("click", unlock, true);
+			}
+		};
+		document.addEventListener("touchend", unlock, true);
+		document.addEventListener("click", unlock, true);
+	}
+	unlockAudioOnGesture();
 	// Master gain multiplier applied to every sound effect's own `vol` — adjustable
 	// via the Settings volume slider (0-150%, persisted), independent of the mute
 	// toggle. SFX_VOLUME_DEFAULT is the multiplier at the slider's 100% position.
@@ -1393,24 +1421,58 @@
 		hint = null;
 		if (busy || !assetsReady) return;
 		const cell = cellFromEvent(e);
-		// Debug Mode's "Spawn any special" / "Change any color": clicking a gem opens
-		// a picker above it (Bomb/Cross/Hyper, or the color swatches); clicking a
-		// different gem re-opens the picker there, and clicking anywhere else on the
-		// canvas (including empty board margin) closes it without doing anything.
-		// A separate flow entirely from the tap/drag swap below.
-		if (debugMode && debugSubMode !== "swap") {
+		// Debug Mode's "Spawn any special" / "Change any color" pickers — a separate
+		// flow entirely from the tap/drag swap below. The two tools never overlap
+		// because they trigger on different gestures:
+		//   spawn: hold a gem for DEBUG_HOLD_MS → specials picker opens; drag onto
+		//          Bomb/Cross/Hyper and release to plant it.
+		//   color: quick tap (released before the hold fires) → swatches open;
+		//          tap a swatch to recolor (click-driven).
+		if (debugMode && (debugModes.spawn || debugModes.color)) {
 			if (!cell) { closeDebugPicker(); return; }
-			if (debugPickerOpen && debugPickerCell && debugPickerCell.r === cell.r && debugPickerCell.c === cell.c) {
+			// tapping the gem the color swatches are already open for closes them
+			if (debugPickerOpen && debugPickerKind === "color" &&
+				debugPickerCell && debugPickerCell.r === cell.r && debugPickerCell.c === cell.c) {
 				closeDebugPicker();
-			} else {
-				openDebugPicker(cell);
+				return;
 			}
+			// Swap-anywhere still works alongside the pickers: a previous tap left a
+			// gem selected (with the swatches open on it when Color is on) — tapping
+			// a different gem swaps the two instead of re-arming the pickers there.
+			if (debugModes.swap && selected && (selected.r !== cell.r || selected.c !== cell.c)) {
+				const a = selected;
+				closeDebugPicker();
+				pointerDown = null;
+				trySwap(a, cell);
+				return;
+			}
+			closeDebugPicker();   // switching gems: close before re-arming on the new one
+			// select the pressed gem right away: it drives the spin flipbook while
+			// held/dragged (same as a normal press) and doubles as the Swap-anywhere
+			// anchor. openDebugPicker keeps it selected and skips the re-select beep.
+			selected = { r: cell.r, c: cell.c };
+			sndSelect();
+			if (debugModes.spawn) {
+				// arm the hold — the specials picker only appears after DEBUG_HOLD_MS
+				debugHoldCell = { r: cell.r, c: cell.c };
+				debugHoldTimer = setTimeout(() => {
+					debugHoldTimer = null;
+					pointerDown = null;   // picker took over; no swap drag from here
+					openDebugPicker(debugHoldCell, "spawn");
+				}, DEBUG_HOLD_MS);
+			} else {
+				openDebugPicker(cell, "color");
+			}
+			// also arm a normal swap drag from this gem — dragging off it before the
+			// hold fires (or while the swatches are up) is still a regular match move
+			pointerDown = cell;
+			if (canvas.setPointerCapture) { try { canvas.setPointerCapture(e.pointerId); } catch (err) {} }
 			return;
 		}
 		if (!cell) return;
 		// tap-tap: a gem is already selected and this one is adjacent → swap now
-		// (in debug mode any gem on the board is a valid swap target)
-		if (selected && (debugMode || adjacent(selected, cell))) {
+		// (with the Swap-anywhere debug tool, any gem is a valid swap target)
+		if (selected && ((debugMode && debugModes.swap) || adjacent(selected, cell))) {
 			const a = selected;
 			selected = null;
 			pointerDown = null;
@@ -1424,22 +1486,62 @@
 		sndSelect();
 	}
 
-	// ---- Debug Mode: click-to-open picker (spawn special / change color) ----
+	// ---- Debug Mode: gem picker (spawn special: hold-drag / change color: tap-tap) ----
 	const debugPickerEl = document.getElementById("bj-debug-picker");
 	let debugPickerOpen = false;
 	let debugPickerCell = null;   // {r,c} the gem the picker is currently open for
+	let debugPickerKind = null;   // "spawn" (drag-driven) or "color" (click-driven)
+	// Spawn's hold-to-open gesture: pressing a gem arms this timer; the specials
+	// picker only opens once it fires. Releasing earlier is a quick tap, which
+	// opens the color swatches instead (when that tool is on).
+	const DEBUG_HOLD_MS = 300;
+	let debugHoldTimer = null;
+	let debugHoldCell = null;     // {r,c} the gem being held while the timer runs
 
-	function openDebugPicker(cell) {
+	function cancelDebugHold() {
+		if (debugHoldTimer) clearTimeout(debugHoldTimer);
+		debugHoldTimer = null;
+		debugHoldCell = null;
+	}
+
+	function openDebugPicker(cell, kind) {
 		if (!debugPickerEl || grid[cell.r][cell.c] === -1) return;
 		debugPickerOpen = true;
+		debugPickerKind = kind;
 		debugPickerCell = { r: cell.r, c: cell.c };
+		// keep the gem selected (spin flipbook + Swap-anywhere anchor); only beep
+		// when this press didn't already select it
+		if (!selected || selected.r !== cell.r || selected.c !== cell.c) sndSelect();
 		selected = { r: cell.r, c: cell.c };
-		sndSelect();
 		if (hapticsEnabled) hapticBuzz(1);
-		debugPickerEl.innerHTML = debugSubMode === "spawn"
-			? `<button type="button" class="bj-debug-pick-btn bj-debug-pick-bomb" data-level="1" title="Bomb Gem">💣</button>
-			   <button type="button" class="bj-debug-pick-btn bj-debug-pick-cross" data-level="2" title="Cross Gem">➕</button>
-			   <button type="button" class="bj-debug-pick-btn bj-debug-pick-hyper" data-level="3" title="Hyper Gem">☢️</button>`
+		// Inline SVG icons instead of emoji: emoji glyphs sit off-center inside
+		// their font box (differently per platform), so they can't be reliably
+		// centered with CSS — an SVG centers exactly.
+		debugPickerEl.innerHTML = kind === "spawn"
+			? `<button type="button" class="bj-debug-pick-btn bj-debug-pick-bomb" data-level="1" title="Bomb Gem">
+				<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+					<circle cx="11" cy="14" r="7" fill="#2b2b33"/>
+					<circle cx="8.5" cy="11.5" r="2" fill="#5a5a66"/>
+					<path d="M15.5 8.5 L18 5.5" stroke="#c9a227" stroke-width="2" stroke-linecap="round" fill="none"/>
+					<circle cx="19" cy="4.5" r="1.8" fill="#ffb020"/>
+				</svg>
+			   </button>
+			   <button type="button" class="bj-debug-pick-btn bj-debug-pick-cross" data-level="2" title="Cross Gem">
+				<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+					<path d="M12 4 V20 M4 12 H20" stroke="#e8ecff" stroke-width="4" stroke-linecap="round" fill="none"/>
+				</svg>
+			   </button>
+			   <button type="button" class="bj-debug-pick-btn bj-debug-pick-hyper" data-level="3" title="Hyper Gem">
+				<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+					<circle cx="12" cy="12" r="10" fill="#f3c200"/>
+					<g fill="#1b1b1b">
+						<circle cx="12" cy="12" r="2.2"/>
+						<path d="M12 12 L8.2 5.4 A7.6 7.6 0 0 1 15.8 5.4 Z"/>
+						<path d="M12 12 L8.2 5.4 A7.6 7.6 0 0 1 15.8 5.4 Z" transform="rotate(120 12 12)"/>
+						<path d="M12 12 L8.2 5.4 A7.6 7.6 0 0 1 15.8 5.4 Z" transform="rotate(240 12 12)"/>
+					</g>
+				</svg>
+			   </button>`
 			: GEM_PALETTE.map((col, i) =>
 				`<button type="button" class="bj-debug-pick-btn bj-debug-pick-color" data-color="${i}" style="background:${col}"></button>`
 			  ).join("");
@@ -1455,28 +1557,50 @@
 	function closeDebugPicker() {
 		debugPickerOpen = false;
 		debugPickerCell = null;
+		debugPickerKind = null;
 		selected = null;
 		if (debugPickerEl) debugPickerEl.classList.remove("open");
 	}
 
-	// Applying a special/color is a plain click on the picker itself, so it's wired
-	// as a normal DOM click listener rather than routed through canvas pointer events.
+	// Spawn picker (drag-driven): while it's open the canvas holds pointer
+	// capture, so the picker's buttons never receive their own pointer events.
+	// Instead the drag is hit-tested against the buttons with elementFromPoint:
+	// hovering highlights, releasing on a button applies it.
+	function debugPickerButtonAt(e) {
+		if (!debugPickerEl || e.clientX === undefined) return null;
+		const el = document.elementFromPoint(e.clientX, e.clientY);
+		return el ? el.closest(".bj-debug-pick-btn") : null;
+	}
+
+	function debugPickerDragMove(e) {
+		const hot = debugPickerButtonAt(e);
+		for (const btn of debugPickerEl.querySelectorAll(".bj-debug-pick-btn"))
+			btn.classList.toggle("hover", btn === hot);
+	}
+
+	function debugPickerDragEnd(e) {
+		const btn = e ? debugPickerButtonAt(e) : null;
+		const cell = debugPickerCell;
+		if (btn && cell) debugSpecial(cell.r, cell.c, parseInt(btn.dataset.level, 10));
+		closeDebugPicker();
+	}
+
+	// Color swatches (click-driven): the picker stays open after release, so its
+	// buttons take normal DOM clicks.
 	if (debugPickerEl) {
 		debugPickerEl.addEventListener("click", (e) => {
 			const btn = e.target.closest(".bj-debug-pick-btn");
 			const cell = debugPickerCell;
-			if (!btn || !cell) return;
-			if (debugSubMode === "spawn") debugSpecial(cell.r, cell.c, parseInt(btn.dataset.level, 10));
-			else debugRecolor(cell.r, cell.c, parseInt(btn.dataset.color, 10));
+			if (!btn || !cell || btn.dataset.color === undefined) return;
+			debugRecolor(cell.r, cell.c, parseInt(btn.dataset.color, 10));
 			closeDebugPicker();
 		});
 	}
 
-	// Clicking anywhere outside the picker and the held gem closes it without
-	// applying anything — covers clicks on other UI (gear, game-mode button, etc.)
-	// that the canvas's own pointerdown handler never sees.
+	// Clicking other UI (gear, game-mode button, ...) while the swatches are open
+	// closes them — the canvas's own pointerdown handler never sees those clicks.
 	document.addEventListener("pointerdown", (e) => {
-		if (!debugPickerOpen) return;
+		if (!debugPickerOpen || debugPickerKind !== "color") return;
 		if (debugPickerEl && debugPickerEl.contains(e.target)) return;
 		if (e.target === canvas) return;   // canvas's own handler decides (re-open / close / switch cell)
 		closeDebugPicker();
@@ -1491,7 +1615,21 @@
 	}
 
 	function onPointerMove(e) {
-		if (debugPickerOpen) return;   // click-driven now; no drag tracking while the picker is up
+		// hold pending: sliding off the held gem is a swap drag, not a hold —
+		// abort the hold and fall through to the normal drag tracking below
+		if (debugHoldTimer) {
+			const p = cellFromEvent(e);
+			if (p && debugHoldCell && p.r === debugHoldCell.r && p.c === debugHoldCell.c) return;
+			cancelDebugHold();
+		} else if (debugPickerOpen) {
+			// spawn picker is drag-driven; the color swatches are click-driven —
+			// dragging off their gem dismisses them and becomes a swap drag
+			if (debugPickerKind === "spawn") { debugPickerDragMove(e); return; }
+			const p = cellFromEvent(e);
+			if (pointerDown && p && p.r === pointerDown.r && p.c === pointerDown.c) return;
+			if (!pointerDown) return;
+			closeDebugPicker();
+		}
 		if (busy || !pointerDown || !assetsReady) return;
 		const p = pointFromEvent(e);
 		const dx = p.x - pointerDown.x, dy = p.y - pointerDown.y;
@@ -1520,8 +1658,29 @@
 		dragPreview = { a, b };
 	}
 
-	function onPointerUp() {
-		if (debugPickerOpen) return;   // click-driven now; nothing to resolve on release
+	function onPointerUp(e) {
+		// released before the hold fired: a quick tap — open the color swatches
+		// (when that tool is on) instead of the specials picker
+		if (debugHoldTimer) {
+			const rel = e ? cellFromEvent(e) : null;
+			const cell = debugHoldCell;
+			cancelDebugHold();
+			pointerDown = null;
+			if (cell && rel && rel.r === cell.r && rel.c === cell.c) {
+				// quick tap: open the swatches (which also marks the gem as the swap
+				// anchor), or with Color off just select it so Swap-anywhere can pair it
+				if (debugModes.color) openDebugPicker(cell, "color");
+				else if (debugModes.swap) { selected = { r: cell.r, c: cell.c }; sndSelect(); }
+			}
+			return;
+		}
+		if (debugPickerOpen) {
+			// spawn picker resolves on release (apply the hovered special); the
+			// color swatches stay open waiting for their click
+			pointerDown = null;
+			if (debugPickerKind === "spawn") debugPickerDragEnd(e);
+			return;
+		}
 		pointerDown = null;
 		if (dragPreview && !busy) {
 			const { a, b } = dragPreview;
@@ -2535,8 +2694,8 @@
 	})();
 
 	// ---- Debug sub-menu panel (Swap anywhere / Spawn any special / Change any color) ----
-	// The three options are toggles, but only one style can be active at a time —
-	// checking one switches debugSubMode and un-checks the other two (radio behaviour).
+	// The three tools are independent toggles — any combination can be on at once
+	// (spawn and color share the board without clashing: hold-drag vs tap-tap).
 	(function initDebugMenu() {
 		const overlay = document.getElementById("bj-debug-overlay");
 		const closeBtn = document.getElementById("bj-debug-close");
@@ -2544,13 +2703,6 @@
 		if (!overlay) return;
 
 		function closeDebugMenu() { overlay.classList.remove("open"); }
-		function syncToggles() {
-			for (const row of modeRows) {
-				const chk = row.querySelector(".bj-debugmode-toggle");
-				if (chk) chk.checked = row.dataset.debugmode === debugSubMode;
-			}
-		}
-		syncToggles();
 
 		if (closeBtn) closeBtn.addEventListener("click", closeDebugMenu);
 		overlay.addEventListener("click", (e) => { if (e.target === overlay) closeDebugMenu(); });
@@ -2558,10 +2710,10 @@
 		for (const row of modeRows) {
 			const chk = row.querySelector(".bj-debugmode-toggle");
 			if (!chk) continue;
+			chk.checked = !!debugModes[row.dataset.debugmode];
 			chk.addEventListener("change", () => {
-				debugSubMode = row.dataset.debugmode;
-				try { localStorage.setItem("bj2_debug_submode", debugSubMode); } catch (e) {}
-				syncToggles();
+				debugModes[row.dataset.debugmode] = chk.checked;
+				try { localStorage.setItem("bj2_debug_modes", JSON.stringify(debugModes)); } catch (e) {}
 			});
 		}
 	})();
