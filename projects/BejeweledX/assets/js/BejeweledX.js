@@ -17,7 +17,7 @@
 
 	// Shown in the Options panel to confirm a deploy is live. Bump this together
 	// with CACHE in sw.js so the number always matches the service-worker version.
-	const APP_VERSION = "0.2.1";
+	const APP_VERSION = "0.2.2";
 
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
 	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,
@@ -618,10 +618,14 @@
 		return new Promise((resolve) => {
 			// When the tab is hidden the browser pauses rAF, which would stall the
 			// animation (and any await on it). Skip straight to the end state.
-			if (document.hidden) { onUpdate(1); resolve(); return; }
+			// Same for a zero-length tween (e.g. commitDrag released at full offset):
+			// dividing by ms would yield NaN/Infinity and poison the draw offsets.
+			if (document.hidden || ms <= 0) { onUpdate(1); resolve(); return; }
 			const start = performance.now();
 			function step(now) {
-				let p = Math.min(1, (now - start) / ms);
+				// clamp low too: the rAF timestamp can be slightly earlier than the
+				// performance.now() captured above, making (now - start) negative
+				let p = Math.min(1, Math.max(0, (now - start) / ms));
 				onUpdate(easing ? easing(p) : p);
 				if (p < 1) requestAnimationFrame(step);
 				else resolve();

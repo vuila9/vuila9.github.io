@@ -8,6 +8,10 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.2.2] - 2026-07-02
+### Fixed
+- Game could freeze permanently after committing a drag-swap that was already at full offset on release (often noticed when detonating a power gem). The finishing slide's duration scaled to 0, and a zero-length tween divided by zero — producing NaN/Infinity draw offsets that crashed the render loop (`createRadialGradient` non-finite error). Zero-length tweens now jump straight to their end state, and tween progress is clamped so an early rAF timestamp can't go negative.
+
 ## [0.2.1] - 2026-07-02
 ### Fixed
 - Timer buff now travels with its gem when swapped. Previously the buff was tracked by board cell and `swapCells` didn't exchange it, so swapping a buffed gem silently left the buff behind on the other gem — a match formed at the buff's old cell would wrongly collect it (+10s), while matching the buffed gem at its new position wouldn't.
