@@ -8,6 +8,10 @@ Format follows this [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and
 
 ---
 
+## [0.2.1] - 2026-07-02
+### Fixed
+- Timer buff now travels with its gem when swapped. Previously the buff was tracked by board cell and `swapCells` didn't exchange it, so swapping a buffed gem silently left the buff behind on the other gem — a match formed at the buff's old cell would wrongly collect it (+10s), while matching the buffed gem at its new position wouldn't.
+
 ## [0.2.0] - 2026-07-02
 ### Changed
 - Project renamed from "Bejeweled 2" to "Bejeweled X". Folder, file names, and all paths/references updated accordingly (`projects/Bejeweled2/` → `projects/BejeweledX/`, `Bejeweled2.html` → `BejeweledX.html`, `Bejeweled2.js` → `BejeweledX.js`, `Bejeweled2_icon.svg` → `BejeweledX_icon.svg`); service worker cache bumped to `bejeweledx-v10`. Mentions of the original PopCap game keep the "Bejeweled 2" name. Note: previously installed web apps and bookmarks pointing at the old `Bejeweled2` URL will no longer resolve.

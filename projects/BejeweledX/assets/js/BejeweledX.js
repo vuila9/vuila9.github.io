@@ -17,7 +17,7 @@
 
 	// Shown in the Options panel to confirm a deploy is live. Bump this together
 	// with CACHE in sw.js so the number always matches the service-worker version.
-	const APP_VERSION = "0.2.0";
+	const APP_VERSION = "0.2.1";
 
 	// ---- Layout (internal logical resolution; CSS scales to fit) ----
 	// COLS grows to WIDE_COLS in fullscreen/app mode when the screen is in landscape,
@@ -640,6 +640,9 @@
 		const p = power[a.r][a.c];
 		power[a.r][a.c] = power[b.r][b.c];
 		power[b.r][b.c] = p;
+		const tb = timerBuff[a.r][a.c];
+		timerBuff[a.r][a.c] = timerBuff[b.r][b.c];
+		timerBuff[b.r][b.c] = tb;
 	}
 
 	// Animate a swap (visual offsets slide between the two homes).
@@ -1872,7 +1875,7 @@
 		ctx.shadowBlur = 12;
 		ctx.fillStyle = "#ffe9a8";
 		ctx.font = "bold 40px 'Trebuchet MS', Verdana, sans-serif";
-		ctx.fillText("BEJEWELED 2", cx, cy - 64);
+		ctx.fillText("BEJEWELED X", cx, cy - 64);
 		ctx.shadowBlur = 0;
 
 		const bw = Math.min(360, CANVAS_W - 80), bh = 16;
