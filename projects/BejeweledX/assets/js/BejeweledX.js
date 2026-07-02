@@ -940,7 +940,20 @@
 				const lvl = power[pr][pc];
 				const t = (lvl === 3 && srcColor != null) ? srcColor : grid[pr][pc];
 				blastCenters.push({ r: pr, c: pc, t, level: lvl });
-				for (const [nr, nc] of blastCellsFor(pr, pc, lvl, t)) {
+				const cells = blastCellsFor(pr, pc, lvl, t);
+				// Jackpot: a single bomb/cross blast catching two (or more) hyper gems
+				// sweeps the whole board — same payout as swapping hyper onto hyper.
+				const hyperHits = (lvl === 3) ? [] :
+					cells.filter(([nr, nc]) => power[nr][nc] === 3 && !detonated.has(nr + "," + nc));
+				if (hyperHits.length >= 2) {
+					for (let br = 0; br < ROWS; br++) for (let bc = 0; bc < COLS; bc++) {
+						const nk = br + "," + bc;
+						blast.add(nk);
+						if (power[br][bc] && !detonated.has(nk)) queue.push({ key: nk, srcColor: t });
+					}
+					continue;
+				}
+				for (const [nr, nc] of cells) {
 					const nk = nr + "," + nc;
 					blast.add(nk);
 					if (power[nr][nc] && !detonated.has(nk)) queue.push({ key: nk, srcColor: t });
@@ -986,11 +999,21 @@
 			// Second pass: bomb/hyper gems from 4+ straight runs (skip runs already producing a cross)
 			for (const run of runs) {
 				if (run.len < POWER_MIN) continue;
-				if (runHasDetonated(run)) continue;
+				// Exception to the no-double-payout rule: a hyper-length run still
+				// mints its hyper even when one of its gems is a detonating power gem
+				// (`x x o x x'`: swapping o into a 5-run ending in a bomb pays out
+				// both the blast and the hyper — five of a kind always rewards).
+				if (runHasDetonated(run) && run.len < HYPER_MIN) continue;
 				// if this run contributed to a cross, skip it (cross takes priority)
 				const contributesToCross = run.cells.some(([r, c]) => crossKeeps.has(r + "," + c));
 				if (contributesToCross) continue;
-				const cands = run.cells.filter(([r, c]) => !blast.has(r + "," + c));
+				let cands = run.cells.filter(([r, c]) => !blast.has(r + "," + c));
+				// A cross gem in a hyper-length run blasts its whole row/column — which
+				// swallows every keep candidate. The hyper still gets minted on a
+				// blasted cell (keeps are exempt from clearing, and new power gems are
+				// created after the detonation queue, so the blast can't set it off).
+				if (cands.length === 0 && run.len >= HYPER_MIN)
+					cands = run.cells.filter(([r, c]) => !detonated.has(r + "," + c));
 				if (cands.length === 0) continue;
 				let keep = cands.find(([r, c]) => movedCells.some((m) => m.r === r && m.c === c));
 				if (!keep) keep = cands[Math.floor(cands.length / 2)];
@@ -2741,14 +2764,41 @@
 		// the board once the panel closes (replaces the always-visible subtext that
 		// used to sit under each mode button).
 		let toastTimer = null;
+		function hideModeToast() {
+			clearTimeout(toastTimer);
+			if (toast) toast.classList.remove("show");
+		}
 		function showModeToast(name, desc) {
 			if (!toast) return;
 			toastName.textContent = name;
 			toastDesc.textContent = desc || "";
 			toast.classList.add("show");
 			clearTimeout(toastTimer);
-			toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+			toastTimer = setTimeout(hideModeToast, 2200);
 		}
+		// Any press anywhere dismisses the toast — it's purely informational, so
+		// it should never sit in the way of playing on. Pressing pauses the
+		// auto-hide (holding keeps it readable for as long as you like); the toast
+		// goes away the moment you let go, so a quick tap dismisses it instantly.
+		// Capture phase so even presses that other handlers swallow still count.
+		let toastHeld = false;
+		document.addEventListener("pointerdown", (e) => {
+			if (!toast || !toast.classList.contains("show")) return;
+			// ignore the click on the mode button that just showed it
+			if (overlay.contains(e.target)) return;
+			toastHeld = true;
+			clearTimeout(toastTimer);
+		}, true);
+		document.addEventListener("pointerup", () => {
+			if (!toastHeld) return;
+			toastHeld = false;
+			hideModeToast();
+		}, true);
+		document.addEventListener("pointercancel", () => {
+			if (!toastHeld) return;
+			toastHeld = false;
+			hideModeToast();
+		}, true);
 
 		for (const btn of modeBtns) {
 			btn.addEventListener("click", () => {
