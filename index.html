@@ -8,7 +8,7 @@
 		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
 		<!-- End Google Tag Manager -->
-		<title>John's Portfolio</title>
+		<title>Khoa's Portfolio</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -21,6 +21,26 @@
 		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NXVSDNVW"
 		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		<!-- End Google Tag Manager (noscript) -->
+		<!-- Language toggle (shows the flag of the language you switch TO) -->
+			<button id="lang-toggle" type="button" aria-label="Switch language">
+				<!-- Vietnam flag: shown while site is in English -->
+				<svg class="flag flag-vn" viewBox="0 0 30 20" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+					<rect width="30" height="20" fill="#da251d"/>
+					<polygon fill="#ff0" points="15,4 16.41,8.06 20.71,8.15 17.28,10.74 18.53,14.85 15,12.4 11.47,14.85 12.72,10.74 9.29,8.15 13.59,8.06"/>
+				</svg>
+				<!-- UK flag: shown while site is in Vietnamese -->
+				<svg class="flag flag-en" viewBox="0 0 60 30" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+					<clipPath id="ukClip"><path d="M0,0 v30 h60 v-30 z"/></clipPath>
+					<clipPath id="ukDiag"><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/></clipPath>
+					<g clip-path="url(#ukClip)">
+						<path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+						<path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6"/>
+						<path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#ukDiag)" stroke="#c8102e" stroke-width="4"/>
+						<path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10"/>
+						<path d="M30,0 v30 M0,15 h60" stroke="#c8102e" stroke-width="6"/>
+					</g>
+				</svg>
+			</button>
 		<!-- Wrapper -->
 			<div id="wrapper">
 				<!-- Header -->
@@ -30,16 +50,16 @@
 								<a class="logo">
 									<span class="symbol"><img src="assets/img/misc/vykas.ico" alt="" /></span><span class="title">My name is Khoa Xuan Nguyen</span>
 								</a>
-								<h1>Welcome to my portfolio!</h1>
-								<p class="bigger-p">This website provides an overview of my background and showcases all the projects I have created. Unless otherwise specified, most of these projects were developed using vanilla JavaScript, without the use of any frameworks or library.</p>
-								<p class="bigger-p">It has been a while since I last posted a project. I recently moved back to Vietnam for more opportunities and am currently working as a developer at a small-sized company. I’ve been handling various projects and tasks, and I’m actively working on them. I’ll be sharing updates soon.</p>
-								<p class="bigger-p">All of my projects up to Streaming Simulator were completely hand-coded without any AI assistance. However, I’ve come to realize that avoiding AI entirely would be like handicapping myself. So from this point onward, many of my upcoming and future projects will heavily involve AI-assisted coding. Of course, my coding knowledge and fundamentals will still be applied wherever necessary and won’t go to waste.</p>
+								<h1 data-i18n="home.welcome">Welcome to my portfolio!</h1>
+								<p class="bigger-p" data-i18n="home.intro1">This website provides an overview of my background and showcases all the projects I have created. Unless otherwise specified, most of these projects were developed using vanilla JavaScript, without the use of any frameworks or library.</p>
+								<p class="bigger-p" data-i18n="home.intro2">It has been a while since I last posted a project. I recently moved back to Vietnam for more opportunities and am currently working as a developer at a small-sized company. I’ve been handling various projects and tasks, and I’m actively working on them. I’ll be sharing updates soon.</p>
+								<p class="bigger-p" data-i18n="home.intro3">All of my projects up to Streaming Simulator were completely hand-coded without any AI assistance. However, I’ve come to realize that avoiding AI entirely would be like handicapping myself. So from this point onward, many of my upcoming and future projects will heavily involve AI-assisted coding. Of course, my coding knowledge and fundamentals will still be applied wherever necessary and won’t go to waste.</p>
 
 								<br>
 							<!-- Nav -->
 								<nav>
 									<ul>
-										<li><a href="#menu">Menu</a></li>
+										<li><a href="#menu" data-i18n="nav.menu">Menu</a></li>
 									</ul>
 								</nav>
 						</div>
@@ -47,13 +67,13 @@
 
 				<!-- Menu -->
 					<nav id="menu">
-						<h1>Menu</h2>
+						<h1 data-i18n="nav.menu">Menu</h2>
 						<ul>
-							<li><a href="#header"><h3>Home</h3></a></li>
-							<li><a href="#main"><h3>Projects</h3></a></li>
-							<li><a href="#about-me"><h3>About Me</h3></a></li>
-							<li><a href="#experience"><h3>Experience</h3></a></li>
-							<li><a href="#footer"><h3>Contact</h3></a></li>
+							<li><a href="#header"><h3 data-i18n="nav.home">Home</h3></a></li>
+							<li><a href="#main"><h3 data-i18n="nav.projects">Projects</h3></a></li>
+							<li><a href="#about-me"><h3 data-i18n="nav.about">About Me</h3></a></li>
+							<li><a href="#experience"><h3 data-i18n="nav.experience">Experience</h3></a></li>
+							<li><a href="#footer"><h3 data-i18n="nav.contact">Contact</h3></a></li>
 						</ul>
 					</nav>
 
@@ -61,7 +81,7 @@
 					<section id="main">
 						<div class="inner">
 							<br>
-							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u>PROJECTS</u></h1>
+							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u data-i18n="section.projects">PROJECTS</u></h1>
 							<div style="justify-content: center" class="section tiles">
 								<!-- homepage_script.js -->
 							</div>
@@ -87,16 +107,14 @@
 										<p class="cmd-log">(c) Microsoft Corporation. All rights reserved.</p>
 										<p style="margin: 0; height: 16px"></p>
 										<p class="cmd-log">C:\Users\vuila9>whoami</p>
-										<p class="cmd-log">I have a passion for computer science because I love coding. While I initially enjoyed math and physics, I found them too dry to pursue professionally. My interest in coding began in high school when I was unsure about which course to study. As I explored coding further, my love for it grew. Eventually, I realized that being good at math actually complements computer science, and I finally discovered my career path.</p>
+										<p class="cmd-log" data-i18n="about.whoami1">I have a passion for computer science because I love coding. While I initially enjoyed math and physics, I found them too dry to pursue professionally. My interest in coding began in high school when I was unsure about which course to study. As I explored coding further, my love for it grew. Eventually, I realized that being good at math actually complements computer science, and I finally discovered my career path.</p>
 										<p></p>
-										<p class="cmd-log">My diligent efforts during university were rewarded when I secured an internship at BlackBerry QNX. During my time there, I gained invaluable insights into the realities of a professional environment, particularly in software development and engineering roles. Additionally, I had the opportunity to engage in various social aspects, including team meetings, discussions, and assuming responsibilities. The knowledge and experiences I acquired during this internship were beyond the scope of classroom learning.</p>
+										<p class="cmd-log" data-i18n="about.whoami2">My diligent efforts during university were rewarded when I secured an internship at BlackBerry QNX. During my time there, I gained invaluable insights into the realities of a professional environment, particularly in software development and engineering roles. Additionally, I had the opportunity to engage in various social aspects, including team meetings, discussions, and assuming responsibilities. The knowledge and experiences I acquired during this internship were beyond the scope of classroom learning.</p>
 										<p></p>
-										<p class="cmd-log">After the internship, I returned to complete my university studies at Carleton. Now, two years later, I am a new graduate with a Bachelor's Degree in Computer Science (Honours), eager to embark on a new chapter in my life.</p>
+										<p class="cmd-log" data-i18n="about.whoami3">After the internship, I returned to complete my university studies at Carleton. Now, two years later, I am a new graduate with a Bachelor's Degree in Computer Science (Honours), eager to embark on a new chapter in my life.</p>
 										<p></p>
-										<p class="cmd-log">Although the job search turned out to be more challenging than I anticipated, I made the decision to regroup and invest in my personal growth. After reassessing my situation, I recognized that my lack of experience was a significant factor. Consequently, I have concentrated on enhancing my professional skills by creating numerous small to medium-sized projects.</p>
-										<p></p>
-										<p class="cmd-log">You can reach out to me at my working email address: <a class="cmd-log" style="color: cyan" href="mailto:johnxnguyenwork@gmail.com">johnxnguyenwork@gmail.com</a></p> 
-										<p class="cmd-log">More can be found at the <a class="cmd-log" style="color: cyan" href="#footer">bottom</a> of this website ↓</p>
+										<p class="cmd-log"><span data-i18n="about.reachEmail">You can reach out to me at my working email address: </span><a class="cmd-log" style="color: cyan" href="mailto:johnxnguyenwork@gmail.com">johnxnguyenwork@gmail.com</a></p>
+										<p class="cmd-log" data-i18n-html="about.moreBottom">More can be found at the <a class="cmd-log" style="color: cyan" href="#footer">bottom</a> of this website ↓</p>
 										<p style="margin: 0; height: 16px"></p>
 										<p class="cmd-log">C:\Users\vuila9><b><span class="cursor">_</span></b></p>
 									</div>
@@ -104,7 +122,7 @@
 								<!-- Resume Download button -->
 								<br><br>
 								<div style="text-align: center; padding: 20px;">
-									<a href="assets/attachment/John_Resume.pdf" class="button primary icon solid fa-download" target="_blank" style="height:50px">Download My Resume!</a>
+									<a href="assets/attachment/John_Resume.pdf" class="button primary icon solid fa-download" target="_blank" style="height:50px" data-i18n="about.resumeBtn">Download My Resume!</a>
 								</div>
 							</div>
 						</div>
@@ -115,10 +133,10 @@
 					<section id="experience">
 						<div class="inner" >
 							<br>
-							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u>Experience</u></h1>
+							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u data-i18n="section.experience">Experience</u></h1>
 							<div class="row">
 								<div class="col-lg p-3 stickyNote rotate-right shadow">
-									<h3 style="letter-spacing: -1px; margin-bottom: 8px;">Languages</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.languages">Languages</h3>
 									<ul><b>
 										<li>Python</li>
 										<li>Java</li>
@@ -129,66 +147,66 @@
 									</ul>
 								</div>
 								<div class="col-lg p-3 stickyNote rotate-left shadow">
-									<h3 style="letter-spacing: -1px; margin-bottom: 8px;">Tools</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.tools">Tools</h3>
 									<ul><b>
-										<li>Git, Git SVN, GitHub, Jenkin, MatLab</li>
-										<li>Linux, Windows, Oracle VM VirtualBox</li>
-										<li>Python: Pytest, TKinter, PDB, Paramiko SSH lib</li>
-										<li>Frameworks: Node.js, Qt</li>
-										<li>Database: SQLite, MySQL, MongoDB</li>
+										<li data-i18n="exp.tools.li1">Git, Git SVN, GitHub, Jenkin, MatLab</li>
+										<li data-i18n="exp.tools.li2">Linux, Windows, Oracle VM VirtualBox</li>
+										<li data-i18n="exp.tools.li3">Python: Pytest, TKinter, PDB, Paramiko SSH lib</li>
+										<li data-i18n="exp.tools.li4">Frameworks: Node.js, Qt</li>
+										<li data-i18n="exp.tools.li5">Database: SQLite, MySQL, MongoDB</li>
 										</b>
 									</ul>
 								</div>
 								<div class="col-lg p-3 stickyNote rotate-right shadow">
-									<h3 style="letter-spacing: -1px; margin-bottom: 8px;">Coursework & Interests</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.coursework">Coursework & Interests</h3>
 									<ul><b>
-										<li>Algorithms, Discrete Structures</li>
-										<li>Object-Oriented Design</li>
-										<li>Cybersecurity, AI</li>
-										<li>Web Applications</li>
-										<li>Systems Programming, Distributed OS</li>
+										<li data-i18n="exp.course.li1">Algorithms, Discrete Structures</li>
+										<li data-i18n="exp.course.li2">Object-Oriented Design</li>
+										<li data-i18n="exp.course.li3">Cybersecurity, AI</li>
+										<li data-i18n="exp.course.li4">Web Applications</li>
+										<li data-i18n="exp.course.li5">Systems Programming, Distributed OS</li>
 										</b>
 									</ul>
 								</div>
 							</div>
 							<div class="row">
 								<div class="col-lg p-3 stickyPage rotate-left shadow" style="width: 75%; margin: auto;">
-									<h3 style="letter-spacing: -1px; margin-bottom: 1px;">Command Line Tools Co-op</h3>
-									<h3 style="letter-spacing: -1px; margin-bottom: 1px;">BlackBerry QNX</h3>
-									<h4 style="letter-spacing: -1px; margin-bottom: 8px;">May 2022 - Dec 2022</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.coop.role">Command Line Tools Co-op</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.coop.company">BlackBerry QNX</h3>
+									<h4 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.coop.date">May 2022 - Dec 2022</h3>
 									<ul><b>
-										<li>Focused on Linux OS, Bash scripting, Python scripting, and C programming</li>
-										<li>Tested compatibility of over 300 GNU commands and their flags in BlackBerry's QNX OS</li>
-										<li>Enhanced and added five features to front-end and back-end of software usage tracking tool using HTML,	Python, JavaScript scripting as base code</li>
-										<li>Conducted extensive Python automation scripting, utilizing Pytest to automatically check status of over 40 QNX targets using the Paramiko SSH library</li>
-										<li>Performed bug testing on 40 'verification' JIRA tickets to ensure bug fixes work correctly</li>
-										<li>Responsible for resolving over 20 JIRA bug tickets submitted by other testers and BlackBerry's customers, utilizing advanced debugging tools such as GDB and PDB</li>
-										<li>Developed Python log parser to extract and convert data from over 250,000 test logs on internal report server database into easily readable format</li>
+										<li data-i18n="exp.coop.li1">Focused on Linux OS, Bash scripting, Python scripting, and C programming</li>
+										<li data-i18n="exp.coop.li2">Tested compatibility of over 300 GNU commands and their flags in BlackBerry's QNX OS</li>
+										<li data-i18n="exp.coop.li3">Enhanced and added five features to front-end and back-end of software usage tracking tool using HTML,	Python, JavaScript scripting as base code</li>
+										<li data-i18n="exp.coop.li4">Conducted extensive Python automation scripting, utilizing Pytest to automatically check status of over 40 QNX targets using the Paramiko SSH library</li>
+										<li data-i18n="exp.coop.li5">Performed bug testing on 40 'verification' JIRA tickets to ensure bug fixes work correctly</li>
+										<li data-i18n="exp.coop.li6">Responsible for resolving over 20 JIRA bug tickets submitted by other testers and BlackBerry's customers, utilizing advanced debugging tools such as GDB and PDB</li>
+										<li data-i18n="exp.coop.li7">Developed Python log parser to extract and convert data from over 250,000 test logs on internal report server database into easily readable format</li>
 										</b>
 									</ul>
 								</div>
 							</div>
 							<div class="row">
 								<div class="col-lg p-3 stickyNote rotate-right shadow" >
-									<h3 style="letter-spacing: -1px; margin-bottom: 1px;">Education</h3>
-									<h3 style="letter-spacing: -1px; margin-bottom: 1px;">Carleton University</h3>
-									<h3 style="letter-spacing: -1px; margin-bottom: 1px;">Bachelor in Computer Science (Honours)</h3>
-									<h4 style="letter-spacing: -1px; margin-bottom: 8px;">Sept 2019 - May 2024</h4>
+									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.heading">Education</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.school">Carleton University</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.degree">Bachelor in Computer Science (Honours)</h3>
+									<h4 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.edu.date">Sept 2019 - May 2024</h4>
 									<ul><b>
-										<li>Achieved average of A on major CompSci courses</li>
-										<li>Participated in various social events and group projects</li>
-										<li>Other relatable courses: Statistic, Mathemetics, Business</li>
+										<li data-i18n="exp.edu.li1">Achieved average of A on major CompSci courses</li>
+										<li data-i18n="exp.edu.li2">Participated in various social events and group projects</li>
+										<li data-i18n="exp.edu.li3">Other relatable courses: Statistic, Mathemetics, Business</li>
 										</b>
 									</ul>
 								</div>
 								<div class="col-lg p-3 stickyNote rotate-left shadow" >
-									<h3 style="letter-spacing: -1px; margin-bottom: 8px;">Personal skills</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.personal.heading">Personal skills</h3>
 									<ul><b>
-										<li>Computer hardware assembly</li>
-										<li>Computer software troubleshooting</li>
-										<li>All the projects at the <a href="#main">top</a> ↑</li>
-										<li>Hard-working, ethical, opportunistic</li>
-										<li>Fluent in English, Vietnamese</li>
+										<li data-i18n="exp.personal.li1">Computer hardware assembly</li>
+										<li data-i18n="exp.personal.li2">Computer software troubleshooting</li>
+										<li data-i18n-html="exp.personal.li3html">All the projects at the <a href="#main">top</a> ↑</li>
+										<li data-i18n="exp.personal.li4">Hard-working, ethical, opportunistic</li>
+										<li data-i18n="exp.personal.li5">Fluent in English, Vietnamese</li>
 										</b>
 									</ul>
 								</div>
@@ -202,8 +220,8 @@
 						<div class="inner">
 							<section class="contact-info">
 								<br>
-								<h1 style="font-size: 40px; margin-bottom: 10px;">Contact</h1>
-								<i class='fas fa-map-marker-alt' style='font-size:36px'><p style="display: inline; font-size: 20px">&nbsp;&nbsp;&nbsp;&nbsp;Ho Chi Minh, Vietnam</p></i> 
+								<h1 style="font-size: 40px; margin-bottom: 10px;" data-i18n="footer.contact">Contact</h1>
+								<i class='fas fa-map-marker-alt' style='font-size:36px'><p style="display: inline; font-size: 20px" data-i18n-html="footer.location">&nbsp;&nbsp;&nbsp;&nbsp;Ho Chi Minh, Vietnam</p></i>
 								<br><br>
 								<i class='fas fa-phone' style='font-size:33px'> <p style="display: inline; font-size: 20px">&nbsp;(+84) 973-243-713</p></i> 
 								<br><br>
@@ -211,16 +229,16 @@
 							</section>
 							<section class="contact-info">
 								<br>
-								<h1 style="font-size: 40px; margin-bottom: 5px;">About Site</h1>
-								<p style="font-size:20px; margin-bottom: 5px;">This is my personal portfolio, built using a free template from <a style="color: rgba(47, 0, 255, 0.479);" href="https://html5up.net/phantom" target="_blank"><b>HTML5up</b></a></p>
-								<h1 style="font-size: 40px; margin-bottom: 5px">Connect</h1>
+								<h1 style="font-size: 40px; margin-bottom: 5px;" data-i18n="footer.aboutSite">About Site</h1>
+								<p style="font-size:20px; margin-bottom: 5px;"><span data-i18n="footer.aboutSiteText">This is my personal portfolio, built using a free template from </span><a style="color: rgba(47, 0, 255, 0.479);" href="https://html5up.net/phantom" target="_blank"><b>HTML5up</b></a></p>
+								<h1 style="font-size: 40px; margin-bottom: 5px" data-i18n="footer.connect">Connect</h1>
 								<ul class="icons">
 									<li><a href="https://www.linkedin.com/in/jxnguyen/" target="_blank" class="icon brands style2 fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
 									<li><a href="https://github.com/vuila9" target="_blank" class="icon brands style2 fa-github"><span class="label">GitHub</span></a></li>
 								</ul>
 							</section>
 							<ul class="copyright">
-								<p style="text-align: center; font-size: 16px; color: rgba(255, 255, 255, 0.541);">Copyright &copy; John Nguyen 2024</p>
+								<p style="text-align: center; font-size: 16px; color: rgba(255, 255, 255, 0.541);" data-i18n="footer.copyright">Copyright &copy; John Nguyen 2024</p>
 							</ul>
 						</div>
 					</footer>
@@ -233,6 +251,7 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script src="assets/js/i18n.js"></script>
 			<script src="assets/js/homepage_script.js"></script>
 	</body>
 </html>

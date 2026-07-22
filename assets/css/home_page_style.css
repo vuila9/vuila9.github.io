@@ -149,3 +149,47 @@ body {
 .shadowEven {
     box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
+
+/* <------------------------LANGUAGE TOGGLE (flag button)---------------------------> */
+#lang-toggle {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 10000;
+    width: 42px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    background: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    transition: transform .1s ease-in-out, box-shadow .15s ease-in-out;
+}
+#lang-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+#lang-toggle:active {
+    transform: translateY(0);
+}
+#lang-toggle .flag {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+/* Show the flag of the language you'd switch TO. */
+#lang-toggle[data-lang="en"] .flag-vn { display: block; }
+#lang-toggle[data-lang="vi"] .flag-en { display: block; }
+/* Fallback before JS sets data-lang: default (English) shows the VN flag. */
+#lang-toggle:not([data-lang]) .flag-vn { display: block; }
+
+@media (max-width: 480px) {
+    #lang-toggle {
+        top: 10px;
+        left: 10px;
+        width: 36px;
+        height: 24px;
+    }
+}

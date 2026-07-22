@@ -1,140 +1,153 @@
 // A script made to add project dynamically with ease. Only need to add to 'articlesData' for this to work.
+// Title/description text lives in i18n.js (assets/js/i18n.js), keyed by titleKey/descKey,
+// so the tiles re-render whenever the site language changes.
 document.addEventListener("DOMContentLoaded", function() {
     // Get the section where the articles will be added
     const section = document.querySelector("#main .inner .tiles");
 
-    // Data for the articles
+    // Data for the articles. `titleKey`/`descKey` reference entries in the i18n
+    // dictionary; the actual text is resolved at render time for the active language.
     const articlesData = [
         // {
         //     imageSrc: "assets/img/pic08.jpg",
-        //     title: "W.I.P",
-        //     description: "A work-in-progress project to be released soon™",
+        //     titleKey: "proj.wip.title",
+        //     descKey: "proj.wip.desc",
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
             imageSrc: "projects/BejeweledX/BejeweledX_icon.svg",
-            title: "Bejeweled X",
-            description: "A web revival of the classic match-3 game Bejeweled 2, using the original assets and re-implemented in vanilla JavaScript.",
+            titleKey: "proj.bejeweled.title",
+            descKey: "proj.bejeweled.desc",
             link: "projects/BejeweledX/BejeweledX.html"
         },
         {
             imageSrc: "assets/img/program_icons/flappy_tile.png",
-            title: "Flappy Bird",
-            description: "A web revival of the classic Flappy Bird, using the original 2014 assets and re-implemented in vanilla JavaScript.",
+            titleKey: "proj.flappy.title",
+            descKey: "proj.flappy.desc",
             link: "projects/Flappy_Bird/Flappy_Bird.html"
         },
         {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
-            title: "Stream Simulator",
-            description: "A streaming simulator that lets you role-play as a streamer with any audience size.",
+            titleKey: "proj.stream.title",
+            descKey: "proj.stream.desc",
             link: "projects/Stream_Simulator/Stream_Simulator.html"
         },
         {
             imageSrc: "assets/img/program_icons/snake_tile.jpg",
-            title: "Snake Game",
-            description: "Snake game made using HTML, CSS, JS",
+            titleKey: "proj.snake.title",
+            descKey: "proj.snake.desc",
             link: "projects/Snake/Snake.html"
         },
         {
             imageSrc: "assets/img/program_icons/paint_tile.jpg",
-            title: "Paint",
-            description: "A paint program that allows users to draw.",
+            titleKey: "proj.paint.title",
+            descKey: "proj.paint.desc",
             link: "projects/MS_Paint/MS_Paint.html"
         },
         {
             imageSrc: "assets/img/program_icons/cube_tile.jpg",
-            title: "Cube",
-            description: "A program featuring a 3D object created using Three.js and Blender.",
+            titleKey: "proj.cube.title",
+            descKey: "proj.cube.desc",
             link: "projects/Cube/Cube.html"
         },
         {
             imageSrc: "assets/img/program_icons/terminal_tile.jpg",
-            title: "Terminal Simulator",
-            description: "A simulator for Windows CMD and Ubuntu Terminal command consoles.",
+            titleKey: "proj.terminal.title",
+            descKey: "proj.terminal.desc",
             link: "projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html"
         },
         {
             imageSrc: "assets/img/program_icons/manytools_tile.jpg",
-            title: "Many mini-tools",
-            description: "A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal need.",
+            titleKey: "proj.manytools.title",
+            descKey: "proj.manytools.desc",
             link: "projects/Many_mini-tools/Many_mini-tools.html"
         },
         {
             imageSrc: "assets/img/program_icons/sudoku_tile.jpg",
-            title: "Sudoku Game (v2)",
-            description: "A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS.",
+            titleKey: "proj.sudoku.title",
+            descKey: "proj.sudoku.desc",
             link: "projects/Sudoku_JS/Sudoku_JS.html"
         },
         // {
         //     imageSrc: "assets/img/pic03.jpg",
-        //     title: "Sudoku Game",
-        //     description: "A Python-based Sudoku game with a built-in solver, featuring a fully implemented GUI using Tkinter.",
+        //     titleKey: "proj.sudokuPy.title",
+        //     descKey: "proj.sudokuPy.desc",
         //     link: "projects/Sudoku_Solver/Sudoku_Solver.html"
         // },
         {
             imageSrc: "assets/img/program_icons/restaurant_tile.jpg",
-            title: "Web-based Restaurant",
-            description: "A web-based online restaurant using MongoDB for storing order database and Node.js for server hosting.",
+            titleKey: "proj.restaurant.title",
+            descKey: "proj.restaurant.desc",
             link: "projects/Web-based_Restaurant/Web-based_Restaurant.html"
         },
         {
             imageSrc: "assets/img/program_icons/storeapp_tile.jpg",
-            title: "Store Application",
-            description: "A Java-based application with a graphical user interface (GUI).",
+            titleKey: "proj.store.title",
+            descKey: "proj.store.desc",
             link: "projects/Store_Application/Store_Application.html"
         }
     ];
 
-    // Loop through the data to create multiple articles
-    articlesData.forEach(data => {
-        const tile_size = '225px';
+    // Resolve a translation key via the i18n helper, falling back to the key itself.
+    const tr = (key) => (window.i18n && window.i18n.t ? window.i18n.t(key) : key);
 
-        // Create the article element
-        const article = document.createElement("article");
-        article.style.width = tile_size;
-        article.style.height = tile_size;
-        //article.className = "style8";
+    // (Re)build all the project tiles in the current language.
+    function renderTiles() {
+        section.innerHTML = "";
+        articlesData.forEach(data => {
+            const tile_size = '225px';
 
-        // Create the span with the image
-        const span = document.createElement("span");
-        span.className = "image";
-        span.style.width = tile_size;
-        span.style.height = tile_size;
-        //span.style.overflow = 'hidden';
+            // Create the article element
+            const article = document.createElement("article");
+            article.style.width = tile_size;
+            article.style.height = tile_size;
+            //article.className = "style8";
 
-        const img = document.createElement("img");
-        img.src = data.imageSrc;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'fill';
-        span.appendChild(img);
+            // Create the span with the image
+            const span = document.createElement("span");
+            span.className = "image";
+            span.style.width = tile_size;
+            span.style.height = tile_size;
+            //span.style.overflow = 'hidden';
 
-        // Create the anchor tag
-        const anchor = document.createElement("a");
-        anchor.href = data.link;
+            const img = document.createElement("img");
+            img.src = data.imageSrc;
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.objectFit = 'fill';
+            span.appendChild(img);
 
-        // Create the h2 element for the title
-        const h2 = document.createElement("h2");
-        h2.className = 'program_title';
-        h2.textContent = data.title;
+            // Create the anchor tag
+            const anchor = document.createElement("a");
+            anchor.href = data.link;
 
-        // Create the div with the paragraph for the description
-        const contentDiv = document.createElement("div");
-        contentDiv.className = "content";
+            // Create the h2 element for the title
+            const h2 = document.createElement("h2");
+            h2.className = 'program_title';
+            h2.textContent = tr(data.titleKey);
 
-        const paragraph = document.createElement("p");
-        paragraph.textContent = data.description;
-        contentDiv.appendChild(h2);
-        contentDiv.appendChild(paragraph);
+            // Create the div with the paragraph for the description
+            const contentDiv = document.createElement("div");
+            contentDiv.className = "content";
 
-        // Append everything together
-        anchor.appendChild(contentDiv);
-        article.appendChild(span);
-        article.appendChild(anchor);
+            const paragraph = document.createElement("p");
+            paragraph.textContent = tr(data.descKey);
+            contentDiv.appendChild(h2);
+            contentDiv.appendChild(paragraph);
 
-        // Append the article to the section
-        section.appendChild(article);
-    });
+            // Append everything together
+            anchor.appendChild(contentDiv);
+            article.appendChild(span);
+            article.appendChild(anchor);
+
+            // Append the article to the section
+            section.appendChild(article);
+        });
+    }
+
+    // Initial render, plus a re-render whenever the language toggle fires.
+    renderTiles();
+    document.addEventListener("languagechange", renderTiles);
 });
 
 // Disable right-click for the container
