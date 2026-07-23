@@ -1,10 +1,15 @@
 html {
     scroll-behavior: smooth; /* Enable smooth scrolling */
+    overflow-x: hidden;      /* clip the off-screen #menu so it can't scroll horizontally */
 }
 
 body {
     font-size:16.5px;
-    background: linear-gradient(to bottom, 
+    /* Prevent horizontal scroll on small screens: the template's off-canvas
+       #menu sits off-screen to the right and leaks a few px of scroll width.
+       #menu is position:fixed, so this doesn't clip it when it slides in. */
+    overflow-x: hidden;
+    background: linear-gradient(to bottom,
         rgb(255, 255, 255),
         rgb(249, 239, 229), /* Light Pink */
         rgb(229, 219, 199), /* Medium Pink */
@@ -95,10 +100,20 @@ body {
     color: rgb(46, 46, 46); 
     margin: auto;
 }
-/* Media query for smaller screens */
+/* Media query for smaller screens: stack every note/column full-width so they
+   aren't cramped side by side (and so the page stops scrolling horizontally). */
 @media (max-width: 768px) {
-    .col {
-        flex: 100%; /* Makes each box take up the full width */
+    .row {
+        flex-wrap: wrap;
+    }
+    /* [class*="col-"] catches col-lg/col-md/etc.; .col is the bare variant.
+       width:100% !important overrides inline widths like the co-op note's 60%. */
+    .row > [class*="col-"],
+    .row > .col {
+        flex: 1 1 100%;
+        max-width: 100%;
+        width: 100% !important;
+        margin-bottom: 1.5rem;
     }
 }
 
@@ -227,6 +242,70 @@ body {
     }
     .exp-triangle-row > .exp-note {
         flex: 1 1 100%;
+    }
+}
+
+/* <------------------------PROJECT TILES: 2-up on phones---------------------------> */
+/* homepage_script.js renders each tile at a fixed 225px (inline width/height),
+   so on a narrow phone only one fits per row. Below 480px, force two per row and
+   keep them square with aspect-ratio. !important is needed to beat the inline px. */
+@media (max-width: 480px) {
+    .tiles {
+        gap: 1rem !important;
+        justify-content: center;
+    }
+    .tiles article {
+        width: calc(50% - 0.5rem) !important;
+        height: auto !important;
+        aspect-ratio: 1 / 1;
+        margin: 0 !important;
+    }
+    .tiles article > .image {
+        width: 100% !important;
+        height: 100% !important;
+    }
+}
+
+/* The Phantom template forces the tile title/description overlay to stay visible
+   on touch devices (body.is-touch, added by main.js) since touch can't hover.
+   Keep it hidden instead so the tiles stay clean — the project icons already
+   show their names. This loads after main.css, so it overrides that rule. */
+body.is-touch .tiles article .content {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* <------------------------HEADER LOGO: icon stacked over one-line name---------------------------> */
+/* On phones, put the icon on its own line and the name on a single line beneath
+   it. The name gets a larger, fluid font (bigger than the shared-line version)
+   since it now has the full width; nowrap + tightened spacing keep it one line
+   from small (~320px) up to large phones. */
+@media (max-width: 480px) {
+    #header .logo {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        letter-spacing: 0.12em;
+    }
+    #header .logo .symbol {
+        margin: 0 0 0.35em 0;   /* space below the icon (template had margin-right) */
+    }
+    #header .logo .title {
+        white-space: nowrap;
+        font-size: clamp(14px, 4.6vw, 20px);
+    }
+}
+
+/* <------------------------RESUME BUTTON: fit on small phones---------------------------> */
+/* The download button overflows very narrow screens because of its wide 0.35em
+   letter-spacing and padding. Tighten both on phones so it stays within the
+   viewport (no horizontal scroll). */
+@media (max-width: 480px) {
+    #about-me .button {
+        letter-spacing: 0.1em;
+        padding-left: 1.25em;
+        padding-right: 1.25em;
+        max-width: 100%;
     }
 }
 
