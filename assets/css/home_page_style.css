@@ -150,8 +150,90 @@ body {
     box-shadow: 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
+/* <------------------------EXPERIENCE: collapsible "letter" notes---------------------------> */
+/* Top row holds two notes side by side; align to the top so a collapsed note
+   doesn't stretch to match an expanded neighbour. */
+.exp-triangle-row {
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+.exp-triangle-row > .exp-note {
+    flex: 1 1 0;
+}
+
+/* Each note starts collapsed, showing only its header. */
+.exp-note {
+    align-self: flex-start;
+    overflow: hidden;
+}
+.exp-header {
+    position: relative;
+    cursor: pointer;
+    padding-right: 2rem;               /* room for the toggle chevron */
+    outline: none;
+}
+.exp-header:focus-visible {
+    outline: 2px dashed rgba(46, 46, 46, 0.6);
+    outline-offset: 4px;
+}
+
+/* Chevron on the right of the header; rotates when the note unfolds. */
+.exp-toggle-icon {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    width: 0;
+    height: 0;
+    border-left: 7px solid rgb(46, 46, 46);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transition: transform .3s ease;
+}
+.exp-note.exp-open .exp-toggle-icon {
+    transform: rotate(90deg);
+}
+
+/* Hint text shown only while collapsed. */
+.exp-hint {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: rgba(46, 46, 46, 0.55);
+    transition: opacity .2s ease;
+}
+.exp-note.exp-open .exp-hint {
+    display: none;
+}
+
+/* Body animates open via max-height; the exact open height is set in JS
+   (homepage_script.js) from the content's scrollHeight for a pixel-perfect slide. */
+.exp-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .4s ease;
+}
+.exp-body-inner ul {
+    margin-top: 0.75rem;
+    /* subtle fold line separating header from the unfolded letter */
+    border-top: 1px dashed rgba(46, 46, 46, 0.25);
+    padding-top: 0.75rem;
+}
+
+/* Stack the two top notes on small screens. */
+@media (max-width: 768px) {
+    .exp-triangle-row {
+        flex-wrap: wrap;
+    }
+    .exp-triangle-row > .exp-note {
+        flex: 1 1 100%;
+    }
+}
+
 /* <------------------------LANGUAGE TOGGLE (flag button)---------------------------> */
 #lang-toggle {
+    /* Language toggle disabled/hidden. Remove this line to re-enable it. */
+    display: none;
     position: fixed;
     top: 16px;
     left: 16px;

@@ -46,7 +46,7 @@ const translations = {
         // --- Section headings ---
         "section.projects": "PROJECTS",
         "section.about": "ABOUT ME",
-        "section.experience": "Experience",
+        "section.experience": "EXPERIENCE",
 
         // --- About Me (command prompt) ---
         "about.whoami1": "I have a passion for computer science because I love coding. While I initially enjoyed math and physics, I found them too dry to pursue professionally. My interest in coding began in high school when I was unsure about which course to study. As I explored coding further, my love for it grew. Eventually, I realized that being good at math actually complements computer science, and I finally discovered my career path.",
@@ -60,11 +60,11 @@ const translations = {
         "exp.languages": "Languages",
         "exp.tools": "Tools",
         "exp.coursework": "Coursework & Interests",
-        "exp.tools.li1": "Git, Git SVN, GitHub, Jenkin, MatLab",
+        "exp.tools.li1": "Git, Pytest, GDB/PDB, CVAT, YOLO",
         "exp.tools.li2": "Linux, Windows, Oracle VM VirtualBox",
-        "exp.tools.li3": "Python: Pytest, TKinter, PDB, Paramiko SSH lib",
-        "exp.tools.li4": "Frameworks: Node.js, Qt",
-        "exp.tools.li5": "Database: SQLite, MySQL, MongoDB",
+        "exp.tools.li3": "Frameworks: React 19, Next.js, Astro, Node.js",
+        "exp.tools.li4": "Libraries: Tailwind CSS, Qt, PyQt, Tkinter, Konva",
+        "exp.tools.li5": "Database & CMS: SQLite, Sanity CMS",
         "exp.course.li1": "Algorithms, Discrete Structures",
         "exp.course.li2": "Object-Oriented Design",
         "exp.course.li3": "Cybersecurity, AI",
@@ -82,6 +82,31 @@ const translations = {
         "exp.coop.li5": "Performed bug testing on 40 'verification' JIRA tickets to ensure bug fixes work correctly",
         "exp.coop.li6": "Responsible for resolving over 20 JIRA bug tickets submitted by other testers and BlackBerry's customers, utilizing advanced debugging tools such as GDB and PDB",
         "exp.coop.li7": "Developed Python log parser to extract and convert data from over 250,000 test logs on internal report server database into easily readable format",
+
+        // --- Experience: collapsible note hint ---
+        "exp.clickHint": "Click to read more",
+
+        // --- Experience: freelance — Electrical Cabinet Configurator (MG) ---
+        "exp.mg.role": "Web-Based Electrical Cabinet Configurator",
+        "exp.mg.company": "Freelance Project",
+        "exp.mg.date": "June 2026 - Present",
+        "exp.mg.li1": "Building a full-featured web application that lets users design electrical cabinets by selecting from a catalog of pre-built components, each with detailed specifications and high-resolution imagery",
+        "exp.mg.li2": "Implemented an interactive canvas using Konva where users place, drag, and arrange components in real time with millimeter-accurate, real-world measurements and overlap validation",
+        "exp.mg.li3": "Designed an extensive, searchable device library backed by structured component data, allowing users to filter and compare parts before adding them to a configuration",
+        "exp.mg.li4": "Standardized the entire cabinet-design workflow to auto-generate consistent output documents — assembly diagrams, parts lists, and quotes — for every project",
+        "exp.mg.li5": "Focused on a responsive, intuitive interface so both technical and non-technical users can build valid cabinet layouts without training",
+        "exp.mg.li6": "Tools & Frameworks: React 19 + TypeScript (strict mode), Konva (interactive canvas), Vite, and Cloudflare Workers",
+
+        // --- Experience: freelance — B2B M&E Solutions Website (GP) ---
+        "exp.gp.role": "B2B M&E Solutions Website",
+        "exp.gp.company": "Freelance Project",
+        "exp.gp.date": "June 2026 - Present",
+        "exp.gp.li1": "Designed and built a modern, minimalist corporate website for a B2B mechanical & electrical (M&E) solutions company, with clean typography, generous whitespace, and refined micro-interactions",
+        "exp.gp.li2": "Integrated a headless CMS (Sanity) so non-technical editors can independently create and publish content — projects, news, products, and pages — with zero developer involvement",
+        "exp.gp.li3": "Engineered strong SEO and AIO foundations (canonical tags, structured metadata, semantic markup), passing rigorous performance and accessibility audits with high Lighthouse and PageSpeed Insights scores",
+        "exp.gp.li4": "Implemented an email inquiry handler using Resend so leads submitted through the site are delivered reliably to the client's inbox",
+        "exp.gp.li5": "Delivered a smooth, polished browsing experience that stays consistent across desktop, tablet, and mobile devices",
+        "exp.gp.li6": "Tools & Frameworks: Next.js 15 (App Router), TypeScript, Tailwind CSS v4, Sanity CMS, Cloudflare Workers, Resend (email inquiry handler), and Google Analytics 4",
 
         // --- Experience: education ---
         "exp.edu.heading": "Education",
@@ -106,7 +131,7 @@ const translations = {
         "footer.aboutSite": "About Site",
         "footer.aboutSiteText": "This is my personal portfolio, built using a free template from ",
         "footer.connect": "Connect",
-        "footer.copyright": "Copyright © John Nguyen 2024",
+        "footer.copyright": "Copyright © Khoa X Nguyen 2024",
 
         // --- Project tiles (rendered by homepage_script.js) ---
         "proj.bejeweled.title": "Bejeweled X",
@@ -139,7 +164,7 @@ const translations = {
         // --- Header / intro ---
         "home.logoTitle": "Tôi tên là Nguyễn Xuân Khoa",
         "home.welcome": "Chào mừng đến với portfolio của tôi!",
-        "home.intro1": "Trang web này giới thiệu tổng quan về bản thân tôi và trưng bày tất cả các dự án tôi đã thực hiện. Trừ khi có ghi chú khác, phần lớn các dự án này được phát triển bằng vanilla JavaScript, không sử dụng bất kỳ framework hay thư viện nào.",
+        "home.intro1": "Trang web này giới thiệu tổng quan về bản thân tôi và trưng bày tất cả các dự án tôi đã thực hiện. Trừ khi có ghi chú khác, phần lớn các dự án này được phát triển bằng JavaScript gốc, không sử dụng bất kỳ framework hay thư viện nào.",
         "home.intro2": "Đã một thời gian kể từ lần cuối tôi đăng một dự án. Gần đây tôi đã chuyển về Việt Nam để tìm kiếm nhiều cơ hội hơn và hiện đang làm lập trình viên tại một công ty quy mô nhỏ. Tôi đã và đang đảm nhận nhiều dự án cũng như công việc khác nhau và đang tích cực thực hiện chúng. Tôi sẽ sớm chia sẻ những cập nhật mới.",
         "home.intro3": "Tất cả các dự án của tôi tính đến Streaming Simulator đều được viết tay hoàn toàn mà không có sự hỗ trợ của AI. Tuy nhiên, tôi nhận ra rằng việc né tránh AI hoàn toàn chẳng khác nào tự trói tay mình. Vì vậy, kể từ đây, nhiều dự án sắp tới và trong tương lai của tôi sẽ có sự tham gia đáng kể của việc lập trình với sự hỗ trợ của AI. Tất nhiên, kiến thức và nền tảng lập trình của tôi vẫn sẽ được áp dụng ở bất cứ nơi nào cần thiết và sẽ không bị lãng phí.",
 
@@ -152,9 +177,9 @@ const translations = {
         "nav.contact": "Liên hệ",
 
         // --- Section headings ---
-        "section.projects": "DỰ ÁN",
+        "section.projects": "PROJECTS",
         "section.about": "VỀ TÔI",
-        "section.experience": "Kinh nghiệm",
+        "section.experience": "EXPERIENCE",
 
         // --- About Me (command prompt) ---
         "about.whoami1": "Tôi có niềm đam mê với khoa học máy tính vì tôi yêu thích lập trình. Ban đầu tôi thích toán và vật lý, nhưng tôi thấy chúng quá khô khan để theo đuổi chuyên nghiệp. Niềm hứng thú với lập trình của tôi bắt đầu từ thời trung học khi tôi còn phân vân không biết nên học ngành gì. Càng tìm hiểu về lập trình, tình yêu của tôi dành cho nó càng lớn. Cuối cùng, tôi nhận ra rằng giỏi toán thực ra lại bổ trợ cho khoa học máy tính, và tôi đã tìm ra con đường sự nghiệp của mình.",
@@ -168,11 +193,11 @@ const translations = {
         "exp.languages": "Ngôn ngữ lập trình",
         "exp.tools": "Công cụ",
         "exp.coursework": "Môn học & Sở thích",
-        "exp.tools.li1": "Git, Git SVN, GitHub, Jenkin, MatLab",
+        "exp.tools.li1": "Git, Pytest, GDB/PDB, CVAT, YOLO",
         "exp.tools.li2": "Linux, Windows, Oracle VM VirtualBox",
-        "exp.tools.li3": "Python: Pytest, TKinter, PDB, thư viện Paramiko SSH",
-        "exp.tools.li4": "Framework: Node.js, Qt",
-        "exp.tools.li5": "Cơ sở dữ liệu: SQLite, MySQL, MongoDB",
+        "exp.tools.li3": "Framework: React 19, Next.js, Astro, Node.js",
+        "exp.tools.li4": "Thư viện: Tailwind CSS, Qt, PyQt, Tkinter, Konva",
+        "exp.tools.li5": "Cơ sở dữ liệu & CMS: SQLite, Sanity CMS",
         "exp.course.li1": "Thuật toán, Cấu trúc rời rạc",
         "exp.course.li2": "Thiết kế hướng đối tượng",
         "exp.course.li3": "An ninh mạng, AI",
@@ -214,7 +239,7 @@ const translations = {
         "footer.aboutSite": "Về trang web",
         "footer.aboutSiteText": "Đây là portfolio cá nhân của tôi, được xây dựng bằng một template miễn phí từ ",
         "footer.connect": "Kết nối",
-        "footer.copyright": "Bản quyền © John Nguyen 2024",
+        "footer.copyright": "Bản quyền © Khoa X Nguyen 2024",
 
         // --- Project tiles (rendered by homepage_script.js) ---
         "proj.bejeweled.title": "Bejeweled X",

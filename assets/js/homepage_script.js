@@ -150,6 +150,42 @@ document.addEventListener("DOMContentLoaded", function() {
     document.addEventListener("languagechange", renderTiles);
 });
 
+// ---------------------------------------------------------------------------
+// Experience notes: collapsible "letter" behaviour.
+// Each .exp-note starts collapsed; clicking (or pressing Enter/Space on) its
+// header toggles .exp-open, which the CSS animates open/closed. Notes open
+// independently of one another.
+// ---------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".exp-note .exp-header").forEach(header => {
+        const note = header.closest(".exp-note");
+        const body = note.querySelector(".exp-body");
+
+        // Open state is driven by an explicit max-height (the content's real
+        // height) so the CSS transition slides smoothly to any content size.
+        const setOpen = (open) => {
+            note.classList.toggle("exp-open", open);
+            header.setAttribute("aria-expanded", open ? "true" : "false");
+            body.style.maxHeight = open ? body.scrollHeight + "px" : "";
+        };
+
+        header.addEventListener("click", () => setOpen(!note.classList.contains("exp-open")));
+        header.addEventListener("keydown", e => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setOpen(!note.classList.contains("exp-open"));
+            }
+        });
+    });
+
+    // Text length differs between languages; recompute open notes' heights.
+    document.addEventListener("languagechange", () => {
+        document.querySelectorAll(".exp-note.exp-open .exp-body").forEach(body => {
+            body.style.maxHeight = body.scrollHeight + "px";
+        });
+    });
+});
+
 // Disable right-click for the container
 document.getElementById('cmd-body').addEventListener('contextmenu', function(e) {
     e.preventDefault(); // Prevent the context menu from appearing
