@@ -8,25 +8,35 @@
 }
 
 #mspaint-bar {
-    background-color: rgb(67,67,67); 
-    width: 100%; 
-    height: 31px; 
-    padding: 0; 
-    margin: 0 auto; 
+    background-color: rgb(67,67,67);
+    width: 100%;
+    height: 31px;
+    padding: 0;
+    margin: 0 auto;
     position: relative;
+    overflow: hidden;   /* keep the chrome images from ever spilling onto the canvas */
 }
+
+.paint-img {
+    height: 31px;
+}
+
+.paint-img-left  { float: left; }
+.paint-img-right { float: right; }
 
 .paint-img::selection {
     background: transparent;
 }
 
 #mspaint-body {
-    width: 100%;          
-    height: 500px; 
-    background-color: rgb(242,242,242); 
+    width: 100%;
+    height: 500px;
+    background-color: rgb(242,242,242);
     /* misc effects */
     position: relative;
     overflow: hidden;
+    cursor: crosshair;
+    touch-action: none;   /* let the canvas own touch gestures instead of scrolling the page */
 }
 
 .pixel {
@@ -36,6 +46,10 @@
 /* BUTTONS */
 br, .paint-button {
     user-select: none;
+}
+
+.paint-button button {
+    touch-action: manipulation;   /* drop the 300ms double-tap-zoom delay on touch */
 }
 
 #pointer-size-button {
@@ -58,6 +72,7 @@ br, .paint-button {
 .left-buttons, .right-buttons {
     display: flex;
     gap: 10px;
+    align-items: center;
 }
 
 /* SLIDERS */
@@ -87,4 +102,63 @@ input[type="range"] {
 
 #zoom-slider {
     margin-top: 10px;
+}
+
+/* ===== RESPONSIVE ===== */
+/* Breakpoints match the Phantom template (736px small, 480px x-small). */
+@media screen and (max-width: 736px) {
+    #mspaint-body {
+        height: 340px;   /* a 500px canvas eats most of a phone screen */
+    }
+
+    /* At natural size the two chrome images total 366px and wrap onto a second
+       row, pushing the right one down over the canvas. Scale them to fit. */
+    .paint-img {
+        height: 24px;
+    }
+
+    #mspaint-bar {
+        height: 24px;
+    }
+
+    /* Let the toolbar wrap instead of pushing the sliders off-screen */
+    .button-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .left-buttons, .right-buttons {
+        flex-wrap: wrap;
+        flex: 1 1 auto;
+    }
+
+    .right-buttons {
+        justify-content: flex-end;
+    }
+
+    .slider {
+        flex: 1 1 110px;
+        min-width: 90px;
+        max-width: 100%;
+        margin-top: 0;   /* the wrapped rows already provide vertical spacing */
+    }
+}
+
+@media screen and (max-width: 480px) {
+    #mspaint-body {
+        height: 280px;
+    }
+
+    .paint-img {
+        height: 20px;
+    }
+
+    #mspaint-bar {
+        height: 20px;
+    }
+
+    /* Full-width sliders read better than three cramped ones side by side */
+    .slider {
+        flex: 1 1 100%;
+    }
 }
