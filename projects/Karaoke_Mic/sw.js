@@ -8,12 +8,13 @@
 // never reach an installed app because it keeps serving stale cached code.
 //
 // Bump CACHE whenever the precached file list changes.
-const CACHE = "karaoke-mic-v1";
+const CACHE = "karaoke-mic-v2";
 const ASSETS = [
   "./webapp.html",
   "./manifest.webmanifest",
   "./assets/img/Karaoke_Mic_icon.png",
   "./assets/css/effects.css",
+  "./assets/css/webapp.css",
   "./assets/js/Karaoke_Mic.js"
 ];
 

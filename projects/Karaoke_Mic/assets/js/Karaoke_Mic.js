@@ -382,8 +382,31 @@
         btn.addEventListener("click", () => applyPreset(btn.dataset.preset));
     });
 
+    // The headphone-feedback warning is dismissed for the rest of this
+    // browser session (sessionStorage), not forever (localStorage) — it
+    // reappears next time the user opens a fresh tab/session, but won't
+    // nag them again on every reload/navigation within the same one.
+    const WARNING_DISMISSED_KEY = "km-warning-dismissed";
+
+    function warningWasDismissed() {
+        try {
+            return sessionStorage.getItem(WARNING_DISMISSED_KEY) === "1";
+        } catch (err) {
+            return false; // storage unavailable (e.g. private mode) — just show it
+        }
+    }
+
+    if (warningWasDismissed()) {
+        els.warning.classList.add("km-hidden");
+    }
+
     els.dismissWarning.addEventListener("click", () => {
         els.warning.classList.add("km-hidden");
+        try {
+            sessionStorage.setItem(WARNING_DISMISSED_KEY, "1");
+        } catch (err) {
+            // ignore — worst case it just reappears next reload
+        }
     });
 
     // Release the mic if the user navigates away without clicking "Stop".

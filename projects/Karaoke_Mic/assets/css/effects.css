@@ -148,10 +148,14 @@
     /* Once the mic is live, the "stop" control only needs to be a small,
        unmissable icon button — the full pill/label was only useful before
        the mic was on. Muting (a separate, more frequent action) gets its
-       own button next to this one instead. Green reads as "live/on"; it
-       turns red on hover as a "click to stop" warning cue. */
-    background: #3cb371;
-    color: #fff;
+       own button next to this one instead. Red reads as "live — tap to
+       stop", and deepens further on hover as the same warning cue.
+       color/box-shadow are forced (!important) to beat main.css's native
+       button:hover rule, which would otherwise flip the icon pink and
+       draw a pink ring on hover. */
+    background: #e04b4b;
+    color: #fff !important;
+    box-shadow: none !important;
     width: 52px;
     height: 52px;
     padding: 0;
@@ -159,7 +163,9 @@
     justify-content: center;
 }
 .km-big-button.km-active:hover {
-    background: #ff5c5c;
+    background: #b83232;
+    color: #fff !important;
+    box-shadow: none !important;
 }
 .km-big-button.km-active #km-toggle-label {
     /* visually hidden but still readable by screen readers */
@@ -177,7 +183,9 @@
 /* Mute/unmute: quick toggle that keeps the mic stream (and its browser
    permission grant) alive, just silences it. */
 .km-icon-button {
-    /* Same main.css neutralization as .km-big-button above. */
+    /* Same main.css neutralization as .km-big-button above. main.css's
+       base button rule forces color via !important even at rest (not
+       just on hover), so we need !important here too or it wins. */
     box-shadow: none;
     text-transform: none;
     letter-spacing: normal;
@@ -190,25 +198,32 @@
     border-radius: 50%;
     border: none;
     background: #e8e8e8;
-    color: #2b2b2b;
+    color: #2b2b2b !important;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease;
 }
 .km-icon-button:hover {
     background: #d8d8d8;
-    box-shadow: none;
+    /* !important beats main.css's button:hover rule, which would
+       otherwise flip the mic icon pink on hover. */
+    color: #2b2b2b !important;
+    box-shadow: none !important;
 }
 .km-icon-button:active {
     background: #d8d8d8;
-    box-shadow: none;
+    color: #2b2b2b !important;
+    box-shadow: none !important;
     transform: scale(0.97);
 }
 .km-icon-button.km-muted {
     background: #6b6b6b;
-    color: #fff;
+    color: #fff !important;
 }
-.km-icon-button.km-muted:hover {
+.km-icon-button.km-muted:hover,
+.km-icon-button.km-muted:active {
     background: #5a5a5a;
+    color: #fff !important;
+    box-shadow: none !important;
 }
 
 /* Sliders */
