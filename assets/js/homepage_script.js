@@ -27,6 +27,12 @@ document.addEventListener("DOMContentLoaded", function() {
             link: "projects/Flappy_Bird/Flappy_Bird.html"
         },
         {
+            imageSrc: "projects/Karaoke_Mic/Karaoke_Mic_icon.svg",
+            titleKey: "proj.karaoke.title",
+            descKey: "proj.karaoke.desc",
+            link: "projects/Karaoke_Mic/Karaoke_Mic.html"
+        },
+        {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
             titleKey: "proj.stream.title",
             descKey: "proj.stream.desc",
@@ -120,6 +126,14 @@ document.addEventListener("DOMContentLoaded", function() {
             // Create the anchor tag
             const anchor = document.createElement("a");
             anchor.href = data.link;
+            // The ".content" description overlay's hover max-height (15em, from
+            // main.css) is taller than this fixed 225px tile, so on hover it used
+            // to bleed a sliver of text past the tile's actual box — visible, but
+            // outside the real hoverable area, which flickered the hover state
+            // on/off right at/below the edge. Clipping just this anchor (not the
+            // whole article) fixes that without hard-cutting the ".image" blur
+            // bloom, which still needs to bleed past its own box for a soft edge.
+            anchor.style.overflow = "hidden";
 
             // Create the h2 element for the title
             const h2 = document.createElement("h2");

@@ -1,0 +1,191 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
+		<!-- End Google Tag Manager -->
+		<title>Karaoke Mic</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="Karaoke_Mic_icon.svg" type="image/svg+xml">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="stylesheet" href="assets/css/effects.css">
+	</head>
+
+	<body class="is-preload">
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NXVSDNVW"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+							<a href="https://vuila9.github.io/#main">
+								<button id="home-btn">&lt;&lt;</button>
+							</a>
+							<a><h1>Karaoke Mic</h1></a>
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+							<div id="karaoke-app">
+								<!-- Project goes here -->
+
+								<div id="km-headphone-warning" class="km-banner">
+									<span class="material-icons" aria-hidden="true">headphones</span>
+									<span>Use headphones! Live mic effects played through speakers will feed back into the mic and squeal.</span>
+									<button id="km-dismiss-warning" title="Dismiss" aria-label="Dismiss warning">&times;</button>
+								</div>
+
+								<div id="km-status" class="km-status">Microphone is off.</div>
+
+								<div class="km-visualizer-wrap">
+									<canvas id="km-visualizer" width="600" height="120"></canvas>
+								</div>
+
+								<div class="km-transport">
+									<button id="km-toggle-mic" class="km-big-button" title="Enable microphone">
+										<span class="material-icons" aria-hidden="true">mic</span>
+										<span id="km-toggle-label">Enable Microphone</span>
+									</button>
+									<!-- Quick mute/unmute: silences the mic instantly without releasing the
+									     stream, so no repeat browser permission prompt. Only shown once the
+									     mic is actually live. -->
+									<button id="km-mute-mic" class="km-icon-button" title="Mute microphone" style="display: none;">
+										<span class="material-icons" id="km-mute-icon" aria-hidden="true">mic</span>
+									</button>
+								</div>
+
+								<div class="km-controls">
+									<div class="km-slider-row">
+										<label for="km-reverb">Reverb</label>
+										<input type="range" id="km-reverb" min="0" max="100" value="35">
+										<output for="km-reverb" id="km-reverb-val">35%</output>
+									</div>
+									<div class="km-slider-row">
+										<label for="km-echo">Echo</label>
+										<input type="range" id="km-echo" min="0" max="100" value="20">
+										<output for="km-echo" id="km-echo-val">20%</output>
+									</div>
+									<div class="km-slider-row">
+										<label for="km-echo-time">Echo delay</label>
+										<input type="range" id="km-echo-time" min="80" max="600" value="260">
+										<output for="km-echo-time" id="km-echo-time-val">260ms</output>
+									</div>
+									<div class="km-slider-row">
+										<label for="km-bass">Bass</label>
+										<input type="range" id="km-bass" min="-15" max="15" value="2">
+										<output for="km-bass" id="km-bass-val">+2dB</output>
+									</div>
+									<div class="km-slider-row">
+										<label for="km-treble">Treble</label>
+										<input type="range" id="km-treble" min="-15" max="15" value="3">
+										<output for="km-treble" id="km-treble-val">+3dB</output>
+									</div>
+									<div class="km-slider-row">
+										<label for="km-volume">Output volume</label>
+										<input type="range" id="km-volume" min="0" max="150" value="100">
+										<output for="km-volume" id="km-volume-val">100%</output>
+									</div>
+								</div>
+
+								<div class="km-presets">
+									<span class="km-presets-label">Presets:</span>
+									<button class="km-preset-btn" data-preset="dry">Dry</button>
+									<button class="km-preset-btn" data-preset="hall">Concert Hall</button>
+									<button class="km-preset-btn" data-preset="stadium">Stadium Echo</button>
+									<button class="km-preset-btn" data-preset="bathroom">Bathroom</button>
+								</div>
+							</div>
+
+							<div>
+								<span class="submenu">Description</span>
+								<p>A live karaoke microphone effects processor. Grant mic access, sing along to any song playing from another source (your phone, a speaker, YouTube, whatever), and hear your own voice pushed through reverb, echo, and EQ in real time, for the classic "karaoke mic" sound. No song hosting, no accounts, no server: everything runs in your browser using the Web Audio API.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Background</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('background-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="background-content">
+								<p>I wanted to see how far a completely static, backend-free site could go with real-time audio. The browser's Web Audio API turns out to be surprisingly capable: you can grab a live microphone stream, route it through a graph of gain/delay/filter/convolver nodes, and hear the processed result with only a few milliseconds of latency, with no server round-trip involved.</p>
+								<p>The reverb effect doesn't load an audio file; it synthesizes its own impulse response on the fly (exponentially-decaying white noise fed into a <code>ConvolverNode</code>), so there's no extra binary asset to host. The echo is a simple delay line with a feedback loop, and the tone controls are just a pair of shelving <code>BiquadFilterNode</code>s. All of it is mixed together and visualized live on a frequency canvas.</p>
+								<p>Because this page never touches a backing track, there's no licensing concern: play your song from wherever you like (phone, another tab, a Bluetooth speaker) and this tab only ever processes your voice.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('features-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<ul>
+									<li><span class="effect-span"><b>Live mic processing</b>: grants microphone access and streams it through the effects chain in real time, entirely client-side.</span></li>
+									<li><span class="effect-span"><b>Reverb</b> (slider): synthesized convolution reverb, from a dry room to a big hall.</span></li>
+									<li><span class="effect-span"><b>Echo</b> (slider + delay time): classic karaoke-mic slap-back echo with adjustable delay and amount.</span></li>
+									<li><span class="effect-span"><b>Bass / Treble</b> (sliders): shelving EQ to shape the tone of your voice.</span></li>
+									<li><span class="effect-span"><b>Output volume</b> (slider): overall gain going to your speakers/headphones.</span></li>
+									<li><span class="effect-span"><b>Presets</b> (buttons): one-click combos (Dry, Concert Hall, Stadium Echo, Bathroom) that set all sliders at once.</span></li>
+									<li><span class="effect-span"><b>Live visualizer</b>: a real-time frequency display of the processed signal.</span></li>
+									<li><span class="effect-span"><b>Feedback-safety warning</b>: a dismissible banner reminding you to use headphones so the output doesn't loop back into the mic.</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Future Improvements</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('future-improvement-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="future-improvement-content">
+								<ul>
+									<li><span class="effect-span">Recording: capture the processed voice with <code>MediaRecorder</code> and offer a download.</span></li>
+									<li><span class="effect-span">Pitch shift: a real-time pitch-correction/harmony effect via an <code>AudioWorklet</code>.</span></li>
+									<li><span class="effect-span">Pitch scoring: analyze how close the singer's pitch is to a reference melody.</span></li>
+									<li><span class="effect-span">More presets, and saving custom presets to <code>localStorage</code>.</span></li>
+									<li><span class="effect-span">Input device picker for machines with multiple microphones.</span></li>
+									<li><span class="effect-span">To be updated</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('github-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Karaoke_Mic" target="_blank"><p>Source code</p></a>
+							</div>
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- project specifics -->
+			<script src="assets/js/Karaoke_Mic.js"></script>
+	</body>
+</html>

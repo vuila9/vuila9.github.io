@@ -1,0 +1,289 @@
+/* Karaoke Mic — project-specific styles */
+
+#karaoke-app {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* Headphone feedback warning banner */
+.km-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff3cd;
+    border: 1px solid #e0c36a;
+    color: #6b5300;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 0.95em;
+}
+.km-banner .material-icons {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.km-banner span:nth-child(2) {
+    flex: 1;
+}
+/* Override the site-wide button styling (main.css draws its "border" via
+   box-shadow, forces a tall pill shape, and sets hover/active color with
+   !important) so this reads as a plain inline "x", not a boxed button.
+   !important is needed here specifically to beat main.css's own
+   !important color rules on :hover/:active. */
+#km-dismiss-warning,
+#km-dismiss-warning:hover,
+#km-dismiss-warning:active,
+#km-dismiss-warning:focus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    height: auto;
+    width: auto;
+    font-size: 1.3em;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    cursor: pointer;
+    color: rgba(107, 83, 0, 0.7) !important;
+    padding: 0 4px;
+    flex-shrink: 0;
+}
+#km-dismiss-warning:hover {
+    opacity: 0.7;
+}
+.km-banner.km-hidden {
+    display: none;
+}
+
+/* Status line */
+.km-status {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: rgba(0, 0, 0, 0.7);
+}
+.km-status.km-live {
+    color: #1a7d3a;
+}
+.km-status.km-error {
+    color: #b00020;
+}
+
+/* Visualizer */
+.km-visualizer-wrap {
+    background: #111;
+    border-radius: 8px;
+    padding: 6px;
+    margin-bottom: 16px;
+}
+#km-visualizer {
+    display: block;
+    width: 100%;
+    height: 120px;
+    border-radius: 4px;
+}
+
+/* Mic toggle button */
+.km-transport {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+.km-big-button {
+    /* Plain white pill in its resting state; only text-transform/letter-
+       spacing are overridden from main.css's site-wide button theme (which
+       forces uppercase + wide tracking). The gray "border" at rest and the
+       pink hover/active accent are main.css's native button treatment —
+       left alone on purpose so this matches the rest of the site. */
+    text-transform: none;
+    letter-spacing: normal;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1em;
+    padding: 12px 22px;
+    border-radius: 30px;
+    border: none;
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease, width 0.15s ease, padding 0.15s ease;
+}
+.km-big-button:active {
+    transform: scale(0.97);
+}
+.km-big-button.km-active {
+    /* Once the mic is live, the "stop" control only needs to be a small,
+       unmissable icon button — the full pill/label was only useful before
+       the mic was on. Muting (a separate, more frequent action) gets its
+       own button next to this one instead. Green reads as "live/on"; it
+       turns red on hover as a "click to stop" warning cue. */
+    background: #3cb371;
+    color: #fff;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
+}
+.km-big-button.km-active:hover {
+    background: #ff5c5c;
+}
+.km-big-button.km-active #km-toggle-label {
+    /* visually hidden but still readable by screen readers */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+.km-big-button.km-active .material-icons {
+    font-size: 24px;
+}
+
+/* Mute/unmute: quick toggle that keeps the mic stream (and its browser
+   permission grant) alive, just silences it. */
+.km-icon-button {
+    /* Same main.css neutralization as .km-big-button above. */
+    box-shadow: none;
+    text-transform: none;
+    letter-spacing: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    background: #e8e8e8;
+    color: #2b2b2b;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.km-icon-button:hover {
+    background: #d8d8d8;
+    box-shadow: none;
+}
+.km-icon-button:active {
+    background: #d8d8d8;
+    box-shadow: none;
+    transform: scale(0.97);
+}
+.km-icon-button.km-muted {
+    background: #6b6b6b;
+    color: #fff;
+}
+.km-icon-button.km-muted:hover {
+    background: #5a5a5a;
+}
+
+/* Sliders */
+.km-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.km-slider-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 60px;
+    align-items: center;
+    gap: 10px;
+}
+.km-slider-row label {
+    font-size: 0.95em;
+    color: rgba(0, 0, 0, 0.75);
+}
+.km-slider-row input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: transparent; /* the visible track is drawn by the pseudo-elements below */
+    cursor: pointer;
+}
+/* Track */
+.km-slider-row input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 3px;
+    background: #c7c7c7;
+}
+.km-slider-row input[type="range"]::-moz-range-track {
+    height: 6px;
+    border-radius: 3px;
+    background: #c7c7c7;
+}
+/* Thumb */
+.km-slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2196f3;
+    border: none;
+    margin-top: -5px; /* centers the thumb on a 6px track */
+    cursor: pointer;
+}
+.km-slider-row input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2196f3;
+    border: none;
+    cursor: pointer;
+}
+.km-slider-row output {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9em;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+/* Presets */
+.km-presets {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.km-presets-label {
+    font-weight: bold;
+    margin-right: 4px;
+}
+.km-preset-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    background: #fff;
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 0.9em;
+    line-height: 1;
+    text-align: center;
+}
+/* No custom hover background here on purpose: main.css's native pink
+   box-shadow/color hover treatment (also used on the main mic button) is
+   left to show through instead of a custom color. */
+
+/* Mobile */
+@media (max-width: 480px) {
+    .km-slider-row {
+        grid-template-columns: 90px 1fr 50px;
+    }
+    .km-big-button {
+        font-size: 1em;
+        padding: 10px 18px;
+    }
+}
