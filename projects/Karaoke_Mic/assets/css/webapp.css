@@ -61,11 +61,23 @@
     height: 56px;
 }
 
+/* effects.css lays presets out as a wrapping flex row with the "Presets:"
+   label as just another item in it — fine at desktop widths, but on a
+   phone the label eats into the first row and throws off how many
+   buttons fit per line, so pairs land unevenly (e.g. one button stranded
+   alone, full-width). Switch to a grid instead: the label gets its own
+   full-width row, and the four preset buttons form a predictable 2x2. */
 .km-presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
 }
+.km-presets-label {
+    grid-column: 1 / -1;
+    margin-right: 0;
+}
 .km-preset-btn {
-    flex: 1 1 calc(50% - 10px);
+    width: 100%;
     padding: 12px 14px;
     font-size: 0.95em;
 }

@@ -289,6 +289,41 @@
     color: rgba(0, 0, 0, 0.6);
 }
 
+/* Reset-to-defaults */
+.km-reset-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: -6px 0 10px;
+}
+/* Same main.css neutralization as #km-dismiss-warning above — a plain
+   quiet text link, not a boxed/pink site button. */
+.km-reset-btn,
+.km-reset-btn:hover,
+.km-reset-btn:active,
+.km-reset-btn:focus {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    height: auto;
+    padding: 2px 0;
+    font-size: 0.75em;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    line-height: 1;
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.55) !important;
+}
+.km-reset-btn .material-icons {
+    font-size: 14px;
+}
+.km-reset-btn:hover {
+    color: rgba(0, 0, 0, 0.85) !important;
+}
+
 /* Presets */
 .km-presets {
     display: flex;

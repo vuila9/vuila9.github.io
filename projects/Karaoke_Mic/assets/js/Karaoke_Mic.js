@@ -42,9 +42,35 @@
         volume: document.getElementById("km-volume"),
         volumeVal: document.getElementById("km-volume-val"),
         presetButtons: document.querySelectorAll(".km-preset-btn"),
+        resetBtn: document.getElementById("km-reset-controls"),
     };
 
     const canvasCtx = els.canvas.getContext("2d");
+
+    // ---- "Open as app" row (project page only — these elements don't
+    // exist in webapp.html) --------------------------------------------
+    // Only worth showing on mobile: that's the only place "Add to Home
+    // Screen" installs a standalone app, and it's the only place someone
+    // would want to leave the project page for the lean app shell.
+    (function hideOpenAppRowOnDesktop() {
+        const row = document.querySelector(".km-app-row");
+        const hint = document.querySelector(".km-hint");
+        if (!row) return; // not on this page (e.g. webapp.html)
+
+        function isMobileDevice() {
+            const ua = navigator.userAgent || navigator.vendor || "";
+            if (/Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(ua)) return true;
+            // Fallback for UAs that don't self-identify (e.g. iPadOS
+            // requesting the desktop site): touch input + a narrow-ish
+            // viewport reads as a phone/tablet rather than a desktop.
+            return window.matchMedia("(pointer: coarse)").matches && window.innerWidth <= 820;
+        }
+
+        if (!isMobileDevice()) {
+            row.style.display = "none";
+            if (hint) hint.style.display = "none";
+        }
+    })();
 
     // ---- State --------------------------------------------------------------
     let audioCtx = null;
@@ -358,6 +384,62 @@
         els.bass.value = preset.bass;
         els.treble.value = preset.treble;
         applyAllControls();
+        saveControlsToSession();
+    }
+
+    // ---- Reset to defaults ---------------------------------------------
+    // Matches each slider's original value="..." in the HTML markup.
+    const DEFAULTS = { reverb: 35, echo: 20, echoTime: 260, bass: 2, treble: 3, volume: 100 };
+
+    function resetControls() {
+        Object.keys(DEFAULTS).forEach((id) => {
+            els[id].value = DEFAULTS[id];
+        });
+        applyAllControls();
+        saveControlsToSession();
+    }
+
+    // ---- Slider memory (sessionStorage) ---------------------------------
+    // Same sessionStorage pattern as the headphone warning above: slider/
+    // preset choices persist across reloads and navigation within this
+    // browser session, but reset to the page's defaults next time the user
+    // opens a fresh tab/session — no permanent "my settings" file needed.
+    const CONTROLS_KEY = "km-controls";
+    const CONTROL_SETTERS = {
+        reverb: setReverb,
+        echo: setEcho,
+        echoTime: setEchoTime,
+        bass: setBass,
+        treble: setTreble,
+        volume: setVolume,
+    };
+    const CONTROL_IDS = Object.keys(CONTROL_SETTERS);
+
+    function saveControlsToSession() {
+        try {
+            const state = {};
+            CONTROL_IDS.forEach((id) => {
+                state[id] = els[id].value;
+            });
+            sessionStorage.setItem(CONTROLS_KEY, JSON.stringify(state));
+        } catch (err) {
+            // ignore — storage unavailable (e.g. private mode)
+        }
+    }
+
+    function restoreControlsFromSession() {
+        let state;
+        try {
+            const raw = sessionStorage.getItem(CONTROLS_KEY);
+            if (!raw) return;
+            state = JSON.parse(raw);
+        } catch (err) {
+            return;
+        }
+        CONTROL_IDS.forEach((id) => {
+            if (state[id] !== undefined) els[id].value = state[id];
+        });
+        applyAllControls(); // refresh the readout labels (and live audio graph, if any)
     }
 
     // ---- Event wiring -----------------------------------------------------
@@ -371,16 +453,20 @@
 
     els.muteBtn.addEventListener("click", toggleMute);
 
-    els.reverb.addEventListener("input", setReverb);
-    els.echo.addEventListener("input", setEcho);
-    els.echoTime.addEventListener("input", setEchoTime);
-    els.bass.addEventListener("input", setBass);
-    els.treble.addEventListener("input", setTreble);
-    els.volume.addEventListener("input", setVolume);
+    CONTROL_IDS.forEach((id) => {
+        els[id].addEventListener("input", () => {
+            CONTROL_SETTERS[id]();
+            saveControlsToSession();
+        });
+    });
 
     els.presetButtons.forEach((btn) => {
         btn.addEventListener("click", () => applyPreset(btn.dataset.preset));
     });
+
+    els.resetBtn.addEventListener("click", resetControls);
+
+    restoreControlsFromSession();
 
     // The headphone-feedback warning is dismissed for the rest of this
     // browser session (sessionStorage), not forever (localStorage) — it
