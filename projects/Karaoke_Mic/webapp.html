@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8" />
+		<title>Karaoke Mic</title>
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+		<meta name="description" content="A live karaoke microphone effects processor: reverb, echo, and EQ on your voice in real time." />
+		<meta name="theme-color" content="#ffffff" />
+
+		<!-- PWA / Add to Home Screen: launches chrome-free in standalone mode -->
+		<link rel="manifest" href="manifest.webmanifest" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<meta name="apple-mobile-web-app-title" content="Karaoke Mic" />
+		<link rel="apple-touch-icon" href="assets/img/Karaoke_Mic_icon.png" />
+		<link rel="icon" href="assets/img/Karaoke_Mic_icon.png" type="image/png" />
+
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="stylesheet" href="assets/css/effects.css" />
+		<style>
+			/* Standalone app shell — no theme CSS or scroll scripts are loaded
+			   here, which is what keeps it lean and fast on mobile compared with
+			   the full project page. Base type/colour match the site's own
+			   (main.css) so the app doesn't look out of place once installed. */
+			html, body {
+				margin: 0;
+				min-height: 100%;
+				background: #ffffff;
+				color: #585858;
+				font-family: "Source Sans Pro", Helvetica, sans-serif;
+				font-weight: 300;
+				line-height: 1.75;
+				overscroll-behavior: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+			#km-app-shell {
+				box-sizing: border-box;
+				max-width: 640px;
+				margin: 0 auto;
+				padding: calc(20px + env(safe-area-inset-top, 0px)) 16px
+					calc(20px + env(safe-area-inset-bottom, 0px));
+			}
+			#km-app-shell h1 {
+				margin: 0 0 14px;
+				font-size: 1.4em;
+				font-weight: 700;
+				text-align: center;
+				color: #2b2b2b;
+			}
+		</style>
+	</head>
+
+	<body class="km-app">
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NXVSDNVW"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div id="km-app-shell">
+			<h1>Karaoke Mic</h1>
+			<div id="karaoke-app">
+				<!-- Same markup/IDs as the project page — Karaoke_Mic.js drives both. -->
+
+				<div id="km-headphone-warning" class="km-banner">
+					<span class="material-icons" aria-hidden="true">headphones</span>
+					<span>Use headphones! Live mic effects played through speakers will feed back into the mic and squeal.</span>
+					<button id="km-dismiss-warning" title="Dismiss" aria-label="Dismiss warning">&times;</button>
+				</div>
+
+				<div id="km-status" class="km-status">Microphone is off.</div>
+
+				<div class="km-visualizer-wrap">
+					<canvas id="km-visualizer" width="600" height="120"></canvas>
+				</div>
+
+				<div class="km-transport">
+					<button id="km-toggle-mic" class="km-big-button" title="Enable microphone">
+						<span class="material-icons" aria-hidden="true">mic</span>
+						<span id="km-toggle-label">Enable Microphone</span>
+					</button>
+					<button id="km-mute-mic" class="km-icon-button" title="Mute microphone" style="display: none;">
+						<span class="material-icons" id="km-mute-icon" aria-hidden="true">mic</span>
+					</button>
+				</div>
+
+				<div class="km-controls">
+					<div class="km-slider-row">
+						<label for="km-reverb">Reverb</label>
+						<input type="range" id="km-reverb" min="0" max="100" value="35">
+						<output for="km-reverb" id="km-reverb-val">35%</output>
+					</div>
+					<div class="km-slider-row">
+						<label for="km-echo">Echo</label>
+						<input type="range" id="km-echo" min="0" max="100" value="20">
+						<output for="km-echo" id="km-echo-val">20%</output>
+					</div>
+					<div class="km-slider-row">
+						<label for="km-echo-time">Echo delay</label>
+						<input type="range" id="km-echo-time" min="80" max="600" value="260">
+						<output for="km-echo-time" id="km-echo-time-val">260ms</output>
+					</div>
+					<div class="km-slider-row">
+						<label for="km-bass">Bass</label>
+						<input type="range" id="km-bass" min="-15" max="15" value="2">
+						<output for="km-bass" id="km-bass-val">+2dB</output>
+					</div>
+					<div class="km-slider-row">
+						<label for="km-treble">Treble</label>
+						<input type="range" id="km-treble" min="-15" max="15" value="3">
+						<output for="km-treble" id="km-treble-val">+3dB</output>
+					</div>
+					<div class="km-slider-row">
+						<label for="km-volume">Output volume</label>
+						<input type="range" id="km-volume" min="0" max="150" value="100">
+						<output for="km-volume" id="km-volume-val">100%</output>
+					</div>
+				</div>
+
+				<div class="km-presets">
+					<span class="km-presets-label">Presets:</span>
+					<button class="km-preset-btn" data-preset="dry">Dry</button>
+					<button class="km-preset-btn" data-preset="hall">Concert Hall</button>
+					<button class="km-preset-btn" data-preset="stadium">Stadium Echo</button>
+					<button class="km-preset-btn" data-preset="bathroom">Bathroom</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- app (no theme scripts: this is the lean, fast app build) -->
+		<script src="assets/js/Karaoke_Mic.js"></script>
+		<script>
+			// Register the service worker so the app is installable and loads its
+			// assets from cache (faster, and works offline once visited).
+			if ("serviceWorker" in navigator) {
+				window.addEventListener("load", function () {
+					navigator.serviceWorker.register("sw.js").catch(function () {});
+				});
+			}
+		</script>
+	</body>
+</html>

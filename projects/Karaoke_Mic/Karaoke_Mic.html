@@ -40,6 +40,14 @@
 				<!-- Main -->
 					<div id="main">
 						<div class="inner">
+							<div class="km-app-row">
+								<a id="km-open-app" href="webapp.html" target="_blank"
+									title="Open the standalone full-screen app">Open as app &#8599;</a>
+							</div>
+							<p class="km-hint">On mobile, open the app and use your browser's
+								&ldquo;Add to Home Screen&rdquo; for a native-feeling, fullscreen
+								experience that also works offline.</p>
+
 							<div id="karaoke-app">
 								<!-- Project goes here -->
 
@@ -125,6 +133,31 @@
 								<p>I wanted to see how far a completely static, backend-free site could go with real-time audio. The browser's Web Audio API turns out to be surprisingly capable: you can grab a live microphone stream, route it through a graph of gain/delay/filter/convolver nodes, and hear the processed result with only a few milliseconds of latency, with no server round-trip involved.</p>
 								<p>The reverb effect doesn't load an audio file; it synthesizes its own impulse response on the fly (exponentially-decaying white noise fed into a <code>ConvolverNode</code>), so there's no extra binary asset to host. The echo is a simple delay line with a feedback loop, and the tone controls are just a pair of shelving <code>BiquadFilterNode</code>s. All of it is mixed together and visualized live on a frequency canvas.</p>
 								<p>Because this page never touches a backing track, there's no licensing concern: play your song from wherever you like (phone, another tab, a Bluetooth speaker) and this tab only ever processes your voice.</p>
+								<p>Like Flappy Bird and Bejeweled X, this is also installable as a standalone app: Safari lets you add it to your iOS Home Screen, where it launches full-screen with no browser chrome. The project page and the app share the exact same interface, audio engine, and JavaScript file - the app build just swaps out the surrounding site theme for a lean, install-ready shell (manifest, service worker, standalone meta tags) so it starts instantly and works offline.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">iOS App Setup Instruction</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('instruction-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="instruction-content">
+								<p>Quick disclaimer: Android users can always just use the browser tab, so yes you are being left out on this one.</p>
+								<p>Before we get started, open the <a href="https://vuila9.github.io/projects/Karaoke_Mic/webapp.html" target="_blank">webapp version</a> on Safari browser, because apparently only Safari can do this.</p>
+								<p>The version of the app on this current page is not a webapp version, make sure you only do the next step once you open the webapp version on a new tab.</p>
+								<figure class="doc-img">
+									<img src="./assets/img/img1.png" alt="step1">
+									<figcaption>Step 1: Look anywhere on the interface for this button</figcaption>
+								</figure>
+								<figure class="doc-img">
+									<img src="./assets/img/img2.png" alt="step2">
+									<figcaption>Step 2: Need to expand the option list to see this button</figcaption>
+								</figure>
+								<figure class="doc-img">
+									<img src="./assets/img/img3.png" alt="step3">
+									<figcaption>Step 3: Make sure this option is checked, click Add and done</figcaption>
+								</figure>
 							</div>
 
 							<div class="container">
@@ -143,6 +176,7 @@
 									<li><span class="effect-span"><b>Presets</b> (buttons): one-click combos (Dry, Concert Hall, Stadium Echo, Bathroom) that set all sliders at once.</span></li>
 									<li><span class="effect-span"><b>Live visualizer</b>: a real-time frequency display of the processed signal.</span></li>
 									<li><span class="effect-span"><b>Feedback-safety warning</b>: a dismissible banner reminding you to use headphones so the output doesn't loop back into the mic.</span></li>
+									<li><span class="effect-span"><b>Installable app</b>: add it to your iOS Home Screen from Safari for a fullscreen, native-feeling app that also works offline once loaded.</span></li>
 								</ul>
 							</div>
 

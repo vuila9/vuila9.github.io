@@ -1,0 +1,19 @@
+{
+  "name": "Karaoke Mic",
+  "short_name": "Karaoke Mic",
+  "description": "A live karaoke microphone effects processor: reverb, echo, and EQ on your voice in real time.",
+  "start_url": "./webapp.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "assets/img/Karaoke_Mic_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

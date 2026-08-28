@@ -5,6 +5,33 @@
     margin: 0 auto;
 }
 
+/* "Open as app" link + hint, shown above the app on the project page (the
+   project page and webapp.html share this same #karaoke-app markup/JS —
+   only the surrounding page chrome differs). */
+.km-app-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.4rem;
+}
+#km-open-app {
+    font-size: 0.85rem;
+    text-decoration: none;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+#km-open-app:hover {
+    opacity: 1;
+}
+.km-hint {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    text-align: center;
+    margin: 0 0 1rem;
+}
+
 /* Headphone feedback warning banner */
 .km-banner {
     display: flex;
