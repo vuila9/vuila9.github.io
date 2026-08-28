@@ -7,13 +7,24 @@
 // audio playing from somewhere else (phone, another tab, a speaker, etc).
 //
 // Audio graph:
-//   micSource -> bassFilter -> trebleFilter -> [tap] -> analyser
-//                                   |
-//                                   +--> dryGain -------------------+
-//                                   +--> delayNode <-> feedbackGain |--> masterGain -> destination
-//                                   |        |                      |
-//                                   |        +--> echoWetGain ------+
-//                                   +--> convolver --> reverbWetGain+
+//   micSource -> inputGain -> bassFilter -> trebleFilter
+//                                                  |
+//                                                  +--> dryGain -------------------+
+//                                                  +--> delayNode <-> feedbackGain |--> masterGain -> limiter -> [tap] -> analyser
+//                                                  |        |                      |                      |
+//                                                  |        +--> echoWetGain ------+                      +--> destination (desktop)
+//                                                  +--> convolver --> reverbWetGain+                      +--> MediaStreamDestination -> <audio> element (mobile)
+//
+// inputGain is a manual mic pre-amp (getUserMedia's autoGainControl is left
+// off so we control loudness ourselves instead of the browser auto-leveling
+// it down). limiter is a DynamicsCompressorNode that catches the summed
+// dry+echo+reverb peaks so the extra gain can't turn into harsh clipping.
+// Output routing branches on device: desktop connects straight to
+// audioCtx.destination (lowest latency); mobile instead renders to a
+// MediaStreamAudioDestinationNode played through a hidden <audio playsinline>
+// element, because iOS/Android otherwise often route audioCtx.destination
+// through the phone's quiet earpiece (voice-call audio session) instead of
+// the loud speaker whenever a mic stream is active.
 // ============================================================================
 
 (function () {
@@ -47,6 +58,17 @@
 
     const canvasCtx = els.canvas.getContext("2d");
 
+    // Shared across the "open as app" row below and the audio-routing
+    // workaround in buildGraph() — both need to know phone/tablet vs desktop.
+    function isMobileDevice() {
+        const ua = navigator.userAgent || navigator.vendor || "";
+        if (/Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(ua)) return true;
+        // Fallback for UAs that don't self-identify (e.g. iPadOS
+        // requesting the desktop site): touch input + a narrow-ish
+        // viewport reads as a phone/tablet rather than a desktop.
+        return window.matchMedia("(pointer: coarse)").matches && window.innerWidth <= 820;
+    }
+
     // ---- "Open as app" row (project page only — these elements don't
     // exist in webapp.html) --------------------------------------------
     // Only worth showing on mobile: that's the only place "Add to Home
@@ -56,15 +78,6 @@
         const row = document.querySelector(".km-app-row");
         const hint = document.querySelector(".km-hint");
         if (!row) return; // not on this page (e.g. webapp.html)
-
-        function isMobileDevice() {
-            const ua = navigator.userAgent || navigator.vendor || "";
-            if (/Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(ua)) return true;
-            // Fallback for UAs that don't self-identify (e.g. iPadOS
-            // requesting the desktop site): touch input + a narrow-ish
-            // viewport reads as a phone/tablet rather than a desktop.
-            return window.matchMedia("(pointer: coarse)").matches && window.innerWidth <= 820;
-        }
 
         if (!isMobileDevice()) {
             row.style.display = "none";
@@ -76,6 +89,7 @@
     let audioCtx = null;
     let micStream = null;
     let micSource = null;
+    let inputGain = null;
     let bassFilter = null;
     let trebleFilter = null;
     let dryGain = null;
@@ -85,6 +99,9 @@
     let convolver = null;
     let reverbWetGain = null;
     let masterGain = null;
+    let limiter = null;
+    let outputDestination = null; // MediaStreamAudioDestinationNode, mobile-only
+    let outputEl = null; // hidden <audio> element that plays outputDestination.stream
     let analyser = null;
     let rafId = null;
     let isLive = false;
@@ -93,6 +110,12 @@
     // Max feedback kept well under 1.0 so the delay loop can never run away
     // into an infinite/self-amplifying echo.
     const MAX_FEEDBACK = 0.6;
+
+    // Manual mic pre-amp. Phone/laptop mics are usually quiet by default,
+    // and disabling getUserMedia's autoGainControl (see enableMic) means
+    // nothing else boosts the signal — this is that boost, applied before
+    // the effects chain so echo/reverb tails scale with it too.
+    const INPUT_GAIN = 1.8;
 
     // ---- Impulse response synthesis for the reverb (no audio file needed) --
     // Generates decaying stereo white noise; a longer/steeper decay reads as
@@ -117,9 +140,18 @@
 
     // ---- Build the audio graph (called once, on first mic enable) ----------
     function buildGraph(stream) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // "interactive" asks the browser for the smallest safe output
+        // buffer it can give us — the single biggest lever we have over
+        // perceived delay, since every node below is already a native
+        // Web Audio node (no ScriptProcessor round-trips adding latency).
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+            latencyHint: "interactive",
+        });
 
         micSource = audioCtx.createMediaStreamSource(stream);
+
+        inputGain = audioCtx.createGain();
+        inputGain.gain.value = INPUT_GAIN;
 
         bassFilter = audioCtx.createBiquadFilter();
         bassFilter.type = "lowshelf";
@@ -140,11 +172,22 @@
 
         masterGain = audioCtx.createGain();
 
+        // Catches the summed dry+echo+reverb peaks so the pre-amp/output
+        // gain above can be pushed loud without turning into harsh digital
+        // clipping — standard voice-bus limiter settings.
+        limiter = audioCtx.createDynamicsCompressor();
+        limiter.threshold.value = -6;
+        limiter.knee.value = 12;
+        limiter.ratio.value = 8;
+        limiter.attack.value = 0.003;
+        limiter.release.value = 0.15;
+
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
 
-        // EQ chain
-        micSource.connect(bassFilter);
+        // Pre-amp -> EQ chain
+        micSource.connect(inputGain);
+        inputGain.connect(bassFilter);
         bassFilter.connect(trebleFilter);
 
         // Dry path
@@ -164,8 +207,33 @@
         reverbWetGain.connect(masterGain);
 
         // Output + visualizer tap
-        masterGain.connect(analyser);
-        masterGain.connect(audioCtx.destination);
+        masterGain.connect(limiter);
+        limiter.connect(analyser);
+
+        if (isMobileDevice()) {
+            // iOS/Android browsers often switch to a "voice call" audio
+            // session while a mic stream is live and route
+            // audioCtx.destination through the phone's quiet earpiece
+            // instead of its loud speaker. A real <audio playsinline>
+            // element gets normal playback routing, so we render into a
+            // MediaStreamAudioDestinationNode and play that through one.
+            outputDestination = audioCtx.createMediaStreamDestination();
+            limiter.connect(outputDestination);
+
+            outputEl = document.createElement("audio");
+            outputEl.autoplay = true;
+            outputEl.playsInline = true;
+            outputEl.setAttribute("webkit-playsinline", "true");
+            outputEl.srcObject = outputDestination.stream;
+            outputEl.style.display = "none";
+            document.body.appendChild(outputEl);
+            // enableMic() only ever runs from a user tap, so this play()
+            // is inside a user-gesture call stack and won't be blocked by
+            // autoplay policies.
+            outputEl.play().catch(() => {});
+        } else {
+            limiter.connect(audioCtx.destination);
+        }
 
         applyAllControls();
     }
@@ -176,6 +244,13 @@
         if (micStream) {
             micStream.getTracks().forEach((track) => track.stop());
         }
+        if (outputEl) {
+            outputEl.pause();
+            outputEl.srcObject = null;
+            outputEl.remove();
+        }
+        outputEl = null;
+        outputDestination = null;
         if (audioCtx) {
             audioCtx.close().catch(() => {});
         }
@@ -307,7 +382,10 @@
                 audio: {
                     echoCancellation: false,
                     noiseSuppression: false,
-                    autoGainControl: true,
+                    // Off on purpose: AGC auto-levels (usually *down*) and
+                    // adds its own processing latency. inputGain in
+                    // buildGraph() does the boosting instead, predictably.
+                    autoGainControl: false,
                 },
             });
         } catch (err) {
