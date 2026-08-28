@@ -10,30 +10,23 @@
    never adds new markup/classes and never touches anything the shared
    Karaoke_Mic.js reads, so functionality stays identical on both builds. */
 
-/* Sliders: the project page's fixed label/track/value grid columns wrap
-   longer labels ("Output volume") onto two lines on narrow phones and
-   leaves little room for the track itself. In the app, stack each row
-   instead — label + readout on one line, a full-width slider below — and
-   give the thumb a bigger touch target. */
+/* Sliders: label, track, and readout all stay on one line (matches the
+   project page's layout) — just re-tuned for a narrow phone: a slightly
+   tighter label column so the track gets more room, and a bigger thumb/
+   tap target since this is used one-handed, at arm's length. */
 .km-slider-row {
-    grid-template-columns: 1fr auto;
-    row-gap: 8px;
+    grid-template-columns: 84px 1fr 46px;
+    column-gap: 8px;
 }
 .km-slider-row label {
-    grid-column: 1;
-    grid-row: 1;
-    font-size: 1em;
+    font-size: 0.9em;
     font-weight: 600;
     color: #2b2b2b;
 }
 .km-slider-row output {
-    grid-column: 2;
-    grid-row: 1;
-    font-size: 1em;
+    font-size: 0.9em;
 }
 .km-slider-row input[type="range"] {
-    grid-column: 1 / -1;
-    grid-row: 2;
     height: 32px; /* bigger tap/drag target than the track itself */
 }
 .km-slider-row input[type="range"]::-webkit-slider-thumb {
@@ -84,4 +77,23 @@
 
 .km-banner {
     font-size: 0.92em;
+}
+
+/* App feel: a tap-and-hold anywhere in the app (a button, a label, the
+   readout numbers, the warning banner) should never pop the OS text-
+   selection handles/callout menu — it should behave like a native app
+   control, not a web page of text. Scoped to the app shell only, so the
+   project page's prose (description, background, etc.) stays normally
+   selectable. */
+#km-app-shell {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none; /* iOS: also suppresses the long-press callout menu */
+}
+/* Sliders are the one interactive exception: keep native drag behavior
+   untouched (user-select doesn't affect them, but this documents intent
+   and guards against the rule ever being narrowed to *:not(input) above). */
+#km-app-shell input[type="range"] {
+    -webkit-user-select: auto;
+    user-select: auto;
 }
