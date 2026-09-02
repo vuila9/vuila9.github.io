@@ -158,8 +158,6 @@ const translations = {
         "proj.restaurant.desc": "A web-based online restaurant using MongoDB for storing order database and Node.js for server hosting.",
         "proj.store.title": "Store Application",
         "proj.store.desc": "A Java-based application with a graphical user interface (GUI).",
-        "proj.karaoke.title": "Karaoke Mic",
-        "proj.karaoke.desc": "A live microphone effects processor that adds karaoke-style reverb, echo, and EQ to your voice in real time using the Web Audio API.",
 
         // --- Language toggle ---
         "toggle.label": "Tiếng Việt",
@@ -268,8 +266,6 @@ const translations = {
         "proj.restaurant.desc": "Một nhà hàng trực tuyến trên web sử dụng MongoDB để lưu cơ sở dữ liệu đơn hàng và Node.js để lưu trữ máy chủ.",
         "proj.store.title": "Store Application",
         "proj.store.desc": "Một ứng dụng bằng Java với giao diện đồ họa người dùng (GUI).",
-        "proj.karaoke.title": "Karaoke Mic",
-        "proj.karaoke.desc": "Một chương trình xử lý hiệu ứng micro trực tiếp, thêm vang (reverb), vọng âm (echo) và chỉnh âm (EQ) kiểu karaoke vào giọng hát theo thời gian thực bằng Web Audio API.",
 
         // --- Language toggle ---
         "toggle.label": "English",

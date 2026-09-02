@@ -10,10 +10,10 @@
 //   micSource -> inputGain -> bassFilter -> trebleFilter
 //                                                  |
 //                                                  +--> dryGain -------------------+
-//                                                  +--> delayNode <-> feedbackGain |--> masterGain -> limiter -> [tap] -> analyser
-//                                                  |        |                      |                      |
-//                                                  |        +--> echoWetGain ------+                      +--> destination (desktop)
-//                                                  +--> convolver --> reverbWetGain+                      +--> MediaStreamDestination -> <audio> element (mobile)
+//                                                  +--> delayNode <-> feedbackGain |--> masterGain -> duckGain -> limiter -> makeupGain -> [tap] -> analyser
+//                                                  |        |                      |                                                  |
+//                                                  |        +--> echoWetGain ------+                                                  +--> destination (desktop)
+//                                                  +--> convolver --> reverbWetGain+                                                  +--> MediaStreamDestination -> <audio> element (mobile)
 //
 // inputGain is a manual mic pre-amp (getUserMedia's autoGainControl is left
 // off so we control loudness ourselves instead of the browser auto-leveling
@@ -25,6 +25,31 @@
 // element, because iOS/Android otherwise often route audioCtx.destination
 // through the phone's quiet earpiece (voice-call audio session) instead of
 // the loud speaker whenever a mic stream is active.
+//
+// Feedback (Larsen effect) safety net — this app's biggest usability
+// obstacle is open-speaker howling: the processed voice (plus its own echo/
+// reverb tail) plays out the speaker and re-enters the same mic, and
+// without headphones that loop can ring into a squeal. Two layers guard
+// against it:
+//   1. getUserMedia can request echoCancellation via USE_ECHO_CANCELLATION
+//      below (currently off — see that constant for why). When on, the
+//      browser's native AEC knows exactly what this tab just rendered to
+//      the output device, so it can subtract that known signal back out of
+//      the mic input; this is the strongest defense against the
+//      self-feedback loop described above, at the cost of some added
+//      latency/tone coloration. (Even at full strength it cannot do
+//      anything about a *different* device's speaker, e.g. a phone playing
+//      the backing track a foot away — no browser API gives this tab a
+//      reference for audio it didn't produce. That case is still a "wear
+//      headphones" problem, see the banner in the UI.)
+//   2. duckGain is a dedicated safety-only gain node (separate from the
+//      user's masterGain/volume slider) driven by detectHowl() below: if the
+//      analyser sees a narrow frequency spike stay dominant for many
+//      consecutive frames — the signature of a runaway resonance rather than
+//      a sung note — it fast-ducks duckGain near-silent and eases it back
+//      over ~1s. Currently disabled too, via USE_HOWL_DETECTOR (see that
+//      constant) — with both layers off there is no automatic feedback
+//      protection at all right now, only the manual headphone warning.
 // ============================================================================
 
 (function () {
@@ -99,7 +124,9 @@
     let convolver = null;
     let reverbWetGain = null;
     let masterGain = null;
+    let duckGain = null; // safety-only node, driven by detectHowl() — see file header
     let limiter = null;
+    let makeupGain = null; // fixed post-limiter loudness recovery — see MAKEUP_GAIN
     let outputDestination = null; // MediaStreamAudioDestinationNode, mobile-only
     let outputEl = null; // hidden <audio> element that plays outputDestination.stream
     let analyser = null;
@@ -108,14 +135,36 @@
     let isMuted = false;
 
     // Max feedback kept well under 1.0 so the delay loop can never run away
-    // into an infinite/self-amplifying echo.
-    const MAX_FEEDBACK = 0.6;
+    // into an infinite/self-amplifying echo. Kept conservative since this
+    // internal loop compounds with any acoustic speaker->mic loop.
+    const MAX_FEEDBACK = 0.5;
+
+    // Native browser echo cancellation (AEC) on the mic input — see the
+    // "Feedback (Larsen effect) safety net" note in the file header for what
+    // this buys you. Currently disabled: AEC's own processing measurably
+    // dulled/delayed the voice, and the howl detector below still catches
+    // runaway feedback on its own. Flip this back to true (no other changes
+    // needed) if open-speaker howling becomes a problem again.
+    const USE_ECHO_CANCELLATION = false;
 
     // Manual mic pre-amp. Phone/laptop mics are usually quiet by default,
     // and disabling getUserMedia's autoGainControl (see enableMic) means
     // nothing else boosts the signal — this is that boost, applied before
-    // the effects chain so echo/reverb tails scale with it too.
-    const INPUT_GAIN = 1.8;
+    // the effects chain so echo/reverb tails scale with it too. Raised from
+    // 1.8: at "100%" output the processed voice was still getting buried
+    // under louder external sources (phone speaker playing the song, etc).
+    const INPUT_GAIN = 2.4;
+
+    // Fixed makeup gain applied after the limiter (see buildGraph). The
+    // limiter/compressor below squashes peaks down at its threshold but
+    // doesn't compensate for the *average* level it removes doing so, so the
+    // processed signal ends up quieter than the raw peaks would suggest.
+    // This restores loudness post-compression instead of just cranking
+    // INPUT_GAIN/masterGain further, which would raise feedback risk 1:1
+    // with volume; boosting after the limiter keeps peaks capped while still
+    // recovering perceived loudness. +4dB ≈ x1.585, chosen to stay under the
+    // ~6dB of headroom the limiter's -6dB threshold leaves before 0dBFS.
+    const MAKEUP_GAIN = 1.585;
 
     // ---- Impulse response synthesis for the reverb (no audio file needed) --
     // Generates decaying stereo white noise; a longer/steeper decay reads as
@@ -172,6 +221,12 @@
 
         masterGain = audioCtx.createGain();
 
+        // Safety-only node for the howl detector — always starts fully open
+        // (gain 1) and is only ever touched by triggerDuck()/recoverFromDuck()
+        // below, never by the volume slider.
+        duckGain = audioCtx.createGain();
+        duckGain.gain.value = 1;
+
         // Catches the summed dry+echo+reverb peaks so the pre-amp/output
         // gain above can be pushed loud without turning into harsh digital
         // clipping — standard voice-bus limiter settings.
@@ -181,6 +236,11 @@
         limiter.ratio.value = 8;
         limiter.attack.value = 0.003;
         limiter.release.value = 0.15;
+
+        // Recovers the loudness the limiter's compression removes — see the
+        // MAKEUP_GAIN comment above.
+        makeupGain = audioCtx.createGain();
+        makeupGain.gain.value = MAKEUP_GAIN;
 
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
@@ -207,8 +267,10 @@
         reverbWetGain.connect(masterGain);
 
         // Output + visualizer tap
-        masterGain.connect(limiter);
-        limiter.connect(analyser);
+        masterGain.connect(duckGain);
+        duckGain.connect(limiter);
+        limiter.connect(makeupGain);
+        makeupGain.connect(analyser);
 
         if (isMobileDevice()) {
             // iOS/Android browsers often switch to a "voice call" audio
@@ -218,7 +280,7 @@
             // element gets normal playback routing, so we render into a
             // MediaStreamAudioDestinationNode and play that through one.
             outputDestination = audioCtx.createMediaStreamDestination();
-            limiter.connect(outputDestination);
+            makeupGain.connect(outputDestination);
 
             outputEl = document.createElement("audio");
             outputEl.autoplay = true;
@@ -232,7 +294,7 @@
             // autoplay policies.
             outputEl.play().catch(() => {});
         } else {
-            limiter.connect(audioCtx.destination);
+            makeupGain.connect(audioCtx.destination);
         }
 
         applyAllControls();
@@ -257,6 +319,9 @@
         audioCtx = null;
         micStream = null;
         micSource = null;
+        duckGain = null;
+        makeupGain = null;
+        resetHowlState();
         clearVisualizer();
     }
 
@@ -343,6 +408,7 @@
         function frame() {
             rafId = requestAnimationFrame(frame);
             analyser.getByteFrequencyData(data);
+            detectHowl(data); // reuses this frame's data, no extra analyser read
 
             const w = els.canvas.width;
             const h = els.canvas.height;
@@ -360,6 +426,105 @@
             }
         }
         frame();
+    }
+
+    // ---- Howl (feedback) detector ---------------------------------------
+    // A sung note or spoken voice spreads energy across many bins; a runaway
+    // acoustic/delay feedback loop rings at one resonant frequency and looks
+    // like a single narrow bin sitting far above the rest of the spectrum,
+    // frame after frame. Flag that pattern once it sustains for a while and
+    // duck the safety-only duckGain node (never the user's volume slider) to
+    // break the loop, then ease back in. With USE_ECHO_CANCELLATION off
+    // (see enableMic), this is the main defense against the self-feedback
+    // loop, not just a backstop — it still can't fix bleed from a
+    // *different* device's speaker, only this tab's own output re-entering
+    // its own mic.
+    //
+    // Currently disabled (see USE_HOWL_DETECTOR) — with both feedback layers
+    // off, open-speaker use has no automatic protection at all right now;
+    // rely on the headphone warning / manual volume discipline until this is
+    // switched back on.
+    const USE_HOWL_DETECTOR = false;
+    const HOWL_PEAK_THRESHOLD = 235; // byte magnitude (0-255) the peak bin must clear
+    const HOWL_DOMINANCE_RATIO = 2.2; // peak must be this many times the spectrum's average
+    const HOWL_BIN_TOLERANCE = 1; // peak bin allowed to drift this many bins between frames
+    const HOWL_SUSTAIN_FRAMES = 18; // ~300ms at 60fps before it counts as "ringing", not a note
+    const DUCK_ATTACK_SECONDS = 0.05; // fast — the whole point is to break the loop quickly
+    const DUCK_HOLD_MS = 900; // how long to stay ducked before easing back
+    const DUCK_RELEASE_SECONDS = 1.2; // gentle recovery so it doesn't sound like a hard mute
+
+    let howlStreak = 0;
+    let howlStreakBin = -1;
+    let isDucking = false;
+    let duckRecoverTimer = null;
+
+    function resetHowlState() {
+        howlStreak = 0;
+        howlStreakBin = -1;
+        isDucking = false;
+        if (duckRecoverTimer) {
+            clearTimeout(duckRecoverTimer);
+            duckRecoverTimer = null;
+        }
+    }
+
+    function detectHowl(data) {
+        if (!USE_HOWL_DETECTOR || !duckGain || isDucking) return;
+
+        let peakIndex = 0;
+        let peakValue = 0;
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) {
+            sum += data[i];
+            if (data[i] > peakValue) {
+                peakValue = data[i];
+                peakIndex = i;
+            }
+        }
+        const average = sum / data.length;
+        const isSpike = peakValue >= HOWL_PEAK_THRESHOLD && peakValue >= average * HOWL_DOMINANCE_RATIO;
+        const sameBinAsLastFrame = isSpike && Math.abs(peakIndex - howlStreakBin) <= HOWL_BIN_TOLERANCE;
+
+        if (sameBinAsLastFrame) {
+            howlStreak++;
+        } else {
+            howlStreak = isSpike ? 1 : 0;
+        }
+        howlStreakBin = isSpike ? peakIndex : -1;
+
+        if (howlStreak >= HOWL_SUSTAIN_FRAMES) {
+            triggerDuck();
+        }
+    }
+
+    function triggerDuck() {
+        if (!duckGain || !audioCtx || isDucking) return;
+        isDucking = true;
+        howlStreak = 0;
+
+        const now = audioCtx.currentTime;
+        duckGain.gain.cancelScheduledValues(now);
+        duckGain.gain.setValueAtTime(duckGain.gain.value, now);
+        duckGain.gain.linearRampToValueAtTime(0.03, now + DUCK_ATTACK_SECONDS);
+        setStatus("Feedback detected — muting briefly…", "km-error");
+
+        duckRecoverTimer = setTimeout(recoverFromDuck, DUCK_HOLD_MS);
+    }
+
+    function recoverFromDuck() {
+        duckRecoverTimer = null;
+        if (!duckGain || !audioCtx) {
+            isDucking = false;
+            return;
+        }
+        const now = audioCtx.currentTime;
+        duckGain.gain.cancelScheduledValues(now);
+        duckGain.gain.setValueAtTime(duckGain.gain.value, now);
+        duckGain.gain.linearRampToValueAtTime(1, now + DUCK_RELEASE_SECONDS);
+        isDucking = false;
+        if (isLive) {
+            setStatus(isMuted ? "Live — muted." : "Live — singing through effects.", "km-live");
+        }
     }
 
     // ---- Status helpers --------------------------------------------------------
@@ -380,7 +545,9 @@
         try {
             micStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    echoCancellation: false,
+                    // See USE_ECHO_CANCELLATION above for why this is a
+                    // named toggle rather than a literal.
+                    echoCancellation: USE_ECHO_CANCELLATION,
                     noiseSuppression: false,
                     // Off on purpose: AGC auto-levels (usually *down*) and
                     // adds its own processing latency. inputGain in

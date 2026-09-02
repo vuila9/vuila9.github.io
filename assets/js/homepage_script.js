@@ -26,12 +26,6 @@ document.addEventListener("DOMContentLoaded", function() {
             descKey: "proj.flappy.desc",
             link: "projects/Flappy_Bird/Flappy_Bird.html"
         },
-        // {
-        //     imageSrc: "projects/Karaoke_Mic/Karaoke_Mic_icon.svg",
-        //     titleKey: "proj.karaoke.title",
-        //     descKey: "proj.karaoke.desc",
-        //     link: "projects/Karaoke_Mic/Karaoke_Mic.html"
-        // },
         {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
             titleKey: "proj.stream.title",
