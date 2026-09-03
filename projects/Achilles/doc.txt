@@ -1,0 +1,27 @@
+1.
+Set up a self-hosted Ruffle shell
+Ruffle (open source Flash emulator, compiled to WebAssembly) gets embedded as a static JS file plus a small loader HTML page. No server-side Flash, no plugin, no Adobe dependency. This becomes the container the game runs inside.
+
+2.
+Load the SWF and check AS2 compatibility
+Drop achilles.swf into the Ruffle shell and run it in a real browser to see what actually executes. Your file is clean AS2 with standard patterns (Key.isDown, attachMovie, gotoAndStop, etc.), all of which Ruffle supports well, so this should mostly just work. Anything Ruffle can't handle would show up as a console warning at this stage.
+
+3.
+Strip the phone-home code
+Frame 1 calls a MochiBot analytics stub that tries to load an external SWF from mochibot.com for ad tracking. This will fail silently under Ruffle (harmless) but it is dead weight, so it gets removed by patching that DoAction script and repackaging the SWF, or by blocking the request at the shell level.
+
+4.
+Build the touch input layer
+The game reads real keyboard state via Key.isDown() for movement (Left/Right or A/D), jump (Up/W), duck (Down/S), and two attack keys. On-screen touch controls get built that, on touchstart/touchend, dispatch synthetic KeyboardEvent(keydown/keyup) with those exact key codes. Ruffle listens to genuine browser keyboard events, so it can't tell the difference between a real key press and a synthetic one triggered by a tap.
+
+5.
+Handle mobile viewport quirks
+iOS Safari needs specific handling to behave like a game surface instead of a webpage: locking pinch-zoom and rubber-band scroll, scaling the Ruffle canvas to fit the screen while preserving aspect ratio, and adding a 'tap to start' gate, since iOS blocks audio from playing until the user makes a deliberate touch gesture (this affects the game's music/sound calls specifically).
+
+6.
+Package it as an installable web app
+A web app manifest, apple-touch-icon, and apple-mobile-web-app-capable meta tags turn it into something 'Add to Home Screen' can install as a standalone fullscreen icon, no Safari address bar, no App Store. A service worker caches the SWF and Ruffle runtime so it also works offline once installed.
+
+7.
+Test on a real device and iterate
+Simulators don't reliably reproduce iOS Safari's audio-unlock and touch-event quirks, so this needs a real iPhone/iPad test pass: confirming standalone mode launches correctly, controls feel responsive, and performance holds up (this is a fairly asset-heavy game with lots of sprites).

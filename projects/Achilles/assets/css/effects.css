@@ -1,0 +1,210 @@
+/* Achilles — project-specific styles */
+
+/* Centered game stage, mirrors the in-page layout used by other projects. */
+#achilles-stage {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.75rem;
+	width: 100%;
+}
+
+/* The Ruffle player's parent box: fixed 700:500 aspect (the SWF's own stage
+   size), scaled to fit whatever space it's given. Ruffle letterboxes the SWF
+   inside this box on its own, so nothing here needs to track resize. */
+#achilles-frame {
+	position: relative;
+	width: min(100%, calc(100dvh * 700 / 500));
+	aspect-ratio: 700 / 500;
+	background: #1a1210;
+	border-radius: 6px;
+	overflow: hidden;
+	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+	touch-action: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+#achilles-player {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* When the frame goes fullscreen, fill the screen and keep it centered. */
+#achilles-frame:fullscreen {
+	width: 100vw;
+	height: 100vh;
+	max-width: none;
+	aspect-ratio: auto;
+	border-radius: 0;
+	background: #000;
+}
+
+/* CSS-only fullscreen fallback for browsers without an element Fullscreen API
+   (iOS Safari never implements requestFullscreen on non-video elements). */
+#achilles-frame.achilles-fake-fullscreen {
+	position: fixed;
+	inset: 0;
+	width: 100vw;
+	height: 100vh;
+	max-width: none;
+	aspect-ratio: auto;
+	border-radius: 0;
+	background: #000;
+	z-index: 1000;
+}
+
+/* ---- Tap-to-start / audio-unlock gate -------------------------------
+   Same global `button` rule as above (main.css: height:3.5em, box-shadow
+   ring, color:#585858 !important) fights this being a full-cover overlay,
+   so width/height/box-shadow/color all need to be reasserted explicitly. */
+#achilles-gate {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: radial-gradient(circle at 50% 40%, #3a1f18, #170d0a 75%);
+	box-shadow: none;
+	color: #e0a94a !important;
+	font-family: inherit;
+	font-size: 1.1rem;
+	font-weight: bold;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	cursor: pointer;
+	border: none;
+	margin: 0;
+	padding: 0;
+	appearance: none;
+	-webkit-appearance: none;
+	transition: opacity 0.25s ease;
+}
+
+#achilles-gate-label {
+	padding: 0.9rem 1.6rem;
+	border: 2px solid #d99a3c;
+	border-radius: 8px;
+}
+
+#achilles-gate.achilles-gate-hidden {
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* ---- Touch controls --------------------------------------------------
+   Shown only on coarse-pointer (touch) devices; a real keyboard already
+   works everywhere via Ruffle's native key handling, so desktop/trackpad
+   visitors never see these. */
+.achilles-controls {
+	position: absolute;
+	inset: 0;
+	z-index: 10;
+	display: none;
+	align-items: flex-end;
+	justify-content: space-between;
+	padding: 10px;
+	padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+	pointer-events: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+	.achilles-controls {
+		display: flex;
+	}
+}
+
+.achilles-controls button {
+	/* The site's global `button` rule (main.css) sets height:3.5em, chunky
+	   padding, a gray inset box-shadow ring, and `color:#585858 !important` —
+	   fine for the site's normal pill buttons, but these are meant to be bare
+	   circular touch targets, so every one of those has to be explicitly
+	   undone here (color needs !important right back to beat main.css's). */
+	pointer-events: auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	background: rgba(224, 169, 74, 0.28);
+	border: 2px solid rgba(224, 169, 74, 0.65);
+	box-shadow: none;
+	color: #fff5e0 !important;
+	border-radius: 50%;
+	letter-spacing: normal;
+	-webkit-tap-highlight-color: transparent;
+	user-select: none;
+	touch-action: none;
+}
+
+.achilles-controls button:active,
+.achilles-controls button.achilles-btn-active {
+	background: rgba(224, 169, 74, 0.55);
+}
+
+.achilles-dpad {
+	display: grid;
+	grid-template-columns: repeat(3, 52px);
+	grid-template-rows: repeat(3, 52px);
+	gap: 4px;
+}
+
+.achilles-btn-up { grid-column: 2; grid-row: 1; }
+.achilles-btn-left { grid-column: 1; grid-row: 2; }
+.achilles-btn-right { grid-column: 3; grid-row: 2; }
+.achilles-btn-down { grid-column: 2; grid-row: 3; }
+
+.achilles-dpad button { border-radius: 10px; font-size: 1.3rem; }
+
+.achilles-atk {
+	display: flex;
+	gap: 10px;
+	align-items: flex-end;
+}
+
+.achilles-atk button {
+	width: 62px;
+	height: 62px;
+	font-size: 0.75rem;
+	font-weight: bold;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.achilles-btn-bash { margin-bottom: 22px; }
+
+/* ---- "Open as app" controls row (project page only) ------------------ */
+.achilles-page-controls {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+#achilles-fullscreen {
+	cursor: pointer;
+}
+
+#achilles-open-app {
+	font-size: 0.85rem;
+	text-decoration: none;
+	padding: 0.2rem 0.6rem;
+	border: 1px solid currentColor;
+	border-radius: 4px;
+	opacity: 0.8;
+	white-space: nowrap;
+}
+
+#achilles-open-app:hover {
+	opacity: 1;
+}
+
+.achilles-hint {
+	font-size: 0.8rem;
+	opacity: 0.6;
+	margin: 0;
+	text-align: center;
+}

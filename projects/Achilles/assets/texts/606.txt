@@ -1,0 +1,7 @@
+Block arrows with your shield by pressing s or down.
+--- RECORDSEPARATOR ---
+Disable enemies temporarily by kicking them.
+--- RECORDSEPARATOR ---
+Spears are most effective when thrown.
+--- RECORDSEPARATOR ---
+Revisit earlier levels to get more lives for later on.

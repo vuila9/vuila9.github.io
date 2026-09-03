@@ -1,0 +1,266 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
+		<!-- End Google Tag Manager -->
+		<title>Achilles Web App &mdash; Play the 2008 Flash Brawler Free, Online &amp; Offline</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+
+		<!-- ===== SEO / search & social metadata ===== -->
+		<meta name="description" content="Play Achilles free in your browser - the 2008 Flash brawler, running unmodified through the Ruffle Flash emulator with touch controls added. Works on desktop and mobile, installs to your home screen, and is fully playable offline." />
+		<meta name="keywords" content="achilles game, achilles flash game, achilles online, play achilles, flash brawler, ruffle, flash emulator, html5 flash game, achilles browser, free achilles game, achilles unblocked" />
+		<meta name="author" content="vuila9" />
+		<meta name="robots" content="index, follow" />
+		<link rel="canonical" href="https://vuila9.github.io/projects/Achilles/Achilles.html" />
+
+		<!-- Open Graph (link previews on Facebook, Discord, iMessage, etc.) -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="vuila9" />
+		<meta property="og:title" content="Achilles Web App - Play Free, Online & Offline" />
+		<meta property="og:description" content="The 2008 Flash brawler Achilles, running through the Ruffle emulator with touch controls added. Installable to your home screen and fully playable offline." />
+		<meta property="og:url" content="https://vuila9.github.io/projects/Achilles/Achilles.html" />
+		<meta property="og:image" content="https://vuila9.github.io/projects/Achilles/Achilles_icon.svg" />
+
+		<!-- Twitter card -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="Achilles Web App - Play Free, Online & Offline" />
+		<meta name="twitter:description" content="The 2008 Flash brawler Achilles, running through the Ruffle emulator - installable and fully playable offline." />
+		<meta name="twitter:image" content="https://vuila9.github.io/projects/Achilles/Achilles_icon.svg" />
+
+		<!-- Structured data: tell search engines this page is a playable game -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "VideoGame",
+			"name": "Achilles Web App",
+			"alternateName": "Achilles Online",
+			"url": "https://vuila9.github.io/projects/Achilles/Achilles.html",
+			"image": "https://vuila9.github.io/projects/Achilles/Achilles_icon.svg",
+			"description": "The 2008 Flash brawler Achilles, running unmodified through the Ruffle Flash emulator with touch controls added. Playable in any modern browser on desktop and mobile, installable to the home screen, and fully playable offline.",
+			"genre": ["Beat 'em up", "Action"],
+			"gamePlatform": ["Web browser", "iOS", "Android", "Desktop", "Opensource"],
+			"applicationCategory": "GameApplication",
+			"operatingSystem": "Any (modern web browser)",
+			"author": { "@type": "Person", "name": "vuila9" },
+			"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+		}
+		</script>
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="Achilles_icon.svg" type="image/svg+xml">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="stylesheet" href="assets/css/effects.css">
+	</head>
+
+	<body class="is-preload">
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NXVSDNVW"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+							<a href="https://vuila9.github.io/#main">
+								<button id="home-btn">&lt;&lt;</button>
+							</a>
+							<a><h1>Achilles</h1></a>
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Game -->
+							<div id="achilles-stage">
+								<div id="achilles-frame">
+									<button id="achilles-gate" aria-label="Tap to start">
+										<span id="achilles-gate-label">Tap to Start</span>
+									</button>
+									<div class="achilles-controls">
+										<div class="achilles-dpad">
+											<button class="achilles-btn-up" data-key="jump" aria-label="Jump">&#9650;</button>
+											<button class="achilles-btn-left" data-key="left" aria-label="Move left">&#9664;</button>
+											<button class="achilles-btn-right" data-key="right" aria-label="Move right">&#9654;</button>
+											<button class="achilles-btn-down" data-key="duck" aria-label="Duck">&#9660;</button>
+										</div>
+										<div class="achilles-atk">
+											<button class="achilles-btn-bash" data-key="bash" aria-label="Bash attack">Bash</button>
+											<button class="achilles-btn-swipe" data-key="swipe" aria-label="Swipe attack">Swipe</button>
+										</div>
+									</div>
+								</div>
+								<div class="achilles-page-controls">
+									<button id="achilles-fullscreen" title="Toggle fullscreen"
+										class="fas fa-expand"></button>
+									<a id="achilles-open-app" href="webapp.html" target="_blank"
+										title="Open the standalone full-screen app">Open as app &#8599;</a>
+								</div>
+								<p class="achilles-hint">Move: arrow keys or A/D &middot; Jump: Up/W &middot;
+									Duck: Down/S &middot; Attacks: T and Y. On touch devices, on-screen
+									controls appear automatically. On mobile, open the app and use your
+									browser's &ldquo;Add to Home Screen&rdquo; for true fullscreen.</p>
+							</div>
+
+							<div>
+								<span class="submenu">Description</span>
+								<p>The 2008 Flash brawler Achilles, running in the browser through
+									<a href="https://ruffle.rs/" target="_blank">Ruffle</a>, an
+									open-source Flash emulator compiled to WebAssembly - no plugin, no
+									Adobe dependency. The original SWF runs unmodified except for one
+									patch: a dead analytics call to a shut-down ad-tracking service has
+									been stripped. On top of that, this page adds an on-screen touch
+									control layer and a PWA shell so it installs and plays offline on
+									phones and tablets, matching the rest of the site's web-app projects.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Background</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('background-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="background-content">
+								<p>The game was made with the assistance of Claude AI.</p>
+								<p>Unlike the other browser-revival projects on this site, Achilles isn't
+									a from-scratch reimplementation. The source assets I had access to -
+									504 loose SVG shapes, sounds, and text snippets - had no timeline data:
+									nothing recording which shape sits where, at what frame, for which of
+									the game's eight animated characters. Rebuilding that choreography by
+									hand would mean re-animating the entire game from scratch, weeks of
+									art work for a result that still wouldn't quite match the original.</p>
+								<p>The original SWF, on the other hand, already has all of that baked in,
+									and it's clean AS2 (ActionScript 2) using standard patterns - Key.isDown() for
+									input, gotoAndStop() for animation state, attachMovie() for spawning
+									effects - all of which Ruffle emulates well. So instead of rebuilding
+									the game, this project wraps the original file: Ruffle runs the real
+									SWF byte-for-byte (minus one patched-out analytics call), and a thin
+									JavaScript layer around it adds what a 2008 Flash game never needed -
+									touch controls, a tap-to-start gate for iOS's audio-unlock rule, and
+									an installable, offline-capable app shell.</p>
+								<p>That one patch is worth explaining. Frame 1 of the original SWF calls
+									a MochiBot analytics stub - a play-count/anti-piracy tracker that Flash
+									game portals commonly embedded around 2008. It tries to load a tracking
+									SWF from mochibot.com on every play. MochiMedia shut down years ago, so
+									the request would just fail - and on a HTTPS GitHub Pages site it can't
+									even leave the browser, since the URL is plain HTTP and gets blocked as
+									mixed content before it's ever sent. Still, the call also grants
+									mochibot.com scripting access into the game via
+									System.security.allowDomain(), and an expired domain like that can be
+									re-registered by anyone. Removing it costs one byte: the call sits as
+									the very last statement in frame 1's script, so overwriting it with the
+									AS2 "end of actions" opcode drops it cleanly, with the rest of the
+									timeline completely untouched.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">iOS App Setup Instruction</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('instruction-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="instruction-content">
+								<p>Quick disclaimer: Android users can always get the vanilla game by
+									finding the original SWF, so yes you are being left out on this one.</p>
+								<p>Before we get started, open the <a href="https://vuila9.github.io/projects/Achilles/webapp.html" target="_blank">webapp version</a> on Safari browser, because apparently only Safari can do this.</p>
+								<p>The version of the game on this current page is not a webapp version, make sure you only do the next step once you open the webapp version of the game on a new tab.</p>
+								<figure class="doc-img">
+									<img src="./assets/img/img1.png" alt="step1">
+									<figcaption>Step 1: Look anywhere on the interface for this button</figcaption>
+								</figure>
+								<figure class="doc-img">
+									<img src="./assets/img/img2.png" alt="step2">
+									<figcaption>Step 2: Need to expand the option list to see this button</figcaption>
+								</figure>
+								<figure class="doc-img">
+									<img src="./assets/img/img3.png" alt="step3">
+									<figcaption>Step 3: Make sure this option is checked, click Add and done</figcaption>
+								</figure>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('features-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<ul>
+									<li><span class="effect-span"><b>Original game</b>: the actual 2008 SWF, run through Ruffle rather than reimplemented.</span></li>
+									<li><span class="effect-span"><b>Move</b> (arrow keys / A,D): walk left or right.</span></li>
+									<li><span class="effect-span"><b>Jump</b> (Up / W) and <b>Duck</b> (Down / S).</span></li>
+									<li><span class="effect-span"><b>Attacks</b> (T and Y): swipe and bash.</span></li>
+									<li><span class="effect-span"><b>Touch controls</b>: on-screen d-pad and attack buttons appear automatically on phones and tablets.</span></li>
+									<li><span class="effect-span"><b>Fullscreen</b> (button): expand the game to fill the screen.</span></li>
+									<li><span class="effect-span"><b>Esc</b> (keyboard): exit fullscreen.</span></li>
+									<li><span class="effect-span"><b>Offline playable</b>: once loaded up the first time, the game can be fully played without internet (only applies after adding the game as a native app).</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">FAQ</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('faq-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="faq-content">
+								<p><b>Why does the game ask me to tap before it starts?</b></p>
+								<p>iOS Safari blocks a page from playing any audio until you make a
+									deliberate tap. The "Tap to Start" screen is that tap - it also
+									doubles as the moment the game actually loads, so nothing plays or
+									makes sound before you've interacted with the page.</p>
+								<p><b>Is this the real game, or a remake?</b></p>
+								<p>It's the real game. The original SWF file runs inside Ruffle, an
+									open-source Flash emulator, with one dead analytics call removed.
+									Nothing about the game itself - its art, animation, or logic - has
+									been changed.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Future Improvements</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('future-improvement-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="future-improvement-content">
+								<ul>
+									<li><span class="effect-span">On-device testing pass across a range of real iPhones/iPads for touch and audio-unlock edge cases.</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('github-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Achilles" target="_blank"><p>Source code</p></a>
+							</div>
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- project specifics -->
+			<script src="assets/js/achilles_app.js"></script>
+	</body>
+</html>

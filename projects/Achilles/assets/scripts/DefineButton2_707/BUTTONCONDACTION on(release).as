@@ -1,0 +1,3 @@
+on(release){
+   gotoAndStop("menu");
+}

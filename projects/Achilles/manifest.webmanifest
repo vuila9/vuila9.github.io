@@ -1,0 +1,19 @@
+{
+  "name": "Achilles",
+  "short_name": "Achilles",
+  "description": "A browser-playable revival of the 2008 Flash brawler Achilles, powered by Ruffle.",
+  "start_url": "./webapp.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#170d0a",
+  "theme_color": "#6e1f1a",
+  "icons": [
+    {
+      "src": "Achilles_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

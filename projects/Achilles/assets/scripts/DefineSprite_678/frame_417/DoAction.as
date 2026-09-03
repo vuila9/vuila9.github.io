@@ -1,0 +1,9 @@
+if(Key.isDown(40))
+{
+   gotoAndStop("spearduck");
+   play();
+}
+else
+{
+   gotoAndPlay(1);
+}

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Achilles Corinthian helmet icon">
+	<!-- Placeholder app icon: a bronze Corinthian helmet on a deep terracotta
+	     background, standing in for the game's own artwork. -->
+	<rect width="512" height="512" rx="96" fill="#6e1f1a"/>
+	<g transform="translate(256 268)">
+		<!-- crest / plume -->
+		<path d="M-14,-206 C-46,-206 -70,-176 -70,-140 C-70,-108 -50,-92 -18,-84
+			C6,-78 18,-70 18,-52 L18,-30 C46,-46 60,-78 60,-112
+			C60,-166 22,-206 -14,-206 Z" fill="#e0a94a"/>
+		<path d="M-14,-190 C-34,-190 -50,-168 -50,-142 C-50,-118 -36,-106 -12,-100
+			C10,-95 20,-86 20,-70" fill="none" stroke="#c8842a" stroke-width="10"
+			stroke-linecap="round"/>
+		<!-- helmet dome -->
+		<path d="M-128,4 C-128,-96 -70,-168 0,-168 C70,-168 128,-96 128,4
+			L128,30 C128,30 96,18 60,18 L60,60 L-60,60 L-60,18
+			C-96,18 -128,30 -128,30 Z" fill="#d99a3c"/>
+		<!-- shading -->
+		<path d="M-128,4 C-128,-96 -70,-168 0,-168 L0,60 L-60,60 L-60,18
+			C-96,18 -128,30 -128,30 Z" fill="#b87e2c"/>
+		<!-- eye slit -->
+		<path d="M-92,-8 C-70,-24 -34,-30 0,-30 C34,-30 70,-24 92,-8
+			L92,14 C70,-2 34,-8 0,-8 C-34,-8 -70,-2 -92,14 Z" fill="#3a1410"/>
+		<!-- nose guard -->
+		<rect x="-14" y="-30" width="28" height="70" rx="8" fill="#3a1410"/>
+		<!-- cheek guards -->
+		<path d="M-128,30 L-128,86 C-128,100 -116,110 -100,110 L-70,110
+			C-58,110 -50,100 -50,88 L-50,60 L-60,60 L-60,18 Z" fill="#c8842a"/>
+		<path d="M128,30 L128,86 C128,100 116,110 100,110 L70,110
+			C58,110 50,100 50,88 L50,60 L60,60 L60,18 Z" fill="#e0a94a"/>
+	</g>
+</svg>

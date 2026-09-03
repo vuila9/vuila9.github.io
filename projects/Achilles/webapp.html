@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8" />
+		<title>Achilles</title>
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+		<meta name="description" content="A browser-playable revival of the 2008 Flash brawler Achilles, powered by Ruffle." />
+		<meta name="theme-color" content="#6e1f1a" />
+
+		<!-- PWA / Add to Home Screen: launches chrome-free in standalone mode -->
+		<link rel="manifest" href="manifest.webmanifest" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Achilles" />
+		<link rel="apple-touch-icon" href="Achilles_icon.svg" />
+		<link rel="icon" href="Achilles_icon.svg" type="image/svg+xml" />
+
+		<link rel="stylesheet" href="assets/css/effects.css" />
+		<style>
+			/* Standalone app shell — the game owns the whole viewport. No theme CSS
+			   or scroll scripts are loaded here, which is what keeps it smooth on
+			   mobile compared with the full project page. */
+			html, body {
+				margin: 0;
+				height: 100%;
+				background: #170d0a;
+				overflow: hidden;
+				overscroll-behavior: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+			#achilles-page {
+				position: fixed;
+				inset: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#achilles-stage {
+				height: 100%;
+				justify-content: center;
+			}
+			#achilles-frame {
+				max-width: none;
+				border-radius: 0;
+				box-shadow: none;
+			}
+		</style>
+	</head>
+
+	<body class="achilles-app">
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NXVSDNVW"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div id="achilles-page">
+			<div id="achilles-stage">
+				<div id="achilles-frame">
+					<button id="achilles-gate" aria-label="Tap to start">
+						<span id="achilles-gate-label">Tap to Start</span>
+					</button>
+					<div class="achilles-controls">
+						<div class="achilles-dpad">
+							<button class="achilles-btn-up" data-key="jump" aria-label="Jump">&#9650;</button>
+							<button class="achilles-btn-left" data-key="left" aria-label="Move left">&#9664;</button>
+							<button class="achilles-btn-right" data-key="right" aria-label="Move right">&#9654;</button>
+							<button class="achilles-btn-down" data-key="duck" aria-label="Duck">&#9660;</button>
+						</div>
+						<div class="achilles-atk">
+							<button class="achilles-btn-bash" data-key="bash" aria-label="Bash attack">Bash</button>
+							<button class="achilles-btn-swipe" data-key="swipe" aria-label="Swipe attack">Swipe</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- game (no theme scripts: this is the lean, fast app build) -->
+		<script src="assets/js/achilles_app.js"></script>
+		<script>
+			// Register the service worker so the app is installable and loads its
+			// assets from cache (faster, and works offline once visited).
+			if ("serviceWorker" in navigator) {
+				window.addEventListener("load", function () {
+					navigator.serviceWorker.register("sw.js").catch(function () {});
+				});
+			}
+		</script>
+	</body>
+</html>

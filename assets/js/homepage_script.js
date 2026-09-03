@@ -27,6 +27,12 @@ document.addEventListener("DOMContentLoaded", function() {
             link: "projects/Flappy_Bird/Flappy_Bird.html"
         },
         {
+            imageSrc: "projects/Achilles/Achilles_icon.svg",
+            titleKey: "proj.achilles.title",
+            descKey: "proj.achilles.desc",
+            link: "projects/Achilles/Achilles.html"
+        },
+        {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
             titleKey: "proj.stream.title",
             descKey: "proj.stream.desc",

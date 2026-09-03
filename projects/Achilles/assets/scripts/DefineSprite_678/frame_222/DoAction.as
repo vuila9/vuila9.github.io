@@ -1,0 +1,2 @@
+gotoAndStop("respawn");
+play();
