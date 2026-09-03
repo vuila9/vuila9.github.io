@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 	<head>
 		<!-- Google Tag Manager -->
 		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -17,7 +17,44 @@
 		     LinkedIn, Facebook, etc.) real content to read without running JS. -->
 		<meta name="description" content="Portfolio of Khoa Xuan Nguyen — Computer Science graduate (Carleton University) and software developer. Explore my projects, work experience, and background." />
 		<meta name="author" content="Khoa Xuan Nguyen" />
+		<meta name="robots" content="index, follow" />
 		<link rel="canonical" href="https://vuila9.github.io/" />
+
+		<!-- Structured data (JSON-LD) so AI assistants and rich results can read
+		     who this site is about and what it links to, without running JS. -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "ProfilePage",
+			"dateCreated": "2024-01-01",
+			"mainEntity": {
+				"@type": "Person",
+				"name": "Khoa Xuan Nguyen",
+				"alternateName": "vuila9",
+				"url": "https://vuila9.github.io/",
+				"image": "https://vuila9.github.io/assets/img/misc/og-image.jpg",
+				"jobTitle": "Software Developer",
+				"email": "mailto:johnxnguyenwork@gmail.com",
+				"alumniOf": {
+					"@type": "CollegeOrUniversity",
+					"name": "Carleton University"
+				},
+				"knowsAbout": ["Python", "Java", "C", "C++", "JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Astro"],
+				"sameAs": [
+					"https://www.linkedin.com/in/jxnguyen/",
+					"https://github.com/vuila9"
+				]
+			}
+		}
+		</script>
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "WebSite",
+			"name": "Khoa's Portfolio",
+			"url": "https://vuila9.github.io/"
+		}
+		</script>
 
 		<!-- Open Graph (Facebook, LinkedIn, Discord, ...) -->
 		<meta property="og:type" content="website" />
@@ -72,18 +109,18 @@
 						<div class="inner">
 							<!-- Logo -->
 								<a class="logo">
-									<span class="symbol"><img src="assets/img/misc/vykas.ico" alt="" /></span><span class="title" data-i18n="home.logoTitle"></span>
+									<span class="symbol"><img src="assets/img/misc/vykas.ico" alt="Khoa's Portfolio logo" /></span><span class="title" data-i18n="home.logoTitle">My name is Khoa Xuan Nguyen</span>
 								</a>
-								<h1 data-i18n="home.welcome"></h1>
-								<p class="bigger-p" data-i18n="home.intro1"></p>
-								<p class="bigger-p" data-i18n="home.intro2"></p>
-								<p class="bigger-p" data-i18n="home.intro3"></p>
+								<h1 data-i18n="home.welcome">Welcome to my portfolio!</h1>
+								<p class="bigger-p" data-i18n="home.intro1">This website provides an overview of my background and showcases all the projects I have created. Unless otherwise specified, most of these projects were developed using vanilla JavaScript, without the use of any frameworks or library.</p>
+								<p class="bigger-p" data-i18n="home.intro2">It has been a while since I last posted a project. I recently moved back to Vietnam for more opportunities and am currently working as a developer at a small-sized company. I’ve been handling various projects and tasks, and I’m actively working on them. I’ll be sharing updates soon.</p>
+								<p class="bigger-p" data-i18n="home.intro3">All of my projects up to Streaming Simulator were completely hand-coded without any AI assistance. However, I’ve come to realize that avoiding AI entirely would be like handicapping myself. So from this point onward, many of my upcoming and future projects will heavily involve AI-assisted coding. Of course, my coding knowledge and fundamentals will still be applied wherever necessary and won’t go to waste.</p>
 
 								<br>
 							<!-- Nav -->
 								<nav>
 									<ul>
-										<li><a href="#menu" data-i18n="nav.menu"></a></li>
+										<li><a href="#menu" data-i18n="nav.menu">Menu</a></li>
 									</ul>
 								</nav>
 						</div>
@@ -91,13 +128,13 @@
 
 				<!-- Menu -->
 					<nav id="menu">
-						<h1 data-i18n="nav.menu"></h1>
+						<h1 data-i18n="nav.menu">Menu</h1>
 						<ul>
-							<li><a href="#header"><h3 data-i18n="nav.home"></h3></a></li>
-							<li><a href="#main"><h3 data-i18n="nav.projects"></h3></a></li>
-							<li><a href="#about-me"><h3 data-i18n="nav.about"></h3></a></li>
-							<li><a href="#experience"><h3 data-i18n="nav.experience"></h3></a></li>
-							<li><a href="#footer"><h3 data-i18n="nav.contact"></h3></a></li>
+							<li><a href="#header"><h3 data-i18n="nav.home">Home</h3></a></li>
+							<li><a href="#main"><h3 data-i18n="nav.projects">Projects</h3></a></li>
+							<li><a href="#about-me"><h3 data-i18n="nav.about">About Me</h3></a></li>
+							<li><a href="#experience"><h3 data-i18n="nav.experience">Experience</h3></a></li>
+							<li><a href="#footer"><h3 data-i18n="nav.contact">Contact</h3></a></li>
 						</ul>
 					</nav>
 
@@ -105,9 +142,22 @@
 					<section id="main">
 						<div class="inner">
 							<br>
-							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u data-i18n="section.projects"></u></h1>
+							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u data-i18n="section.projects">PROJECTS</u></h1>
 							<div style="justify-content: center" class="section tiles">
-								<!-- homepage_script.js -->
+								<!-- Static fallback so crawlers/AI fetchers that don't run JS still see
+								     the project list; homepage_script.js replaces this markup with the
+								     same tiles (and re-renders on language toggle) once it runs. -->
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="projects/BejeweledX/BejeweledX_icon.svg" alt="Bejeweled X" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/BejeweledX/BejeweledX.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Bejeweled X</h2><p>A web revival of the classic match-3 game Bejeweled 2, using the original assets and re-implemented in vanilla JavaScript.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/flappy_tile.png" alt="Flappy Bird" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/Flappy_Bird/Flappy_Bird.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Flappy Bird</h2><p>A web revival of the classic Flappy Bird, using the original 2014 assets and re-implemented in vanilla JavaScript.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/stream_simulator_tile.jpg" alt="Stream Simulator" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/Stream_Simulator/Stream_Simulator.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Stream Simulator</h2><p>A streaming simulator that lets you role-play as a streamer with any audience size.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/snake_tile.jpg" alt="Snake Game" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/Snake/Snake.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Snake Game</h2><p>Snake game made using HTML, CSS, JS</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/paint_tile.jpg" alt="Paint" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/MS_Paint/MS_Paint.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Paint</h2><p>A paint program that allows users to draw.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/cube_tile.jpg" alt="Cube" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/Cube/Cube.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Cube</h2><p>A program featuring a 3D object created using Three.js and Blender.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/terminal_tile.jpg" alt="Terminal Simulator" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Terminal Simulator</h2><p>A simulator for Windows CMD and Ubuntu Terminal command consoles.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/manytools_tile.jpg" alt="Many mini-tools" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/Many_mini-tools/Many_mini-tools.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Many mini-tools</h2><p>A collection of small-scale projects (or tools) that I find interesting to implement or useful for personal need.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/sudoku_tile.jpg" alt="Sudoku Game (v2)" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/Sudoku_JS/Sudoku_JS.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Sudoku Game (v2)</h2><p>A Sudoku game with built-in solver, featuring a fully implemented GUI using JavaScript, HTML, and CSS.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/restaurant_tile.jpg" alt="Web-based Restaurant" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/Web-based_Restaurant/Web-based_Restaurant.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Web-based Restaurant</h2><p>A web-based online restaurant using MongoDB for storing order database and Node.js for server hosting.</p></div></a></article>
+								<article style="width:225px;height:225px"><span class="image" style="width:225px;height:225px"><img src="assets/img/program_icons/storeapp_tile.jpg" alt="Store Application" style="width:100%;height:100%;object-fit:fill" /></span><a href="projects/Store_Application/Store_Application.html" style="overflow:hidden"><div class="content"><h2 class="program_title">Store Application</h2><p>A Java-based application with a graphical user interface (GUI).</p></div></a></article>
 							</div>
 						</div>
 						<br><br>
@@ -117,7 +167,7 @@
 					<section id="about-me">
 						<br>
 						<div class="inner">
-							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u data-i18n="section.about"></u></h1>
+							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u data-i18n="section.about">ABOUT ME</u></h1>
 							<div style="justify-content: center">
 								<!-- Command prompt terminal -->
 								<div id="command-console">
@@ -131,16 +181,16 @@
 										<p class="cmd-log">(c) Microsoft Corporation. All rights reserved.</p>
 										<p style="margin: 0; height: 16px"></p>
 										<p class="cmd-log">C:\Users\vuila9>whoami</p>
-										<p class="cmd-log" data-i18n="about.whoami1"></p>
+										<p class="cmd-log" data-i18n="about.whoami1">It all started with a passion for computer science because I love coding. While I initially enjoyed math and physics, I found them too dry to pursue professionally. My interest in coding began in high school when I was unsure about which course to study. As I explored coding further, my love for it grew. Eventually, I realized that being good at math actually complements computer science, and I finally discovered my career path.</p>
 										<p></p>
-										<p class="cmd-log" data-i18n="about.whoami2"></p>
+										<p class="cmd-log" data-i18n="about.whoami2">My diligent efforts during university were rewarded when I secured an internship at BlackBerry QNX. During my time there, I gained invaluable insights into the realities of a professional environment, particularly in software development and engineering roles. Additionally, I had the opportunity to engage in various social aspects, including team meetings, discussions, and assuming responsibilities. The knowledge and experiences I acquired during this internship were beyond the scope of classroom learning.</p>
 										<p></p>
-										<p class="cmd-log" data-i18n="about.whoami3"></p>
+										<p class="cmd-log" data-i18n="about.whoami3">After the internship, I returned to complete my university studies at Carleton. Although the job search turned out to be more challenging than I anticipated, I made the decision to regroup and invest in my personal growth. After reassessing my situation, I recognized that my lack of experience was a significant factor. Consequently, I have concentrated on enhancing my professional skills by creating numerous small to medium-sized projects.</p>
 										<p></p>
-										<p class="cmd-log" data-i18n="about.whoami4"></p>
+										<p class="cmd-log" data-i18n="about.whoami4">I traveled to Canada in June 2017 to study abroad. Started in Grade 11 at Glebe CI, Ottawa. I then went to Carleton University for 4.5 years of study. Lived and worked for another 2 years. February 2026, my journey here finally concluded, and I decided it was a good time to go home, in Vietnam.</p>
 										<p></p>
-										<p class="cmd-log"><span data-i18n="about.reachEmail"></span><a class="cmd-log" style="color: cyan" href="mailto:johnxnguyenwork@gmail.com">johnxnguyenwork@gmail.com</a></p>
-										<p class="cmd-log" data-i18n-html="about.moreBottom"></p>
+										<p class="cmd-log"><span data-i18n="about.reachEmail">You can reach out to me at my working email address: </span><a class="cmd-log" style="color: cyan" href="mailto:johnxnguyenwork@gmail.com">johnxnguyenwork@gmail.com</a></p>
+										<p class="cmd-log" data-i18n-html="about.moreBottom">More can be found at the <a class="cmd-log" style="color: cyan" href="#footer">bottom</a> of this website ↓</p>
 										<p style="margin: 0; height: 16px"></p>
 										<p class="cmd-log">C:\Users\vuila9><b><span class="cursor">_</span></b></p>
 									</div>
@@ -148,7 +198,7 @@
 								<!-- Resume Download button -->
 								<br><br>
 								<div style="text-align: center; padding: 20px;">
-									<a href="assets/attachment/John_Resume.pdf" class="button primary icon solid fa-download" target="_blank" style="height:50px" data-i18n="about.resumeBtn"></a>
+									<a href="assets/attachment/John_Resume.pdf" class="button primary icon solid fa-download" target="_blank" style="height:50px" data-i18n="about.resumeBtn">Download My Resume!</a>
 								</div>
 							</div>
 						</div>
@@ -159,10 +209,10 @@
 					<section id="experience">
 						<div class="inner" >
 							<br>
-							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u data-i18n="section.experience"></u></h1>
+							<h1 class="center-text" style="color: rgb(46, 46, 46);"><u data-i18n="section.experience">EXPERIENCE</u></h1>
 							<div class="row">
 								<div class="col-lg p-3 stickyNote rotate-right shadow">
-									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.languages"></h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.languages">Languages</h3>
 									<ul><b>
 										<li>Python</li>
 										<li>Java</li>
@@ -173,24 +223,24 @@
 									</ul>
 								</div>
 								<div class="col-lg p-3 stickyNote rotate-left shadow">
-									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.tools"></h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.tools">Tools</h3>
 									<ul><b>
-										<li data-i18n="exp.tools.li1"></li>
-										<li data-i18n="exp.tools.li2"></li>
-										<li data-i18n="exp.tools.li3"></li>
-										<li data-i18n="exp.tools.li4"></li>
-										<li data-i18n="exp.tools.li5"></li>
+										<li data-i18n="exp.tools.li1">Git, Pytest, GDB/PDB, CVAT, YOLO</li>
+										<li data-i18n="exp.tools.li2">Linux, Windows, Oracle VM VirtualBox</li>
+										<li data-i18n="exp.tools.li3">Frameworks: React 19, Next.js, Astro, Node.js</li>
+										<li data-i18n="exp.tools.li4">Libraries: Tailwind CSS, Qt, PyQt, Tkinter, Konva</li>
+										<li data-i18n="exp.tools.li5">Database & CMS: SQLite, Sanity CMS</li>
 										</b>
 									</ul>
 								</div>
 								<div class="col-lg p-3 stickyNote rotate-right shadow">
-									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.coursework"></h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.coursework">Coursework & Interests</h3>
 									<ul><b>
-										<li data-i18n="exp.course.li1"></li>
-										<li data-i18n="exp.course.li2"></li>
-										<li data-i18n="exp.course.li3"></li>
-										<li data-i18n="exp.course.li4"></li>
-										<li data-i18n="exp.course.li5"></li>
+										<li data-i18n="exp.course.li1">Algorithms, Discrete Structures</li>
+										<li data-i18n="exp.course.li2">Object-Oriented Design</li>
+										<li data-i18n="exp.course.li3">Cybersecurity, AI</li>
+										<li data-i18n="exp.course.li4">Web Applications</li>
+										<li data-i18n="exp.course.li5">Systems Programming, Distributed OS</li>
 										</b>
 									</ul>
 								</div>
@@ -199,20 +249,20 @@
 								<div class="col-lg p-3 stickyPage rotate-right shadow exp-note">
 									<div class="exp-header" role="button" tabindex="0" aria-expanded="false" aria-controls="exp-mg-body">
 										<span class="exp-toggle-icon" aria-hidden="true"></span>
-										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.mg.role"></h3>
-										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.mg.company"></h3>
-										<h4 style="letter-spacing: -1px; margin-bottom: 4px;" data-i18n="exp.mg.date"></h4>
-										<span class="exp-hint" data-i18n="exp.clickHint"></span>
+										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.mg.role">Web-Based Electrical Cabinet Configurator</h3>
+										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.mg.company">Freelance Project</h3>
+										<h4 style="letter-spacing: -1px; margin-bottom: 4px;" data-i18n="exp.mg.date">June 2026 - Present</h4>
+										<span class="exp-hint" data-i18n="exp.clickHint">Click to read more</span>
 									</div>
 									<div class="exp-body" id="exp-mg-body">
 										<div class="exp-body-inner">
 											<ul><b>
-												<li data-i18n="exp.mg.li1"></li>
-												<li data-i18n="exp.mg.li2"></li>
-												<li data-i18n="exp.mg.li3"></li>
-												<li data-i18n="exp.mg.li4"></li>
-												<li data-i18n="exp.mg.li5"></li>
-												<li data-i18n="exp.mg.li6"></li>
+												<li data-i18n="exp.mg.li1">Building a full-featured web application that lets users design electrical cabinets by selecting from a catalog of pre-built components, each with detailed specifications and high-resolution imagery</li>
+												<li data-i18n="exp.mg.li2">Implemented an interactive canvas using Konva where users place, drag, and arrange components in real time with millimeter-accurate, real-world measurements and overlap validation</li>
+												<li data-i18n="exp.mg.li3">Designed an extensive, searchable device library backed by structured component data, allowing users to filter and compare parts before adding them to a configuration</li>
+												<li data-i18n="exp.mg.li4">Standardized the entire cabinet-design workflow to auto-generate consistent output documents — assembly diagrams, parts lists, and quotes — for every project</li>
+												<li data-i18n="exp.mg.li5">Focused on a responsive, intuitive interface so both technical and non-technical users can build valid cabinet layouts without training</li>
+												<li data-i18n="exp.mg.li6">Tools & Frameworks: React 19 + TypeScript (strict mode), Konva (interactive canvas), Vite, and Cloudflare Workers</li>
 												</b>
 											</ul>
 										</div>
@@ -221,20 +271,20 @@
 								<div class="col-lg p-3 stickyPage rotate-left shadow exp-note">
 									<div class="exp-header" role="button" tabindex="0" aria-expanded="false" aria-controls="exp-gp-body">
 										<span class="exp-toggle-icon" aria-hidden="true"></span>
-										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.gp.role"></h3>
-										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.gp.company"></h3>
-										<h4 style="letter-spacing: -1px; margin-bottom: 4px;" data-i18n="exp.gp.date"></h4>
-										<span class="exp-hint" data-i18n="exp.clickHint"></span>
+										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.gp.role">B2B M&E Solutions Website</h3>
+										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.gp.company">Freelance Project</h3>
+										<h4 style="letter-spacing: -1px; margin-bottom: 4px;" data-i18n="exp.gp.date">June 2026 - Present</h4>
+										<span class="exp-hint" data-i18n="exp.clickHint">Click to read more</span>
 									</div>
 									<div class="exp-body" id="exp-gp-body">
 										<div class="exp-body-inner">
 											<ul><b>
-												<li data-i18n="exp.gp.li1"></li>
-												<li data-i18n="exp.gp.li2"></li>
-												<li data-i18n="exp.gp.li3"></li>
-												<li data-i18n="exp.gp.li4"></li>
-												<li data-i18n="exp.gp.li5"></li>
-												<li data-i18n="exp.gp.li6"></li>
+												<li data-i18n="exp.gp.li1">Designed and built a modern, minimalist corporate website for a B2B mechanical & electrical (M&E) solutions company, with clean typography, generous whitespace, and refined micro-interactions</li>
+												<li data-i18n="exp.gp.li2">Integrated a headless CMS (Sanity) so non-technical editors can independently create and publish content — projects, news, products, and pages — with zero developer involvement</li>
+												<li data-i18n="exp.gp.li3">Engineered strong SEO and AIO foundations (canonical tags, structured metadata, semantic markup), passing rigorous performance and accessibility audits with high Lighthouse and PageSpeed Insights scores</li>
+												<li data-i18n="exp.gp.li4">Implemented an email inquiry handler using Resend so leads submitted through the site are delivered reliably to the client's inbox</li>
+												<li data-i18n="exp.gp.li5">Delivered a smooth, polished browsing experience that stays consistent across desktop, tablet, and mobile devices</li>
+												<li data-i18n="exp.gp.li6">Tools & Frameworks: Next.js 15 (App Router), TypeScript, Tailwind CSS v4, Sanity CMS, Cloudflare Workers, Resend (email inquiry handler), and Google Analytics 4</li>
 												</b>
 											</ul>
 										</div>
@@ -245,21 +295,21 @@
 								<div class="col-lg p-3 stickyPage rotate-left shadow exp-note" style="width: 60%; margin: auto;">
 									<div class="exp-header" role="button" tabindex="0" aria-expanded="false" aria-controls="exp-coop-body">
 										<span class="exp-toggle-icon" aria-hidden="true"></span>
-										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.coop.role"></h3>
-										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.coop.company"></h3>
-										<h4 style="letter-spacing: -1px; margin-bottom: 4px;" data-i18n="exp.coop.date"></h4>
-										<span class="exp-hint" data-i18n="exp.clickHint"></span>
+										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.coop.role">Command Line Tools Co-op</h3>
+										<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.coop.company">BlackBerry QNX</h3>
+										<h4 style="letter-spacing: -1px; margin-bottom: 4px;" data-i18n="exp.coop.date">May 2022 - Dec 2022</h4>
+										<span class="exp-hint" data-i18n="exp.clickHint">Click to read more</span>
 									</div>
 									<div class="exp-body" id="exp-coop-body">
 										<div class="exp-body-inner">
 											<ul><b>
-												<li data-i18n="exp.coop.li1"></li>
-												<li data-i18n="exp.coop.li2"></li>
-												<li data-i18n="exp.coop.li3"></li>
-												<li data-i18n="exp.coop.li4"></li>
-												<li data-i18n="exp.coop.li5"></li>
-												<li data-i18n="exp.coop.li6"></li>
-												<li data-i18n="exp.coop.li7"></li>
+												<li data-i18n="exp.coop.li1">Focused on Linux OS, Bash scripting, Python scripting, and C programming</li>
+												<li data-i18n="exp.coop.li2">Tested compatibility of over 300 GNU commands and their flags in BlackBerry's QNX OS</li>
+												<li data-i18n="exp.coop.li3">Enhanced and added five features to front-end and back-end of software usage tracking tool using HTML, Python, JavaScript scripting as base code</li>
+												<li data-i18n="exp.coop.li4">Conducted extensive Python automation scripting, utilizing Pytest to automatically check status of over 40 QNX targets using the Paramiko SSH library</li>
+												<li data-i18n="exp.coop.li5">Performed bug testing on 40 'verification' JIRA tickets to ensure bug fixes work correctly</li>
+												<li data-i18n="exp.coop.li6">Responsible for resolving over 20 JIRA bug tickets submitted by other testers and BlackBerry's customers, utilizing advanced debugging tools such as GDB and PDB</li>
+												<li data-i18n="exp.coop.li7">Developed Python log parser to extract and convert data from over 250,000 test logs on internal report server database into easily readable format</li>
 												</b>
 											</ul>
 										</div>
@@ -268,25 +318,25 @@
 							</div>
 							<div class="row">
 								<div class="col-lg p-3 stickyNote rotate-right shadow" >
-									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.heading"></h3>
-									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.school"></h3>
-									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.degree"></h3>
-									<h4 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.edu.date"></h4>
+									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.heading">Education</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.school">Carleton University</h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 1px;" data-i18n="exp.edu.degree">Bachelor in Computer Science (Honours)</h3>
+									<h4 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.edu.date">Sept 2019 - May 2024</h4>
 									<ul><b>
-										<li data-i18n="exp.edu.li1"></li>
-										<li data-i18n="exp.edu.li2"></li>
-										<li data-i18n="exp.edu.li3"></li>
+										<li data-i18n="exp.edu.li1">Achieved average of A on major CompSci courses</li>
+										<li data-i18n="exp.edu.li2">Participated in various social events and group projects</li>
+										<li data-i18n="exp.edu.li3">Other relatable courses: Statistic, Mathematics, Business</li>
 										</b>
 									</ul>
 								</div>
 								<div class="col-lg p-3 stickyNote rotate-left shadow" >
-									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.personal.heading"></h3>
+									<h3 style="letter-spacing: -1px; margin-bottom: 8px;" data-i18n="exp.personal.heading">Personal skills</h3>
 									<ul><b>
-										<li data-i18n="exp.personal.li1"></li>
-										<li data-i18n="exp.personal.li2"></li>
-										<li data-i18n-html="exp.personal.li3html"></li>
-										<li data-i18n="exp.personal.li4"></li>
-										<li data-i18n="exp.personal.li5"></li>
+										<li data-i18n="exp.personal.li1">Computer hardware assembly</li>
+										<li data-i18n="exp.personal.li2">Computer software troubleshooting</li>
+										<li data-i18n-html="exp.personal.li3html">All the projects at the <a href="#main">top</a> ↑</li>
+										<li data-i18n="exp.personal.li4">Hard-working, ethical, opportunistic</li>
+										<li data-i18n="exp.personal.li5">Fluent in English, Vietnamese</li>
 										</b>
 									</ul>
 								</div>
@@ -300,8 +350,8 @@
 						<div class="inner">
 							<section class="contact-info">
 								<br>
-								<h1 style="font-size: 40px; margin-bottom: 10px;" data-i18n="footer.contact"></h1>
-								<i class='fas fa-map-marker-alt' style='font-size:36px'><p style="display: inline; font-size: 20px" data-i18n-html="footer.location"></p></i>
+								<h1 style="font-size: 40px; margin-bottom: 10px;" data-i18n="footer.contact">Contact</h1>
+								<i class='fas fa-map-marker-alt' style='font-size:36px'><p style="display: inline; font-size: 20px" data-i18n-html="footer.location">&nbsp;&nbsp;&nbsp;&nbsp;Ho Chi Minh, Vietnam</p></i>
 								<br><br>
 								<i class='fas fa-phone' style='font-size:33px'> <p style="display: inline; font-size: 20px">&nbsp;(+84) 973-243-713</p></i> 
 								<br><br>
@@ -309,16 +359,16 @@
 							</section>
 							<section class="contact-info">
 								<br>
-								<h1 style="font-size: 40px; margin-bottom: 5px;" data-i18n="footer.aboutSite"></h1>
-								<p style="font-size:20px; margin-bottom: 5px;"><span data-i18n="footer.aboutSiteText"></span><a style="color: rgba(47, 0, 255, 0.479);" href="https://html5up.net/phantom" target="_blank"><b>HTML5up</b></a></p>
-								<h1 style="font-size: 40px; margin-bottom: 5px" data-i18n="footer.connect"></h1>
+								<h1 style="font-size: 40px; margin-bottom: 5px;" data-i18n="footer.aboutSite">About Site</h1>
+								<p style="font-size:20px; margin-bottom: 5px;"><span data-i18n="footer.aboutSiteText">This is my personal portfolio, built using a free template from </span><a style="color: rgba(47, 0, 255, 0.479);" href="https://html5up.net/phantom" target="_blank"><b>HTML5up</b></a></p>
+								<h1 style="font-size: 40px; margin-bottom: 5px" data-i18n="footer.connect">Connect</h1>
 								<ul class="icons">
 									<li><a href="https://www.linkedin.com/in/jxnguyen/" target="_blank" class="icon brands style2 fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
 									<li><a href="https://github.com/vuila9" target="_blank" class="icon brands style2 fa-github"><span class="label">GitHub</span></a></li>
 								</ul>
 							</section>
 							<ul class="copyright">
-								<p style="text-align: center; font-size: 16px; color: rgba(255, 255, 255, 0.541);" data-i18n="footer.copyright"></p>
+								<p style="text-align: center; font-size: 16px; color: rgba(255, 255, 255, 0.541);" data-i18n="footer.copyright">Copyright © Khoa X Nguyen 2024</p>
 							</ul>
 						</div>
 					</footer>
