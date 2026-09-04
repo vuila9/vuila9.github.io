@@ -48,10 +48,19 @@
 				height: 100%;
 				justify-content: center;
 			}
+			/* Fill the viewport rather than shrink-wrapping the SWF's 700:500
+			   box. Ruffle letterboxes the movie inside the frame on its own, so
+			   the game looks identical — but the frame now reaches the screen
+			   edges, which is what lets the touch controls sit out in the black
+			   bars beside the game instead of on top of it. */
 			#achilles-frame {
+				width: 100%;
+				height: 100%;
 				max-width: none;
+				aspect-ratio: auto;
 				border-radius: 0;
 				box-shadow: none;
+				background: #170d0a;
 			}
 		</style>
 	</head>
@@ -68,15 +77,15 @@
 						<span id="achilles-gate-label">Tap to Start</span>
 					</button>
 					<div class="achilles-controls">
-						<div class="achilles-dpad">
-							<button class="achilles-btn-up" data-key="jump" aria-label="Jump">&#9650;</button>
+						<div class="achilles-move">
 							<button class="achilles-btn-left" data-key="left" aria-label="Move left">&#9664;</button>
 							<button class="achilles-btn-right" data-key="right" aria-label="Move right">&#9654;</button>
-							<button class="achilles-btn-down" data-key="duck" aria-label="Duck">&#9660;</button>
 						</div>
-						<div class="achilles-atk">
-							<button class="achilles-btn-bash" data-key="bash" aria-label="Bash attack">Bash</button>
-							<button class="achilles-btn-swipe" data-key="swipe" aria-label="Swipe attack">Swipe</button>
+						<div class="achilles-actions">
+							<button class="achilles-btn-jump" data-key="jump" aria-label="Jump">Jump</button>
+							<button class="achilles-btn-attack" data-key="attack" aria-label="Attack">Attack</button>
+							<button class="achilles-btn-kick" data-key="kick" aria-label="Kick">Kick</button>
+							<button class="achilles-btn-block" data-key="block" aria-label="Block">Block</button>
 						</div>
 					</div>
 				</div>

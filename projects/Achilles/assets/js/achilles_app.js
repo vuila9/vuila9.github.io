@@ -112,6 +112,8 @@
 	// inside Ruffle's shadow DOM stops propagation on its own UI handlers.
 	frame.addEventListener("pointerdown", ensurePlayerFocused, true);
 
+	bindTripleTapToggle();
+
 	// ---- Tap-to-start gate (also the iOS audio-unlock gesture) ---------
 	if (gate) {
 		gate.addEventListener(
@@ -136,17 +138,58 @@
 		boot();
 	}
 
+	// ---- Triple-tap to show/hide the touch controls ----------------------
+	// The controls are only wanted once you're in a level: on the loading gate,
+	// the title menu, the options screen and the game-over screen they just sit
+	// on top of the things you're trying to tap.
+	//
+	// The game itself is the obvious thing to ask which screen it's on, and it
+	// can be made to say so (patching its frame scripts to emit an fscommand,
+	// which Ruffle forwards to the page), but that's a lot of machinery — a
+	// modified SWF — for a preference the player can just state. So: three taps
+	// on the game inside 600ms toggles the controls. Taps on the control buttons
+	// themselves don't count, so mashing attack during a fight can't dismiss
+	// them mid-level.
+	var TAPS_TO_TOGGLE = 3;
+	var TAP_WINDOW_MS = 600;
+
+	function bindTripleTapToggle() {
+		var taps = [];
+
+		frame.addEventListener("pointerdown", function (e) {
+			// A tap on a d-pad/attack button is play input, not a gesture.
+			if (e.target.closest && e.target.closest("[data-key]")) return;
+
+			var now = e.timeStamp || Date.now();
+			taps.push(now);
+			// Keep only the taps still inside the window, so a slow series of
+			// ordinary menu taps never accumulates into a toggle.
+			taps = taps.filter(function (t) {
+				return now - t <= TAP_WINDOW_MS;
+			});
+			if (taps.length < TAPS_TO_TOGGLE) return;
+
+			taps = [];
+			frame.classList.toggle("achilles-controls-on");
+		});
+	}
+
 	// ---- Touch controls: synthetic keydown/keyup ------------------------
 	// Physical key codes the game already checks in CheckKeys() (frame_3):
 	// Left=37 Right=39 Jump(Up)=38/87 Duck(Down)=40/83 Swipe=100/84('T')
 	// Bash=101/89('Y'). We only need to send one accepted code per action.
+	//
+	// The names on the left are the button names, which don't all match the
+	// SWF's own vocabulary: what the game calls "swipe" is the Attack button,
+	// "bash" is Kick, and the down/duck input is Block. The key codes are what
+	// matters — those are the game's, unchanged.
 	var KEYS = {
 		left: { keyCode: 37, code: "ArrowLeft", key: "ArrowLeft" },
 		right: { keyCode: 39, code: "ArrowRight", key: "ArrowRight" },
 		jump: { keyCode: 38, code: "ArrowUp", key: "ArrowUp" },
-		duck: { keyCode: 40, code: "ArrowDown", key: "ArrowDown" },
-		swipe: { keyCode: 84, code: "KeyT", key: "t" },
-		bash: { keyCode: 89, code: "KeyY", key: "y" }
+		block: { keyCode: 40, code: "ArrowDown", key: "ArrowDown" },
+		attack: { keyCode: 84, code: "KeyT", key: "t" },
+		kick: { keyCode: 89, code: "KeyY", key: "y" }
 	};
 
 	function bindTouchControls(targetEl) {
@@ -197,6 +240,14 @@
 			active.delete(e.pointerId);
 			if (active.size === 0) fire("keyup");
 		}
+
+		// Long-pressing a button is just "hold this direction", but Android
+		// answers a long press with the context menu (iOS is covered by
+		// -webkit-touch-callout in the CSS), which cancels the pointer and so
+		// drops the held key mid-move.
+		el.addEventListener("contextmenu", function (e) {
+			e.preventDefault();
+		});
 
 		el.addEventListener("pointerdown", down);
 		el.addEventListener("pointerup", up);

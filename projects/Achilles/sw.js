@@ -16,7 +16,7 @@
 // from then on — which is what "offline after the first launch" means anyway.
 //
 // Bump CACHE whenever the precached file list changes.
-const CACHE = "achilles-v2";
+const CACHE = "achilles-v3";
 const ASSETS = [
   "./webapp.html",
   "./manifest.webmanifest",

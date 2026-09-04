@@ -100,19 +100,33 @@
    works everywhere via Ruffle's native key handling, so desktop/trackpad
    visitors never see these. */
 .achilles-controls {
+	/* One button size drives both clusters, so they scale together. vmin keeps
+	   them sensible in either orientation: big enough to hit on a phone in
+	   landscape, capped so they don't turn into dinner plates on a tablet. */
+	--achilles-btn: clamp(46px, 14vmin, 62px);
+
 	position: absolute;
 	inset: 0;
 	z-index: 10;
 	display: none;
 	align-items: flex-end;
 	justify-content: space-between;
-	padding: 10px;
-	padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+	/* Hug the frame's left and right edges — in fullscreen and in the
+	   standalone app the frame is the whole screen, so this puts each cluster
+	   out in the letterbox bar beside the game rather than over it. The
+	   safe-area insets keep them clear of a notch or the home indicator when
+	   the phone is held sideways. */
+	padding: 10px max(10px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
 	pointer-events: none;
 }
 
+/* ...and only once the player has asked for them, by tapping the game three
+   times quickly (achilles_app.js toggles .achilles-controls-on). They start
+   hidden so they're not covering the loading screen, the title menu or the
+   game-over screen, all of which are tapped directly rather than played with
+   the d-pad. */
 @media (hover: none) and (pointer: coarse) {
-	.achilles-controls {
+	#achilles-frame.achilles-controls-on .achilles-controls {
 		display: flex;
 	}
 }
@@ -136,9 +150,26 @@
 	color: #fff5e0 !important;
 	border-radius: 50%;
 	letter-spacing: normal;
+
+	/* Nothing about these should behave like text or an image. Rapid tapping
+	   and long-pressing are both normal play input here, and by default iOS
+	   answers them with the selection magnifier, a blue highlight over the
+	   glyph, and the copy/share callout — all of which interrupt the game. The
+	   -webkit- prefixes are the ones that matter: iOS Safari still needs
+	   -webkit-user-select, and -webkit-touch-callout is the only thing that
+	   suppresses the long-press menu. */
 	-webkit-tap-highlight-color: transparent;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
 	user-select: none;
+	-webkit-user-drag: none;
 	touch-action: none;
+}
+
+.achilles-controls button::selection {
+	background: transparent;
 }
 
 .achilles-controls button:active,
@@ -146,36 +177,42 @@
 	background: rgba(224, 169, 74, 0.55);
 }
 
-.achilles-dpad {
+/* Left thumb: walk only. Jump and block moved over to the action cluster, so
+   there's no up/down here and no reason to keep a full d-pad cross.
+   Lifted clear of the bottom edge because the game draws its own "Main Menu"
+   button down in that corner — overlapping it both looked wrong and put our
+   arrows on top of a control the player still needs to be able to hit. */
+.achilles-move {
 	display: grid;
-	grid-template-columns: repeat(3, 52px);
-	grid-template-rows: repeat(3, 52px);
+	grid-template-columns: repeat(2, var(--achilles-btn));
+	grid-template-rows: var(--achilles-btn);
+	gap: 8px;
+	margin-bottom: 24px;
+}
+
+.achilles-move button { border-radius: 10px; font-size: 1.3rem; }
+
+/* Right thumb: the four actions in a diamond — jump on top, attack at nine
+   o'clock, kick at the bottom, block at three. It's the same 3x3 grid the
+   d-pad used, with the corners and centre left empty. */
+.achilles-actions {
+	display: grid;
+	grid-template-columns: repeat(3, var(--achilles-btn));
+	grid-template-rows: repeat(3, var(--achilles-btn));
 	gap: 4px;
 }
 
-.achilles-btn-up { grid-column: 2; grid-row: 1; }
-.achilles-btn-left { grid-column: 1; grid-row: 2; }
-.achilles-btn-right { grid-column: 3; grid-row: 2; }
-.achilles-btn-down { grid-column: 2; grid-row: 3; }
+.achilles-btn-jump { grid-column: 2; grid-row: 1; }
+.achilles-btn-attack { grid-column: 1; grid-row: 2; }
+.achilles-btn-block { grid-column: 3; grid-row: 2; }
+.achilles-btn-kick { grid-column: 2; grid-row: 3; }
 
-.achilles-dpad button { border-radius: 10px; font-size: 1.3rem; }
-
-.achilles-atk {
-	display: flex;
-	gap: 10px;
-	align-items: flex-end;
-}
-
-.achilles-atk button {
-	width: 62px;
-	height: 62px;
-	font-size: 0.75rem;
+.achilles-actions button {
+	font-size: 0.7rem;
 	font-weight: bold;
 	letter-spacing: 0.03em;
 	text-transform: uppercase;
 }
-
-.achilles-btn-bash { margin-bottom: 22px; }
 
 /* ---- "Open as app" controls row (project page only) ------------------ */
 .achilles-page-controls {
