@@ -22,6 +22,15 @@
 	box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
 	touch-action: none;
 	-webkit-tap-highlight-color: transparent;
+
+	/* The whole game surface is unselectable, not just the buttons. iOS raises
+	   the magnifier loupe on a long press over anything selectable, so a press
+	   landing a few pixels off a button — on the control layer, the frame, or
+	   the page showing through — would still summon it. Nothing here is worth
+	   selecting anyway: a canvas and some button labels. */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 #achilles-player {
@@ -118,6 +127,9 @@
 	   the phone is held sideways. */
 	padding: 10px max(10px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px));
 	pointer-events: none;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
 }
 
 /* ...and only once the player has asked for them, by tapping the game three

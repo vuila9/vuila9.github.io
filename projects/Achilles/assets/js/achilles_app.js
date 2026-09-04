@@ -20,6 +20,11 @@
 	var gateLabel = document.getElementById("achilles-gate-label");
 	var player = null;
 
+	// Set by bindTouchControls; drops every held key. Anything that can strand
+	// a press — hiding the controls mid-hold, the app going to the background —
+	// calls this rather than waiting for a pointerup that may never arrive.
+	var releaseAllKeys = function () {};
+
 	// Ruffle listens for keydown/keyup on `window`, but only acts on them
 	// while it believes it has focus — a flag it maintains from focusin /
 	// focusout listeners it attaches to the player element during its own
@@ -110,7 +115,19 @@
 	// (clicking the page around the game, a browser UI detour) the next click on
 	// the game recovers it. Capture phase, so this still runs even if something
 	// inside Ruffle's shadow DOM stops propagation on its own UI handlers.
-	frame.addEventListener("pointerdown", ensurePlayerFocused, true);
+	frame.addEventListener(
+		"pointerdown",
+		function (e) {
+			// Not for the on-screen buttons. Their handler focuses the player
+			// directly, and ensurePlayerFocused deliberately blurs first — a
+			// focus cycle on every single button press is churn, and Ruffle
+			// ignores key events whenever it believes it isn't focused, so a
+			// keyup landing in that window would be dropped and stick the key.
+			if (e.target.closest && e.target.closest("[data-key]")) return;
+			ensurePlayerFocused();
+		},
+		true
+	);
 
 	bindTripleTapToggle();
 
@@ -196,7 +213,9 @@
 			if (taps.length < TAPS_TO_TOGGLE) return;
 
 			taps = [];
-			frame.classList.toggle("achilles-controls-on");
+			var showing = frame.classList.toggle("achilles-controls-on");
+			// Hiding mid-press would stop the buttons ever seeing the pointerup.
+			if (!showing) releaseAllKeys();
 		});
 	}
 
@@ -249,6 +268,10 @@
 		}
 
 		function fire(type, name) {
+			// Ruffle discards key events while it believes it isn't focused, and
+			// a discarded keyup is exactly how a key gets stuck down. Focusing
+			// before every event is cheap and is a no-op when already focused.
+			if (document.activeElement !== targetEl) targetEl.focus();
 			var spec = KEYS[name];
 			var ev = new KeyboardEvent(type, {
 				keyCode: spec.keyCode,
@@ -312,16 +335,77 @@
 			refresh();
 		}
 
+		function releaseEverything() {
+			var stranded = false;
+			Object.keys(pointerAction).forEach(function (id) {
+				delete pointerAction[id];
+				stranded = true;
+			});
+			if (stranded) refresh();
+		}
+		releaseAllKeys = releaseEverything;
+
 		controls.addEventListener("pointerup", release);
 		controls.addEventListener("pointercancel", release);
 
-		// Long-pressing a button is just "hold this direction", but Android
-		// answers a long press with the context menu (iOS is covered by
-		// -webkit-touch-callout in the CSS), which cancels the pointer and so
-		// drops the held key mid-move.
+		// ---- Backstops against a stranded key -------------------------------
+		// A held key is only released when its pointerup arrives, so any lost
+		// pointerup leaves the game with the key still down — walking or
+		// blocking on its own until something else disturbs it. Rapid taps are
+		// where events actually go missing, so don't depend on a single path.
+
+		// 1. The same events at the window, in case the button that had implicit
+		//    capture stops delivering them (hidden, detached, capture lost).
+		window.addEventListener("pointerup", release, true);
+		window.addEventListener("pointercancel", release, true);
+		window.addEventListener("lostpointercapture", release, true);
+
+		// 2. The authoritative one: TouchEvent.touches is the live list of
+		//    fingers on the glass. No fingers means nothing can be held, no
+		//    matter which pointer events went missing.
+		function reconcileTouches(e) {
+			if (e.touches && e.touches.length === 0) releaseEverything();
+		}
+		window.addEventListener("touchend", reconcileTouches, true);
+		window.addEventListener("touchcancel", reconcileTouches, true);
+
+		// 3. Leaving the page mid-press: a pointerup never comes, and the game
+		//    would resume with the key still down.
+		window.addEventListener("blur", releaseEverything);
+		window.addEventListener("pagehide", releaseEverything);
+		document.addEventListener("visibilitychange", function () {
+			if (document.hidden) releaseEverything();
+		});
+
+		// Lets a stuck state be diagnosed from the console: if this reports a
+		// key while nothing is being touched, the strand is here; if it reports
+		// nothing while the game still walks or blocks, the key state stuck on
+		// Ruffle's side instead.
+		window.__achillesHeld = function () {
+			return { keysDown: Object.keys(isDown), pointers: pointerAction };
+		};
+
+		// Long-pressing a button is just "hold this direction", but the OS reads
+		// it as a gesture on content: Android raises the context menu, iOS the
+		// magnifier loupe and selection callout. Either one cancels the pointer
+		// and strands the held key mid-move.
 		controls.addEventListener("contextmenu", function (e) {
 			e.preventDefault();
 		});
+
+		// The CSS (-webkit-touch-callout / user-select) is the main defence on
+		// iOS, but cancelling touchstart on the buttons stops the long-press
+		// gesture from ever starting. Scoped to the buttons and non-passive, so
+		// preventDefault actually applies: cancelling this anywhere else in the
+		// frame would swallow the taps Ruffle needs for the game's own menus.
+		// Pointer events are unaffected by this — only the native gesture is.
+		controls.addEventListener(
+			"touchstart",
+			function (e) {
+				if (e.target.closest && e.target.closest("[data-key]")) e.preventDefault();
+			},
+			{ passive: false }
+		);
 	}
 
 	// ---- Fullscreen toggle (project-page only; webapp.html has no button) --

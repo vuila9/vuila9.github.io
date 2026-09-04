@@ -36,6 +36,11 @@
 				overflow: hidden;
 				overscroll-behavior: none;
 				-webkit-tap-highlight-color: transparent;
+				/* The standalone app is all game — no prose to select, so no
+				   reason for iOS to ever offer the loupe or a callout here. */
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				user-select: none;
 			}
 			#achilles-page {
 				position: fixed;
