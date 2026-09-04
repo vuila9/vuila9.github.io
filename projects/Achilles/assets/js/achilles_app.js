@@ -20,6 +20,35 @@
 	var gateLabel = document.getElementById("achilles-gate-label");
 	var player = null;
 
+	// Ruffle listens for keydown/keyup on `window`, but only acts on them
+	// while it believes it has focus — a flag it maintains from focusin /
+	// focusout listeners it attaches to the player element during its own
+	// async init. That creates a trap:
+	//
+	//   1. We create the player and call .focus() immediately. That sets
+	//      document.activeElement, but Ruffle hasn't attached its listeners
+	//      yet, so it never hears the focusin and its flag stays false.
+	//   2. Every later .focus() call is a silent no-op, because the element
+	//      is ALREADY the active element — no focus change, no focusin event.
+	//      Ruffle never finds out, so keys are received and then discarded.
+	//
+	// The result looks bizarre from the outside: activeElement is correct,
+	// document.hasFocus() is true, keydown events genuinely arrive — and the
+	// game ignores every one of them. Ruffle also never calls preventDefault
+	// on keys it isn't handling, which is why Space fell through to the
+	// browser and scrolled the page instead of pausing the game.
+	//
+	// Alt-tabbing, or clicking outside the game and back, fixes it precisely
+	// because those force a real blur -> focus CYCLE, which does emit a
+	// focusin that Ruffle is by then listening for. So do that deliberately:
+	// blur first when already focused, so .focus() has an actual transition
+	// to make instead of being optimised away.
+	function ensurePlayerFocused() {
+		if (!player) return;
+		if (document.activeElement === player) player.blur();
+		player.focus();
+	}
+
 	// ---- Ruffle bootstrap ----------------------------------------------
 	function loadRuffleScript() {
 		return new Promise(function (resolve, reject) {
@@ -54,11 +83,34 @@
 				contextMenu: "off",
 				letterbox: "on"
 			});
-			player.focus();
 			bindTouchControls(player);
+
+			// Focusing now would be too early — Ruffle attaches the focusin
+			// listener that matters partway through its own async init, so a
+			// focus set before that point is simply never heard. Ruffle builds
+			// its <canvas> during that same init, so wait for the canvas to
+			// appear and take it as the signal that its listeners are up,
+			// then hand it focus for real. Falls back to firing anyway after
+			// ~5s so a rendering-path change upstream can't strand us.
+			var waited = 0;
+			var poll = setInterval(function () {
+				var ready = player.shadowRoot && player.shadowRoot.querySelector("canvas");
+				waited += 100;
+				if (ready || waited >= 5000) {
+					clearInterval(poll);
+					ensurePlayerFocused();
+				}
+			}, 100);
+
 			return player;
 		});
 	}
+
+	// Safety net: any click in the frame re-asserts focus, so if it's ever lost
+	// (clicking the page around the game, a browser UI detour) the next click on
+	// the game recovers it. Capture phase, so this still runs even if something
+	// inside Ruffle's shadow DOM stops propagation on its own UI handlers.
+	frame.addEventListener("pointerdown", ensurePlayerFocused, true);
 
 	// ---- Tap-to-start gate (also the iOS audio-unlock gesture) ---------
 	if (gate) {
