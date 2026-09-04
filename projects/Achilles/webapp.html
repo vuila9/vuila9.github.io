@@ -44,6 +44,30 @@
 				align-items: center;
 				justify-content: center;
 			}
+
+			/* Force landscape on a phone held upright.
+			   This is the fallback layer, and the only one that works on iOS:
+			   the manifest's "orientation": "landscape" is honoured by installed
+			   Android PWAs, and achilles_app.js additionally asks the Screen
+			   Orientation API to lock — but iOS Safari implements neither, and a
+			   700x500 game letterboxed into a portrait phone is a stamp at the
+			   top of a black screen. So present the whole app rotated instead,
+			   swapping the viewport's dimensions.
+
+			   When the real lock succeeds (or the player simply turns the phone),
+			   the device reports landscape, this query stops matching, and the
+			   rotation switches itself off — the two approaches don't fight. */
+			@media (orientation: portrait) and (pointer: coarse) {
+				#achilles-page {
+					inset: auto;
+					top: 50%;
+					left: 50%;
+					width: 100dvh;
+					height: 100dvw;
+					transform: translate(-50%, -50%) rotate(90deg);
+					transform-origin: center center;
+				}
+			}
 			#achilles-stage {
 				height: 100%;
 				justify-content: center;

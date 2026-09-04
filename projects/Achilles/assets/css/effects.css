@@ -186,7 +186,10 @@
 	display: grid;
 	grid-template-columns: repeat(2, var(--achilles-btn));
 	grid-template-rows: var(--achilles-btn);
-	gap: 8px;
+	/* Spread the two arrows apart rather than butting them together — a thumb
+	   rocking between them wants a gap it can feel. Tied to the button size so
+	   the spacing scales with them instead of drifting on bigger screens. */
+	gap: calc(var(--achilles-btn) * 0.5);
 	margin-bottom: 24px;
 }
 

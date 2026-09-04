@@ -114,6 +114,30 @@
 
 	bindTripleTapToggle();
 
+	// ---- Landscape on launch (standalone app only) -----------------------
+	// Three layers, because no single one covers every platform:
+	//   1. manifest.webmanifest's "orientation": "landscape" — installed
+	//      Android PWAs honour this and never show portrait at all.
+	//   2. this, the Screen Orientation API — Android/Chrome, and only from a
+	//      user gesture while installed or fullscreen.
+	//   3. a CSS rotation in webapp.html, for when both of the above do nothing.
+	// iOS Safari implements neither 1 nor 2, so on iPhone it is always 3.
+	//
+	// Guarded on #achilles-page, which only exists in webapp.html: the project
+	// page is a normal scrolling document and must never grab the orientation.
+	function lockLandscape() {
+		if (!document.getElementById("achilles-page")) return;
+		var orientation = window.screen && window.screen.orientation;
+		if (!orientation || !orientation.lock) return;
+		try {
+			var result = orientation.lock("landscape");
+			// Rejects when not installed/fullscreen; the CSS fallback covers it.
+			if (result && result.catch) result.catch(function () {});
+		} catch (err) {
+			/* not supported here — fall through to the CSS rotation */
+		}
+	}
+
 	// ---- Tap-to-start gate (also the iOS audio-unlock gesture) ---------
 	if (gate) {
 		gate.addEventListener(
@@ -121,6 +145,8 @@
 			function onGate() {
 				gate.removeEventListener("click", onGate);
 				if (gateLabel) gateLabel.textContent = "Loading…";
+				// Must ride this gesture — orientation.lock() is gesture-gated.
+				lockLandscape();
 				boot()
 					.then(function () {
 						gate.classList.add("achilles-gate-hidden");
@@ -192,22 +218,38 @@
 		kick: { keyCode: 89, code: "KeyY", key: "y" }
 	};
 
+	// One tracker for the whole control layer rather than a listener per
+	// button, so a finger can slide from one button to another mid-hold and
+	// have the input follow it: release left, press right, without lifting.
+	//
+	// Per-button listeners can't do that. A touch pointer gets IMPLICIT pointer
+	// capture on pointerdown — every later event for that finger is delivered
+	// to the button it started on, so the button you slide onto never hears a
+	// thing and the one you left never hears you go. (The old code made that
+	// worse by calling setPointerCapture explicitly.) So the button under a
+	// finger is resolved by coordinates via elementFromPoint on every move,
+	// not from event.target, which is pinned to the origin button.
+	//
+	// A key is held while ANY finger is on its button and released only when
+	// the last one leaves, so two thumbs sharing a button, or a finger sliding
+	// onto a button someone else is already holding, behave sensibly.
 	function bindTouchControls(targetEl) {
-		var buttons = frame.querySelectorAll("[data-key]");
-		buttons.forEach(function (el) {
-			var spec = KEYS[el.getAttribute("data-key")];
-			if (!spec) return;
-			bindHoldButton(el, targetEl, spec);
-		});
-	}
+		var controls = frame.querySelector(".achilles-controls");
+		if (!controls) return;
 
-	function bindHoldButton(el, targetEl, spec) {
-		// Tracks active pointer ids so two fingers briefly overlapping the same
-		// button (or a stray extra pointerdown) can't drop the held key early —
-		// keyup only fires once every active pointer has released.
-		var active = new Set();
+		var pointerAction = {};   // pointerId -> action name, or null when off
+		var isDown = {};          // action name -> true while its key is held
 
-		function fire(type) {
+		function actionAt(x, y) {
+			var el = document.elementFromPoint(x, y);
+			var btn = el && el.closest ? el.closest("[data-key]") : null;
+			if (!btn || !frame.contains(btn)) return null;
+			var name = btn.getAttribute("data-key");
+			return KEYS[name] ? name : null;
+		}
+
+		function fire(type, name) {
+			var spec = KEYS[name];
 			var ev = new KeyboardEvent(type, {
 				keyCode: spec.keyCode,
 				which: spec.keyCode,
@@ -223,36 +265,63 @@
 			targetEl.dispatchEvent(ev);
 		}
 
-		function down(e) {
-			e.preventDefault();
-			targetEl.focus();
-			try {
-				el.setPointerCapture(e.pointerId);
-			} catch (err) {
-				/* ignore */
-			}
-			if (active.size === 0) fire("keydown");
-			active.add(e.pointerId);
+		// Diff what should be held against what is held, and emit only the
+		// changes — so a slide between two buttons is exactly one keyup and one
+		// keydown, and re-entering a button you're already holding is nothing.
+		function refresh() {
+			var wanted = {};
+			Object.keys(pointerAction).forEach(function (id) {
+				if (pointerAction[id]) wanted[pointerAction[id]] = true;
+			});
+			Object.keys(KEYS).forEach(function (name) {
+				var want = !!wanted[name];
+				if (want === !!isDown[name]) return;
+				if (want) isDown[name] = true;
+				else delete isDown[name];
+				fire(want ? "keydown" : "keyup", name);
+				// :active only ever tracks the button the touch started on, so
+				// the held look has to be driven by hand to survive a slide.
+				var btn = frame.querySelector('[data-key="' + name + '"]');
+				if (btn) btn.classList.toggle("achilles-btn-active", want);
+			});
 		}
 
-		function up(e) {
-			if (!active.has(e.pointerId)) return;
-			active.delete(e.pointerId);
-			if (active.size === 0) fire("keyup");
+		controls.addEventListener("pointerdown", function (e) {
+			var name = actionAt(e.clientX, e.clientY);
+			if (!name) return;
+			e.preventDefault();
+			targetEl.focus();
+			pointerAction[e.pointerId] = name;
+			refresh();
+		});
+
+		controls.addEventListener("pointermove", function (e) {
+			if (!(e.pointerId in pointerAction)) return;
+			e.preventDefault();
+			var name = actionAt(e.clientX, e.clientY);
+			if (name === pointerAction[e.pointerId]) return;
+			// null is kept, not deleted: the finger is still down, just resting
+			// somewhere that isn't a button. Sliding back onto one resumes.
+			pointerAction[e.pointerId] = name;
+			refresh();
+		});
+
+		function release(e) {
+			if (!(e.pointerId in pointerAction)) return;
+			delete pointerAction[e.pointerId];
+			refresh();
 		}
+
+		controls.addEventListener("pointerup", release);
+		controls.addEventListener("pointercancel", release);
 
 		// Long-pressing a button is just "hold this direction", but Android
 		// answers a long press with the context menu (iOS is covered by
 		// -webkit-touch-callout in the CSS), which cancels the pointer and so
 		// drops the held key mid-move.
-		el.addEventListener("contextmenu", function (e) {
+		controls.addEventListener("contextmenu", function (e) {
 			e.preventDefault();
 		});
-
-		el.addEventListener("pointerdown", down);
-		el.addEventListener("pointerup", up);
-		el.addEventListener("pointercancel", up);
-		el.addEventListener("lostpointercapture", up);
 	}
 
 	// ---- Fullscreen toggle (project-page only; webapp.html has no button) --
