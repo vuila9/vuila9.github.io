@@ -136,6 +136,8 @@ const translations = {
         "footer.copyright": "Copyright © Khoa X Nguyen 2024",
 
         // --- Project tiles (rendered by homepage_script.js) ---
+        "proj.games.title": "Games",
+        "proj.games.desc": "A small collection of classic games recreated for the browser.",
         "proj.bejeweled.title": "Bejeweled X",
         "proj.bejeweled.desc": "A web revival of the classic match-3 game Bejeweled 2, using the original assets and re-implemented in vanilla JavaScript.",
         "proj.flappy.title": "Flappy Bird",
@@ -246,6 +248,8 @@ const translations = {
         "footer.copyright": "Bản quyền © Khoa X Nguyen 2024",
 
         // --- Project tiles (rendered by homepage_script.js) ---
+        "proj.games.title": "Trò chơi",
+        "proj.games.desc": "Một bộ sưu tập nhỏ các trò chơi kinh điển được tái hiện lại trên trình duyệt.",
         "proj.bejeweled.title": "Bejeweled X",
         "proj.bejeweled.desc": "Phiên bản web hồi sinh của trò chơi match-3 kinh điển Bejeweled 2, sử dụng tài nguyên gốc và được viết lại bằng vanilla JavaScript.",
         "proj.flappy.title": "Flappy Bird",

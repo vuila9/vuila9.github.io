@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Games controller icon">
+	<rect width="512" height="512" rx="96" fill="#241a3d"/>
+	<g transform="translate(256 256)">
+		<!-- controller body -->
+		<path d="M-150,-20 C-150,-70 -110,-100 -60,-100 L60,-100 C110,-100 150,-70 150,-20
+			L150,40 C150,80 120,100 90,90 L55,45 C45,32 35,25 15,25 L-15,25 C-35,25 -45,32 -55,45
+			L-90,90 C-120,100 -150,80 -150,40 Z" fill="#8b6bd6"/>
+		<!-- shading -->
+		<path d="M-150,-20 C-150,-70 -110,-100 -60,-100 L60,-100 C110,-100 150,-70 150,-20
+			L150,10 L-150,10 Z" fill="#a68ae6"/>
+		<!-- d-pad -->
+		<rect x="-115" y="-25" width="18" height="50" rx="4" fill="#241a3d"/>
+		<rect x="-133" y="-7" width="50" height="18" rx="4" fill="#241a3d"/>
+		<!-- action buttons -->
+		<circle cx="95" cy="-30" r="12" fill="#241a3d"/>
+		<circle cx="122" cy="-3" r="12" fill="#241a3d"/>
+		<circle cx="95" cy="24" r="12" fill="#241a3d"/>
+		<circle cx="68" cy="-3" r="12" fill="#241a3d"/>
+		<!-- highlight -->
+		<path d="M-130,-70 C-105,-92 -75,-95 -50,-95 L-10,-95 C-25,-85 -45,-80 -70,-75 C-95,-70 -115,-62 -130,-50 Z" fill="#ffffff" opacity="0.25"/>
+	</g>
+</svg>

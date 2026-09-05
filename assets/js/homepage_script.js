@@ -15,24 +15,6 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
-            imageSrc: "projects/BejeweledX/BejeweledX_icon.svg",
-            titleKey: "proj.bejeweled.title",
-            descKey: "proj.bejeweled.desc",
-            link: "projects/BejeweledX/BejeweledX.html"
-        },
-        {
-            imageSrc: "assets/img/program_icons/flappy_tile.png",
-            titleKey: "proj.flappy.title",
-            descKey: "proj.flappy.desc",
-            link: "projects/Flappy_Bird/Flappy_Bird.html"
-        },
-        {
-            imageSrc: "projects/Achilles/Achilles_icon.svg",
-            titleKey: "proj.achilles.title",
-            descKey: "proj.achilles.desc",
-            link: "projects/Achilles/Achilles.html"
-        },
-        {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
             titleKey: "proj.stream.title",
             descKey: "proj.stream.desc",
@@ -43,6 +25,12 @@ document.addEventListener("DOMContentLoaded", function() {
             titleKey: "proj.snake.title",
             descKey: "proj.snake.desc",
             link: "projects/Snake/Snake.html"
+        },
+        {
+            imageSrc: "projects/Games/Games_icon.svg",
+            titleKey: "proj.games.title",
+            descKey: "proj.games.desc",
+            link: "projects/Games/Games.html"
         },
         {
             imageSrc: "assets/img/program_icons/paint_tile.jpg",
