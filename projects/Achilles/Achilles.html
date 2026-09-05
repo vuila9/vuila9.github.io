@@ -8,7 +8,7 @@
 		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
 		<!-- End Google Tag Manager -->
-		<title>Achilles Web App &mdash; Play the 2008 Flash Brawler Free, Online &amp; Offline</title>
+		<title>Achilles Web App</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
@@ -133,35 +133,31 @@
 							</div>
 							<div class="expandable-content" id="background-content">
 								<p>The game was made with the assistance of Claude AI.</p>
-								<p>Unlike the other browser-revival projects on this site, Achilles isn't
-									a from-scratch reimplementation. The source assets I had access to -
-									504 loose SVG shapes, sounds, and text snippets - had no timeline data:
-									nothing recording which shape sits where, at what frame, for which of
-									the game's eight animated characters. Rebuilding that choreography by
-									hand would mean re-animating the entire game from scratch, weeks of
-									art work for a result that still wouldn't quite match the original.</p>
-								<p>The original SWF, on the other hand, already has all of that baked in,
-									and it's clean AS2 (ActionScript 2) using standard patterns - Key.isDown() for
-									input, gotoAndStop() for animation state, attachMovie() for spawning
-									effects - all of which Ruffle emulates well. So instead of rebuilding
-									the game, this project wraps the original file: Ruffle runs the real
-									SWF byte-for-byte (minus one patched-out analytics call), and a thin
-									JavaScript layer around it adds what a 2008 Flash game never needed -
-									touch controls, a tap-to-start gate for iOS's audio-unlock rule, and
-									an installable, offline-capable app shell.</p>
-								<p>That one patch is worth explaining. Frame 1 of the original SWF calls
-									a MochiBot analytics stub - a play-count/anti-piracy tracker that Flash
-									game portals commonly embedded around 2008. It tries to load a tracking
-									SWF from mochibot.com on every play. MochiMedia shut down years ago, so
-									the request would just fail - and on a HTTPS GitHub Pages site it can't
-									even leave the browser, since the URL is plain HTTP and gets blocked as
-									mixed content before it's ever sent. Still, the call also grants
-									mochibot.com scripting access into the game via
-									System.security.allowDomain(), and an expired domain like that can be
-									re-registered by anyone. Removing it costs one byte: the call sits as
-									the very last statement in frame 1's script, so overwriting it with the
-									AS2 "end of actions" opcode drops it cleanly, with the rest of the
-									timeline completely untouched.</p>
+								<p>Simply put, I'm testing how far I can push porting old, native-feeling games into something that just runs in a browser tab.
+									Achilles was one of the many Flash games I played as a kid - never finished it, but I still remember exactly how it felt to play.
+									After messing around with Flappy Bird clones, I got curious about where the actual ceiling is for a browser-based game webapp, so I
+									looked into it. Storage turned out to be a non-issue - a Flash-era SWF and the Ruffle runtime together are only a few megabytes, nothing
+									a browser cache or a service worker can't handle for offline play. The real roadblock is input and platform quirks: these games were
+									built assuming a keyboard and mouse, so every touch device needs a hand-built control layer translating taps into the key presses the
+									game expects, and mobile browsers add their own restrictions on top (autoplay-blocked audio, no real fullscreen outside a home-screen
+									install) that have nothing to do with the game itself.
+								</p>
+								<p>Porting the game was relatively simple: the source SWF is easy to find online, and once I had it, all I needed was Ruffle - an open-source
+									Flash Player emulator, written in Rust and compiled to WebAssembly - to run it directly in the browser via canvas/WebGL, no plugin and
+									no Adobe runtime involved. Since Ruffle runs the same WASM build on desktop and mobile, the emulation itself is just as compatible on a
+									phone as on a laptop. What Ruffle does <i>not</i> give you for free is input: it only listens for the keyboard and mouse events the
+									original SWF expects, so on a touchscreen there's nothing to tap. That gap is exactly what the on-screen control overlay on this page
+									exists to fill.
+								</p>
+								<p>My original goal was to make this fully playable on mobile via Safari's "Add to Home Screen," so I built the on-screen buttons to dispatch
+									the same key events the game listens for. What I underestimated at first was everything around that core problem: iOS Safari blocks
+									audio until a deliberate tap (hence the "Tap to Start" screen), and a page opened in a normal browser tab never gets a true fullscreen
+									on iOS - only a home-screen install does - which is why this page ended up needing both the on-screen controls and the separate
+									installable webapp version.</p>
+								<p>Last but not least, the author of this game is <a href="https://www.benoldinggames.com/" target="_blank">Ben Olding</a>. By extracting the 
+									SWF file, I was able to modify some of the game content, mostly	texts and audio files. I have omitted some texts (Play more games, 
+									version count, etc) and some audio sound effect which I found annoying.
+								</p>
 							</div>
 
 							<div class="container">
