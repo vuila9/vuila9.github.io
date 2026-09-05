@@ -1,1 +1,0 @@
-ducking = true;

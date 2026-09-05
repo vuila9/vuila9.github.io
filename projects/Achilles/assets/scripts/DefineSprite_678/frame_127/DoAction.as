@@ -1,9 +1,0 @@
-if(Key.isDown(40))
-{
-   gotoAndStop("duck");
-   play();
-}
-else
-{
-   gotoAndPlay(1);
-}

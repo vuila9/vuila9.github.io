@@ -1,1 +1,0 @@
-gotoAndStop(1);

@@ -25,6 +25,13 @@
 	// calls this rather than waiting for a pointerup that may never arrive.
 	var releaseAllKeys = function () {};
 
+	// Set by bindTripleTapToggle (when the hint exists) to actually start its
+	// 15s countdown. Called once the gate is dismissed, below — starting it
+	// at bindTripleTapToggle()'s own call time (page load) would burn most of
+	// the 15s while the player is still staring at "Tap to Start", so the
+	// hint would appear post-boot with barely any of it left.
+	var armHintTimer = function () {};
+
 	// Ruffle listens for keydown/keyup on `window`, but only acts on them
 	// while it believes it has focus — a flag it maintains from focusin /
 	// focusout listeners it attaches to the player element during its own
@@ -167,6 +174,9 @@
 				boot()
 					.then(function () {
 						gate.classList.add("achilles-gate-hidden");
+						// The hint (if this page has one) only becomes visible now,
+						// so its 15s countdown starts here too.
+						armHintTimer();
 					})
 					.catch(function () {
 						if (gateLabel) {
@@ -195,13 +205,48 @@
 	// them mid-level.
 	var TAPS_TO_TOGGLE = 3;
 	var TAP_WINDOW_MS = 600;
+	var HINT_TIMEOUT_MS = 10000;
 
 	function bindTripleTapToggle() {
 		var taps = [];
+		// Only webapp.html carries this element (see its markup and the CSS
+		// block above #achilles-tap-hint) — the embedded project-page frame
+		// has none, and keeps the old whole-frame gesture below.
+		var hint = document.getElementById("achilles-tap-hint");
+
+		function dismissHint() {
+			if (hint) hint.classList.add("achilles-tap-hint-hidden");
+		}
+
+		// A one-time nudge — no reason for it to sit over the title screen
+		// forever once the player's had a chance to see it.
+		if (hint) {
+			armHintTimer = function () {
+				setTimeout(dismissHint, HINT_TIMEOUT_MS);
+			};
+		}
+
+		// Webapp only: a tap must land inside the hinted corner to count
+		// toward the toggle, so mashing the fullscreen game surface can
+		// never spawn the controls by accident. Hit-tested against the hint
+		// element's own rect rather than a separate constant, so the tap
+		// zone always matches what the player was shown — including while
+		// it's faded out via opacity, since that never changes layout.
+		function inZone(e) {
+			if (!hint) return true;
+			var r = hint.getBoundingClientRect();
+			return (
+				e.clientX >= r.left &&
+				e.clientX <= r.right &&
+				e.clientY >= r.top &&
+				e.clientY <= r.bottom
+			);
+		}
 
 		frame.addEventListener("pointerdown", function (e) {
 			// A tap on a d-pad/attack button is play input, not a gesture.
 			if (e.target.closest && e.target.closest("[data-key]")) return;
+			if (!inZone(e)) return;
 
 			var now = e.timeStamp || Date.now();
 			taps.push(now);
@@ -213,6 +258,7 @@
 			if (taps.length < TAPS_TO_TOGGLE) return;
 
 			taps = [];
+			dismissHint();
 			var showing = frame.classList.toggle("achilles-controls-on");
 			// Hiding mid-press would stop the buttons ever seeing the pointerup.
 			if (!showing) releaseAllKeys();
