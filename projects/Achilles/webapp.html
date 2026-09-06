@@ -50,28 +50,29 @@
 				justify-content: center;
 			}
 
-			/* Force landscape on a phone held upright.
-			   This is the fallback layer, and the only one that works on iOS:
-			   the manifest's "orientation": "landscape" is honoured by installed
-			   Android PWAs, and achilles_app.js additionally asks the Screen
-			   Orientation API to lock — but iOS Safari implements neither, and a
-			   700x500 game letterboxed into a portrait phone is a stamp at the
-			   top of a black screen. So present the whole app rotated instead,
-			   swapping the viewport's dimensions.
-
-			   When the real lock succeeds (or the player simply turns the phone),
-			   the device reports landscape, this query stops matching, and the
-			   rotation switches itself off — the two approaches don't fight. */
-			@media (orientation: portrait) and (pointer: coarse) {
-				#achilles-page {
-					inset: auto;
-					top: 50%;
-					left: 50%;
-					width: 100dvh;
-					height: 100dvw;
-					transform: translate(-50%, -50%) rotate(90deg);
-					transform-origin: center center;
-				}
+			/* Rotate-to-play gate: held upright, the game is replaced outright by
+			   a message asking for landscape — no forced rotation, no sideways
+			   rendering, nothing running behind the message. achilles_app.js
+			   toggles this class from a matchMedia("(orientation: portrait)")
+			   listener, so turning the phone swaps the two live. */
+			#achilles-rotate-message {
+				display: none;
+			}
+			html.achilles-portrait #achilles-page {
+				display: none;
+			}
+			html.achilles-portrait #achilles-rotate-message {
+				position: fixed;
+				inset: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				box-sizing: border-box;
+				padding: 24px;
+				text-align: center;
+				color: #ffcc33;
+				font-size: 1.1rem;
+				line-height: 1.5;
 			}
 			#achilles-stage {
 				height: 100%;
@@ -121,6 +122,8 @@
 				</div>
 			</div>
 		</div>
+
+		<div id="achilles-rotate-message">Rotate your device to landscape to play.</div>
 
 		<!-- game (no theme scripts: this is the lean, fast app build) -->
 		<script src="assets/js/achilles_app.js"></script>

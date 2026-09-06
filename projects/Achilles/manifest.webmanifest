@@ -5,7 +5,6 @@
   "start_url": "./webapp.html",
   "scope": "./",
   "display": "standalone",
-  "orientation": "landscape",
   "background_color": "#170d0a",
   "theme_color": "#6e1f1a",
   "icons": [

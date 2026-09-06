@@ -138,29 +138,33 @@
 
 	bindTripleTapToggle();
 
-	// ---- Landscape on launch (standalone app only) -----------------------
-	// Three layers, because no single one covers every platform:
-	//   1. manifest.webmanifest's "orientation": "landscape" — installed
-	//      Android PWAs honour this and never show portrait at all.
-	//   2. this, the Screen Orientation API — Android/Chrome, and only from a
-	//      user gesture while installed or fullscreen.
-	//   3. a CSS rotation in webapp.html, for when both of the above do nothing.
-	// iOS Safari implements neither 1 nor 2, so on iPhone it is always 3.
+	// ---- Rotate-to-play gate (standalone app only) ------------------------
+	// No orientation LOCK any more — Android's manifest hint and the Screen
+	// Orientation API both used to force the app into landscape regardless of
+	// how the phone was actually held, which is exactly the "why is my game
+	// sideways" confusion this replaces. Instead: just watch which way the
+	// phone really is, and only show the game while that's landscape. Held
+	// upright, the player sees a "rotate your device" message instead — no
+	// game, no boot, nothing running behind it — and turning the phone
+	// swaps the two live, no reload needed.
 	//
 	// Guarded on #achilles-page, which only exists in webapp.html: the project
-	// page is a normal scrolling document and must never grab the orientation.
-	function lockLandscape() {
-		if (!document.getElementById("achilles-page")) return;
-		var orientation = window.screen && window.screen.orientation;
-		if (!orientation || !orientation.lock) return;
-		try {
-			var result = orientation.lock("landscape");
-			// Rejects when not installed/fullscreen; the CSS fallback covers it.
-			if (result && result.catch) result.catch(function () {});
-		} catch (err) {
-			/* not supported here — fall through to the CSS rotation */
+	// page is a normal scrolling document and must never do this.
+	(function bindRotateGate() {
+		var page = document.getElementById("achilles-page");
+		if (!page) return;
+		var mq = window.matchMedia("(orientation: portrait)");
+		function apply() {
+			document.documentElement.classList.toggle("achilles-portrait", mq.matches);
 		}
-	}
+		apply();
+		// addEventListener on a MediaQueryList is the modern form; Safari added
+		// it in iOS 14, well within this app's support range. "resize" is a
+		// belt-and-suspenders fallback — some engines resize the viewport
+		// without ever firing the query's own change event.
+		mq.addEventListener("change", apply);
+		window.addEventListener("resize", apply);
+	})();
 
 	// ---- Tap-to-start gate (also the iOS audio-unlock gesture) ---------
 	if (gate) {
@@ -169,8 +173,6 @@
 			function onGate() {
 				gate.removeEventListener("click", onGate);
 				if (gateLabel) gateLabel.textContent = "Loading…";
-				// Must ride this gesture — orientation.lock() is gesture-gated.
-				lockLandscape();
 				boot()
 					.then(function () {
 						gate.classList.add("achilles-gate-hidden");
