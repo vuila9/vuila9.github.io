@@ -243,26 +243,42 @@
 			);
 		}
 
-		frame.addEventListener("pointerdown", function (e) {
-			// A tap on a d-pad/attack button is play input, not a gesture.
-			if (e.target.closest && e.target.closest("[data-key]")) return;
-			if (!inZone(e)) return;
+		frame.addEventListener(
+			"pointerdown",
+			function (e) {
+				// A tap on a d-pad/attack button is play input, not a gesture.
+				if (e.target.closest && e.target.closest("[data-key]")) return;
+				if (!inZone(e)) return;
 
-			var now = e.timeStamp || Date.now();
-			taps.push(now);
-			// Keep only the taps still inside the window, so a slow series of
-			// ordinary menu taps never accumulates into a toggle.
-			taps = taps.filter(function (t) {
-				return now - t <= TAP_WINDOW_MS;
-			});
-			if (taps.length < TAPS_TO_TOGGLE) return;
+				// Webapp only (hint exists): this corner is reserved for the
+				// toggle gesture, never gameplay. The hint is pointer-events:
+				// none purely so it doesn't visually block the tap, but that
+				// also means the tap falls straight through to Ruffle's canvas
+				// underneath unless we stop it here, in the capture phase,
+				// before it reaches Ruffle's own listeners. Left alone, a
+				// rapid triple-tap forwarded into the SWF can trip whatever
+				// puts the game's stage into text-entry mode, which makes
+				// Ruffle focus its hidden virtual-keyboard <input> and pop the
+				// iOS on-screen keyboard.
+				if (hint) e.stopPropagation();
 
-			taps = [];
-			dismissHint();
-			var showing = frame.classList.toggle("achilles-controls-on");
-			// Hiding mid-press would stop the buttons ever seeing the pointerup.
-			if (!showing) releaseAllKeys();
-		});
+				var now = e.timeStamp || Date.now();
+				taps.push(now);
+				// Keep only the taps still inside the window, so a slow series of
+				// ordinary menu taps never accumulates into a toggle.
+				taps = taps.filter(function (t) {
+					return now - t <= TAP_WINDOW_MS;
+				});
+				if (taps.length < TAPS_TO_TOGGLE) return;
+
+				taps = [];
+				dismissHint();
+				var showing = frame.classList.toggle("achilles-controls-on");
+				// Hiding mid-press would stop the buttons ever seeing the pointerup.
+				if (!showing) releaseAllKeys();
+			},
+			true
+		);
 	}
 
 	// ---- Touch controls: synthetic keydown/keyup ------------------------
