@@ -15,14 +15,38 @@ p {
     font-size: 1.15em; 
 }
 #home-btn {
-    padding: center;
     font-size: 15px;
     cursor: pointer;
     position: absolute;
     top: 30px;
     left: 40px;
-    width: 80px;  
-    height: 50px;  
+    width: 80px;
+    height: 50px;
+    /* Override the generic input/button/.button rule in main.css (built for
+       large CTA buttons): its 1.6em/1.25em padding + 0.35em letter-spacing
+       leaves too little room in this small icon button once it shrinks for
+       mobile below, clipping "<<" into a "<…" ellipsis. Center with flex
+       instead of fighting that padding/line-height. */
+    padding: 0;
+    letter-spacing: normal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Below 736px, #header's top padding shrinks from 8em to 4em (main.css), but
+   this button's position is fixed pixels relative to the page, not to that
+   padding — so on mobile its bottom edge (30+50=80px) drops past where the
+   title now starts (~66px), overlapping it. Shrink and pull the button up so
+   it clears the title's start with room to spare. */
+@media screen and (max-width: 736px) {
+    #home-btn {
+        top: 12px;
+        left: 20px;
+        width: 60px;
+        height: 36px;
+        font-size: 13px;
+    }
 }
 .content {
     max-height: 0;
@@ -141,4 +165,74 @@ figure.doc-img figcaption {
     margin-top: 10px;
     color: #eee;
     font-size: 0.9rem;
+}
+
+/* <------------------------PROJECT TILES: 2-up on phones---------------------------> */
+/* Same as the homepage tiles (assets/css/home_page_style.css): tiles here are
+   also rendered at a fixed 225px (inline width/height), so on a narrow phone
+   only one fits per row. Below 480px, force two per row and keep them square
+   with aspect-ratio; justify-content: center also centers a lone leftover
+   tile on its own row when the count is odd. !important beats the inline px. */
+@media (max-width: 480px) {
+    .tiles {
+        gap: 1rem !important;
+        justify-content: center;
+    }
+    .tiles article {
+        width: calc(50% - 0.5rem) !important;
+        height: auto !important;
+        aspect-ratio: 1 / 1;
+        margin: 0 !important;
+    }
+    .tiles article > .image {
+        width: 100% !important;
+        height: 100% !important;
+    }
+}
+
+/* <------------------------PROJECT TILES: touch hover-hold effect---------------------------> */
+/* The generic "p { color: rgba(0,0,0,0.8) }" rule above (meant for regular page
+   copy) also matches the tile description's <p>, overriding the white text
+   color the Phantom template's ".tiles article > a" sets — invisible against
+   the tile's dark hover/hold background. Restore it explicitly. */
+.tiles article .content p {
+    color: #ffffff;
+}
+
+/* Same treatment as the homepage tiles (assets/css/home_page_style.css): the
+   Phantom template keeps the tile title/description overlay always visible on
+   touch devices (body.is-touch, added by main.js) since touch can't hover.
+   Hide it by default instead, then reveal it via the "touch-hover" class that
+   project_global_function.js toggles on press-and-hold, reproducing the same
+   blur/dark-overlay reveal desktop gets from :hover (see main.css). */
+body.is-touch .tiles article .content {
+    max-height: 0;
+    opacity: 0;
+}
+body.is-touch .tiles article.touch-hover > .image {
+    filter: blur(7px);
+}
+body.is-touch .tiles article.touch-hover > .image:before {
+    background-color: #333333;
+    opacity: 0.35;
+}
+body.is-touch .tiles article.touch-hover > .image:after {
+    opacity: 0;
+}
+body.is-touch .tiles article.touch-hover .content {
+    max-height: 15em;
+    opacity: 1;
+}
+
+/* Suppress the OS/browser's default hold feedback on tiles (long-press
+   callout menu, text/image selection, and Android Chrome's blue tap-highlight
+   flash) so a hold reads as our hover effect instead, not a "select" action. */
+body.is-touch .tiles article,
+body.is-touch .tiles article a,
+body.is-touch .tiles article .image,
+body.is-touch .tiles article .image img {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }

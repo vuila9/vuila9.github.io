@@ -268,11 +268,42 @@ body {
 
 /* The Phantom template forces the tile title/description overlay to stay visible
    on touch devices (body.is-touch, added by main.js) since touch can't hover.
-   Keep it hidden instead so the tiles stay clean — the project icons already
+   Keep it hidden by default so the tiles stay clean — the project icons already
    show their names. This loads after main.css, so it overrides that rule. */
 body.is-touch .tiles article .content {
     max-height: 0;
     opacity: 0;
+}
+
+/* Touch can't hover, so homepage_script.js toggles this class on press-and-hold
+   (touchstart/touchend) to reproduce the same reveal desktop gets from :hover.
+   Mirrors the body:not(.is-touch) .tiles article:hover rules in main.css. */
+body.is-touch .tiles article.touch-hover > .image {
+    filter: blur(7px);
+}
+body.is-touch .tiles article.touch-hover > .image:before {
+    background-color: #333333;
+    opacity: 0.35;
+}
+body.is-touch .tiles article.touch-hover > .image:after {
+    opacity: 0;
+}
+body.is-touch .tiles article.touch-hover .content {
+    max-height: 15em;
+    opacity: 1;
+}
+
+/* Suppress the OS/browser's default hold feedback on tiles (long-press
+   callout menu, text/image selection, and Android Chrome's blue tap-highlight
+   flash) so a hold reads as our hover effect instead, not a "select" action. */
+body.is-touch .tiles article,
+body.is-touch .tiles article a,
+body.is-touch .tiles article .image,
+body.is-touch .tiles article .image img {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* <------------------------HEADER LOGO: icon stacked over one-line name---------------------------> */

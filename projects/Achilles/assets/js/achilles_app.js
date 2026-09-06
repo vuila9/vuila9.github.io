@@ -32,6 +32,18 @@
 	// hint would appear post-boot with barely any of it left.
 	var armHintTimer = function () {};
 
+	// Set true once Ruffle's canvas exists (see the poll in boot(), below).
+	// The custom <ruffle-player> element builds its shadow DOM — including a
+	// hidden <input> it focuses to summon a mobile keyboard for in-game text
+	// entry — the moment it's created, well before the SWF itself has loaded
+	// or rendered a frame. A triple-tap gesture during that window still lands
+	// on that live shadow DOM, and can end up focusing the hidden input and
+	// popping the keyboard for no on-screen reason (nothing looks focused —
+	// there's just a black screen, no loading UI yet). Gating the gesture on
+	// this flag means it only ever does anything once the game is actually
+	// far enough along to show its own loading screen.
+	var canvasReady = false;
+
 	// Ruffle listens for keydown/keyup on `window`, but only acts on them
 	// while it believes it has focus — a flag it maintains from focusin /
 	// focusout listeners it attaches to the player element during its own
@@ -111,6 +123,11 @@
 				if (ready || waited >= 5000) {
 					clearInterval(poll);
 					ensurePlayerFocused();
+					canvasReady = true;
+					// The hint's 15s countdown starts here too, rather than at
+					// boot() time — starting it before the gesture even does
+					// anything would burn most of it on a blank loading screen.
+					armHintTimer();
 				}
 			}, 100);
 
@@ -176,9 +193,6 @@
 				boot()
 					.then(function () {
 						gate.classList.add("achilles-gate-hidden");
-						// The hint (if this page has one) only becomes visible now,
-						// so its 15s countdown starts here too.
-						armHintTimer();
 					})
 					.catch(function () {
 						if (gateLabel) {
@@ -248,6 +262,8 @@
 		frame.addEventListener(
 			"pointerdown",
 			function (e) {
+				// Not yet: see canvasReady's own comment above.
+				if (!canvasReady) return;
 				// A tap on a d-pad/attack button is play input, not a gesture.
 				if (e.target.closest && e.target.closest("[data-key]")) return;
 				if (!inZone(e)) return;
