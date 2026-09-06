@@ -133,7 +133,7 @@ const translations = {
         "footer.aboutSite": "About Site",
         "footer.aboutSiteText": "This is my personal portfolio, built using a free template from ",
         "footer.connect": "Connect",
-        "footer.copyright": "Copyright © Khoa X Nguyen 2024",
+        "footer.copyright": "Copyright © Khoa X Nguyen 2024-2026",
 
         // --- Project tiles (rendered by homepage_script.js) ---
         "proj.games.title": "Games",
@@ -245,7 +245,7 @@ const translations = {
         "footer.aboutSite": "Về trang web",
         "footer.aboutSiteText": "Đây là portfolio cá nhân của tôi, được xây dựng bằng một template miễn phí từ ",
         "footer.connect": "Kết nối",
-        "footer.copyright": "Bản quyền © Khoa X Nguyen 2024",
+        "footer.copyright": "Bản quyền © Khoa X Nguyen 2024-2026",
 
         // --- Project tiles (rendered by homepage_script.js) ---
         "proj.games.title": "Trò chơi",

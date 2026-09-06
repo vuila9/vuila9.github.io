@@ -173,13 +173,16 @@ body {
         flex-wrap: wrap;
     }
     /* [class*="col-"] catches col-lg/col-md/etc.; .col is the bare variant.
-       width:100% !important overrides inline widths like the co-op note's 60%. */
+       width/margin-bottom need !important to beat inline styles like the
+       co-op note's "width: 60%; margin: auto;" (that inline "margin: auto"
+       shorthand also zeroes its margin-bottom, which otherwise silently wins
+       over this rule and collapses the gap before the next section). */
     .row > [class*="col-"],
     .row > .col {
         flex: 1 1 100%;
         max-width: 100%;
         width: 100% !important;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.75rem !important;
     }
 }
 
@@ -305,10 +308,62 @@ body {
 @media (max-width: 768px) {
     .exp-triangle-row {
         flex-wrap: wrap;
+        /* This row's own 1.5rem `gap` is for the horizontal space between the
+           two side-by-side desktop cards. Once stacked here, gap's row-gap
+           component would double up with the margin-bottom the block above
+           already adds between every stacked column — keep only column-gap. */
+        gap: 0 1.5rem;
     }
     .exp-triangle-row > .exp-note {
         flex: 1 1 100%;
     }
+}
+
+/* <------------------------EXPERIENCE: plain list on phones---------------------------> */
+/* On phones the sticky-note look (tilted, paper-colored, drop-shadowed cards
+   in Comic Sans) reads cluttered at this width. Strip it down to plain text
+   groups; tablet (max-width: 768px above) and desktop keep the note effect
+   untouched. This is a narrower phone-only breakpoint (736px, this project's
+   usual phone cutoff), nested inside the 768px tablet range. */
+@media screen and (max-width: 736px) {
+    #experience .row {
+        font-family: inherit;
+        letter-spacing: normal;
+    }
+    #experience .stickyNote,
+    #experience .stickyPage {
+        background-color: transparent;
+        box-shadow: none;
+        transform: none !important;
+        transition: none;
+        padding: 0 0 0.75rem 0 !important;
+        border-bottom: 1px solid rgba(46, 46, 46, 0.15);
+        font-family: inherit;
+        letter-spacing: normal;
+    }
+    /* main.css shrinks h3 to 0.8em at this same breakpoint (built for its
+       0.35em-letter-spaced, all-caps heading style) — smaller than the 1em
+       body text, so these group headers now read weaker than their own list
+       items. Bump them back above body-text size. */
+    #experience .stickyNote h3,
+    #experience .stickyPage h3 {
+        font-size: 1.15em;
+    }
+    /* Every list's items are wrapped in <b> in the markup (part of the
+       handwritten-note look) — that read fine on paper-colored cards, but
+       bolds the entire list body once the note styling is gone. */
+    #experience .stickyNote b,
+    #experience .stickyPage b {
+        font-weight: normal;
+    }
+    #experience .row:last-of-type .stickyNote:last-child,
+    #experience .row:last-of-type .stickyPage:last-child {
+        border-bottom: 0;
+    }
+    /* The freelance-project/co-op write-ups (.exp-note) are left alone here —
+       they keep the normal collapse/expand behavior (click-to-expand, via the
+       .exp-header/.exp-body wiring in homepage_script.js), same as tablet and
+       desktop, just without the sticky-note background/shadow/tilt above. */
 }
 
 /* <------------------------PROJECT TILES: 2-up on phones---------------------------> */

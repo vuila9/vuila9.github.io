@@ -32,17 +32,20 @@
 	// hint would appear post-boot with barely any of it left.
 	var armHintTimer = function () {};
 
-	// Set true once Ruffle's canvas exists (see the poll in boot(), below).
-	// The custom <ruffle-player> element builds its shadow DOM — including a
+	// Set true CANVAS_READY_DELAY_MS after boot() starts (i.e. after the
+	// player taps "Tap to Start" — see the timer in boot(), below). The
+	// custom <ruffle-player> element builds its shadow DOM — including a
 	// hidden <input> it focuses to summon a mobile keyboard for in-game text
 	// entry — the moment it's created, well before the SWF itself has loaded
 	// or rendered a frame. A triple-tap gesture during that window still lands
 	// on that live shadow DOM, and can end up focusing the hidden input and
 	// popping the keyboard for no on-screen reason (nothing looks focused —
 	// there's just a black screen, no loading UI yet). Gating the gesture on
-	// this flag means it only ever does anything once the game is actually
-	// far enough along to show its own loading screen.
+	// this flag means it only ever does anything once the game has had time
+	// to actually load, rather than the moment the shadow DOM's canvas first
+	// appears (which turned out to still be too early on iOS).
 	var canvasReady = false;
+	var CANVAS_READY_DELAY_MS = 3000;
 
 	// Ruffle listens for keydown/keyup on `window`, but only acts on them
 	// while it believes it has focus — a flag it maintains from focusin /
@@ -73,6 +76,39 @@
 		player.focus();
 	}
 
+	// ---- Mute while backgrounded -----------------------------------------
+	// The SWF keeps running (and keeps making sound) even while the tab isn't
+	// visible — going home or switching apps on iOS/Android doesn't pause it,
+	// and Ruffle doesn't do this on its own. document.visibilitychange is what
+	// actually fires for "the app is no longer up": home button, app switcher,
+	// and locking the screen all hide the document without necessarily
+	// blurring the window first. blur/focus are kept too as a desktop-friendly
+	// backstop (alt-tab, clicking another window) for the same reason
+	// releaseAllKeys hooks both below.
+	var savedVolume = 1;
+	var mutedForBackground = false;
+
+	function muteForBackground() {
+		if (!player || mutedForBackground) return;
+		mutedForBackground = true;
+		savedVolume = player.volume;
+		player.volume = 0;
+	}
+
+	function unmuteForForeground() {
+		if (!player || !mutedForBackground) return;
+		mutedForBackground = false;
+		player.volume = savedVolume;
+	}
+
+	document.addEventListener("visibilitychange", function () {
+		if (document.hidden) muteForBackground();
+		else unmuteForForeground();
+	});
+	window.addEventListener("blur", muteForBackground);
+	window.addEventListener("focus", unmuteForForeground);
+	window.addEventListener("pagehide", muteForBackground);
+
 	// ---- Ruffle bootstrap ----------------------------------------------
 	function loadRuffleScript() {
 		return new Promise(function (resolve, reject) {
@@ -91,6 +127,18 @@
 	}
 
 	function boot() {
+		// Starts here, at the "Tap to Start" click, rather than once the canvas
+		// exists — the canvas appears well before the SWF is actually usable,
+		// which was still early enough for a triple-tap to reach Ruffle's
+		// hidden virtual-keyboard input and pop the iOS keyboard.
+		setTimeout(function () {
+			canvasReady = true;
+			// The hint's 15s countdown starts here too, rather than at boot()
+			// call time — starting it before the gesture even does anything
+			// would burn most of it on a blank loading screen.
+			armHintTimer();
+		}, CANVAS_READY_DELAY_MS);
+
 		return loadRuffleScript().then(function () {
 			var ruffle = window.RufflePlayer.newest();
 			player = ruffle.createPlayer();
@@ -123,11 +171,6 @@
 				if (ready || waited >= 5000) {
 					clearInterval(poll);
 					ensurePlayerFocused();
-					canvasReady = true;
-					// The hint's 15s countdown starts here too, rather than at
-					// boot() time — starting it before the gesture even does
-					// anything would burn most of it on a blank loading screen.
-					armHintTimer();
 				}
 			}, 100);
 
