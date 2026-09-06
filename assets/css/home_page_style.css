@@ -38,6 +38,22 @@ body {
     text-align: center;
 }
 
+/* <------------------------INTRO TEXT: scrollable on phones only---------------------------> */
+/* On phones the three intro paragraphs (.intro-text in index.html) wrap into
+   many more lines than on tablet/desktop, turning the header into a long wall
+   of text before the project tiles even come into view. Cap its height and
+   let it scroll internally on phones only; tablet/desktop keep the default
+   (unset here) so they render exactly as before. */
+@media screen and (max-width: 736px) {
+    .intro-text {
+        max-height: 45vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        padding-right: 0.5em;
+    }
+}
+
 /* <------------------------CMD EFFECT---------------------------> */
 .cmd-log {
     color: rgb(242,242,242); 
@@ -82,6 +98,56 @@ body {
     display: block; /* Block display to occupy full width */
     box-sizing: border-box; /* Include border in the total width calculation */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Light shadow */
+}
+
+/* <------------------------ABOUT ME: fill exactly one viewport---------------------------> */
+/* Unlike every other section, About Me's content is short enough to leave the
+   next section (Experience) peeking in under it. Clicking "About Me" in the
+   nav should land on a section that fills the whole screen: title pinned to
+   the top, the terminal in the middle, and the resume button pinned to the
+   bottom — so Experience stays fully off-screen until the visitor scrolls.
+   Scoped to #about-me only; every other section keeps its natural height. */
+#about-me {
+    min-height: 100vh;
+    min-height: 100dvh; /* accounts for mobile browser chrome; falls back above */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3em 0;
+}
+#about-me > .inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+}
+#about-me .about-me-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+}
+
+/* Same treatment as the homepage intro text above: on phones the "About Me"
+   terminal's full whoami output makes for a lot of scrolling before reaching
+   the rest of the page. Cap it and let it scroll internally on phones only;
+   tablet/desktop keep the default (unset here). #cmd-body's inline
+   "overflow: hidden" needs !important to override from an external sheet. */
+@media screen and (max-width: 736px) {
+    #cmd-body {
+        max-height: 54vh; /* 45vh + 20% */
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        /* Hide the scrollbar itself (still scrollable) to give the small
+           screen's width back to the text instead of a visible track. */
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* legacy Edge/IE */
+    }
+    #cmd-body::-webkit-scrollbar {
+        display: none; /* Chrome/Safari/newer Edge */
+    }
 }
 
 /* <------------------------STICKY NOTE EFFECT---------------------------> */
