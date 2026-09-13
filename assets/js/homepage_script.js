@@ -15,6 +15,12 @@ document.addEventListener("DOMContentLoaded", function() {
         //     link: "projects/Project_name/Project_name.html"
         // },
         {
+            imageSrc: "projects/Talk2Me/Talk2Me_icon.svg",
+            titleKey: "proj.talk2me.title",
+            descKey: "proj.talk2me.desc",
+            link: "projects/Talk2Me/Talk2Me.html"
+        },
+        {
             imageSrc: "assets/img/program_icons/stream_simulator_tile.jpg",
             titleKey: "proj.stream.title",
             descKey: "proj.stream.desc",

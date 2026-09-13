@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Talk2Me chat bubble icon">
+	<defs>
+		<linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#FBD9C4"/>
+			<stop offset="100%" stop-color="#FFFFFF"/>
+		</linearGradient>
+	</defs>
+
+	<rect width="512" height="512" rx="96" fill="url(#bgGrad)"/>
+
+	<g transform="translate(0,-40)">
+		<!-- back bubble (the stranger) -->
+		<path d="M300,140 h120 c22,0 40,18 40,40 v90 c0,22 -18,40 -40,40 h-14 l10,46 -54,-46 h-62
+			c-22,0 -40,-18 -40,-40 v-90 c0,-22 18,-40 40,-40 Z"
+			fill="#FFFFFF" stroke="#e8c3ac" stroke-width="4"/>
+
+		<!-- front bubble (you) -->
+		<path d="M92,190 h230 c26,0 46,20 46,46 v104 c0,26 -20,46 -46,46 h-138 l-64,52 12,-52 h-40
+			c-26,0 -46,-20 -46,-46 v-104 c0,-26 20,-46 46,-46 Z" fill="#D05F3C"/>
+
+		<!-- typing dots inside the front bubble -->
+		<circle cx="155" cy="288" r="14" fill="#FFFFFF"/>
+		<circle cx="207" cy="288" r="14" fill="#FFFFFF"/>
+		<circle cx="259" cy="288" r="14" fill="#FFFFFF"/>
+
+		<!-- soft highlight -->
+		<path d="M112,206 C130,196 160,190 190,190 L260,190 C230,200 190,206 150,222 C130,230 112,238 100,248 Z"
+			fill="#ffffff" opacity="0.22"/>
+	</g>
+</svg>

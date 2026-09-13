@@ -162,6 +162,8 @@ const translations = {
         "proj.restaurant.desc": "A web-based online restaurant using MongoDB for storing order database and Node.js for server hosting.",
         "proj.store.title": "Store Application",
         "proj.store.desc": "A Java-based application with a graphical user interface (GUI).",
+        "proj.talk2me.title": "Talk2Me",
+        "proj.talk2me.desc": "A live chat room embedded from its own domain - message me and I reply in real time from Discord.",
 
         // --- Language toggle ---
         "toggle.label": "Tiếng Việt",
@@ -274,6 +276,8 @@ const translations = {
         "proj.restaurant.desc": "Một nhà hàng trực tuyến trên web sử dụng MongoDB để lưu cơ sở dữ liệu đơn hàng và Node.js để lưu trữ máy chủ.",
         "proj.store.title": "Store Application",
         "proj.store.desc": "Một ứng dụng bằng Java với giao diện đồ họa người dùng (GUI).",
+        "proj.talk2me.title": "Talk2Me",
+        "proj.talk2me.desc": "Một phòng chat trực tiếp được nhúng từ tên miền riêng - hãy nhắn tin cho tôi và tôi sẽ trả lời trực tiếp qua Discord.",
 
         // --- Language toggle ---
         "toggle.label": "English",
