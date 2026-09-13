@@ -274,12 +274,94 @@ function save() {
     });
 }
 
+// Ctrl/Cmd+C copies the canvas to the clipboard as an image, mirroring save()
+// but writing to the clipboard instead of triggering a download.
+function copyToClipboard() {
+    html2canvas(MSPAINT_BODY).then(canvas => {
+        canvas.toBlob(blob => {
+            if (!blob) return;
+            navigator.clipboard.write([
+                new ClipboardItem({ [blob.type]: blob })
+            ]).catch(err => console.error('Copy to clipboard failed:', err));
+        }, 'image/png');
+    });
+}
+
+document.addEventListener('keydown', (event) => {
+    if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'c') return;
+
+    // Don't hijack a normal text copy: leave selected text and focused
+    // inputs/textareas (e.g. the sliders) alone.
+    const active = document.activeElement;
+    const isEditableFocus = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+    const hasTextSelected = window.getSelection().toString().length > 0;
+    if (isEditableFocus || hasTextSelected) return;
+
+    event.preventDefault();
+    copyToClipboard();
+});
+
 function eraseAll() {
-    MSPAINT_BODY.innerHTML = '';
+    MSPAINT_BODY.innerHTML = ''; // also removes the background image, if any
     PIXEL_UNDO_HISTORY.length = 0;
     PIXEL_REDO_HISTORY.length = 0; // otherwise redo would resurrect the erased pixels
     PIXELS_INFO.clear();
 }
+
+/* ----- IMAGE UPLOAD (background to draw on top of) ----- */
+// The image is a plain <img>, inserted behind any existing pixels so it reads
+// as the canvas surface rather than a drawn stroke; drawing itself is untouched.
+function setCanvasBackgroundImage(dataUrl) {
+    let bg = document.getElementById('mspaint-bg-image');
+    if (!bg) {
+        bg = document.createElement('img');
+        bg.id = 'mspaint-bg-image';
+        bg.alt = 'Canvas background';
+        bg.draggable = false;
+        MSPAINT_BODY.insertBefore(bg, MSPAINT_BODY.firstChild);
+    }
+    bg.src = dataUrl;
+}
+
+function loadImageFile(file) {
+    if (!file || !file.type || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (event) => setCanvasBackgroundImage(event.target.result);
+    reader.readAsDataURL(file);
+}
+
+// File upload from Explorer/Finder via the toolbar button
+document.getElementById('image-upload-input').addEventListener('change', (event) => {
+    loadImageFile(event.target.files[0]);
+    event.target.value = ''; // allow re-selecting the same file later
+});
+
+// Drag & drop straight onto the canvas
+MSPAINT_BODY.addEventListener('dragover', (event) => {
+    event.preventDefault(); // required for drop to fire
+    MSPAINT_BODY.classList.add('drag-over');
+});
+
+MSPAINT_BODY.addEventListener('dragleave', () => {
+    MSPAINT_BODY.classList.remove('drag-over');
+});
+
+MSPAINT_BODY.addEventListener('drop', (event) => {
+    event.preventDefault();
+    MSPAINT_BODY.classList.remove('drag-over');
+    loadImageFile(event.dataTransfer.files[0]);
+});
+
+// Ctrl+V (or Cmd+V) paste from the clipboard, anywhere on the page
+document.addEventListener('paste', (event) => {
+    const items = event.clipboardData ? event.clipboardData.items : [];
+    for (const item of items) {
+        if (item.type && item.type.startsWith('image/')) {
+            loadImageFile(item.getAsFile());
+            break;
+        }
+    }
+});
 
 function updatePointerSize(value) {
     SIZE = Number(value);

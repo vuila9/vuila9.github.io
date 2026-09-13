@@ -59,7 +59,9 @@
 										<input class='slider' id="pointer-slider" type="range" min="1" max="35" value="5" oninput="updatePointerSize(this.value)">
 									</div>
 									<div class="right-buttons">
-										<button id="save-button" class="fa fa-save" title="Save canvas" onclick="save()"></button>
+										<input type="file" id="image-upload-input" accept="image/*" style="display:none">
+										<button id="upload-image-button" class="fa fa-image" title="Upload an image to draw on top of (drag &amp; drop or paste also work)" onclick="document.getElementById('image-upload-input').click()"></button>
+										<button id="save-button" class="fa fa-save" title="Save canvas as a file (or Ctrl+C to copy to clipboard instead)" onclick="save()"></button>
 										<button id="eraseAll-button" class="fa fa-trash" title="Erase all content" onclick="eraseAll()"></button>
 									</div>
 
@@ -108,6 +110,8 @@
 									<li><span class="effect-span"><b>Brush slider</b>: changing the size of the brush or eraser (1px to 35px)</span></li>
 									<li><span class="effect-span"><b>Color slider</b>: changing the color of the brush</span></li>
 									<li><span class="effect-span"><b>Save</b>: screenshoting the canvas and automatically downloading it</span></li>
+									<li><span class="effect-span"><b>Copy</b>(Ctrl+C): copies the canvas as an image to the clipboard, ready to paste elsewhere</span></li>
+									<li><span class="effect-span"><b>Upload image</b>: use a photo as the canvas background to draw on top of, via the upload button, drag & drop, or pasting (Ctrl+V)</span></li>
 								</ul>
 							</div>
 
