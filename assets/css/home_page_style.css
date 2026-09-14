@@ -162,8 +162,8 @@ body {
     margin-right: -1.5rem;
     margin-left: -1.5rem;
     letter-spacing: -1px;
-    font-family: Comic Sans MS, Comic Sans; 
-    color: rgb(46, 46, 46); 
+    font-family: Comic Sans MS, Comic Sans;
+    color: rgb(46, 46, 46);
     margin: auto;
 }
 /* Media query for smaller screens: stack every note/column full-width so they
@@ -220,6 +220,15 @@ body {
 .stickyNote, .stickyPage {
     -webkit-transition: -webkit-transform .1s ease-in-out;
     transition: transform .1s ease-in-out;
+    /* Rotated (.rotate-right/.rotate-left) notes sit close enough together
+       that the browser squashes overlapping ones into one shared compositing
+       bitmap; repainting one on :hover then repaints that whole bitmap,
+       flickering neighbouring notes' text even though they never move.
+       Forcing each note onto its own GPU layer stops the squashing/flicker.
+       Trade-off: the tilted box is rasterized at an angle on its own layer,
+       which softens its text slightly at rest (crisp again on hover, since
+       the hover state's transform is rotate(0deg)). */
+    will-change: transform;
 }
 .stickyNote:hover, .stickyPage:hover {
     -webkit-transform: rotate(0deg);
