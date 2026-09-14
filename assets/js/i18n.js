@@ -123,9 +123,7 @@ const translations = {
         "exp.personal.heading": "Personal skills",
         "exp.personal.li1": "Computer hardware assembly",
         "exp.personal.li2": "Computer software troubleshooting",
-        "exp.personal.li3html": "All the projects at the <a href=\"#main\">top</a> ↑",
-        "exp.personal.li4": "Hard-working, ethical, opportunistic",
-        "exp.personal.li5": "Fluent in English, Vietnamese",
+        "exp.personal.li3": "Fluent in English, Vietnamese",
 
         // --- Footer / contact ---
         "footer.contact": "Contact",
@@ -237,9 +235,7 @@ const translations = {
         "exp.personal.heading": "Kỹ năng cá nhân",
         "exp.personal.li1": "Lắp ráp phần cứng máy tính",
         "exp.personal.li2": "Xử lý sự cố phần mềm máy tính",
-        "exp.personal.li3html": "Tất cả các dự án ở <a href=\"#main\">phía trên</a> ↑",
-        "exp.personal.li4": "Chăm chỉ, có đạo đức, biết nắm bắt cơ hội",
-        "exp.personal.li5": "Thông thạo tiếng Anh, tiếng Việt",
+        "exp.personal.li3": "Thông thạo tiếng Anh, tiếng Việt",
 
         // --- Footer / contact ---
         "footer.contact": "Liên hệ",
