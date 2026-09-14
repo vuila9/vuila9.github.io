@@ -67,7 +67,7 @@ const translations = {
         "exp.tools.li3": "Frameworks: React 19, Next.js, Astro, Node.js",
         "exp.tools.li4": "Libraries: Tailwind CSS, Qt, PyQt, Tkinter, Konva",
         "exp.tools.li5": "Database & CMS: SQLite, Sanity CMS",
-        "exp.tools.li6": "Host & Server: CloudFlare, GitHub Pages",
+        "exp.tools.li6": "Server & Host: CloudFlare, GitHub Pages",
         "exp.course.li1": "Algorithms, Discrete Structures",
         "exp.course.li2": "Object-Oriented Design",
         "exp.course.li3": "Cybersecurity, AI",
