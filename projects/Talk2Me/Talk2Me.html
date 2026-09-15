@@ -80,6 +80,15 @@
 							<!-- Chat app -->
 							<div id="chat-stage">
 								<div id="chat-frame">
+									<!-- Only shown while fullscreen: the page's own controls are
+									     hidden under the overlay, and mobile has no Esc key. -->
+									<div class="chat-fullscreen-bar">
+										<button id="chat-exit-fullscreen" type="button"
+											aria-label="Exit fullscreen">
+											<span class="fas fa-times" aria-hidden="true"></span>
+											<span>Exit</span>
+										</button>
+									</div>
 									<iframe id="chat-iframe" src="https://website4u.vn/en/chat/"
 										title="Talk2Me live chat" allow="clipboard-write"
 										loading="lazy"></iframe>

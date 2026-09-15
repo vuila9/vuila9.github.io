@@ -34,6 +34,51 @@
     border: 0;
 }
 
+/* Exit bar, hidden until fullscreen. Driven by the `chat-is-fullscreen` class
+   (set by Talk2Me.js for both real and fallback fullscreen) rather than a
+   `:fullscreen` selector list - an unsupported pseudo-class would drop the
+   whole rule on older iOS, the exact devices that need this button. */
+.chat-fullscreen-bar {
+    display: none;
+}
+
+#chat-frame.chat-is-fullscreen {
+    display: flex;
+    flex-direction: column;
+}
+
+#chat-frame.chat-is-fullscreen .chat-fullscreen-bar {
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    align-items: center;
+    height: 44px;
+    padding: 0 0.5rem;
+    background: #fdf8f2;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* The iframe takes whatever the bar leaves, so the chat is never covered. */
+#chat-frame.chat-is-fullscreen #chat-iframe {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+}
+
+/* Override the template's tall, letter-spaced outlined button style. */
+#chat-exit-fullscreen {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 44px;                    /* full-height touch target */
+    line-height: normal;
+    padding: 0 0.75rem;
+    box-shadow: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: normal;
+}
+
 /* When the frame goes fullscreen, fill the screen and keep the app centered. */
 #chat-frame:fullscreen {
     width: 100%;

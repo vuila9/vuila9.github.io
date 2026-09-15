@@ -17,41 +17,78 @@
   const frame = document.getElementById("chat-frame");
   const iframe = document.getElementById("chat-iframe");
   const fsBtn = document.getElementById("chat-fullscreen");
-  if (!frame || !iframe || !fsBtn) return;
+  const exitBtn = document.getElementById("chat-exit-fullscreen");
+  if (!frame || !iframe || !fsBtn || !exitBtn) return;
 
   const req = frame.requestFullscreen || frame.webkitRequestFullscreen;
   const exit = document.exitFullscreen || document.webkitExitFullscreen;
 
+  function isRealFullscreen() {
+    return (document.fullscreenElement || document.webkitFullscreenElement) === frame;
+  }
+
+  function isFakeFullscreen() {
+    return frame.classList.contains("chat-fake-fullscreen");
+  }
+
+  // One class drives the fullscreen-only UI (the exit bar) in both modes.
+  function syncFullscreenState() {
+    frame.classList.toggle("chat-is-fullscreen", isRealFullscreen() || isFakeFullscreen());
+    // The bar changes how much room the chat has, so tell it.
+    onViewportChange();
+  }
+
+  function enterFakeFullscreen() {
+    frame.classList.add("chat-fake-fullscreen");
+    document.body.classList.add("chat-fullscreen-open");
+    syncFullscreenState();
+  }
+
   function exitFakeFullscreen() {
     frame.classList.remove("chat-fake-fullscreen");
     document.body.classList.remove("chat-fullscreen-open");
+    syncFullscreenState();
+  }
+
+  function enterFullscreen() {
+    if (!req) {
+      // No element Fullscreen API (iPhone Safari) — use the CSS fallback.
+      enterFakeFullscreen();
+      return;
+    }
+    // A browser can expose the API yet still refuse; fall back rather than
+    // leaving the button looking broken.
+    const result = req.call(frame);
+    if (result && typeof result.catch === "function") {
+      result.catch(enterFakeFullscreen);
+    }
+  }
+
+  function exitFullscreen() {
+    if (isRealFullscreen() && exit) {
+      exit.call(document);
+    } else if (isFakeFullscreen()) {
+      exitFakeFullscreen();
+    }
   }
 
   // Esc leaves fullscreen — real fullscreen already does this natively; this
   // additionally covers the iOS CSS fake-fullscreen fallback.
   window.addEventListener("keydown", function (e) {
-    if (e.code !== "Escape") return;
-    if (document.fullscreenElement && exit) exit.call(document);
-    else if (frame.classList.contains("chat-fake-fullscreen")) exitFakeFullscreen();
+    if (e.code === "Escape") exitFullscreen();
   });
 
   fsBtn.addEventListener("click", function () {
-    if (!req) {
-      // No real Fullscreen API (iOS Safari) — toggle the CSS fallback.
-      if (frame.classList.contains("chat-fake-fullscreen")) {
-        exitFakeFullscreen();
-      } else {
-        frame.classList.add("chat-fake-fullscreen");
-        document.body.classList.add("chat-fullscreen-open");
-      }
-      return;
-    }
-    if (!document.fullscreenElement) {
-      req.call(frame);
-    } else if (exit) {
-      exit.call(document);
-    }
+    if (isRealFullscreen() || isFakeFullscreen()) exitFullscreen();
+    else enterFullscreen();
   });
+
+  // Mobile has no Esc key, and the expand button is hidden under the overlay.
+  exitBtn.addEventListener("click", exitFullscreen);
+
+  // Real fullscreen can also be left natively (Esc, Android back gesture).
+  document.addEventListener("fullscreenchange", syncFullscreenState);
+  document.addEventListener("webkitfullscreenchange", syncFullscreenState);
 
   // --- Viewport handshake with the embedded chat app ---------------------
   const CHAT_ORIGIN = "https://website4u.vn";
@@ -73,13 +110,15 @@
     }
   }
 
-  // Report the slice of the frame that's genuinely on screen, so the chat app
+  // Report the slice of the chat that's genuinely on screen, so the chat app
   // can keep its input above the keyboard instead of below it.
   function sendViewport() {
     const vv = window.visualViewport;
     if (!vv) return;
 
-    const rect = frame.getBoundingClientRect();
+    // Measure the iframe, not the frame: in fullscreen the exit bar takes
+    // part of the frame's height.
+    const rect = iframe.getBoundingClientRect();
     const visibleTop = Math.max(rect.top, vv.offsetTop);
     const visibleBottom = Math.min(rect.bottom, vv.offsetTop + vv.height);
 
