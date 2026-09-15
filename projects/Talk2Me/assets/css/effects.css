@@ -34,49 +34,65 @@
     border: 0;
 }
 
-/* Exit bar, hidden until fullscreen. Driven by the `chat-is-fullscreen` class
-   (set by Talk2Me.js for both real and fallback fullscreen) rather than a
-   `:fullscreen` selector list - an unsupported pseudo-class would drop the
+/* Exit button: a round overlay centred on the chat app's orange header,
+   hidden until fullscreen. Visibility is driven by the `chat-is-fullscreen`
+   class (set by Talk2Me.js for both real and fallback fullscreen) rather than
+   a `:fullscreen` selector list - an unsupported pseudo-class would drop the
    whole rule on older iOS, the exact devices that need this button. */
-.chat-fullscreen-bar {
-    display: none;
+#chat-frame {
+    /* The header belongs to the embedded app, so this page can't measure it;
+       this mirrors its rendered height and only centres the button on it. */
+    --chat-header-height: 60px;
+    --chat-exit-size: 36px;
 }
 
-#chat-frame.chat-is-fullscreen {
-    display: flex;
-    flex-direction: column;
-}
-
-#chat-frame.chat-is-fullscreen .chat-fullscreen-bar {
-    display: flex;
-    flex: 0 0 auto;
-    justify-content: flex-end;
-    align-items: center;
-    height: 44px;
-    padding: 0 0.5rem;
-    background: #fdf8f2;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-/* The iframe takes whatever the bar leaves, so the chat is never covered. */
-#chat-frame.chat-is-fullscreen #chat-iframe {
-    flex: 1 1 auto;
-    min-height: 0;
-    height: auto;
-}
-
-/* Override the template's tall, letter-spaced outlined button style. */
 #chat-exit-fullscreen {
-    display: inline-flex;
+    display: none;
+    position: absolute;
+    z-index: 2;                      /* above the iframe */
+    top: calc((var(--chat-header-height) - var(--chat-exit-size)) / 2);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--chat-exit-size);
+    height: var(--chat-exit-size);
+    padding: 0;
     align-items: center;
-    gap: 0.4rem;
-    height: 44px;                    /* full-height touch target */
-    line-height: normal;
-    padding: 0 0.75rem;
-    box-shadow: none;
-    font-size: 0.9rem;
-    font-weight: 700;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #fffaf4 0%, #f3c6a5 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    /* Beat the template's `color: #585858 !important` on every button. */
+    color: #c4532f !important;
+    font-size: 1rem;
+    line-height: 1;
     letter-spacing: normal;
+    /* Visible so the enlarged tap area below isn't clipped. */
+    overflow: visible;
+}
+
+/* Invisible 44px hit area - Apple's minimum touch target - around the
+   smaller visual circle. */
+#chat-exit-fullscreen::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--chat-exit-size) - 44px) / 2);
+    border-radius: 50%;
+}
+
+/* Replace the template's pink outline hover/active states. */
+#chat-exit-fullscreen:hover {
+    color: #a8401f !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+#chat-exit-fullscreen:active {
+    transform: translateX(-50%) scale(0.94);
+}
+
+#chat-frame.chat-is-fullscreen #chat-exit-fullscreen {
+    display: flex;
 }
 
 /* When the frame goes fullscreen, fill the screen and keep the app centered. */

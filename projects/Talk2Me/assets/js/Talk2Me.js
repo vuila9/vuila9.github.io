@@ -31,10 +31,10 @@
     return frame.classList.contains("chat-fake-fullscreen");
   }
 
-  // One class drives the fullscreen-only UI (the exit bar) in both modes.
+  // One class drives the fullscreen-only UI (the exit button) in both modes.
   function syncFullscreenState() {
     frame.classList.toggle("chat-is-fullscreen", isRealFullscreen() || isFakeFullscreen());
-    // The bar changes how much room the chat has, so tell it.
+    // Fullscreen changes how much room the chat has, so tell it.
     onViewportChange();
   }
 
@@ -116,8 +116,7 @@
     const vv = window.visualViewport;
     if (!vv) return;
 
-    // Measure the iframe, not the frame: in fullscreen the exit bar takes
-    // part of the frame's height.
+    // Measure the iframe itself - it is what the chat app actually lays out in.
     const rect = iframe.getBoundingClientRect();
     const visibleTop = Math.max(rect.top, vv.offsetTop);
     const visibleBottom = Math.min(rect.bottom, vv.offsetTop + vv.height);
