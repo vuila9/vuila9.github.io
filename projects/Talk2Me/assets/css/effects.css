@@ -46,12 +46,27 @@
    (iOS Safari never implements requestFullscreen on non-video elements). */
 #chat-frame.chat-fake-fullscreen {
     position: fixed;
-    inset: 0;
-    width: 100vw;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* On iOS Safari `vh` means the *large* viewport - the height with the
+       toolbars hidden - so a 100vh overlay deliberately runs underneath the
+       address bar and the composer at its bottom is cut off behind it. `dvh`
+       tracks the toolbars' current state, so the frame ends where the visible
+       area actually ends. The `vh` line above is the pre-dvh fallback. */
     height: 100vh;
+    height: 100dvh;
     max-width: none;
     border-radius: 0;
     z-index: 1000;
+}
+
+/* While the CSS fullscreen fallback is up, stop the page underneath from
+   scrolling. Besides being the right behaviour for an overlay, it keeps
+   Safari from collapsing/expanding its toolbars mid-session, which would
+   otherwise resize the frame under the visitor as they scroll. */
+body.chat-fullscreen-open {
+    overflow: hidden;
 }
 
 .chat-controls {

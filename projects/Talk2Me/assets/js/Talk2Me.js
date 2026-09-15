@@ -24,6 +24,7 @@
 
   function exitFakeFullscreen() {
     frame.classList.remove("chat-fake-fullscreen");
+    document.body.classList.remove("chat-fullscreen-open");
   }
 
   // Esc leaves fullscreen — real fullscreen already does this natively; this
@@ -41,6 +42,7 @@
         exitFakeFullscreen();
       } else {
         frame.classList.add("chat-fake-fullscreen");
+        document.body.classList.add("chat-fullscreen-open");
       }
       return;
     }
