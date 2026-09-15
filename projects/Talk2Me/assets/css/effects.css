@@ -16,7 +16,12 @@
     position: relative;
     width: min(400px, 94vw);
     height: min(700px, 80vh);
-    background: #0b2530;             /* dark placeholder, shown before load */
+    /* Light placeholder matching the chat app's own cream background. A dark
+       colour here shows through as a jarring navy band wherever the embedded
+       app doesn't paint - e.g. the gap left below its layout when a mobile
+       keyboard opens - and mobile browsers also sample it to tint their
+       toolbars. Keeping it light makes any such gap invisible. */
+    background: #fdf8f2;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
