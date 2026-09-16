@@ -16,7 +16,12 @@
     position: relative;
     width: min(400px, 94vw);
     height: min(700px, 80vh);
-    background: #0b2530;             /* dark placeholder, shown before load */
+    /* Light placeholder matching the chat app's own cream background. A dark
+       colour here shows through as a jarring navy band wherever the embedded
+       app doesn't paint - e.g. the gap left below its layout when a mobile
+       keyboard opens - and mobile browsers also sample it to tint their
+       toolbars. Keeping it light makes any such gap invisible. */
+    background: #fdf8f2;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
@@ -27,6 +32,67 @@
     width: 100%;
     height: 100%;
     border: 0;
+}
+
+/* Exit button: a round overlay centred on the chat app's orange header,
+   hidden until fullscreen. Visibility is driven by the `chat-is-fullscreen`
+   class (set by Talk2Me.js for both real and fallback fullscreen) rather than
+   a `:fullscreen` selector list - an unsupported pseudo-class would drop the
+   whole rule on older iOS, the exact devices that need this button. */
+#chat-frame {
+    /* The header belongs to the embedded app, so this page can't measure it;
+       this mirrors its rendered height and only centres the button on it. */
+    --chat-header-height: 60px;
+    --chat-exit-size: 36px;
+}
+
+#chat-exit-fullscreen {
+    display: none;
+    position: absolute;
+    z-index: 2;                      /* above the iframe */
+    top: calc((var(--chat-header-height) - var(--chat-exit-size)) / 2);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--chat-exit-size);
+    height: var(--chat-exit-size);
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #fffaf4 0%, #f3c6a5 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    /* Beat the template's `color: #585858 !important` on every button. */
+    color: #c4532f !important;
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: normal;
+    /* Visible so the enlarged tap area below isn't clipped. */
+    overflow: visible;
+}
+
+/* Invisible 44px hit area - Apple's minimum touch target - around the
+   smaller visual circle. */
+#chat-exit-fullscreen::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--chat-exit-size) - 44px) / 2);
+    border-radius: 50%;
+}
+
+/* Replace the template's pink outline hover/active states. */
+#chat-exit-fullscreen:hover {
+    color: #a8401f !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+#chat-exit-fullscreen:active {
+    transform: translateX(-50%) scale(0.94);
+}
+
+#chat-frame.chat-is-fullscreen #chat-exit-fullscreen {
+    display: flex;
 }
 
 /* When the frame goes fullscreen, fill the screen and keep the app centered. */
@@ -41,12 +107,27 @@
    (iOS Safari never implements requestFullscreen on non-video elements). */
 #chat-frame.chat-fake-fullscreen {
     position: fixed;
-    inset: 0;
-    width: 100vw;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* On iOS Safari `vh` means the *large* viewport - the height with the
+       toolbars hidden - so a 100vh overlay deliberately runs underneath the
+       address bar and the composer at its bottom is cut off behind it. `dvh`
+       tracks the toolbars' current state, so the frame ends where the visible
+       area actually ends. The `vh` line above is the pre-dvh fallback. */
     height: 100vh;
+    height: 100dvh;
     max-width: none;
     border-radius: 0;
     z-index: 1000;
+}
+
+/* While the CSS fullscreen fallback is up, stop the page underneath from
+   scrolling. Besides being the right behaviour for an overlay, it keeps
+   Safari from collapsing/expanding its toolbars mid-session, which would
+   otherwise resize the frame under the visitor as they scroll. */
+body.chat-fullscreen-open {
+    overflow: hidden;
 }
 
 .chat-controls {

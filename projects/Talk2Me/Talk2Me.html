@@ -11,6 +11,9 @@
 		<title>Talk2Me - Live Chat</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<!-- Keeps mobile browser toolbars tinted to the page's cream rather than
+		     sampling a dark colour from the chat frame. -->
+		<meta name="theme-color" content="#fdf8f2" />
 
 		<!-- ===== SEO / search & social metadata ===== -->
 		<meta name="description" content="Talk2Me is a live chat room where strangers can message me directly - I reply in real time from Discord." />
@@ -77,6 +80,12 @@
 							<!-- Chat app -->
 							<div id="chat-stage">
 								<div id="chat-frame">
+									<!-- Only shown while fullscreen: the page's own controls are
+									     hidden under the overlay, and mobile has no Esc key. -->
+									<button id="chat-exit-fullscreen" type="button"
+										aria-label="Exit fullscreen" title="Exit fullscreen">
+										<span class="fas fa-times" aria-hidden="true"></span>
+									</button>
 									<iframe id="chat-iframe" src="https://website4u.vn/en/chat/"
 										title="Talk2Me live chat" allow="clipboard-write"
 										loading="lazy"></iframe>
@@ -84,8 +93,8 @@
 								<div class="chat-controls">
 									<button id="chat-fullscreen" title="Toggle fullscreen"
 										class="fas fa-expand"></button>
-									<a id="chat-open-app" href="https://website4u.vn/en/chat/" target="_blank"
-										rel="noopener" title="Open the chat in its own tab">Open as app &#8599;</a>
+									<!-- <a id="chat-open-app" href="https://website4u.vn/en/chat/" target="_blank"
+										rel="noopener" title="Open the chat in its own tab">Open as app &#8599;</a> -->
 								</div>
 								<p class="chat-hint">Send a message and I'll reply in real time - I get
 									pinged straight to Discord. This is still a work in progress, so
@@ -95,7 +104,7 @@
 							<div>
 								<span class="submenu">Description</span>
 								<p>Talk2Me is a small live chat room embedded directly into this
-									portfolio via an iframe. Anyone can drop in, give a first name,
+									portfolio via an iframe. Anyone can drop in, give a nick name,
 									and send me a message without creating an account. I get notified
 									instantly and can reply from Discord, so the conversation happens
 									in real time even though I'm never actually on this page myself.</p>
@@ -109,7 +118,7 @@
 							</div>
 							<div class="expandable-content" id="background-content">
 								<p>The chat room itself is a separate app hosted on its own domain
-									(<a href="https://website4u.vn" target="_blank" rel="noopener">website4u.vn</a>),
+									(<a href="https://website4u.vn/en" target="_blank" rel="noopener">website4u.vn</a>),
 									so it can run its own backend independently of this static
 									GitHub Pages site. This page just embeds that app in an iframe.
 									It's a fully responsive page rather than a fixed mobile-sized
@@ -131,9 +140,14 @@
 									forge or guess their way into someone else's conversation, and
 									there's no database behind any of it either. A conversation's
 									entire state lives in its Discord thread, so there's nothing to
-									breach beyond that. The embed itself is locked down too: the chat
-									page only renders inside an iframe on domains I've explicitly
-									approved, so it can't be silently framed on some other site.</p>
+									breach beyond that. Once the session is inactive for 8h, the chat 
+									session ID will be automatically forgetten. Meaning I will no longer 
+									be able to reach out to you unknown stranger. That chat history 
+									however, will still be retained on Discord side, until I decided 
+									to free it up. The embed itself is locked down too: the chat page 
+									only renders inside an iframe on domains I've explicitly approved 
+									from <a href="https://website4u.vn/en" target="_blank" rel="noopener">
+									website4u.vn</a>, so it can't be silently framed on some other site.</p>
 							</div>
 
 							<div class="container">
@@ -144,7 +158,7 @@
 							</div>
 							<div class="expandable-content" id="features-content">
 								<ul>
-									<li><span class="effect-span"><b>No account needed</b>: just a first name, then type and send.</span></li>
+									<li><span class="effect-span"><b>No account needed</b>: just a nick name, then type and send.</span></li>
 									<li><span class="effect-span"><b>Real-time relay</b>: messages reach me through Discord within a few seconds of being sent.</span></li>
 									<li><span class="effect-span"><b>Reply-gated input</b>: a visitor can draft messages right away, but sending is held until I've replied at least once, which keeps the thread from filling up one-sided before anyone's actually watching.</span></li>
 									<li><span class="effect-span"><b>Spam/rate limiting</b>: a short cooldown between messages, an hourly send limit, and a daily cap on brand-new conversations.</span></li>

@@ -67,6 +67,7 @@ const translations = {
         "exp.tools.li3": "Frameworks: React 19, Next.js, Astro, Node.js",
         "exp.tools.li4": "Libraries: Tailwind CSS, Qt, PyQt, Tkinter, Konva",
         "exp.tools.li5": "Database & CMS: SQLite, Sanity CMS",
+        "exp.tools.li6": "Server & Host: CloudFlare, GitHub Pages",
         "exp.course.li1": "Algorithms, Discrete Structures",
         "exp.course.li2": "Object-Oriented Design",
         "exp.course.li3": "Cybersecurity, AI",
@@ -123,9 +124,7 @@ const translations = {
         "exp.personal.heading": "Personal skills",
         "exp.personal.li1": "Computer hardware assembly",
         "exp.personal.li2": "Computer software troubleshooting",
-        "exp.personal.li3html": "All the projects at the <a href=\"#main\">top</a> ↑",
-        "exp.personal.li4": "Hard-working, ethical, opportunistic",
-        "exp.personal.li5": "Fluent in English, Vietnamese",
+        "exp.personal.li3": "Fluent in English, Vietnamese",
 
         // --- Footer / contact ---
         "footer.contact": "Contact",
@@ -193,6 +192,7 @@ const translations = {
         "about.whoami1": "Tôi có niềm đam mê với khoa học máy tính vì tôi yêu thích lập trình. Ban đầu tôi thích toán và vật lý, nhưng tôi thấy chúng quá khô khan để theo đuổi chuyên nghiệp. Niềm hứng thú với lập trình của tôi bắt đầu từ thời trung học khi tôi còn phân vân không biết nên học ngành gì. Càng tìm hiểu về lập trình, tình yêu của tôi dành cho nó càng lớn. Cuối cùng, tôi nhận ra rằng giỏi toán thực ra lại bổ trợ cho khoa học máy tính, và tôi đã tìm ra con đường sự nghiệp của mình.",
         "about.whoami2": "Những nỗ lực chăm chỉ trong thời đại học của tôi đã được đền đáp khi tôi giành được một suất thực tập tại BlackBerry QNX. Trong thời gian ở đó, tôi đã thu được những hiểu biết vô giá về thực tế của môi trường chuyên nghiệp, đặc biệt là trong các vai trò phát triển và kỹ thuật phần mềm. Ngoài ra, tôi còn có cơ hội tham gia vào nhiều khía cạnh xã hội khác nhau, bao gồm các cuộc họp nhóm, thảo luận và đảm nhận trách nhiệm. Kiến thức và kinh nghiệm tôi tích lũy được trong kỳ thực tập này vượt xa những gì học được trên lớp.",
         "about.whoami3": "Sau kỳ thực tập, tôi quay lại hoàn thành việc học đại học tại Carleton. Mặc dù quá trình tìm việc hóa ra khó khăn hơn tôi dự đoán, tôi đã quyết định chấn chỉnh lại và đầu tư vào sự phát triển bản thân. Sau khi đánh giá lại tình hình, tôi nhận ra rằng việc thiếu kinh nghiệm là một yếu tố quan trọng. Do đó, tôi đã tập trung nâng cao kỹ năng chuyên môn bằng cách tạo ra nhiều dự án quy mô từ nhỏ đến trung bình.",
+        "about.whoami4": "Tôi đặt chân đến Canada vào tháng 6 năm 2017 để du học, bắt đầu từ lớp 11 tại trường Glebe CI ở Ottawa. Sau đó, tôi theo học tại Đại học Carleton trong 4,5 năm và tiếp tục sinh sống, làm việc tại đây thêm 2 năm nữa. Đến tháng 2 năm 2026, hành trình của tôi tại đây chính thức khép lại, và tôi quyết định đã đến lúc thích hợp để trở về Việt Nam.",
         "about.reachEmail": "Bạn có thể liên hệ với tôi qua địa chỉ email công việc: ",
         "about.moreBottom": "Có thể tìm thêm thông tin ở <a class=\"cmd-log\" style=\"color: cyan\" href=\"#footer\">cuối</a> trang web này ↓",
         "about.resumeBtn": "Tải CV của tôi!",
@@ -206,6 +206,7 @@ const translations = {
         "exp.tools.li3": "Framework: React 19, Next.js, Astro, Node.js",
         "exp.tools.li4": "Thư viện: Tailwind CSS, Qt, PyQt, Tkinter, Konva",
         "exp.tools.li5": "Cơ sở dữ liệu & CMS: SQLite, Sanity CMS",
+        "exp.tools.li6": "Máy chủ & lưu trữ: CloudFlare, GitHub Pages",
         "exp.course.li1": "Thuật toán, Cấu trúc rời rạc",
         "exp.course.li2": "Thiết kế hướng đối tượng",
         "exp.course.li3": "An ninh mạng, AI",
@@ -237,9 +238,7 @@ const translations = {
         "exp.personal.heading": "Kỹ năng cá nhân",
         "exp.personal.li1": "Lắp ráp phần cứng máy tính",
         "exp.personal.li2": "Xử lý sự cố phần mềm máy tính",
-        "exp.personal.li3html": "Tất cả các dự án ở <a href=\"#main\">phía trên</a> ↑",
-        "exp.personal.li4": "Chăm chỉ, có đạo đức, biết nắm bắt cơ hội",
-        "exp.personal.li5": "Thông thạo tiếng Anh, tiếng Việt",
+        "exp.personal.li3": "Thông thạo tiếng Anh, tiếng Việt",
 
         // --- Footer / contact ---
         "footer.contact": "Liên hệ",
