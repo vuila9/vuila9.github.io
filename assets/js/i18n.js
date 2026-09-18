@@ -42,6 +42,7 @@ const translations = {
         "nav.about": "About Me",
         "nav.experience": "Experience",
         "nav.contact": "Contact",
+        "nav.stat": "Stat",
 
         // --- Section headings ---
         "section.projects": "PROJECTS",
@@ -182,6 +183,7 @@ const translations = {
         "nav.about": "Về tôi",
         "nav.experience": "Kinh nghiệm",
         "nav.contact": "Liên hệ",
+        "nav.stat": "Thống kê",
 
         // --- Section headings ---
         "section.projects": "PROJECTS",
