@@ -79,19 +79,15 @@
 
 /* POPUP EFFECT */
 .popup {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    left: 30%;
-    top: 25%;
-    width: 40%; /* Full width */
-    height: flex; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    flex-direction: column;   /* Stack content vertically */
-    justify-content: center;  /* Center content vertically */
-    align-items: center;      /* Center content horizontally */
-    padding: 20px;            /* Padding inside the popup */
-    text-align: center;       /* Center text alignment */
+    display: none; /* Hidden by default (JS sets block) */
+    position: fixed;
+    inset: 0; /* full-screen backdrop; clicking it closes the popup */
+    z-index: 1000;
+    overflow: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.35);
+    text-align: center;
 }
 
 .close {
@@ -109,10 +105,30 @@
 
 .body-popup {
     background-color: #fff9e1;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 12vh auto 0;
     padding: 20px;
     border: 1px solid #888;
-    width: flex; /* Could be more or less, depending on screen size */
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 360px;
+}
+
+.body-popup h2 {
+    letter-spacing: 0.2em;
+}
+
+.body-popup button {
+    display: block;
+    width: 100%;
+    margin: 0 0 10px;
+    padding: 0 0.5em;
+    letter-spacing: 0.2em;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.body-popup button:last-child {
+    margin-bottom: 0;
 }
 
 /* SLIDERS */
