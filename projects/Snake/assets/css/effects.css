@@ -44,15 +44,21 @@
 }
 
 #button-gridsize {
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    cursor: default;
+    /* fixed slot (max cell = 50px) so the preview stays centered and the layout below never shifts */
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
 }
 
 #gridsize-icon {
-    font-size: 18.75px; /* Adjust grid size, 50px * 1.25 is max */
-    margin-bottom: 4px;
+    width: 15px;
+    height: 15px;
+    flex: none;
+    box-sizing: border-box;
+    border: 1px dashed #555;
 }
 
 /* GAME ELEMENTS */
@@ -132,4 +138,75 @@ input[type="range"] {
     background: #ddd;
     border-radius: 5px;
     outline: none;
+}
+/* TOUCH: no text selection, callout, tap flash or double-tap zoom when tapping/holding buttons */
+#snakegame button,
+#game-control {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* MOBILE LAYOUT: keep the control rows inside the viewport */
+@media screen and (max-width: 736px) {
+    #snakegame {
+        max-width: 100%;
+    }
+
+    .button-row-farend {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .left-buttons, .right-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .left-buttons .slider {
+        flex: 1 1 100%;   /* slider gets its own full-width row */
+        width: 100%;
+        min-width: 0;
+        margin: 4px 0;
+    }
+
+    #game-control {
+        margin-top: 12px;
+    }
+}
+
+/* RESTART BUTTON BLINK: shown while a grid-size change is waiting for a reset */
+@keyframes reset-blink {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 138, 154, 0); }
+    50% { box-shadow: 0 0 0 4px rgba(232, 138, 154, 0.9); color: #e88a9a; border-color: #e88a9a; }
+}
+
+#button-reset.blink {
+    animation: reset-blink 1s ease-in-out infinite;
+}
+
+/* ROTATION: browsers can't reliably lock orientation, so on touch devices cover the page in landscape */
+#rotate-notice {
+    display: none;
+}
+
+@media (pointer: coarse) and (orientation: landscape) {
+    #rotate-notice {
+        display: flex;
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        text-align: center;
+        font-size: 18px;
+        color: #fff;
+        background: #333;
+    }
 }

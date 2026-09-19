@@ -114,8 +114,16 @@ function main() {
         reset();
     });
 
-    document.getElementById('button-haste').addEventListener('mousedown', (event) => { // hasten the snake when mouse is down
-        DELAY /= HASTE;
+    let buttonHasten = false;
+    const hasteOn = () => { if (!buttonHasten) { buttonHasten = true; DELAY /= HASTE; } };
+    const hasteOff = () => { if (buttonHasten) { buttonHasten = false; DELAY *= HASTE; } };
+    const hasteButton = document.getElementById('button-haste');
+    hasteButton.addEventListener('pointerdown', hasteOn); // hasten the snake while pressed (mouse or touch)
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => hasteButton.addEventListener(type, hasteOff));
+
+    // stop the long-press context menu on touch devices (grid button keeps its own handler)
+    document.querySelectorAll('#snakegame button').forEach(button => {
+        button.addEventListener('contextmenu', (event) => event.preventDefault());
     });
 
     document.addEventListener("keydown", (event) => {
@@ -126,19 +134,26 @@ function main() {
         }
     });
 
-    document.getElementById('button-haste').addEventListener('mouseup', (event) => {   // reset speed to default when mouse is up
-        DELAY *= HASTE;
-    });
-
     document.getElementById('gridsize-slider').addEventListener('input', (event) => {
         GRIDSIZE = event.target.value;
-        document.getElementById('gridsize-icon').style.fontSize = event.target.value * 1.25 + 'px';
+        const cell = document.getElementById('gridsize-icon'); // preview of the real cell size
+        cell.style.width = cell.style.height = event.target.value + 'px';
         document.getElementById('button-gridsize').title = `Grid size ${event.target.value}px`;
         GRID_RESIZE = true;
+        document.getElementById('button-reset').classList.add('blink'); // hint that a reset is needed
         if (GRID_RESIZE) {
             document.getElementById('button-play').disabled = true;
             document.getElementById('button-mode').disabled = true;
         }
+    });
+
+    window.addEventListener('resize', () => { // playfield size is fixed at reset, so a new viewport width needs a restart (desktop only)
+        if (window.matchMedia('(pointer: coarse)').matches) return;
+        if (GAME_INTERFACE.offsetWidth === PLAY_FIELD.max_playfield_width) return;
+        if (GAME_LOOP) pauseGame();
+        GRID_RESIZE = true;
+        document.getElementById('button-play').disabled = true;
+        document.getElementById('button-reset').classList.add('blink');
     });
 
     document.addEventListener("keyup", (event) => {
@@ -213,6 +228,7 @@ function main() {
         isHasten = false;
         PLAY_FIELD.reset(GAME_INTERFACE, GRIDSIZE, GRID_RESIZE);
         GRID_RESIZE = false;
+        document.getElementById('button-reset').classList.remove('blink');
         DELAY =  Math.floor(SPEED * GRIDSIZE / 15);
         DEFAULT_DIRECTION = ['left', 'up', 'right', 'down'][Math.floor(Math.random() * 4)];
         SNAKE.reset(Math.floor(PLAY_FIELD.getColsNum()/2), Math.floor(PLAY_FIELD.getRowsNum()/2), GRIDSIZE, DEFAULT_DIRECTION);
@@ -364,5 +380,10 @@ function main() {
 }
 
 window.onload = function() {
+    // Best effort portrait lock: only honored on some Android browsers (fullscreen/PWA); iOS ignores it.
+    // The #rotate-notice overlay (CSS) covers the rest.
+    if (window.matchMedia('(pointer: coarse)').matches && screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('portrait').catch(() => {});
+    }
     main();
 }
