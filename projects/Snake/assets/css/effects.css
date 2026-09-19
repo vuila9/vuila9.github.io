@@ -4,6 +4,8 @@
     height: 525px;
     width: 100%;
     position: relative;
+    touch-action: none; /* swiping on the play zone doesn't scroll the page */
+    overscroll-behavior: contain;
 }
 
 .grid-box {
@@ -165,35 +167,46 @@ input[type="range"] {
     touch-action: manipulation;
 }
 
-/* MOBILE LAYOUT: keep the control rows inside the viewport */
+/* MOBILE LAYOUT: one wrapping flex column of controls so the game stays fully visible
+   row 1: playfield | row 2: Play (far left) - D-pad (center) - Speed up (far right) | below: the rest */
 @media screen and (max-width: 736px) {
     #snakegame {
-        max-width: 100%;
-    }
-
-    .button-row-farend {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-
-    .left-buttons, .right-buttons {
+        display: flex;
         flex-wrap: wrap;
         justify-content: center;
         align-items: center;
-        gap: 8px;
+        gap: 10px 4px;
+        max-width: 100%;
     }
 
-    .left-buttons .slider {
-        flex: 1 1 100%;   /* slider gets its own full-width row */
-        width: 100%;
-        min-width: 0;
-        margin: 4px 0;
+    #snakegame > br {
+        display: none;
     }
 
-    #game-control {
-        margin-top: 12px;
+    /* flatten the wrappers so every control can be ordered individually */
+    .button-row-farend, .left-buttons, .right-buttons {
+        display: contents;
     }
+
+    #game-interface { flex: 0 0 100%; order: 0; }
+
+    #button-play    { order: 1; margin-right: auto; }
+    #game-control   { order: 2; margin: 0; }
+    #button-haste   { order: 3; margin-left: auto; }
+
+    /* line break between the Play/D-pad/Speed row and the rest */
+    #snakegame::after { content: ''; order: 3; flex: 0 0 100%; height: 0; }
+
+    #button-score    { width: 44px; }
+    #button-gridsize { width: 40px; } /* slot is narrower than the 50px max cell; the preview just overflows it evenly */
+
+    #button-reset    { order: 4; }
+    #button-mode     { order: 5; }
+    #button-grow     { order: 6; }
+    #button-grid     { order: 7; }
+    #button-score    { order: 8; }
+    #button-gridsize { order: 9; margin-left: auto; } /* cell preview pinned to the far right so a big cell can't cover the buttons */
+    #gridsize-slider { order: 10; flex: 0 0 100%; width: 100%; min-width: 0; margin: 4px 0; }
 }
 
 /* RESTART BUTTON BLINK: shown while a grid-size change is waiting for a reset */
@@ -225,4 +238,20 @@ input[type="range"] {
         color: #fff;
         background: #333;
     }
+}
+
+/* No sideways scrolling/swiping on the page (something transient, e.g. the slider tooltip, can widen it) */
+html, body {
+    overflow-x: hidden;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+    max-width: 100%;
+}
+
+body {
+    touch-action: pan-y pinch-zoom;
+}
+
+#slider-title {
+    max-width: 90vw;
 }

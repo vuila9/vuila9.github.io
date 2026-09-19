@@ -147,6 +147,8 @@ function main() {
         }
     });
 
+    GAME_INTERFACE.addEventListener('wheel', (event) => event.preventDefault(), { passive: false }); // no page scroll while the mouse is over the play zone
+
     window.addEventListener('resize', () => { // playfield size is fixed at reset, so a new viewport width needs a restart (desktop only)
         if (window.matchMedia('(pointer: coarse)').matches) return;
         if (GAME_INTERFACE.offsetWidth === PLAY_FIELD.max_playfield_width) return;
