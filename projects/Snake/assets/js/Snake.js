@@ -149,6 +149,29 @@ function main() {
 
     GAME_INTERFACE.addEventListener('wheel', (event) => event.preventDefault(), { passive: false }); // no page scroll while the mouse is over the play zone
 
+    // swiping (touch) or click-hold-dragging (mouse) on the play zone presses the matching direction button
+    const SWIPE_MIN = 24; // px of travel before a swipe registers
+    let swipeStart = null;
+    GAME_INTERFACE.addEventListener('pointerdown', (event) => {
+        if (event.pointerType === 'mouse') {
+            if (event.button !== 0) return;
+            event.preventDefault(); // no text selection while dragging
+            GAME_INTERFACE.setPointerCapture(event.pointerId); // keep tracking if the cursor leaves the play zone
+        }
+        swipeStart = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    });
+    GAME_INTERFACE.addEventListener('pointermove', (event) => {
+        if (!swipeStart || event.pointerId !== swipeStart.id) return;
+        const dx = event.clientX - swipeStart.x;
+        const dy = event.clientY - swipeStart.y;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_MIN) return;
+        const direction = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+        document.getElementById('button-' + direction).click();
+        swipeStart.x = event.clientX; // re-anchor so one long swipe can chain turns
+        swipeStart.y = event.clientY;
+    });
+    ['pointerup', 'pointercancel'].forEach(type => GAME_INTERFACE.addEventListener(type, () => { swipeStart = null; }));
+
     window.addEventListener('resize', () => { // playfield size is fixed at reset, so a new viewport width needs a restart (desktop only)
         if (window.matchMedia('(pointer: coarse)').matches) return;
         if (GAME_INTERFACE.offsetWidth === PLAY_FIELD.max_playfield_width) return;
@@ -263,6 +286,7 @@ function main() {
             gameoverPopupHandler();
             GAME_LOOP = false;
             document.getElementById('button-play').disabled = true;
+            document.getElementById('button-reset').classList.add('blink'); // hint to restart
             return;
         }
         SNAKE.updateOccupiedGrid(`${SNAKE.getHead()['position'][0]},${SNAKE.getHead()['position'][1]}`);
