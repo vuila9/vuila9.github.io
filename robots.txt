@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /templates/
+Disallow: /projects/zzTrash/
+
+Sitemap: https://vuila9.github.io/sitemap.xml

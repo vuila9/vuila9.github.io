@@ -11,7 +11,6 @@ function START_UBUNTU_TERMINAL() {
     let DOMAIN = 'github.io';
     let SUDO = false || (CURRENT_USER.getUsername() == 'root');
     
-    let THE_PROMPT = `${CURRENT_USER.getUsername()}@${DOMAIN}:~$`; // need to make a function to assign this automatically
     let COMMAND = '';
     let CURSOR_POS = 0;    // track where the cursor is
     let HISTORY_POS = 0;   
@@ -35,13 +34,20 @@ function START_UBUNTU_TERMINAL() {
             event.preventDefault(); // Prevent default "Enter" behavior
             
             const userInput = COMMAND.trim();
-            if (COMMAND.length)
+            if (COMMAND.length && !PASSWORD_IN_PROGRESS) // never record a password in the history
                 HISTORY_COMMAND.push(COMMAND);
             //console.log('User Input:', userInput);  // Do something with the input
 
             // THIS IS WHERE YOU DO YOUR COMMAND HANDLER
-            if (!PASSWORD_IN_PROGRESS)
-                command_handler(userInput);
+            if (!PASSWORD_IN_PROGRESS) {
+                try {
+                    command_handler(userInput);
+                }
+                catch (error) { // a broken command should never freeze the terminal
+                    console.error(error);
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>bash: internal error: ${escapeHTML(error.message)}</span>`;
+                }
+            }
             else {
                 if (COMMAND === USERS[SU_TARGET].getPassword()) {
                     if (SELF_DESTRUCT) {
@@ -330,7 +336,7 @@ function START_UBUNTU_TERMINAL() {
         if (dir.split('').every(char => char === '/')) // if dir is string of '///'s, treat as '/' aka root
             return ROOT_DIR;
     
-        dir_arr = dir.slice(1).split('/');
+        let dir_arr = dir.slice(1).split('/');
         dir_arr = dir_arr.filter(dir => dir !== '');
         // dir_arr = [path, to, dir]
     
@@ -356,6 +362,16 @@ function START_UBUNTU_TERMINAL() {
         SUDO = flag || (CURRENT_USER.getUsername() == 'root');
     }
 
+    // Own-property check, so names like 'constructor' or 'toString' are not mistaken for users.
+    function userExists(username) {
+        return Object.hasOwn(USERS, username);
+    }
+
+    // Escape '&' and '<' so user input can never be rendered as HTML tags. '>' is left alone since it is needed for echo redirection.
+    function escapeHTML(string) {
+        return string.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    }
+
     // This replaces all occurrences of two or more repeated 'character' with a single 'character'.
     function filterExcessiveCharacter(string, character) {
         let regex = new RegExp(character + '{2,}', 'g'); // Dynamically create the regex
@@ -376,9 +392,10 @@ function START_UBUNTU_TERMINAL() {
     }
 
     function command_handler(command) {
-        if (/^sudo/.test(command)) {
+        command = escapeHTML(command);
+        if (/^sudo( |$)/.test(command)) {
             setSUDO(true);
-            command = command.replace(/^sudo /, '');
+            command = command.replace(/^sudo +/, '');
         }
         else 
             setSUDO();
@@ -495,10 +512,10 @@ function START_UBUNTU_TERMINAL() {
                         cur_dir.addFile(new File(command_components[i], owner, DEFAULT_FILE_PERMISSION, cur_dir));
                     }
                     else
-                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot touch '${command_components[i]}': Permission denied'</span>`;
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot touch '${command_components[i]}': Permission denied</span>`;
                 }
                 break;
-    
+
             case 'echo':
                 if (command_components.includes('--help')) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: does not support any options; syntax: echo text</span>`;
@@ -537,29 +554,49 @@ function START_UBUNTU_TERMINAL() {
                         else
                             text.push(command_components[i-1]);
                     }
+                    if (path === undefined) { // nothing after '>' or '>>'
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: syntax error near unexpected token 'newline'</span>`;
+                        break;
+                    }
                     text = text.join(' ').trim();
                     let temp_file;
+                    let temp_path;
                     // any path that starts with . or .. and doesnt include any . or .. in the middle
-                    if (/^(\.\.?)$|^(\.\.?)\/[^\.]*$/.test(path) && path[0] != '/') 
-                        temp_file = goToDir(pathInterpreter(DIR, path));
+                    if (/^(\.\.?)$|^(\.\.?)\/[^\.]*$/.test(path) && path[0] != '/')
+                        temp_path = pathInterpreter(DIR, path);
                     // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
-                    else if (path[0] == '/' || path[0] == '~')           
-                        temp_file = goToDir(absolutePathInterpreter(path));
+                    else if (path[0] == '/' || path[0] == '~')
+                        temp_path = absolutePathInterpreter(path);
                     // any path that starts at the current directory, could also start with . or ..
-                    else                                                             
-                        temp_file = goToDir(absolutePathInterpreter(DIR + '/' + path));
+                    else
+                        temp_path = absolutePathInterpreter(DIR + '/' + path);
+                    temp_file = goToDir(temp_path);
                     if (temp_file) {
                         if (temp_file instanceof File) {
-                            if (SUDO || permissionCheck(temp_file, 'r')) 
+                            if (SUDO || permissionCheck(temp_file, 'w'))
                                 temp_file.setFileContent(text, mode);
-                            else 
+                            else
                                 TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: Permission denied</span>`;
                         }
-                        else 
+                        else
                             TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: Is a directory</span>`;
                     }
-                    else 
-                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: No such file or directory</span>`;
+                    else {  // the file doesnt exist yet, create it inside its parent directory
+                        const split_at = temp_path.lastIndexOf('/');
+                        const parent_dir = goToDir(temp_path.slice(0, split_at) || '/');
+                        if (parent_dir instanceof Directory) {
+                            if (SUDO || permissionCheck(parent_dir, 'w')) {
+                                let owner = (SUDO) ? 'root' : CURRENT_USER.getUsername();
+                                const new_file = new File(temp_path.slice(split_at + 1), owner, DEFAULT_FILE_PERMISSION, parent_dir);
+                                parent_dir.addFile(new_file);
+                                new_file.setFileContent(text, mode);
+                            }
+                            else
+                                TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: Permission denied</span>`;
+                        }
+                        else
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: No such file or directory</span>`;
+                    }
                 }
                 break;
 
@@ -609,16 +646,20 @@ function START_UBUNTU_TERMINAL() {
                 }
                 if (command_components[0] == '-m' && /^[0-7]{3}$/.test(command_components[1])) { // checking for -m ### form
                     if (command_components.length > 3) break;
+                    if (command_components.length < 3) {
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: missing operand</span>`;
+                        break;
+                    }
                     if (SUDO || permissionCheck(cur_dir, 'w')) {
                         let owner = (SUDO) ? 'root' : CURRENT_USER.getUsername();
                         if (!cur_dir.addDirectory(new Directory(command_components[2], owner, command_components[1], cur_dir)))
-                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File exists'</span>`;
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[2]}': File exists</span>`;
                     }
                     else
-                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': Permission denied'</span>`;
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[2]}': Permission denied</span>`;
                 }
                 else if (command_components[0] == "~") {
-                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${HOME_DIR}': File exists'</span>`;
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${HOME_DIR}': File exists</span>`;
                 }
                 else {
                     for (let i = 0; i < command_components.length; i++) {
@@ -630,10 +671,10 @@ function START_UBUNTU_TERMINAL() {
                         if (SUDO || permissionCheck(cur_dir, 'w')) {
                             let owner = (SUDO) ? 'root' : CURRENT_USER.getUsername();
                             if (!cur_dir.addDirectory(new Directory(command_components[i], owner, DEFAULT_DIR_PERMISSION, cur_dir)))
-                               TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File exists'</span>`;
+                               TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': File exists</span>`;
                         }
                         else
-                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': Permission denied'</span>`;
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot create directory '${command_components[i]}': Permission denied</span>`;
                     }
                 }
                 break;
@@ -656,7 +697,9 @@ function START_UBUNTU_TERMINAL() {
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: failed to remove '${command_components[i]}': No nesting allowed</span>`;
                             continue
                         }
-                        if (cur_dir.getChildren(command_components[i]) instanceof File)
+                        if (!cur_dir.getChildren(command_components[i]))
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: failed to remove '${command_components[i]}': No such file or directory</span>`;
+                        else if (cur_dir.getChildren(command_components[i]) instanceof File)
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: failed to remove '${command_components[i]}': Not a directory</span>`;
                         else if (cur_dir.getChildren(command_components[i]).getChildren().length > 2)
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: failed to remove '${command_components[i]}': Directory not empty</span>`;
@@ -676,6 +719,10 @@ function START_UBUNTU_TERMINAL() {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: can only remove file(s) or directory(ies) in the current/working directory, no nesting allowed</span>`;
                     break;
                 }
+                if (!command_components.length) {
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: missing operand</span>`;
+                    break;
+                }
                 let f_flag = command_components[0].includes('-') && command_components[0].includes('f');
                 let r_flag = command_components[0].includes('-') && command_components[0].includes('r');
                 let com_compo = (r_flag || f_flag) ? command_components.slice(1) : command_components;
@@ -685,7 +732,7 @@ function START_UBUNTU_TERMINAL() {
                 }
                 else if (com_compo.includes('.') || com_compo.includes('..'))
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot remove '.' or '..': Invalid argument</span>`;
-                else if (r_flag && f_flag && com_compo[0] == '/') {
+                else if (r_flag && f_flag && com_compo[0] == '/' && !com_compo.includes('--no-preserve-root')) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: it is dangerous to operate recursively on '/'</span>`;
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: use --no-preserve-root to override this failsafe</span>`;
                 }
@@ -694,7 +741,7 @@ function START_UBUNTU_TERMINAL() {
                         TERMINAL_CONSOLE.innerHTML += `<br><span>Only root may execute such a devastating command...</span>`;
                         break;
                     }
-                    TERMINAL_CONSOLE.innerHTML += `<br><span><img src="../../assets/img/whatmini.gif" alt=""/> DON'T DO IT!</span>`;
+                    TERMINAL_CONSOLE.innerHTML += `<br><span><img src="../../assets/img/misc/whatmini.gif" alt=""/> DON'T DO IT!</span>`;
                     SU_TARGET = 'root';
                     PASSWORD_IN_PROGRESS = true;
                     SELF_DESTRUCT = true;
@@ -730,7 +777,7 @@ function START_UBUNTU_TERMINAL() {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: does not support any option; syntax: su username</span>`;
                     break;
                 }
-                if (!USERS[command_components[0]]) 
+                if (!userExists(command_components[0]))
                     TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: user ${command_components[0]} does not exist or the user entry does not contain all the required fields</span>`;
                 else {
                     PASSWORD_IN_PROGRESS = true;
@@ -746,9 +793,11 @@ function START_UBUNTU_TERMINAL() {
                 if (!SUDO) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: Only root may add a user to the system.</span>`;
                 }
+                else if (command_components.length == 0)
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>adduser: Only one or two names allowed.</span>`;
                 else if (command_components.length > 1)
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: Only one name is allowed.</span>`;
-                else if (USERS[command_components[0]])
+                else if (userExists(command_components[0]))
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: The user \`${command_components[0]}' already exists.</span>`;
                 else if (/^\./.test(command_components[0]))
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: The name must not start with '.' character.</span>`;
@@ -767,18 +816,20 @@ function START_UBUNTU_TERMINAL() {
                 if (!SUDO) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: Only root may remove a user to the system.</span>`;
                 }
-                else if (command_components[0] == 'root') {
+                else if (command_components.length == 0)
+                    TERMINAL_CONSOLE.innerHTML += `<br><span>deluser: Only one or two names allowed.</span>`;
+                else if (command_components[0] == 'root' && !command_components.includes('--no-preserve-root')) {
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: WARNING: You are just about to delete the root account (uid 0). Usually this is never required as it may render the whole system unsuable. If you really want this, call deluser with parameter --no-preserve-root. Stopping now without having performed any action</span>`;
                 }
                 else if (command_components.includes('root') && command_components.includes('--no-preserve-root')){
-                    TERMINAL_CONSOLE.innerHTML += `<br><span><img src="../../assets/img/whatmini.gif" alt=""/> DON'T DO IT!</span>`;
+                    TERMINAL_CONSOLE.innerHTML += `<br><span><img src="../../assets/img/misc/whatmini.gif" alt=""/> DON'T DO IT!</span>`;
                     SU_TARGET = 'root';
                     PASSWORD_IN_PROGRESS = true;
                     SELF_DESTRUCT = true;
                 }
                 else if (command_components.length > 1)
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: Only one name is allowed.</span>`;
-                else if (!USERS[command_components[0]])
+                else if (!userExists(command_components[0]))
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: The user \`${command_components[0]}' does not exist.</span>`;
                 else if (CURRENT_USER.getUsername() == command_components[0]) 
                     TERMINAL_CONSOLE.innerHTML += `<br><span>fatal: The user \`${command_components[0]}' is currently logged in.</span>`;
@@ -786,7 +837,8 @@ function START_UBUNTU_TERMINAL() {
                     const home_dir = ROOT_DIR.getChildren('home');
                     home_dir.removeFilenode(command_components[0]);
                     delete USERS[command_components[0]];
-                    DIR = HOME_DIR;
+                    if (!goToDir(DIR)) // only move if the working directory was removed along with the user
+                        DIR = HOME_DIR;
                 }
                 break;
                
@@ -832,8 +884,16 @@ function START_UBUNTU_TERMINAL() {
                         }
                         if (!SUDO && !permissionCheck(temp_filenode.getParent(), 'w'))
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: changing permissions of '${filenode_name}': Operation not permitted</span>`;
-                        else 
+                        else {
                             temp_filenode.setPermission(perm);
+                            if (temp_filenode instanceof Directory) { // keep the '.' and '..' entries in sync, ls -la reads them
+                                temp_filenode.getChildren('.')?.setPermission(perm);
+                                for (const child of temp_filenode.getChildren()) {
+                                    if (child instanceof Directory && child.getName() != '.' && child.getName() != '..')
+                                        child.getChildren('..')?.setPermission(perm);
+                                }
+                            }
+                        }
                     }
                     else 
                         TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot access '${filenode_name}': No such file or directory</span>`;
@@ -851,7 +911,7 @@ function START_UBUNTU_TERMINAL() {
                     break;
                 }
                 TERMINAL_CONSOLE.innerHTML = '';
-                CURSOR_POS == 0;
+                CURSOR_POS = 0;
                 break;
 
             case 'history':
@@ -1072,7 +1132,7 @@ function START_UBUNTU_TERMINAL() {
         function printFilenodeInfoList(cur_dir, option) {
             let stringHTML = '';
             if (option.length > 3) { // only support up to '-la'
-                stringHTML += `<span>ls: unrecognized option '${option}'</span>`;
+                TERMINAL_CONSOLE.innerHTML += `<br><span>ls: unrecognized option '${option}'</span>`;
                 return;
             }
             let total_size = 0;
@@ -1095,8 +1155,8 @@ function START_UBUNTU_TERMINAL() {
 
         function printHistory(line=HISTORY_COMMAND.length) {
             let span = HISTORY_COMMAND.length.toString().length;
-            for (let i = HISTORY_COMMAND.length - line; i < HISTORY_COMMAND.length; i++) {
-                TERMINAL_CONSOLE.innerHTML += `<br><span>  ${(i+1).toString().padStart(span, ' ')}  ${HISTORY_COMMAND[i]}</span>`;
+            for (let i = Math.max(HISTORY_COMMAND.length - line, 0); i < HISTORY_COMMAND.length; i++) { // asking for more lines than exist just prints them all
+                TERMINAL_CONSOLE.innerHTML += `<br><span>  ${(i+1).toString().padStart(span, ' ')}  ${escapeHTML(HISTORY_COMMAND[i])}</span>`;
             }
         }
 
@@ -1115,7 +1175,7 @@ function START_UBUNTU_TERMINAL() {
             manual.push({'sudo':`<br><span>sudo: a powerful command add-on that lets you bypass almost any restriction (use with caution)`});
             manual.push({'su':`<br><span>su: simply change to another available user`});
             manual.push({'adduser':`<br><span>adduser: add users, must be used with sudo`});
-            manual.push({'deluser':`<br><span>delsuer: remove a user, must be used with sudo`});
+            manual.push({'deluser':`<br><span>deluser: remove a user, must be used with sudo`});
             manual.push({'chmod':`<br><span>chmod: change file mode bits`});
             manual.push({'pwd':`<br><span>pwd: print name of current/working directory`});
             manual.push({'whoami':`<br><span>whoami: print effective user name`});

@@ -9,7 +9,7 @@ class User {
         this.group = '100' + (USER_COUNT - 1);
         if (USER_COUNT == 0) {
             this.uid = '0';
-            this.gid = '0';``
+            this.gid = '0';
             this.group = '0';
         }
         USER_COUNT++;
@@ -19,7 +19,7 @@ class User {
         return this.username;
     }
 
-    setUsername() {
+    setUsername(username) {
         this.username = username;
     }
 
@@ -161,7 +161,7 @@ class Directory {
     }
 
     removeFile(file_name) {
-        if (!this.hasChildren(directory_name)) {
+        if (!this.hasChildren(file_name)) {
             return false;
         }
         this.setChildren(this.getChildren().filter(filenode => filenode.getName() !== file_name));
