@@ -27,13 +27,11 @@
 				display: block;
 				border: 0;
 				width: 100vw;
-				/* Leave room above the iframe for the absolutely-positioned #home-btn
-				   (30px top + 50px tall on desktop) so it never overlaps the content. */
-				margin-top: 90px;
-				height: calc(100vh - 90px);
+				height: 100vh;
 			}
 			@media screen and (max-width: 736px) {
-				/* Mobile button is 12px top + 36px tall. */
+				/* Leave room above the iframe for the absolutely-positioned #home-btn
+				   (12px top + 36px tall on mobile) so it never overlaps the content. */
 				iframe {
 					margin-top: 58px;
 					height: calc(100vh - 58px);
