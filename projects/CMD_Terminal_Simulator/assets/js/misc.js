@@ -1,8 +1,8 @@
 // Grab the switch and state display elements
 const switchElement = document.getElementById('switch-window');
 
-// Initialize state (off by default)
-let isOn = false;
+// Initialize state (on by default, the Ubuntu Terminal is shown first, see the html)
+let isOn = true;
 
 // Toggle the 'active' class and update state value when clicked
 switchElement.addEventListener('click', function() {
@@ -28,6 +28,6 @@ document.addEventListener('keydown', function(event) {
 });
 
 window.onload = function() {
-    START_WINDOW_CMD();
+    START_UBUNTU_TERMINAL();
 }
 

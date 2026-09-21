@@ -11,6 +11,7 @@
 		<title>CMD/Terminal Simulator</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<meta name="description" content="Practice Linux commands in your browser - a free Ubuntu Terminal and Windows CMD simulator. Try ls, cd, mkdir, rm, chmod, sudo and more on a virtual file system, no install needed." />
 		<link rel="stylesheet" href="../../assets/css/main.css" />
 		<link rel="icon" href="CMD_Terminal_Simulator_icon.svg" type="image/x-icon">
 		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
@@ -41,19 +42,18 @@
 						<div class="inner">
 							<div class="switch-container">
 								<span class="label">Windows CMD</span>
-								<div class="switch" id="switch-window">
+								<div class="switch active" id="switch-window">
 									<div class="toggle-btn"></div>
 								</div>
 								<span class="label">Ubuntu Terminal</span>
 							</div><br>
 							<div id="command-console">
-								<div id="cmd-bar">
-									<img class="cmd-img" src="assets/img/topleft_cmd_white.png" alt="Left Image" style="float: left; height: 31px;">
-									<img class="cmd-img" src="assets/img/topright_cmd_white.png" alt="Right Image" style="float: right; height: 31px;">
-									<div style="clear: both;"></div>
+								<div id="terminal-bar">
+									<img class="terminal-img" src="assets/img/topleft_terminal_black.png" alt="Left Image" style="float: left; height: 46px">
+									<img class="terminal-img" src="assets/img/topright_terminal_black.png" alt="Right Image" style="float: right; height: 46px">
 								</div>
-								<!-- CMD_Simulator.js -->
-								<div id="cmd-body" tabindex="0"><span>Microsoft Windows [Version 10.5.18071.1703]<br>(c) Microsoft Corporation. All rights reserved.<br><br></span></div>
+								<!-- Terminal_Simulator.js -->
+								<div id="terminal-body" tabindex="0"><span>Welcome to John's scuffed Ubuntu terminal simulator.<br>See "man command" for supported commands.<br><br></span></div>
 							</div>
 							<div>
 								<span class="submenu">Description</span>
@@ -83,7 +83,7 @@
 							</div>
 							<div class="expandable-content" id="features-content">
 								<p>Windows CMD supported command: whoami, cls</p>
-								<p>Ubuntu Terminal supported command: ls, cd, touch, echo, cat, rm, mkdir, rmdir, sudo, su, adduser, deluser, chmod, pwd, whoami, clear, history, man</p>
+								<p>Ubuntu Terminal supported command: ls, cd, touch, echo, cat, rm, mkdir, rmdir, sudo, su, adduser, deluser, chmod, pwd, whoami, umask, clear, history, man</p>
 								<ul>
 									<li><span class="effect-span"><b>ls</b>: list directory contents</span></li>
 									<li><span class="effect-span"><b>cd</b>: change working directory</span></li>
@@ -100,7 +100,7 @@
 									<li><span class="effect-span"><b>chmod</b>: change file mode (permission)</span></li>
 									<li><span class="effect-span"><b>pwd</b>: show current/working directory</span></li>
 									<li><span class="effect-span"><b>whoami</b>: show current active user</span></li>
-									<li><span class="effect-span"><b>chmod</b>: change file mode (permission)</span></li>
+									<li><span class="effect-span"><b>umask</b>: show the file mode creation mask</span></li>
 									<li><span class="effect-span"><b>clear</b>: clear the terminal screen</span></li>
 									<li><span class="effect-span"><b>history</b>: show history of all previous input command</span></li>
 									<li><span class="effect-span"><b>man</b>: show manual to each or all commands</span></li>
@@ -111,6 +111,7 @@
 											<li><span class="effect-span">Arrow key up/down: traversing command history</span></li>
 											<li><span class="effect-span">Home/End key: move cursor to the head/tail of text</span></li>
 											<li><span class="effect-span">Backspace/Del key: remove character to the left/right of cursor of text</span></li>
+											<li><span class="effect-span">Tab key: auto-complete command names, file/directory names (any path, including <b>..</b> and <b>~</b>) and usernames, press it twice to list every option</span></li>
 										</ul>
 								</ul>
 
@@ -128,7 +129,6 @@
 									<li><span class="effect-span">Upgrade <b>mkdir</b>, <b>rmdir</b>, <b>rm</b> to allow nesting file path to directory/file</span></li>
 									<li><span class="effect-span">Add feature for command piping</span></li>
 									<li><span class="effect-span">Code optimizations, code reorganization</span></li>
-									<li><span class="effect-span">Implementing Tab key: auto-complete file name in during command prompting</span></li>
 									<li><span class="effect-span">To be updated</span></li>
 								</ul>								
 							</div>

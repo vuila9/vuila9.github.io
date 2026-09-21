@@ -32,8 +32,8 @@ const translations = {
         "home.logoTitle": "My name is Khoa Xuan Nguyen",
         "home.welcome": "Welcome to my portfolio!",
         "home.intro1": "This website provides an overview of my background and showcases all the projects I have created. Unless otherwise specified, most of these projects were developed using vanilla JavaScript, without the use of any frameworks or library.",
-        "home.intro2": "It has been a while since I last posted a project. I recently moved back to Vietnam for more opportunities and am currently working as a developer at a small-sized company. I’ve been handling various projects and tasks, and I’m actively working on them. I’ll be sharing updates soon.",
         "home.intro3": "All of my projects up to Streaming Simulator were completely hand-coded without any AI assistance. However, I’ve come to realize that avoiding AI entirely would be like handicapping myself. So from this point onward, many of my upcoming and future projects will heavily involve AI-assisted coding. Of course, my coding knowledge and fundamentals will still be applied wherever necessary and won’t go to waste.",
+        "home.intro4": "Curious how many people visit? Check out the traffic stats of this website, powered by Google Analytics 4 (GA4), <a href=\"./stat\">here</a>.",
 
         // --- Navigation / menu ---
         "nav.menu": "Menu",
@@ -173,8 +173,8 @@ const translations = {
         "home.logoTitle": "Tôi tên là Nguyễn Xuân Khoa",
         "home.welcome": "Chào mừng đến với portfolio của tôi!",
         "home.intro1": "Trang web này giới thiệu tổng quan về bản thân tôi và trưng bày tất cả các dự án tôi đã thực hiện. Trừ khi có ghi chú khác, phần lớn các dự án này được phát triển bằng JavaScript gốc, không sử dụng bất kỳ framework hay thư viện nào.",
-        "home.intro2": "Đã một thời gian kể từ lần cuối tôi đăng một dự án. Gần đây tôi đã chuyển về Việt Nam để tìm kiếm nhiều cơ hội hơn và hiện đang làm lập trình viên tại một công ty quy mô nhỏ. Tôi đã và đang đảm nhận nhiều dự án cũng như công việc khác nhau và đang tích cực thực hiện chúng. Tôi sẽ sớm chia sẻ những cập nhật mới.",
         "home.intro3": "Tất cả các dự án của tôi tính đến Streaming Simulator đều được viết tay hoàn toàn mà không có sự hỗ trợ của AI. Tuy nhiên, tôi nhận ra rằng việc né tránh AI hoàn toàn chẳng khác nào tự trói tay mình. Vì vậy, kể từ đây, nhiều dự án sắp tới và trong tương lai của tôi sẽ có sự tham gia đáng kể của việc lập trình với sự hỗ trợ của AI. Tất nhiên, kiến thức và nền tảng lập trình của tôi vẫn sẽ được áp dụng ở bất cứ nơi nào cần thiết và sẽ không bị lãng phí.",
+        "home.intro4": "Tò mò có bao nhiêu người truy cập? Xem thống kê lượt truy cập của trang web này, được cung cấp bởi Google Analytics 4 (GA4), <a href=\"./stat\">tại đây</a>.",
 
         // --- Navigation / menu ---
         "nav.menu": "Menu",

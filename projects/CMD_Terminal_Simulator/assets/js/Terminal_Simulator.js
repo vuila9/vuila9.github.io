@@ -16,6 +16,7 @@ function START_UBUNTU_TERMINAL() {
     let HISTORY_POS = 0;   
     let HISTORY_COMMAND = [];
 
+    let TAB_LIST_READY = false; // Tab could not complete any further, so pressing it again lists the options
     let PASSWORD_IN_PROGRESS = false;
     let SELF_DESTRUCT = false;
     let SU_TARGET = '';
@@ -29,6 +30,8 @@ function START_UBUNTU_TERMINAL() {
     TERMINAL_CONSOLE.addEventListener('keydown', (event) => {
         let arrow_keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
         removeCursor();
+        if (event.key !== 'Tab' && !['Shift', 'Control', 'Alt', 'Meta'].includes(event.key))
+            TAB_LIST_READY = false;
 
         if (event.key === 'Enter') { // Extract the user input
             event.preventDefault(); // Prevent default "Enter" behavior
@@ -115,7 +118,9 @@ function START_UBUNTU_TERMINAL() {
             CURSOR_POS = COMMAND.length;
         }
         else if (event.key === 'Tab') {
-            event.preventDefault(); // Prevent the default action (whatever it is)
+            event.preventDefault(); // Prevent the default action (moving focus out of the terminal)
+            if (!PASSWORD_IN_PROGRESS)
+                tabComplete();
         }
         else if (event.key === 'ArrowUp' && !PASSWORD_IN_PROGRESS) {
             event.preventDefault(); // Prevent the default action (scrolling up)
@@ -263,71 +268,74 @@ function START_UBUNTU_TERMINAL() {
         return readablePermission;
     }
 
-    function absolutePathInterpreter(path) {
+    function userHomeDir(username) {
+        return (username == 'root') ? '/' : `/home/${username}`;
+    }
+
+    // Walks the file system one component at a time, starting at '/' for an absolute path or at the working directory DIR otherwise.
+    // Handles '.', '..', '~' (current user's home), '~user' (that user's home) and any number of extra '/'s.
+    // Returns {node, path} where path is the simplified '/path/to/file', or {error} where error is 'ENOENT', 'ENOTDIR' or 'EACCES'.
+    // If only the very last component is missing, {error, parent, name} is returned so the caller can create it (echo > newfile).
+    function resolvePath(path, sudo=SUDO) {
         if (path[0] === '~') {
-            path = path.replace('~', HOME_DIR);
+            const tilde = path.split('/')[0];
+            if (tilde === '~')
+                path = HOME_DIR + path.slice(1);
+            else if (userExists(tilde.slice(1)))
+                path = userHomeDir(tilde.slice(1)) + path.slice(tilde.length);
         }
-        
-        // Split the input path into parts
-        let pathParts = path.split('/');
-        let resolvedParts = [];
 
-        // Traverse through the path parts
-        for (let part of pathParts) {
-            if (part === '.' || part === '') {
-                // Do nothing for current directory (.) or empty parts
-                continue;
-            } else if (part === '..') {
-                // Go up one directory for (..), but prevent going above the root (empty resolvedParts)
-                if (resolvedParts.length > 0) {
-                    resolvedParts.pop(); // Remove the last directory
-                }
-            } else {
-                // Add new directory or file to the resolved path
-                resolvedParts.push(part);
+        const stack = [ROOT_DIR]; // every directory (or file, at the very end) walked through so far
+        const names = [];         // their names, joined back together to form the simplified path
+        if (path[0] !== '/') {    // a relative path starts from wherever we are now
+            for (const name of DIR.split('/').filter(name => name !== '')) {
+                const child = stack[stack.length - 1].getChildren(name);
+                if (!child)
+                    return {error: 'ENOENT'};
+                stack.push(child);
+                names.push(name);
             }
         }
 
-        // Join the parts back into a valid path
-        let resolvedPath = '/' + resolvedParts.join('/');
-
-        // Ensure the result doesn't end with an extra '/' (except for root '/')
-        return resolvedPath === '/' ? resolvedPath : resolvedPath.replace(/\/$/, '');
-    } 
-
-    // this function will normalize the . and .. components.
-    // it will resolve the path relative to the current directory DIR
-    function pathInterpreter(dir, relativePath) {
-        if (relativePath === '/') { // root
-            return '/';
-        }
-        if (relativePath[0] === '~') {
-            return relativePath.replace('~', HOME_DIR);
-        }
-        // Split the current directory and relative path into parts
-        let dirParts = dir.split('/');
-        let pathParts = relativePath.split('/');
-    
-        // Traverse through the relative path parts
-        for (let part of pathParts) {
-            if (part === '.' || part === '') {
-                // Do nothing for current directory (.)
+        const parts = path.split('/');
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            if (part === '')
                 continue;
-            } else if (part === '..') {
-                // Go up one directory for (..)
-                if (dirParts.length > 1) {
-                    dirParts.pop(); // Remove the last directory in DIR
+            const cur = stack[stack.length - 1];
+            if (!(cur instanceof Directory)) // cant go through a file, ex: file/..
+                return {error: 'ENOTDIR'};
+            if (part === '.')
+                continue;
+            if (part === '..') {
+                if (stack.length > 1) { // prevent going above the root
+                    stack.pop();
+                    names.pop();
                 }
-            } else {
-                // Add new directory or file to the path
-                dirParts.push(part);
+                continue;
             }
+            // x permission is required to look inside a directory. '.' and '..' are exempt so a chmod 000 directory can still be left
+            if (!sudo && !permissionCheck(cur, 'x'))
+                return {error: 'EACCES'};
+            const child = cur.getChildren(part);
+            if (!child)
+                return (i == parts.length - 1) ? {error: 'ENOENT', parent: cur, name: part} : {error: 'ENOENT'};
+            stack.push(child);
+            names.push(part);
         }
-        // Join the parts back into a valid path and return
-        if (dirParts.length == 1 && dirParts[0] == '')
-            return '/';
-        else
-            return dirParts.join('/');
+
+        const node = stack[stack.length - 1];
+        if (path.endsWith('/') && node instanceof File) // file/ is not a directory
+            return {error: 'ENOTDIR'};
+        return {node: node, path: '/' + names.join('/')};
+    }
+
+    function pathErrorMessage(error) {
+        if (error == 'ENOTDIR')
+            return 'Not a directory';
+        if (error == 'EACCES')
+            return 'Permission denied';
+        return 'No such file or directory';
     }
 
     function goToDir(dir) {
@@ -389,6 +397,171 @@ function START_UBUNTU_TERMINAL() {
         // check for others permisison (last 3 digits)
         return perm.slice(-3).includes(type); 
         //return perm.slice(-3).includes(type) && (filenode.getOwner() == CURRENT_USER.getUsername() || filenode.getOwner() == 'root');   
+    }
+
+    // man, Tab //
+    function allAvailableSupportedCommands() {
+        const manual = []
+        manual.push({'help': `<br><span>--help: add anywhere after the command to see available options and short guide`});
+        manual.push({'ls':`<br><span>ls (-a, -l, -la): list directory contents (show hidden, show as list, show as both)`});
+        manual.push({'cd':`<br><span>cd: change the working directory`});
+        manual.push({'touch':`<br><span>touch: change file timestamps`});
+        manual.push({'echo':`<br><span>echo: display a line of text`});
+        manual.push({'cat':`<br><span>cat: concatenate files and print on the standard output`});
+        manual.push({'rm':`<br><span>rm: (-r, -f, -rf) remove files or directories (remove directory, ignore nonexistent filenode, both)`});
+        manual.push({'mkdir':`<br><span>mkdir (-m ###): make directories (specify permission in octal)`});
+        manual.push({'rmdir':`<br><span>rmdir: remove the directory(ies), if they are empty`});
+        manual.push({'sudo':`<br><span>sudo: a powerful command add-on that lets you bypass almost any restriction (use with caution)`});
+        manual.push({'su':`<br><span>su: simply change to another available user`});
+        manual.push({'adduser':`<br><span>adduser: add users, must be used with sudo`});
+        manual.push({'deluser':`<br><span>deluser: remove a user, must be used with sudo`});
+        manual.push({'chmod':`<br><span>chmod: change file mode bits`});
+        manual.push({'pwd':`<br><span>pwd: print name of current/working directory`});
+        manual.push({'whoami':`<br><span>whoami: print effective user name`});
+        manual.push({'umask':`<br><span>umask: display file mode creation mask`});
+        manual.push({'clear':`<br><span>clear: clear the terminal screen`});
+        manual.push({'history':`<br><span>history (-c, ##): GNU History Library (clear list, show amount from bottom up)`});
+
+        manual.push({'man':`<br><span>man: print the system reference manuals`});
+        return manual;
+    }
+
+    // Reverse of escapeHTML, file/user names are stored escaped but must be typed and completed unescaped.
+    function unescapeHTML(string) {
+        return string.replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+    }
+
+    // TAB //
+
+    // Works out what can be completed at the cursor. Only the text before the cursor counts, like bash.
+    // Returns null if there is nothing to complete, otherwise {token, dir_part, candidates}:
+    //   token      the word being completed, as typed (ex: '../th')
+    //   dir_part   the directory portion of the token that is kept as typed (ex: '../')
+    //   candidates [{name, text, node}], name is the escaped name (for printing), text is what gets typed
+    function getCompletions() {
+        const words = COMMAND.slice(0, CURSOR_POS).split(' ');
+        const token = words.pop(); // '' if the cursor is right after a space
+        const previous = words.filter(word => word !== '');
+        let sudo = false;
+        if (previous[0] == 'sudo') {
+            sudo = true;
+            previous.shift();
+        }
+
+        const candidates = [];
+        if (previous.length == 0) { // the first word is a command name
+            for (const name of commandNames()) {
+                if (name.startsWith(token))
+                    candidates.push({name: name, text: name});
+            }
+            return {token: token, dir_part: '', candidates: candidates};
+        }
+
+        const command = previous[0];
+        const args = previous.slice(1);
+        if (token[0] == '-') // options
+            return null;
+        let type = null; // what kind of word this command expects here
+        if (['ls', 'cat', 'touch', 'rm'].includes(command))
+            type = 'path';
+        else if (command == 'cd' && args.length == 0 || command == 'rmdir')
+            type = 'dir';
+        else if (command == 'chmod' && args.length == 1) // the first argument is the mode
+            type = 'path';
+        else if (['su', 'deluser'].includes(command) && args.length == 0)
+            type = 'user';
+        else if (command == 'man')
+            type = 'command';
+        else if (command == 'echo' && ['>', '>>'].includes(args[args.length - 1])) // only the redirection target is a path
+            type = 'path';
+        if (!type)
+            return null;
+
+        if (type == 'command') {
+            for (const name of commandNames()) {
+                if (name.startsWith(token))
+                    candidates.push({name: name, text: name});
+            }
+        }
+        else if (type == 'user') {
+            for (const username in USERS) {
+                if (username.startsWith(escapeHTML(token)))
+                    candidates.push({name: username, text: unescapeHTML(username)});
+            }
+        }
+        else {
+            // ex: token = 'this/.././/th' -> dir_part = 'this/.././/', name_part = 'th'
+            const split_at = token.lastIndexOf('/') + 1;
+            const dir_part = token.slice(0, split_at);
+            const name_part = token.slice(split_at);
+            const resolved = resolvePath(dir_part || '.', sudo);
+            if (resolved.error || !(resolved.node instanceof Directory) || !(sudo || permissionCheck(resolved.node, 'r')))
+                return null;
+
+            const prefix = escapeHTML(name_part);
+            for (const child of resolved.node.getChildren()) {
+                const name = child.getName();
+                if (name == '.' || name == '..' || !name.startsWith(prefix))
+                    continue;
+                if (name[0] == '.' && name_part[0] != '.') // hidden unless asked for
+                    continue;
+                if (type == 'dir' && !(child instanceof Directory))
+                    continue;
+                candidates.push({name: name, text: unescapeHTML(name), node: child});
+            }
+            return {token: token, dir_part: dir_part, candidates: candidates};
+        }
+        return {token: token, dir_part: '', candidates: candidates};
+    }
+
+    function commandNames() {
+        return allAvailableSupportedCommands().map(man => Object.keys(man)[0]).filter(name => name != 'help');
+    }
+
+    function tabComplete() {
+        const completion = getCompletions();
+        if (!completion || completion.candidates.length == 0) {
+            TAB_LIST_READY = false;
+            return;
+        }
+
+        // the longest start shared by every candidate
+        const texts = completion.candidates.map(candidate => candidate.text);
+        let common = texts[0];
+        for (const text of texts) {
+            while (!text.startsWith(common))
+                common = common.slice(0, -1);
+        }
+        let completed = completion.dir_part + common;
+        if (texts.length == 1) // fully completed, move on
+            completed += (completion.candidates[0].node instanceof Directory) ? '/' : ' ';
+
+        if (completed != completion.token) {
+            COMMAND = COMMAND.slice(0, CURSOR_POS - completion.token.length) + completed + COMMAND.slice(CURSOR_POS);
+            CURSOR_POS += completed.length - completion.token.length;
+            TAB_LIST_READY = false;
+        }
+        else if (TAB_LIST_READY) { // nothing left to complete and Tab was pressed twice in a row, show the options
+            printCompletionList(completion.candidates);
+            TAB_LIST_READY = false;
+        }
+        else
+            TAB_LIST_READY = true;
+    }
+
+    // Prints the candidates like ls does, then a fresh prompt. The current input is put back on it by the key handler.
+    function printCompletionList(candidates) {
+        let stringHTML = '<br>';
+        for (const candidate of candidates) {
+            if (candidate.node instanceof Directory)
+                stringHTML += `<span class="terminal-directory">${candidate.name}</span><span>  </span>`;
+            else if (candidate.node && /x$/.test(octalToReadable(candidate.node.getPermission())))
+                stringHTML += `<span class="terminal-file-exec">${candidate.name}</span><span>  </span>`;
+            else
+                stringHTML += `<span>${candidate.name}</span><span>  </span>`;
+        }
+        TERMINAL_CONSOLE.innerHTML += stringHTML + '<br>';
+        addThePrompt();
     }
 
     function command_handler(command) {
@@ -461,36 +634,15 @@ function START_UBUNTU_TERMINAL() {
                 else if (command.length == command_name.length || command_components[0] == '~') // aka just cd
                     DIR = HOME_DIR;
                 else { 
-                    let temp_filenode;
-                    let temp_path;
-                    // any path that starts with . or .. and doesnt include any . or .. in the middle
-                    if (/^(\.\.?)$|^(\.\.?)\/[^\.]*$/.test(command_components[0]) && command_components[0] != '/') {
-                        temp_path = pathInterpreter(DIR, command_components[0]);
-                        temp_filenode = goToDir(temp_path);
-                    }
-                    // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
-                    else if (command_components[0][0] == '/' || command_components[0][0] == '~') {        
-                        temp_path = absolutePathInterpreter(command_components[0]);
-                        temp_filenode = goToDir(temp_path);
-                    }
-                    // any path that starts at the current directory, could also start with . or ..
-                    else {                                                                                
-                        temp_path = absolutePathInterpreter(DIR + '/' + command_components[0]);
-                        temp_filenode = goToDir(temp_path);
-                    }
-                    if (temp_filenode){
-                        if (temp_filenode instanceof File)
-                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Not a directory</span>`;
-                        else {
-                            if (SUDO || permissionCheck(temp_filenode, 'x'))
-                                DIR = temp_path;
-                            else 
-                                TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Permission denied</span>`;
-
-                        }
-                    }
-                    else 
-                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: No such file or directory</span>`;
+                    const resolved = resolvePath(command_components[0]);
+                    if (resolved.error)
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: ${pathErrorMessage(resolved.error)}</span>`;
+                    else if (resolved.node instanceof File)
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Not a directory</span>`;
+                    else if (SUDO || permissionCheck(resolved.node, 'x'))
+                        DIR = resolved.path;
+                    else
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${command_name}: ${command_components[0]}: Permission denied</span>`;
                 }
                 break;
 
@@ -559,44 +711,29 @@ function START_UBUNTU_TERMINAL() {
                         break;
                     }
                     text = text.join(' ').trim();
-                    let temp_file;
-                    let temp_path;
-                    // any path that starts with . or .. and doesnt include any . or .. in the middle
-                    if (/^(\.\.?)$|^(\.\.?)\/[^\.]*$/.test(path) && path[0] != '/')
-                        temp_path = pathInterpreter(DIR, path);
-                    // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
-                    else if (path[0] == '/' || path[0] == '~')
-                        temp_path = absolutePathInterpreter(path);
-                    // any path that starts at the current directory, could also start with . or ..
-                    else
-                        temp_path = absolutePathInterpreter(DIR + '/' + path);
-                    temp_file = goToDir(temp_path);
-                    if (temp_file) {
-                        if (temp_file instanceof File) {
-                            if (SUDO || permissionCheck(temp_file, 'w'))
-                                temp_file.setFileContent(text, mode);
+                    const resolved = resolvePath(path);
+                    if (!resolved.error) {
+                        if (resolved.node instanceof File) {
+                            if (SUDO || permissionCheck(resolved.node, 'w'))
+                                resolved.node.setFileContent(text, mode);
                             else
                                 TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: Permission denied</span>`;
                         }
                         else
                             TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: Is a directory</span>`;
                     }
-                    else {  // the file doesnt exist yet, create it inside its parent directory
-                        const split_at = temp_path.lastIndexOf('/');
-                        const parent_dir = goToDir(temp_path.slice(0, split_at) || '/');
-                        if (parent_dir instanceof Directory) {
-                            if (SUDO || permissionCheck(parent_dir, 'w')) {
-                                let owner = (SUDO) ? 'root' : CURRENT_USER.getUsername();
-                                const new_file = new File(temp_path.slice(split_at + 1), owner, DEFAULT_FILE_PERMISSION, parent_dir);
-                                parent_dir.addFile(new_file);
-                                new_file.setFileContent(text, mode);
-                            }
-                            else
-                                TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: Permission denied</span>`;
+                    else if (resolved.parent) {  // the file doesnt exist yet, create it inside its parent directory
+                        if (SUDO || permissionCheck(resolved.parent, 'w')) {
+                            let owner = (SUDO) ? 'root' : CURRENT_USER.getUsername();
+                            const new_file = new File(resolved.name, owner, DEFAULT_FILE_PERMISSION, resolved.parent);
+                            resolved.parent.addFile(new_file);
+                            new_file.setFileContent(text, mode);
                         }
                         else
-                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: No such file or directory</span>`;
+                            TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: Permission denied</span>`;
                     }
+                    else
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>bash: ${path}: ${pathErrorMessage(resolved.error)}</span>`;
                 }
                 break;
 
@@ -607,25 +744,11 @@ function START_UBUNTU_TERMINAL() {
                 }
                 let stringHTML = ''
                 for (let i = 0; i < command_components.length; i++) {
-                    if (command_components[i] == '~') {
-                        stringHTML += `<br><span>${command_name}: ${HOME_DIR}: Is a directory</span>`;
-                        continue;
-                    }
-                    let temp_file;
-                    // any path that starts with . or .. and doesnt include any . or .. in the middle
-                    if (/^(\.\.?)$|^(\.\.?)\/[^\.]*$/.test(command_components[i]) && command_components[i][0] != '/')
-                        temp_file = goToDir(pathInterpreter(DIR, command_components[i]));
-                    // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
-                    else if (command_components[i][0] == '/' || command_components[i][0] == '~')           
-                        temp_file = goToDir(absolutePathInterpreter(command_components[i]));
-                    // any path that starts at the current directory, could also start with . or ..
-                    else                                                             
-                        temp_file = goToDir(absolutePathInterpreter(DIR + '/' + command_components[i]));
-                    
-                    if (temp_file) {
-                        if (temp_file instanceof File) {
-                            if (SUDO || permissionCheck(temp_file, 'r')) 
-                                stringHTML += (temp_file.getSize()) ? `<br><span>${temp_file.getFileContent()}</span>` : '';
+                    const resolved = resolvePath(command_components[i]);
+                    if (!resolved.error) {
+                        if (resolved.node instanceof File) {
+                            if (SUDO || permissionCheck(resolved.node, 'r')) 
+                                stringHTML += (resolved.node.getSize()) ? `<br><span>${resolved.node.getFileContent()}</span>` : '';
                             else 
                                 stringHTML += `<br><span>${command_name}: ${command_components[i]}: Permission denied</span>`;
                         }
@@ -633,7 +756,7 @@ function START_UBUNTU_TERMINAL() {
                             stringHTML += `<br><span>${command_name}: ${command_components[i]}: Is a directory</span>`;
                     }
                     else 
-                        stringHTML += `<br><span>${command_name}: ${command_components[i]}: No such file or directory</span>`;
+                        stringHTML += `<br><span>${command_name}: ${command_components[i]}: ${pathErrorMessage(resolved.error)}</span>`;
                 }
                 TERMINAL_CONSOLE.innerHTML += stringHTML;
                 break;    
@@ -854,29 +977,14 @@ function START_UBUNTU_TERMINAL() {
                 else if ((command_components.length < 2))
                     break;
                 else {
-                    let temp_filenode;
-                    let temp_path;
                     let perm = command_components[0];
                     let filenode_name = command_components[1]
                     if (!/^[0-7]{3}$/.test(perm) || perm.length != 3) {
                         TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: invalid mode: '${perm}'</span>`;
                         break;
                     }
-                    // any path that starts with . or .. and doesnt include any . or .. in the middle
-                    if (/^(\.\.?)$|^(\.\.?)\/[^\.]*$/.test(filenode_name) && filenode_name != '/') {
-                        temp_path = pathInterpreter(DIR, filenode_name);
-                        temp_filenode = goToDir(temp_path);
-                    }
-                    // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
-                    else if (filenode_name[0] == '/' || filenode_name[0] == '~') {        
-                        temp_path = absolutePathInterpreter(filenode_name);
-                        temp_filenode = goToDir(temp_path);
-                    }
-                    // any path that starts at the current directory, could also start with . or ..
-                    else {                                                                                
-                        temp_path = absolutePathInterpreter(DIR + '/' + filenode_name);
-                        temp_filenode = goToDir(temp_path);
-                    }
+                    const resolved = resolvePath(filenode_name);
+                    const temp_filenode = resolved.node;
                     if (temp_filenode){
                         if (temp_filenode.getParent() == null || temp_filenode.getName() == 'root') {
                             TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: changing permissions of '${filenode_name}': Operation not permitted</span>`;
@@ -896,7 +1004,7 @@ function START_UBUNTU_TERMINAL() {
                         }
                     }
                     else 
-                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot access '${filenode_name}': No such file or directory</span>`;
+                        TERMINAL_CONSOLE.innerHTML += `<br><span>${command_name}: cannot access '${filenode_name}': ${pathErrorMessage(resolved.error)}</span>`;
                 }
                 
                 break;
@@ -1032,37 +1140,25 @@ function START_UBUNTU_TERMINAL() {
         //ls MAIN
         function printAnyFileNodeInfo(dir_arr, option='') {
             const bad_dir = [];
+            const bad_dir_message = []; // reason for each entry of bad_dir: no such file or not a directory
             const denied_dir = [];
             const good_dir_obj = [];
             const good_dir_name = [];
             for (let i = 0; i < dir_arr.length; i++) {
-                if (dir_arr[i] == '~') {
-                    good_dir_obj.push(goToDir(HOME_DIR));
-                    good_dir_name.push(HOME_DIR);
-                    continue;
-                }
-                let temp_dir;
-                // any path that starts with . or .. and doesnt include any . or .. in the middle
-                if (/^(\.\.?)$|^(\.\.?)\/[^\.]*$/.test(dir_arr[i]) && dir_arr[i][0] != '/') 
-                    temp_dir = goToDir(pathInterpreter(DIR, dir_arr[i]));
-                // any absolute path or path starts with '~', doesnt matter if . or .. is in the middle
-                else if (dir_arr[i][0] == '/' || dir_arr[i][0] == '~')           
-                    temp_dir = goToDir(absolutePathInterpreter(dir_arr[i]));
-                // any path that starts at the current directory, could also start with . or ..
-                else                                                             
-                    temp_dir = goToDir(absolutePathInterpreter(DIR + '/' + dir_arr[i]));
-                
-                if (temp_dir) {
-                    if (SUDO || permissionCheck(temp_dir, 'r')) 
-                        good_dir_obj.push(temp_dir), good_dir_name.push(dir_arr[i]);
-                    else 
-                        denied_dir.push(dir_arr[i]);
-                }
-                else
+                const resolved = resolvePath(dir_arr[i]);
+                if (resolved.error == 'EACCES')
+                    denied_dir.push(dir_arr[i]);
+                else if (resolved.error) {
                     bad_dir.push(dir_arr[i]);
+                    bad_dir_message.push(pathErrorMessage(resolved.error));
+                }
+                else if (SUDO || permissionCheck(resolved.node, 'r')) 
+                    good_dir_obj.push(resolved.node), good_dir_name.push((dir_arr[i] == '~') ? HOME_DIR : dir_arr[i]);
+                else 
+                    denied_dir.push(dir_arr[i]);
             }
             for (let i = 0; i < bad_dir.length; i++) 
-                TERMINAL_CONSOLE.innerHTML += `<br><span>ls: cannot access '${bad_dir[i]}': No such file or directory</span>`;
+                TERMINAL_CONSOLE.innerHTML += `<br><span>ls: cannot access '${bad_dir[i]}': ${bad_dir_message[i]}</span>`;
             
             for (let i = 0; i < denied_dir.length; i++) 
                 TERMINAL_CONSOLE.innerHTML += `<br><span>ls: cannot access '${denied_dir[i]}': Permission denied</span>`;
@@ -1159,33 +1255,6 @@ function START_UBUNTU_TERMINAL() {
                 TERMINAL_CONSOLE.innerHTML += `<br><span>  ${(i+1).toString().padStart(span, ' ')}  ${escapeHTML(HISTORY_COMMAND[i])}</span>`;
             }
         }
-
-        // man //
-        function allAvailableSupportedCommands() {
-            const manual = []
-            manual.push({'help': `<br><span>--help: add anywhere after the command to see available options and short guide`});
-            manual.push({'ls':`<br><span>ls (-a, -l, -la): list directory contents (show hidden, show as list, show as both)`});
-            manual.push({'cd':`<br><span>cd: change the working directory`});
-            manual.push({'touch':`<br><span>touch: change file timestamps`});
-            manual.push({'echo':`<br><span>echo: display a line of text`});
-            manual.push({'cat':`<br><span>cat: concatenate files and print on the standard output`});
-            manual.push({'rm':`<br><span>rm: (-r, -f, -rf) remove files or directories (remove directory, ignore nonexistent filenode, both)`});
-            manual.push({'mkdir':`<br><span>mkdir (-m ###): make directories (specify permission in octal)`});
-            manual.push({'rmdir':`<br><span>rmdir: remove the directory(ies), if they are empty`});
-            manual.push({'sudo':`<br><span>sudo: a powerful command add-on that lets you bypass almost any restriction (use with caution)`});
-            manual.push({'su':`<br><span>su: simply change to another available user`});
-            manual.push({'adduser':`<br><span>adduser: add users, must be used with sudo`});
-            manual.push({'deluser':`<br><span>deluser: remove a user, must be used with sudo`});
-            manual.push({'chmod':`<br><span>chmod: change file mode bits`});
-            manual.push({'pwd':`<br><span>pwd: print name of current/working directory`});
-            manual.push({'whoami':`<br><span>whoami: print effective user name`});
-            manual.push({'umask':`<br><span>umask: display file mode creation mask`});
-            manual.push({'clear':`<br><span>clear: clear the terminal screen`});
-            manual.push({'history':`<br><span>history (-c, ##): GNU History Library (clear list, show amount from bottom up)`});
-
-            manual.push({'man':`<br><span>man: print the system reference manuals`});
-            return manual;
-        }
     }
 
     // INITIALIZE //
@@ -1201,7 +1270,7 @@ function START_UBUNTU_TERMINAL() {
         root.addDirectory(new Directory('home', 'root', DEFAULT_DIR_PERMISSION, root));
         root.addDirectory(new Directory('home', 'root', DEFAULT_DIR_PERMISSION, root)); // would not add
         root.addDirectory(new Directory('src', 'root', DEFAULT_DIR_PERMISSION, root));
-        root.getChildren('src').addDirectory(new Directory('.?', 'root', DEFAULT_DIR_PERMISSION, root));
+        root.getChildren('src').addDirectory(new Directory('.?', 'root', DEFAULT_DIR_PERMISSION, root.getChildren('src')));
         root.getChildren('src').getChildren('.?').addFile(new File('trust_me_bro', 'root', DEFAULT_DIR_PERMISSION, root.getChildren('src').getChildren('.?')));
         root.getChildren('src').getChildren('.?').getChildren('trust_me_bro').setFileContent('trust him bro');
 
