@@ -42,7 +42,7 @@
 						<div class="inner">
 							<div id="sudoku-board" class="sudoku-board"></div>
 							<div class="buttons">
-								<button id="submit" class="button" onclick="submit()">Submit</button>
+								<button id="create" class="button" onclick="create()">Create</button>
 								<button id="check" class="button" onclick="check()">Check</button>
 								<button id="solve" class="button" onclick="solve()">Solve</button>
 							</div>
@@ -51,7 +51,7 @@
 								<button id="generate" class="button" onclick="generate()">Generate</button>
 								<button id="rules" class="button" onclick="rules()">Rules</button>
 							</div>
-							<div id="submit-popup" class="popup">
+							<div id="create-popup" class="popup">
 								<div class="body-popup">
 									<span class="close">&times;</span>
 									<span></span>
@@ -91,8 +91,8 @@
 
 							<div>
 								<span class="submenu">Description</span>
-								
 								<p>It's essentially the same <a href="https://vuila9.github.io/projects/Sudoku_Solver/Sudoku_Solver.html" target="_blank">project</a>, but it's now converted from Python to JavaScript, HTML, and CSS.</p>
+								<p>Use it as a Sudoku solver by entering your own puzzle and letting it solve automatically, or as a way to create your own challenge: after clicking Create, you can solve the board yourself or have it solved for you. For a quick, ready-made puzzle instead, hit Generate to fill the board with random pre-filled cells.</p>
 							</div>
 
 							<div class="container">
@@ -133,7 +133,7 @@
 									<li><span class="effect-span">Timer for tracking how long it takes to solve a puzzle</span></li>
 									<li><span class="effect-span">A leaderboard for tracking top scores</span></li>
 									<li><span class="effect-span">Show in real-time how the algorithm changes each cell using backtracking when solving</span></li>
-									<li><span class="effect-span">Dancing Links implementation + IRL sudoku advanced techniques such as finding <em>Hidden Singles</em>, <em>Hidden Pairs</em>, <em>Swordfish</em>, <em>X-wing</em>, <em>Y-wing</em>, etc. to maxmiize solving runtime</span></li>
+									<li><span class="effect-span">Dancing Links implementation + IRL sudoku advanced techniques such as finding <em>Hidden Singles</em>, <em>Hidden Pairs</em>, <em>Swordfish</em>, <em>X-wing</em>, <em>Y-wing</em>, etc. to maximize solving runtime</span></li>
 								</ul>
 							</div>
 

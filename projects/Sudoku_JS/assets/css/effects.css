@@ -1,11 +1,21 @@
 /* Style for the grid container */
 .sudoku-board {
     --cell-size: 50px; /* shrunk on narrow viewports below, so the 9x9 grid never overflows the screen */
-    justify-content: center;
+    /* Shrink the box to exactly the 9x9 grid's own size (not the full width
+       of #main), otherwise the border below would be drawn around the whole
+       wide/tall block box while the grid tracks sit centered inside it —
+       stray top/left lines floating away from the actual grid. */
+    width: max-content;
+    margin: 0 auto; /* still centers the now-shrunk board horizontally */
     display: grid;
     grid-template-columns: repeat(9, var(--cell-size));
     grid-template-rows: repeat(9, var(--cell-size));
     gap: 0; /* No gap between cells */
+    /* Outer top/left edge of the board; each cell below only draws its own
+       right/bottom edge (see .grid-item), so no two elements ever draw the
+       same line on top of each other. */
+    border-top: 3px solid black;
+    border-left: 3px solid black;
 }
 
 /* Scale the board down to fit phone widths instead of overflowing/getting clipped */
@@ -20,29 +30,27 @@
     }
 }
 
-/* Style for each grid item */
+/* Style for each grid item.
+   Only the right/bottom edges are drawn here (the container above draws the
+   top/left edge of the whole board). With no gap between cells, giving every
+   item all four borders meant each internal line was actually two 1px
+   borders from neighboring cells sitting exactly on top of each other; at
+   the fractional/vw cell sizes used on mobile, subpixel rounding could push
+   those two borders apart by a hair, and a focus repaint (e.g. the on-screen
+   keyboard opening) was enough to reveal the gap as a "missing" border. */
 .grid-item {
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: white;
-    border: 1px solid #000;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
     padding: 0;
 }
 
 /* Thicker borders for every 3rd column (right border after 3rd, 6th columns) */
 .grid-item:nth-child(3n) { /* Every 3rd column in each row */
     border-right: 3px solid black;
-}
-
-/* Thicker left border for the first column of each block of 3 */
-.grid-item:nth-child(3n+1) { /* Every 1st column in each block of 3 columns */
-    border-left: 3px solid black;
-}
-
-/* Thicker top border for the first row */
-.grid-item:nth-child(-n+9) { /* First row */
-    border-top: 3px solid black;
 }
 
 /* Thicker bottom border for the last row */
