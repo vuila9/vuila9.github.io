@@ -537,7 +537,7 @@ input[type="text"] {
         display: none;
     }
 
-    #send-button, #send-button:hover, #send-button:active {
+    #send-button, #send-button:hover, #send-button:active, #send-button:focus {
         width: auto;
         height: auto;
         min-width: 0;
@@ -548,6 +548,8 @@ input[type="text"] {
         justify-content: center;
         font-size: 0;
         box-shadow: none !important;
+        outline: none !important;
+        -webkit-tap-highlight-color: transparent;
     }
 
     #send-button::after {
