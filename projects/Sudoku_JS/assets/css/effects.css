@@ -1,10 +1,23 @@
 /* Style for the grid container */
 .sudoku-board {
+    --cell-size: 50px; /* shrunk on narrow viewports below, so the 9x9 grid never overflows the screen */
     justify-content: center;
     display: grid;
-    grid-template-columns: repeat(9, 50px); /* 9 columns, each 50px wide */
-    grid-template-rows: repeat(9, 50px);    /* 9 rows, each 50px tall */
+    grid-template-columns: repeat(9, var(--cell-size));
+    grid-template-rows: repeat(9, var(--cell-size));
     gap: 0; /* No gap between cells */
+}
+
+/* Scale the board down to fit phone widths instead of overflowing/getting clipped */
+@media (max-width: 600px) {
+    .sudoku-board {
+        --cell-size: min(9.8vw, 42px);
+    }
+}
+@media (max-width: 360px) {
+    .sudoku-board {
+        --cell-size: 9.5vw;
+    }
 }
 
 /* Style for each grid item */
@@ -50,7 +63,7 @@
     text-align: center;
     border: none;
     background-color: transparent;
-    font-size: 25px;
+    font-size: calc(var(--cell-size) * 0.5); /* scales with the responsive cell size above */
     font-family: 'Ubuntu', monospace;
 }
 
@@ -67,9 +80,26 @@
 .buttons {
     justify-content: center;
     display: flex;
+    flex-wrap: wrap;
     margin-top: 20px;
     margin-bottom: 20px;
     gap: 20px;
+}
+
+/* main.css's .button padding/letter-spacing is sized for a single large CTA;
+   three side-by-side here get squeezed on phones and their labels get
+   ellipsis-truncated (e.g. "GENERATE" -> "GENERA..."). Shrink to fit. */
+@media (max-width: 480px) {
+    .buttons {
+        gap: 10px;
+    }
+    .buttons .button {
+        font-size: 0.62em;
+        letter-spacing: 0.12em;
+        padding: 0 0.9em 0 1em;
+        height: 3em;
+        line-height: 2.95em;
+    }
 }
 
 .popup {
@@ -86,6 +116,16 @@
     align-items: center;      /* Center content horizontally */
     padding: 20px;            /* Padding inside the popup */
     text-align: center;       /* Center text alignment */
+}
+
+/* 40%-wide/30%-left fixed popup is fine on desktop but too narrow for its
+   text (and off-center) on a phone viewport. Widen and re-center. */
+@media (max-width: 600px) {
+    .popup {
+        left: 5%;
+        top: 15%;
+        width: 90%;
+    }
 }
 
 .close {

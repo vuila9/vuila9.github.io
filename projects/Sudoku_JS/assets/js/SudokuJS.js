@@ -20,6 +20,11 @@ function init() {
 
         const input = document.createElement('input');
         input.type = 'text';
+        // inputmode/pattern brings up a numeric keypad on mobile while keeping
+        // type="text" (type="number" would also work but adds spinner arrows
+        // and lets browsers submit non-digit chars like "e" and "-").
+        input.inputMode = 'numeric';
+        input.pattern = '[0-9]*';
         input.maxLength = 1; // Allow only one character input
         input.value = ''; // Start with empty input
 
