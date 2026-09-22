@@ -10,6 +10,35 @@ function Stream_Simulator()  {
 
     let isStreamON = false;
 
+    // On mobile, focusing the chat input opens the on-screen keyboard, which
+    // shrinks the visual viewport and shifts the page up. Some browsers don't
+    // restore the scroll position once the keyboard closes, leaving the page
+    // stuck shifted up. Remember the scroll position on focus and restore it
+    // once the keyboard is gone (on blur, or when the visual viewport goes
+    // back to its full height).
+    let scrollYBeforeKeyboard = null;
+
+    chatInput.addEventListener('focus', () => {
+        scrollYBeforeKeyboard = window.scrollY;
+    });
+
+    function restoreScrollAfterKeyboard() {
+        if (scrollYBeforeKeyboard !== null) {
+            window.scrollTo({ top: scrollYBeforeKeyboard, behavior: 'instant' });
+            scrollYBeforeKeyboard = null;
+        }
+    }
+
+    chatInput.addEventListener('blur', restoreScrollAfterKeyboard);
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', () => {
+            if (window.visualViewport.height >= window.innerHeight - 1) {
+                restoreScrollAfterKeyboard();
+            }
+        });
+    }
+
 
     const ALL_VIEWERS = [];
     const RANDOM_VIEWERS = [];
