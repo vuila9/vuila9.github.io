@@ -98,6 +98,32 @@
 
   let heightOverridden = false;
 
+  // Same shifted-page problem as the Stream Simulator project: focusing the
+  // chat input opens the on-screen keyboard, which shrinks the visual
+  // viewport and the page scrolls to keep the input in view. Some browsers
+  // don't restore that scroll position once the keyboard closes again,
+  // leaving the page stuck shifted up. The difference here is the input
+  // itself lives inside a cross-origin iframe, so this page can't attach a
+  // focus/blur listener to it directly — instead it relies on the
+  // talk2me:input-focus/-blur handshake messages above, backed by the
+  // visualViewport height as a fallback in case a blur message is ever
+  // missed (e.g. the tab is backgrounded while the keyboard is still open).
+  let scrollYBeforeKeyboard = null;
+  let wasKeyboardOpen = false;
+
+  function rememberScrollPosition() {
+    if (scrollYBeforeKeyboard === null) {
+      scrollYBeforeKeyboard = window.scrollY;
+    }
+  }
+
+  function restoreScrollPosition() {
+    if (scrollYBeforeKeyboard !== null) {
+      window.scrollTo({ top: scrollYBeforeKeyboard, behavior: "instant" });
+      scrollYBeforeKeyboard = null;
+    }
+  }
+
   function isMobile() {
     return window.matchMedia("(max-width: 736px)").matches;
   }
@@ -149,6 +175,15 @@
       frame.style.height = "";
       heightOverridden = false;
     }
+
+    // Fallback restore: catches the keyboard closing even if the child app
+    // never posts talk2me:input-blur (tab backgrounded, app reloaded, etc).
+    if (keyboardOpen && !wasKeyboardOpen) {
+      rememberScrollPosition();
+    } else if (!keyboardOpen && wasKeyboardOpen) {
+      restoreScrollPosition();
+    }
+    wasKeyboardOpen = keyboardOpen;
   }
 
   function onViewportChange() {
@@ -168,6 +203,9 @@
         sendViewport();
         break;
       case "talk2me:input-focus":
+        // Capture where the page was *before* scrolling it to reveal the
+        // frame, so blur can put it back exactly where it was.
+        rememberScrollPosition();
         // The one thing this page can't observe for itself. Reveal the frame
         // with a native scroll, which keeps the browser's own idea of where
         // things are intact.
@@ -175,6 +213,7 @@
         onViewportChange();
         break;
       case "talk2me:input-blur":
+        restoreScrollPosition();
         onViewportChange();
         break;
     }
