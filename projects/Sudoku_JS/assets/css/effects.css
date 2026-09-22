@@ -75,9 +75,16 @@
     font-family: 'Ubuntu', monospace;
 }
 
-/* Remove input field outline */
+/* main.css's generic form-field rule (input[type="text"]:focus, ...) sets
+   height: 3em, and the :focus pseudo-class gives it higher specificity than
+   our plain ".grid-item input" selector — so on focus that 3em height beat
+   ours outright, blowing the cell up past its border. Re-declare height
+   (and the other box rules) at :focus so this selector's own specificity
+   covers that state too. */
 .grid-item input:focus {
     outline: none;
+    width: 100%;
+    height: 100%;
 }
 
 /* Highlight grid item on hover */
