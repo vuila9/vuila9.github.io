@@ -122,6 +122,10 @@
     justify-content: flex-end;
 }
 
+#follow-button, #subscribe-button {
+    display: none;
+}
+
 #channel-category {
     font-size: 15px;
     margin-top: 5px;
@@ -283,14 +287,16 @@ input[type="text"] {
     background-color: rgb(119, 44, 232);
     height: 30px;
     align-items: center;
-    justify-content: center; 
+    justify-content: center;
     color: #ffffff !important;
     font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 14px; 
+    font-size: 14px;
     font-weight: bold;
     border:none !important;
-    transition: background-color 0.3s ease; 
-    cursor: pointer; 
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
 }
 
 .purple-button:hover {
@@ -386,4 +392,169 @@ input[type="text"] {
 .user-chatHistory::-webkit-scrollbar-thumb:hover {
     background: #555; /* Darker grey when hovering */
     cursor: pointer;
+}
+
+/* MOBILE LAYOUT */
+@media screen and (max-width: 736px) {
+    #stream-UI {
+        flex-direction: column;
+        height: auto;
+        max-height: none;
+        width: calc(100% - 40px);
+    }
+
+    #media-section {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        padding-top: 56.25%; /* 16:9 reserved space for the video, pushes channel-info below it */
+        position: relative;
+    }
+
+    #youtube-player, #stream-capturer {
+        max-height: none;
+        width: 100%;
+        height: auto;
+    }
+
+    #sub-count-overlay {
+        top: 8px;
+    }
+
+    #gift-alert-overlay {
+        top: 8px;
+        right: 8px;
+        width: 45%;
+    }
+
+    #sub-alert-overlay {
+        top: 8px;
+        left: 8px;
+        right: auto;
+        width: 45%;
+    }
+
+    #channel-info {
+        position: static;
+        height: auto;
+        padding: 0.5rem 0.75rem;
+    }
+
+    #channel-info .section-row-farend {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 4px 10px;
+    }
+
+    #channel-info-left {
+        margin-top: 0;
+        order: 1;
+        gap: 8px;
+        min-width: 0;
+        flex-shrink: 1;
+    }
+
+    .channel-user-avatar {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+    }
+
+    #channel-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+
+    #channel-name, #channel-title {
+        height: auto;
+        line-height: 1.2;
+        font-size: 16px;
+    }
+
+    #channel-category {
+        margin-top: 0;
+        font-size: 12px;
+    }
+
+    /* Unwrap so channel-action and channel-numbers become direct flex items
+       of section-row-farend, letting them be placed independently. */
+    #channel-info-right {
+        display: contents;
+    }
+
+    #channel-numbers {
+        order: 2;
+        margin-left: auto;
+        flex-shrink: 0;
+        white-space: nowrap;
+        gap: 8px;
+        font-size: 13px;
+        float: none;
+        justify-content: flex-start;
+    }
+
+    #channel-action {
+        order: 3;
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    #chat-section {
+        width: 100%;
+        height: 48vh;
+        max-height: 400px;
+        position: relative;
+    }
+
+    /* Pull the send button out of its own row and place it beside the
+       input field, so the field and button share one line. The field
+       itself is shortened (not just padded) so its bar ends before the
+       button instead of running underneath it. */
+    #chat-input {
+        flex-grow: 0;
+        width: calc(100% - 38px);
+    }
+
+    #under-chat-input {
+        position: absolute;
+        right: 7px;
+        bottom: 8px; /* matches #chat-section's bottom padding, so this box's
+                        bottom edge lines up with #chat-input's bottom edge */
+        left: auto;
+        width: auto;
+        height: 35px; /* matches #chat-input's height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+    }
+
+    #under-chat-input > div:first-child {
+        display: none;
+    }
+
+    #send-button, #send-button:hover, #send-button:active {
+        width: auto;
+        height: auto;
+        min-width: 0;
+        padding: 0;
+        background-color: transparent !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0;
+        box-shadow: none !important;
+    }
+
+    #send-button::after {
+        content: "\25B7"; /* hollow/outline right-pointing triangle */
+        font-size: 26px;
+        line-height: 1;
+        color: #ffffff;
+        margin-left: 2px;
+    }
 }
