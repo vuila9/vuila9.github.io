@@ -40,7 +40,7 @@ I wrote every project up to and including Stream Simulator by hand, with no AI a
 
 **Built with AI assistance from the start**
 - Talk2Me, the Games hub, Bejeweled X, Flappy Bird, Achilles and the Stat page
-- Site-wide additions: the English/Vietnamese translations, the mobile tile previews, SEO and analytics
+- Site-wide additions: the mobile tile previews, SEO and analytics
 
 **Originally hand-coded, later updated with AI assistance**
 
