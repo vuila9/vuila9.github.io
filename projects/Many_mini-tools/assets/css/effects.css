@@ -100,6 +100,21 @@
 	background: var(--mmt-box-bg);
 }
 
+/* WEBCAM VIDEO TESTER EFFECTS */
+/* Give the video an explicit size instead of height-only: iOS Safari lays the
+   element out before the camera reports its size and ends up with a near-zero
+   width (a thin slit). The JS swaps in the camera's real aspect ratio once known. */
+#webcam-video-area {
+	display: block;
+	width: 100%;
+	max-width: 480px;
+	max-height: 60vh;          /* portrait phone cameras would otherwise be very tall */
+	aspect-ratio: 4 / 3;       /* placeholder until the camera's shape is known */
+	object-fit: contain;
+	border-radius: 4px;
+	background: var(--mmt-box-bg);
+}
+
 /* CALENDAR DATE TELLER EFFECTS */
 #CDT-select-prompt {
 	width: auto;
