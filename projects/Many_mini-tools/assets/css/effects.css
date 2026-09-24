@@ -48,3 +48,273 @@
 .TMR-timer-sound {
 	margin-left: 10px;
 }
+
+/* SHARED OUTPUT BOX (Text Encrypt/Decrypt result, RegEx breakdown) */
+:root {
+	--mmt-box-bg: rgba(0, 0, 0, 0.04);
+	--mmt-box-border: rgba(0, 0, 0, 0.15);
+	--mmt-scroll-thumb: rgba(0, 0, 0, 0.2);
+	--mmt-scroll-thumb-hover: rgba(0, 0, 0, 0.35);
+}
+
+/* Slim scrollbar for the scrollable output boxes (replaces the chunky
+   default with arrow buttons and a white track on desktop) */
+#TED-text-output,
+.REC-breakdown {
+	scrollbar-width: thin;                               /* Firefox, Chrome 121+ */
+	scrollbar-color: var(--mmt-scroll-thumb) transparent;
+}
+
+/* Safari and older Chrome use the WebKit pseudo-elements instead */
+#TED-text-output::-webkit-scrollbar,
+.REC-breakdown::-webkit-scrollbar {
+	width: 8px;
+}
+
+#TED-text-output::-webkit-scrollbar-track,
+.REC-breakdown::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+#TED-text-output::-webkit-scrollbar-thumb,
+.REC-breakdown::-webkit-scrollbar-thumb {
+	background: var(--mmt-scroll-thumb);
+	border-radius: 4px;
+}
+
+#TED-text-output::-webkit-scrollbar-thumb:hover,
+.REC-breakdown::-webkit-scrollbar-thumb:hover {
+	background: var(--mmt-scroll-thumb-hover);
+}
+
+#TED-text-output::-webkit-scrollbar-button,
+.REC-breakdown::-webkit-scrollbar-button {
+	display: none;
+}
+
+.TED-output,
+.REC-breakdown {
+	padding: 10px;
+	border: 1px solid var(--mmt-box-border);
+	border-radius: 4px;
+	background: var(--mmt-box-bg);
+}
+
+/* CALENDAR DATE TELLER EFFECTS */
+#CDT-select-prompt {
+	width: auto;
+	max-width: 100%;
+}
+
+/* Month / Day / Year: each label stays with its field, and the row wraps
+   instead of overflowing the panel on narrow screens */
+.CDT-date-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 16px;
+}
+
+.CDT-field {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.CDT-field label {
+	margin: 0;
+}
+
+.CDT-field select {
+	width: auto;
+}
+
+.CDT-field .CDT-day {
+	width: 50px;
+}
+
+.CDT-field-year input {
+	width: 150px; /* fits the 9-digit maximum */
+	min-width: 0;
+}
+
+/* REGEX COMPARISON EFFECTS */
+.REC-input-row input {
+	flex: 1;
+	min-width: 0;
+}
+
+#REC-text-result {
+	font-weight: bold;
+	overflow-wrap: anywhere;
+}
+
+#REC-text-result.REC-yes { color: #2e7d32; }
+#REC-text-result.REC-no  { color: #c62828; }
+
+/* Sits right under the result message; collapses when empty */
+#REC-text-result:has(+ .REC-reason:not(:empty)) {
+	margin-bottom: 0.25em;
+}
+
+.REC-reason {
+	font-size: 0.9em;
+	overflow-wrap: anywhere;
+}
+
+.REC-reason:empty {
+	display: none;
+}
+
+/* Row where the match broke */
+.REC-breakdown .REC-fail {
+	color: #c62828;
+	font-weight: bold;
+}
+
+.REC-breakdown .REC-fail code {
+	border-color: #c62828;
+}
+
+/* Collapsible "pattern piece → matched text" list shown on a match */
+.REC-details {
+	margin-bottom: 1em;
+}
+
+.REC-details[hidden] {
+	display: none;
+}
+
+/* The template's CSS reset hides the native disclosure triangle, so draw one */
+.REC-details summary {
+	cursor: pointer;
+	user-select: none;
+	font-size: 0.9em;
+	opacity: 0.8;
+	list-style: none;
+}
+
+.REC-details summary::-webkit-details-marker {
+	display: none;
+}
+
+.REC-details summary::before {
+	content: "▸";
+	display: inline-block;
+	width: 1.2em;
+	transition: transform 0.15s ease;
+}
+
+.REC-details[open] summary::before {
+	transform: rotate(90deg);
+}
+
+.REC-breakdown {
+	list-style: none;
+	margin: 0.5em 0 0 0;
+	max-height: 16em; /* about 8 rows; longer breakdowns scroll inside the box */
+	overflow-y: auto;
+	overscroll-behavior: contain; /* scrolling the list doesn't drag the page along */
+}
+
+.REC-breakdown li {
+	padding-left: 0;
+	margin: 0 0 0.25em 0;
+	overflow-wrap: anywhere;
+}
+
+.REC-breakdown .REC-empty {
+	font-style: italic;
+	opacity: 0.6;
+}
+
+/* TEXT ENCRYPT/DECRYPT EFFECTS */
+/* Input row: mode + key stay compact, message takes the remaining width */
+.TED-input-row #TED-select-prompt {
+	width: auto;
+}
+
+.TED-input-row #TED-input-key {
+	width: 100px;
+}
+
+.TED-input-row #TED-input-message {
+	flex: 1;
+	min-width: 0;
+}
+
+/* Result box: ciphertext is one long unbroken base64 string, so let it wrap
+   anywhere instead of overflowing the (hidden-overflow) panel. */
+.TED-output {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.TED-output[hidden] {
+	display: none;
+}
+
+#TED-text-output {
+	flex: 1;
+	min-width: 0;
+	max-height: 10em; /* very long results scroll inside the box */
+	overflow-y: auto;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	background: none;
+	font-size: 0.85em;
+	line-height: 1.5;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	word-break: break-all;
+}
+
+/* Override the template's big uppercase button sizing */
+.TED-copy-button {
+	flex-shrink: 0;
+	height: 2.4em !important;
+	line-height: 2.4em !important;
+	padding: 0 1em !important;
+	font-size: 0.7em !important;
+}
+
+@media screen and (max-width: 736px) {
+	/* On phones, Year gets its own full-width row under Month / Day */
+	.CDT-field-year {
+		flex: 1 1 100%;
+	}
+	.CDT-field-year input {
+		flex: 1;
+		width: auto;
+	}
+
+	/* On phones, stack the input fields so each gets full width */
+	.REC-input-row,
+	.TED-input-row {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.TED-input-row #TED-select-prompt,
+	.TED-input-row #TED-input-key,
+	.TED-input-row #TED-input-message {
+		width: 100%;
+	}
+	.REC-input-row input,
+	.TED-input-row #TED-input-message {
+		flex: none; /* flex: 1 would squash its height in a column */
+	}
+
+	/* On phones, put the copy button under the text so the text gets full width */
+	.TED-output {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.TED-copy-button {
+		width: 100%;
+		height: 44px !important;  /* comfortable tap target */
+		line-height: 44px !important;
+	}
+}

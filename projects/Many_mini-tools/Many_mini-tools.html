@@ -62,7 +62,7 @@
 									<input class="TMR-timer-input" style="width: 30px" maxlength="2" placeholder="mm" title="minute">
 									<input class="TMR-timer-input" style="width: 30px" maxlength="2" placeholder="ss" title="second">
 									<button id="TMR-timer-add-button">Add</button>
-									<div id="TMR-note" class="far fa-question-circle"></div>
+									<div id="TMR-note" class="far fa-question-circle info-note" role="button" tabindex="0" aria-label="More info" aria-expanded="false"></div>
 								</div>
 								<div id="TMR-timer-display"></div>
 							</div>
@@ -140,30 +140,42 @@
 							<div class="expandable-content" id="CDT-body">
 								<div style="display: flex">
 									<p style="margin-top: 0px">Input a date, any date.</p>
-									<div id="CDT-note" class="far fa-question-circle"></div>
+									<div id="CDT-note" class="far fa-question-circle info-note" role="button" tabindex="0" aria-label="More info" aria-expanded="false"></div>
 								</div>
-								<select id="CDT-select-prompt" style="width: auto">
+								<select id="CDT-select-prompt" aria-label="Question">
 									<option value="current-days-gap">How many days from when to now?</option>
 									<option value="custom-days-gap">How many days from when to then?</option>
 									<option value="what-date-week">What day of the week is then?</option>
 								</select>
 								<br>
-								<div class="same-line-block">
-									<label for="month">Month:</label>
-									<select id="CDT-select-month" style="width: auto"></select>
-									<label for="day">Day:</label>
-									<select id="CDT-select-day" style="width: 50px"></select>
-									<label for="year">Year:</label>
-									<input id="CDT-input-year" style="display: inline; width: 150px" type="text" placeholder="from"/>
+								<div class="CDT-date-row">
+									<span class="CDT-field">
+										<label for="CDT-select-month">Month:</label>
+										<select id="CDT-select-month"></select>
+									</span>
+									<span class="CDT-field">
+										<label for="CDT-select-day">Day:</label>
+										<select id="CDT-select-day" class="CDT-day"></select>
+									</span>
+									<span class="CDT-field CDT-field-year">
+										<label for="CDT-input-year">Year:</label>
+										<input id="CDT-input-year" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="from"/>
+									</span>
 								</div> <br>
 								<div class="expandable-content" id="CDT-text-hiddenPrompt">
-									<div class="same-line-block" >
-										<label for="month">Month:</label>
-										<select id="CDT-select-month-hidden" style="width: auto"></select>
-										<label for="day">Day:</label>
-										<select id="CDT-select-day-hidden" style="width: 50px"></select>
-										<label for="year">Year:</label>
-										<input id="CDT-input-year-hidden" style="display: inline; width: 150px" type="text" placeholder="to"/>
+									<div class="CDT-date-row">
+										<span class="CDT-field">
+											<label for="CDT-select-month-hidden">Month:</label>
+											<select id="CDT-select-month-hidden"></select>
+										</span>
+										<span class="CDT-field">
+											<label for="CDT-select-day-hidden">Day:</label>
+											<select id="CDT-select-day-hidden" class="CDT-day"></select>
+										</span>
+										<span class="CDT-field CDT-field-year">
+											<label for="CDT-input-year-hidden">Year:</label>
+											<input id="CDT-input-year-hidden" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="to"/>
+										</span>
 									</div>
 									<br>
 								</div>
@@ -181,13 +193,22 @@
 								<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('REC-body')">▼</button>
 							</div>
 							<div class="expandable-content" id="REC-body">
-								<p>A simple regular expression comparison tool that checks if the input string matches the input pattern. Only support "*" and "." for now.</p>
-								<div class="same-line-block">
-									<input id="REC-input-string" style="display: inline" type="text" placeholder="Enter a string" />
-									<input id="REC-input-pattern" style="display: inline" type="text" placeholder="Enter a pattern" />
+								<p>A simple regular expression comparison tool that checks if the pattern matches the <u>whole</u> input string.
+									<code>.</code> matches any single character, <code>*</code> matches zero or more of the character before it,
+									and <code>\</code> escapes a literal <code>.</code> or <code>*</code> (e.g. <code>a\.b</code>).</p>
+								<div class="same-line-block REC-input-row">
+									<input id="REC-input-string" type="text" placeholder="Enter a string: hellooo_world.js" aria-label="String" autocapitalize="off" autocorrect="off" spellcheck="false" />
+									<input id="REC-input-pattern" type="text" placeholder="Enter a pattern: hel*o*_.*\.js" aria-label="Pattern" autocapitalize="off" autocorrect="off" spellcheck="false" />
 								</div> <br>
 								<input id="REC-button-submit" type="submit" value="Submit" class="primary"/>
-								<b><p id="REC-text-result">&nbsp;</p></b> <br>
+								<div aria-live="polite">
+									<p id="REC-text-result">&nbsp;</p>
+									<p id="REC-text-reason" class="REC-reason"></p>
+								</div>
+								<details id="REC-details" class="REC-details" hidden>
+									<summary id="REC-details-summary">Breakdown</summary>
+									<ul id="REC-breakdown" class="REC-breakdown" aria-label="What each part of the pattern matched"></ul>
+								</details> <br>
 							</div>
 						</div>
 					</section>
@@ -203,16 +224,20 @@
 								<p>As the name suggests, enter a <u>key</u> along with the <u>message</u> you wish to encrypt or decrypt.</p>
 								<p>Ensure that you use the same key for decrypting a ciphertext that you used for encryption.</p>
 								<p>For experiment purposes, the tool will notify you if the wrong key is used to decrypt an encrypted message.</p>
-								<div class="same-line-block">
-									<select id="TED-select-prompt" style="width: auto">
+								<div class="same-line-block TED-input-row">
+									<select id="TED-select-prompt" aria-label="Mode">
 										<option value="encrypt">Encrypt</option>
 										<option value="decrypt">Decrypt</option>
 									</select>
-									<input id="TED-input-key" style="display: inline; width: 100px" type="text" placeholder="key" />
-									<input id="TED-input-message" style="display: inline" type="text" placeholder="message" />
+									<input id="TED-input-key" type="text" placeholder="key" aria-label="Key" />
+									<input id="TED-input-message" type="text" placeholder="message" aria-label="Message" />
 								</div> <br>
 								<input id="TED-button-submit" type="submit" value="Submit" class="primary"/>
-								<p id="TED-text-result">&nbsp;</p> <br>
+								<p id="TED-text-result">&nbsp;</p>
+								<div class="TED-output" id="TED-output" hidden>
+									<code id="TED-text-output"></code>
+									<button type="button" id="TED-button-copy" class="TED-copy-button" aria-label="Copy result to clipboard">Copy</button>
+								</div> <br>
 							</div>
 						</div>
 					</section>

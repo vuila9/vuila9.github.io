@@ -99,6 +99,14 @@ function TOGGLE_CONTENT(contentId) {
     }
 }
 
+// An open panel's max-height is fixed when it opens, so call this after its
+// content changes size (e.g. a result appears) to grow it and avoid clipping.
+function REFIT_CONTENT(contentId) {
+    const content = document.getElementById(contentId);
+    if (content.classList.contains('active'))
+        content.style.maxHeight = content.scrollHeight + "px";
+}
+
 function PRINT_TO_HTML(contentID, textHTML) {
     document.getElementById(contentID).innerHTML = textHTML;
 }
@@ -147,3 +155,78 @@ function PRINT_TO_HTML(contentID, textHTML) {
     });
 })();
 
+
+// ===== INFO NOTE POPUP =====
+// Elements with class "info-note" carry their help text in `title`, which only shows
+// on mouse hover. On touch screens (and via keyboard), tapping the note opens the text
+// in a small popup instead; tapping anywhere else, Esc, or resizing closes it.
+// Mouse users keep the normal hover tooltip.
+(function () {
+    let popup = null, owner = null, lastPointerType = 'mouse';
+
+    function build() {
+        popup = document.createElement('div');
+        popup.className = 'info-note-popup';
+        popup.id = 'info-note-popup';
+        popup.setAttribute('role', 'tooltip');
+        popup.hidden = true;
+        document.body.appendChild(popup);
+    }
+
+    function close() {
+        if (!owner) return;
+        popup.hidden = true;
+        owner.setAttribute('aria-expanded', 'false');
+        owner = null;
+    }
+
+    // Place the popup under the note (or above it if there's no room), kept 16px inside the screen
+    function position(note) {
+        const GAP = 8, EDGE = 16;
+        const rect = note.getBoundingClientRect();
+        const width = popup.offsetWidth, height = popup.offsetHeight;
+        const centered = rect.left + rect.width / 2 - width / 2;
+        const left = Math.min(Math.max(centered, EDGE), window.innerWidth - EDGE - width);
+        const fitsBelow = rect.bottom + GAP + height <= window.innerHeight;
+        const top = fitsBelow ? rect.bottom + GAP : rect.top - GAP - height;
+        popup.style.left = (left + window.scrollX) + 'px';
+        popup.style.top = (top + window.scrollY) + 'px';
+    }
+
+    function open(note) {
+        if (!popup) build();
+        popup.textContent = note.title; // read now: some pages set the title from JS after load
+        popup.hidden = false;
+        position(note);
+        owner = note;
+        note.setAttribute('aria-expanded', 'true');
+        note.setAttribute('aria-describedby', popup.id);
+    }
+
+    function toggle(note) {
+        if (owner === note) close();
+        else { close(); open(note); }
+    }
+
+    // Remember what kind of pointer is in use, and close when tapping away
+    document.addEventListener('pointerdown', function (e) {
+        lastPointerType = e.pointerType;
+        if (owner && !owner.contains(e.target) && !popup.contains(e.target)) close();
+    }, true);
+
+    document.addEventListener('click', function (e) {
+        const note = e.target.closest('.info-note');
+        if (note && lastPointerType !== 'mouse') toggle(note);
+    });
+
+    document.addEventListener('keydown', function (e) {
+        const note = e.target.closest && e.target.closest('.info-note');
+        if (note && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            toggle(note);
+        }
+        else if (e.key === 'Escape') close();
+    });
+
+    window.addEventListener('resize', close);
+})();
