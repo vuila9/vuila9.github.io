@@ -92,7 +92,7 @@ vuila9.github.io/
     ├── Games/Games.html                Games hub
     ├── BejeweledX/
     │   ├── BejeweledX.html             Project page
-    │   └── webapp.html                 Standalone / installable app
+    │   └── webapp.html                 Standalone / installable app via "Add to Home Screen" feature from Safari
     ├── Flappy_Bird/
     │   ├── Flappy_Bird.html
     │   └── webapp.html
