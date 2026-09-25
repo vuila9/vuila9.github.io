@@ -21,11 +21,19 @@
   let GW = BASE_GW;                   // world width — grows on landscape screens
   let GH = BASE_GH;                   // world height — grows on portrait screens
   let FLOOR_Y = GH - FLOOR_BAND;      // top of ground band — recomputed in resize()
+  let HUD_TOP = 0;                    // world-unit inset keeping HUD clear of the status bar
 
   const cvs = document.getElementById("flappy-canvas");
   if (!cvs) return;                   // nothing to do if the canvas is absent
   const ctx = cvs.getContext("2d");
   ctx.imageSmoothingEnabled = false;
+
+  // Probe for env(safe-area-inset-top). iOS 26+ blurs the status-bar strip of
+  // standalone web apps (a system effect pages can't switch off), so the score
+  // and FPS readout are pushed below it instead of being drawn underneath.
+  const safeProbe = document.createElement("div");
+  safeProbe.className = "flappy-safe-probe";
+  document.body.appendChild(safeProbe);
 
   // ---- load images ----
   // Each sprite is rasterised into an offscreen canvas once it loads. iOS Safari
@@ -52,7 +60,7 @@
   // ---- user settings (persisted in localStorage) ----
   // Shown in the Options panel to confirm a deploy is live. Bump this together
   // with CACHE in sw.js so the number always matches the service-worker version.
-  const APP_VERSION = "0.39";
+  const APP_VERSION = "0.40";
 
   const settings = {
     muted: localStorage.getItem("fb_muted") === "1",
@@ -143,6 +151,10 @@
     prevGW = GW; prevGH = GH;
     let scale = availH / GH;
     if (GW * scale > availW) scale = availW / GW;
+    // Status-bar inset in world units — only matters when the canvas reaches the
+    // top edge of the screen (fullscreen / standalone app).
+    const safeTop = parseFloat(getComputedStyle(safeProbe).paddingTop) || 0;
+    HUD_TOP = fs ? safeTop / scale : 0;
     cvs.style.height = (GH * scale) + "px";
     cvs.style.width = (GW * scale) + "px";
     cvs.width = GW * dpr;
@@ -437,7 +449,7 @@
       drawCentered("tutorial", GW / 2, ay(250), 1);
     }
     if (state === STATE.PLAY) {
-      drawNumber(score, GW / 2, 40, "big");
+      drawNumber(score, GW / 2, 40 + HUD_TOP, "big");
     }
     if (state === STATE.DEAD) {
       drawCentered("text_game_over", GW / 2, ay(120), 1);
@@ -494,7 +506,7 @@
       if (settings.showFps) {
         fpsFrames++; fpsAccum += dt;
         if (fpsAccum >= 500) { fpsValue = Math.round(fpsFrames * 1000 / fpsAccum); fpsFrames = 0; fpsAccum = 0; }
-        drawNumber(fpsValue, 26, 28, "score");
+        drawNumber(fpsValue, 26, 28 + HUD_TOP, "score");
       }
       syncChrome();
     } else {
