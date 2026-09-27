@@ -14,6 +14,12 @@ document.addEventListener("DOMContentLoaded", function() {
         //     descKey: "proj.wip.desc",
         //     link: "projects/Project_name/Project_name.html"
         // },
+        // {
+        //     imageSrc: "projects/3D_Tree/apple-touch-icon.png",
+        //     titleKey: "proj.tree3d.title",
+        //     descKey: "proj.tree3d.desc",
+        //     link: "projects/3D_Tree/3D_Tree.html"
+        // },
         {
             imageSrc: "projects/Talk2Me/Talk2Me_icon.svg",
             titleKey: "proj.talk2me.title",

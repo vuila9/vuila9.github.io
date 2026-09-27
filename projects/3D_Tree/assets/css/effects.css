@@ -1,0 +1,102 @@
+/* 3D Tree — project-specific styles (layout mirrors the Flappy Bird stage) */
+
+#tree-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* Viewer box. Desktop: 16:9, as wide as the content column allows while still
+   fitting the viewport height. */
+#tree-frame {
+    position: relative;
+    width: min(100%, calc((100vh - 220px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #1f2a24;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    line-height: 0;
+}
+
+/* Mobile: same portrait ratio as the Flappy Bird canvas (288 x 512). */
+@media (max-width: 736px), (hover: none) and (pointer: coarse) and (orientation: portrait) {
+    #tree-frame {
+        width: min(100%, calc((100svh - 160px) * 288 / 512));
+        aspect-ratio: 288 / 512;
+    }
+}
+
+#tree-embed {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+/* Shown until an embed link is set in 3D_Tree.js. */
+#tree-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+#tree-frame:fullscreen {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+    background: #000;
+}
+
+/* CSS-only fullscreen fallback for iOS Safari (no element Fullscreen API). */
+#tree-frame.tree-fake-fullscreen {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    aspect-ratio: auto;
+    border-radius: 0;
+    background: #000;
+    z-index: 1000;
+}
+
+/* Exit button only visible while the CSS fallback is active. */
+#tree-exit-fullscreen {
+    display: none;
+    position: absolute;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
+    z-index: 10;
+    cursor: pointer;
+}
+#tree-frame.tree-fake-fullscreen #tree-exit-fullscreen { display: block; }
+
+.tree-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+#tree-fullscreen {
+    cursor: pointer;
+}
+
+.tree-hint {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    margin: 0;
+    text-align: center;
+}

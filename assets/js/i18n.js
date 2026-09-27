@@ -164,6 +164,8 @@ const translations = {
         "proj.store.desc": "A Java-based application with a graphical user interface (GUI).",
         "proj.talk2me.title": "Talk2Me",
         "proj.talk2me.desc": "A live chat room embedded from its own domain - message me and I reply in real time from Discord.",
+        "proj.tree3d.title": "3D Tree",
+        "proj.tree3d.desc": "A free tree model generated with Meshy AI, then downscaled and optimized so it loads smoothly in the browser.",
 
         // --- Language toggle ---
         "toggle.label": "Tiếng Việt",
@@ -279,6 +281,8 @@ const translations = {
         "proj.store.desc": "Một ứng dụng bằng Java với giao diện đồ họa người dùng (GUI).",
         "proj.talk2me.title": "Talk2Me",
         "proj.talk2me.desc": "Một phòng chat trực tiếp được nhúng từ tên miền riêng - hãy nhắn tin cho tôi và tôi sẽ trả lời trực tiếp qua Discord.",
+        "proj.tree3d.title": "3D Tree",
+        "proj.tree3d.desc": "Một mô hình cây miễn phí được tạo bằng Meshy AI, sau đó giảm dung lượng và tối ưu hóa để tải mượt mà trên trình duyệt.",
 
         // --- Language toggle ---
         "toggle.label": "English",

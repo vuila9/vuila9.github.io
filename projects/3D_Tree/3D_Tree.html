@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
+		<!-- End Google Tag Manager -->
+		<title>3D Tree</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+
+		<!-- ===== SEO / search & social metadata ===== -->
+		<meta name="description" content="An interactive 3D tree model generated for free with Meshy AI, then downscaled and optimized so it loads smoothly in any browser on desktop and mobile." />
+		<meta name="keywords" content="3d tree, meshy ai, 3d model, low poly tree, optimized 3d model, web 3d viewer" />
+		<meta name="author" content="vuila9" />
+		<meta name="robots" content="index, follow" />
+		<link rel="canonical" href="https://vuila9.github.io/projects/3D_Tree/3D_Tree.html" />
+
+		<!-- Open Graph (link previews on Facebook, Discord, iMessage, etc.) -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="vuila9" />
+		<meta property="og:title" content="3D Tree - Meshy AI model, optimized for the web" />
+		<meta property="og:description" content="A free tree model generated with Meshy AI, downscaled and optimized so it loads smoothly in the browser." />
+		<meta property="og:url" content="https://vuila9.github.io/projects/3D_Tree/3D_Tree.html" />
+
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+		<link rel="icon" href="favicon-64.png" type="image/png" sizes="64x64">
+		<link rel="apple-touch-icon" href="apple-touch-icon.png">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+		<link rel="stylesheet" href="assets/css/effects.css">
+	</head>
+
+	<body class="is-preload">
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NXVSDNVW"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+							<a href="https://vuila9.github.io/#main">
+								<button id="home-btn">&lt;&lt;</button>
+							</a>
+							<a><h1>3D Tree</h1></a>
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Viewer: 16:9 on desktop, Flappy Bird portrait ratio on mobile -->
+							<div id="tree-stage">
+								<div id="tree-frame">
+									<div id="tree-placeholder">3D model coming soon.</div>
+									<button id="tree-exit-fullscreen" title="Exit fullscreen"
+										class="fas fa-compress"></button>
+								</div>
+								<div class="tree-controls">
+									<button id="tree-fullscreen" title="Toggle fullscreen"
+										class="fas fa-expand"></button>
+								</div>
+								<p class="tree-hint">Drag to rotate, scroll or pinch to zoom.</p>
+							</div>
+
+							<div>
+								<span class="submenu">Description</span>
+								<p>Me messing around with Meshy AI to generate a free 3D tree model, then
+									downscaling and optimizing it so it loads smoothly in the browser, on
+									both desktop and mobile.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Background</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('background-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="background-content">
+								<p>TBD.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Optimization</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('optimization-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="optimization-content">
+								<ul>
+									<li><span class="effect-span"><b>Generated</b>: TBD.</span></li>
+									<li><span class="effect-span"><b>Downscaled</b>: TBD.</span></li>
+									<li><span class="effect-span"><b>Final size</b>: TBD.</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('github-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/3D_Tree" target="_blank"><p>Source code</p></a>
+							</div>
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- project specifics -->
+			<script src="assets/js/3D_Tree.js"></script>
+	</body>
+</html>
