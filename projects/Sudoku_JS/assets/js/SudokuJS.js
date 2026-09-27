@@ -20,6 +20,11 @@ function init() {
 
         const input = document.createElement('input');
         input.type = 'text';
+        // inputmode/pattern brings up a numeric keypad on mobile while keeping
+        // type="text" (type="number" would also work but adds spinner arrows
+        // and lets browsers submit non-digit chars like "e" and "-").
+        input.inputMode = 'numeric';
+        input.pattern = '[0-9]*';
         input.maxLength = 1; // Allow only one character input
         input.value = ''; // Start with empty input
 
@@ -37,36 +42,36 @@ window.onload = function() {
     setButton('solve', false);
 }
 
-function submit() {
-    const submit_popup = document.getElementById('submit-popup');
-    const submit_body_popup = document.getElementsByClassName('body-popup')[0].lastElementChild;
-    submit_body_popup.innerHTML = '';
+function create() {
+    const create_popup = document.getElementById('create-popup');
+    const create_body_popup = document.getElementsByClassName('body-popup')[0].lastElementChild;
+    create_body_popup.innerHTML = '';
     const [sudoku_board] = getSudokuBoard();
     const [solvable, msg] = solveSudoku(sudoku_board);
 
-    setButton('submit', false);
+    setButton('create', false);
     setButton('generate', false);
 
     if (solvable) {
-        submit_body_popup.innerHTML += `<h2>Board Sumitted</h2>`;
-        submit_body_popup.innerHTML += `<p>Board has been submitted!</p>`;
+        create_body_popup.innerHTML += `<h2>Board Sumitted</h2>`;
+        create_body_popup.innerHTML += `<p>Board has been submitted!</p>`;
         setButton('solve', true);
         setButton('check', true);
     }
     else {
-        submit_body_popup.innerHTML += `<h2>Board Not Sumitted</h2>`;
-        submit_body_popup.innerHTML += `<p>Input board is ${msg}</p>`;
+        create_body_popup.innerHTML += `<h2>Board Not Sumitted</h2>`;
+        create_body_popup.innerHTML += `<p>Input board is ${msg}</p>`;
         setButton('solve', false);
         setButton('check', false);
     }
     const span = document.getElementsByClassName("close")[0];
-    submit_popup.style.display = 'block';
+    create_popup.style.display = 'block';
     span.onclick = function() {
-        submit_popup.style.display = "none";
+        create_popup.style.display = "none";
     }
     window.onclick = function(event) {
-        if (event.target == submit_popup) 
-            submit_popup.style.display = "none";
+        if (event.target == create_popup) 
+            create_popup.style.display = "none";
     }
 }
 
@@ -163,7 +168,7 @@ function generate(mode=null) {
             cell.style.background = 'lightblue';
         });
         setButton('generate', false);
-        setButton('submit', false);
+        setButton('create', false);
         setButton('solve', true);
         setButton('check', true);
     }
@@ -178,7 +183,7 @@ function reset() {
     });
     
     setButton('solve', false);
-    setButton('submit', true);
+    setButton('create', true);
     setButton('check', false);
     setButton('generate', true);
 }

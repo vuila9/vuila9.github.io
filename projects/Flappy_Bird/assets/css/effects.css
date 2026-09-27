@@ -229,3 +229,15 @@
     color: #543847;
     opacity: 0.5;
 }
+
+/* Invisible probe the game reads to learn env(safe-area-inset-top), so the
+   canvas HUD can sit below the iOS status bar (see resize() in Flappy_Bird.js). */
+.flappy-safe-probe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 0;
+    padding-top: env(safe-area-inset-top, 0px);
+    visibility: hidden;
+    pointer-events: none;
+}

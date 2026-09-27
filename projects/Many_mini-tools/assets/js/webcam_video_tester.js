@@ -7,6 +7,16 @@ function webcam() {
     const stopButton = document.getElementById('WVT-button-stop');
     let intervalID = null;
 
+    // Size the video box to the camera's real shape (landscape webcam, portrait phone
+    // camera, and it changes when a phone rotates), then refit the panel around it
+    function fit_to_camera() {
+        if (VIDEO_ELEMENT.videoWidth && VIDEO_ELEMENT.videoHeight)
+            VIDEO_ELEMENT.style.aspectRatio = `${VIDEO_ELEMENT.videoWidth} / ${VIDEO_ELEMENT.videoHeight}`;
+        REFIT_CONTENT('WVT-body');
+    }
+    VIDEO_ELEMENT.addEventListener('loadedmetadata', fit_to_camera);
+    VIDEO_ELEMENT.addEventListener('resize', fit_to_camera); // fires when the stream's dimensions change
+
     startButton.onclick = function() {
         // Access the webcam
         navigator.mediaDevices.getUserMedia({ video: true })
@@ -55,6 +65,8 @@ function webcam() {
 
             STREAM.getTracks().forEach((track) => track.stop());
             VIDEO_ELEMENT.srcObject = null; // Clear the video feed
+            VIDEO_ELEMENT.style.aspectRatio = ''; // back to the CSS placeholder shape
+            REFIT_CONTENT('WVT-body');
 
             WEBCAM_ON = false;
             document.getElementById('WVT-button-start').disabled = false;

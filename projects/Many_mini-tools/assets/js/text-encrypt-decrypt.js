@@ -105,36 +105,62 @@ async function EncryptDecrypt(option, message, hashedKey) {
     }
 }
 
-// JavaScript to handle the button click
-document.getElementById("TED-button-submit").onclick = function() {
-    const MAX_STR_LENGTH = 80;
-    var option = document.getElementById("TED-select-prompt").value;
-    var message = document.getElementById("TED-input-message").value;
-    var key = document.getElementById("TED-input-key").value;
-    PRINT_TO_HTML("TED-text-result", `&nbsp;`);
+const TED_OUTPUT = document.getElementById("TED-output");
+const TED_OUTPUT_TEXT = document.getElementById("TED-text-output");
+const TED_COPY_BUTTON = document.getElementById("TED-button-copy");
 
-    if (key == ""){
-        document.getElementById("TED-text-result").innerHTML = `Please enter a key to use this feature`;
+// Show a status line, and optionally a copyable result box below it
+function TED_showResult(status, output = "") {
+    PRINT_TO_HTML("TED-text-result", status);
+    TED_OUTPUT_TEXT.textContent = output; // textContent: decrypted text is never parsed as HTML
+    TED_OUTPUT.hidden = output === "";
+    TED_COPY_BUTTON.textContent = "Copy";
+    REFIT_CONTENT("TED-body");
+}
+
+// Copy the result; falls back to execCommand where the Clipboard API is unavailable
+async function TED_copyResult() {
+    const text = TED_OUTPUT_TEXT.textContent;
+    try {
+        await navigator.clipboard.writeText(text);
+    } catch (error) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        temp.setAttribute("readonly", "");
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        temp.remove();
+    }
+    TED_COPY_BUTTON.textContent = "Copied!";
+    setTimeout(() => { TED_COPY_BUTTON.textContent = "Copy"; }, 1500);
+}
+
+TED_COPY_BUTTON.onclick = TED_copyResult;
+
+// JavaScript to handle the button click
+document.getElementById("TED-button-submit").onclick = async function() {
+    const option = document.getElementById("TED-select-prompt").value;
+    const message = document.getElementById("TED-input-message").value;
+    const key = document.getElementById("TED-input-key").value;
+    TED_showResult("&nbsp;");
+
+    if (key == "") {
+        TED_showResult("Please enter a key to use this feature");
         return;
     }
 
-    hashKey(key).then(hashedKey => {
-        EncryptDecrypt(option, message, hashedKey).then(result => {
-            if (result == null) {
-                PRINT_TO_HTML("TED-text-result", `Wrong key`);
-                return;
-            }
-            if (result.length > MAX_STR_LENGTH) {
-                PRINT_TO_HTML("TED-text-result", `The message processed exceeds the display limit. Please open the console window by inspecting the page to view the full message.`);
-                console.log(`Your ${option}ed message is: \n${result}`);
-            }
-            else {
-                if (result.length != 0) 
-                    PRINT_TO_HTML("TED-text-result", `Your ${option}ed message is: ${result}`);
-                else
-                    PRINT_TO_HTML("TED-text-result", `Your ${option}ed message might be fake.`);
-            }
-            return;
-        });
-    });
+    const hashedKey = await hashKey(key);
+    const result = await EncryptDecrypt(option, message, hashedKey);
+    if (result == null)
+        TED_showResult("Wrong key");
+    else if (result.length == 0)
+        TED_showResult(`Your ${option}ed message might be fake.`);
+    else
+        TED_showResult(`Your ${option}ed message is:`, result);
 };
+
+// Re-fit the panel if a rotation/resize changes how the result wraps
+window.addEventListener("resize", () => REFIT_CONTENT("TED-body"));

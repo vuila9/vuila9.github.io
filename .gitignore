@@ -37,3 +37,4 @@ build/
 
 # AI instructions (local only, not for GitHub)
 CLAUDE.md
+.claude/

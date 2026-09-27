@@ -66,6 +66,9 @@ p {
 .expandable-content {
     max-height: 0;
     overflow: hidden;
+    /* clip (unlike hidden) can't be scrolled at all, so focusing a field that sticks
+       out can't shift the panel's content sideways with no way to scroll back */
+    overflow: clip;
     transition: max-height 0.2s ease-out;
 }
 .video-container {
@@ -235,4 +238,32 @@ body.is-touch .tiles article .image img {
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+}
+
+/* ===== INFO NOTE POPUP ===== */
+/* <span class="info-note" title="..."> — hover tooltip on desktop, tap popup on touch
+   (see project_global_function.js). */
+.info-note {
+    cursor: pointer;
+    /* bigger tap target without moving the icon */
+    padding: 8px;
+    margin: -8px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.info-note-popup {
+    position: absolute;
+    z-index: 10000;
+    max-width: min(280px, calc(100vw - 32px));
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: rgba(40, 40, 40, 0.95);
+    color: #fff;
+    font-size: 0.8em;
+    line-height: 1.5;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.info-note-popup[hidden] {
+    display: none;
 }
