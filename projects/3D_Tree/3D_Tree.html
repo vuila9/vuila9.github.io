@@ -86,31 +86,11 @@
 								</div>
 							</div>
 							<div class="expandable-content" id="background-content">
-								<p>This project is actually much more bigger than this, but for the time being, I will only display the working and simple version of it. The tree itself is generated using Meshy AI. The original file is much heavier than this 21MB downscaled to 433KB. Despite being heavier, it doesnt have that much more details. The background is a flat 2D image generated using ChatGPT, upscaled using Upska</p>
-							</div>
-
-							<div class="container">
-								<div class="submenu">Optimization</div>
-								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('optimization-content')">&#9660;</button>
-								</div>
-							</div>
-							<div class="expandable-content" id="optimization-content">
-								<ul>
-									<li><span class="effect-span"><b>Generated</b>: TBD.</span></li>
-									<li><span class="effect-span"><b>Downscaled</b>: TBD.</span></li>
-									<li><span class="effect-span"><b>Final size</b>: TBD.</span></li>
-								</ul>
-							</div>
-
-							<div class="container">
-								<div class="submenu">GitHub</div>
-								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('github-content')">&#9660;</button>
-								</div>
-							</div>
-							<div class="expandable-content" id="github-content">
-								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/3D_Tree" target="_blank"><p>Source code</p></a>
+								<p>This is a small, working slice of a much bigger project that's still in progress. The tree model was generated with Meshy AI. The original file weighed 21MB; I downscaled it to 433KB, and the difference in detail is barely noticeable.</p>
+								<p>The background is a flat 2D image generated with ChatGPT. I upscaled it with Upscayl to add detail, then scaled it back down to its current size. AI upscalers tend to leave small artifacts: over-sharpened edges, repeating textures, and odd detail in flat areas like grass and flowers. Shrinking a larger image averages several pixels into each final pixel, which smooths those artifacts out. Rendering big and scaling down (supersampling) gives a cleaner result than generating at the target size directly.</p>
+								<p>The clouds are all the same 2D WebP image. Each copy gets its own opacity and horizontal stretch, so they look like many different clouds even though there's only one.</p>
+								<p>To make this simple version feel more alive, I added a cinematic tour: the camera pans around the scene on its own, an idea borrowed from my favorite childhood game, Heroes of Might and Magic V.</p>
+								<p>There's more to come. I'm turning this into a community project where every visitor can leave something behind before they go, so stay tuned.</p>
 							</div>
 				<!--END-->
 						</div>
