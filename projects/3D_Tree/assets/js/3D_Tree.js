@@ -1,7 +1,7 @@
 // 3D Tree — mounts the embedded model viewer and wires up fullscreen.
 
 // Paste the embed link here. Leave empty to show the placeholder.
-const TREE_EMBED_URL = "";
+const TREE_EMBED_URL = "https://pole-display.3d-obj.workers.dev/";
 
 (function () {
     const frame = document.getElementById("tree-frame");
