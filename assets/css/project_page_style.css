@@ -69,6 +69,9 @@ p {
     /* clip (unlike hidden) can't be scrolled at all, so focusing a field that sticks
        out can't shift the panel's content sideways with no way to scroll back */
     overflow: clip;
+    /* clip doesn't contain child margins (hidden did), so without this a first child's
+       top margin collapses through the closed panel and adds a gap under its header */
+    display: flow-root;
     transition: max-height 0.2s ease-out;
 }
 .video-container {
