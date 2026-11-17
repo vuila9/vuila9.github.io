@@ -281,11 +281,15 @@
         el.count.textContent = text;
     }
 
+    /** Update every pager for this view (Quick edit has one above and one below the list). */
     function updatePager(which, page, pages) {
-        const pager = document.querySelector(`.se-pager[data-pager="${which}"]`);
-        pager.querySelector(".se-pagelabel").textContent = `${page + 1} / ${pages}`;
-        pager.querySelector('[data-step="-1"]').disabled = page <= 0;
-        pager.querySelector('[data-step="1"]').disabled = page >= pages - 1;
+        document.querySelectorAll(`.se-pager[data-pager="${which}"]`).forEach(pager => {
+            pager.querySelector(".se-pagelabel").textContent = `${page + 1} / ${pages}`;
+            pager.querySelector('[data-step="-1"]').disabled = page <= 0;
+            pager.querySelector('[data-step="1"]').disabled = page >= pages - 1;
+            // The bottom copy is only useful when there's more than one page.
+            if (pager.dataset.pos === "bottom") pager.parentElement.hidden = pages <= 1;
+        });
     }
 
     function buildRow(leaf) {
@@ -923,7 +927,9 @@
             if (pager.dataset.pager === "quick") {
                 state.quickPage += step;
                 renderQuick();
-                el.list.scrollIntoView({ block: "nearest" });
+                // From the bottom pager, jump back up so the new page is read from its first row.
+                if (pager.dataset.pos === "bottom") el.list.scrollIntoView({ block: "start" });
+                else el.list.scrollIntoView({ block: "nearest" });
             } else {
                 state.hexPage += step;
                 state.hexFocus = -1;

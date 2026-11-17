@@ -345,6 +345,12 @@
     gap: 8px;
     margin: 12px 0 6px;
 }
+/* Second pager under the list, right-aligned like the top one. */
+#save-editor .se-listfoot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
 
 #save-editor .se-pager {
     display: flex;
