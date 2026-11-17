@@ -1,0 +1,645 @@
+/* Save File Editor — page-specific styles.
+   Scoped under #save-editor so the Phantom template's big CTA buttons and
+   underline-only inputs (main.css) don't leak into the editor UI. */
+
+#save-editor {
+    --se-surface: #ffffff;
+    --se-surface-2: #f6f6f4;
+    --se-border: #d9d9d4;
+    --se-text: #2b2b2b;
+    --se-muted: #7a7a74;
+    --se-accent: #2f6fde;
+    --se-accent-soft: rgba(47, 111, 222, 0.1);
+    --se-ok: #2e8b57;
+    --se-warn: #b7791f;
+    --se-error: #c0392b;
+    --se-modified: #fff4cc;
+    --se-num: #1b7f3b;
+    --se-str: #a3412b;
+    --se-bool: #6a3db8;
+    --se-mono: ui-monospace, "Cascadia Mono", "Consolas", "Courier New", monospace;
+    --se-radius: 6px;
+
+    margin: 0 0 3em 0;
+    color: var(--se-text);
+}
+
+/* Elements styled with display:flex etc. must still honour the hidden attribute. */
+#save-editor [hidden] {
+    display: none !important;
+}
+
+/* ----------------------------------------------------------- buttons / inputs */
+
+#save-editor .se-btn {
+    height: auto;
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 34px;
+    text-transform: none;
+    border-radius: var(--se-radius);
+    box-shadow: inset 0 0 0 1px var(--se-border);
+    background: var(--se-surface);
+    color: var(--se-text) !important;
+    white-space: nowrap;
+}
+#save-editor .se-btn:hover:not(:disabled) {
+    box-shadow: inset 0 0 0 1px var(--se-accent);
+    color: var(--se-accent) !important;
+}
+#save-editor .se-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+#save-editor .se-btn-primary {
+    background: var(--se-accent);
+    box-shadow: none;
+    color: #ffffff !important;
+}
+#save-editor .se-btn-primary:hover:not(:disabled) {
+    background: #2359b8;
+    box-shadow: none;
+    color: #ffffff !important;
+}
+#save-editor .se-btn-sm {
+    min-height: 32px;
+    line-height: 30px;
+    padding: 0 10px;
+}
+
+#save-editor .se-input,
+#save-editor .se-select {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--se-border);
+    border-radius: var(--se-radius);
+    background-color: var(--se-surface);
+    color: var(--se-text);
+    font-size: 0.9rem;
+    width: auto;
+}
+#save-editor .se-input:focus,
+#save-editor .se-select:focus {
+    border-color: var(--se-accent);
+    box-shadow: 0 0 0 3px var(--se-accent-soft);
+}
+#save-editor .se-select {
+    appearance: auto;
+    -webkit-appearance: auto;
+    padding-right: 6px;
+    cursor: pointer;
+}
+#save-editor .se-toolbar-label {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--se-text);
+}
+#save-editor .se-input-sm {
+    width: 110px;
+}
+#save-editor .se-grow {
+    flex: 1 1 180px;
+    min-width: 0;
+}
+
+/* The template hides real checkboxes and draws its own in front of the label. */
+#save-editor .se-check label {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--se-text);
+}
+
+/* Button that looks like a link. */
+#save-editor .se-linkbtn {
+    height: auto;
+    padding: 0;
+    box-shadow: none;
+    background: none;
+    font-size: inherit;
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: inherit;
+    text-transform: none;
+    color: var(--se-accent) !important;
+    text-decoration: underline;
+}
+
+#save-editor .se-muted {
+    color: var(--se-muted);
+    font-size: 0.85rem;
+}
+
+/* ----------------------------------------------------------- drop zone */
+
+#save-editor .se-tagline {
+    margin: 0 0 14px;
+    font-size: 1.05rem;
+}
+#save-editor .se-tagline b {
+    color: inherit;
+}
+
+#save-editor .se-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 240px;
+    padding: 32px 16px;
+    border: 2px dashed var(--se-border);
+    border-radius: 12px;
+    background: var(--se-surface);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+#save-editor .se-drop:hover,
+#save-editor .se-drop:focus-visible,
+#save-editor .se-drop.is-dragging {
+    border-color: var(--se-accent);
+    background: #f4f8ff;
+    outline: none;
+}
+#save-editor .se-drop p {
+    margin: 0;
+}
+#save-editor .se-drop-icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 10px;
+    fill: none;
+    stroke: var(--se-accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+#save-editor .se-drop-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--se-text);
+}
+#save-editor .se-drop-sub {
+    font-size: 0.95rem;
+    color: var(--se-muted);
+}
+#save-editor .se-drop-note {
+    margin-top: 12px !important;
+    font-size: 0.8rem;
+    color: var(--se-muted);
+}
+#save-editor .se-link {
+    color: var(--se-accent);
+    text-decoration: underline;
+}
+#save-editor .se-sample-line {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--se-muted);
+}
+
+#save-editor .se-error {
+    margin: 12px 0 0;
+    padding: 10px 14px;
+    border-radius: var(--se-radius);
+    background: #fdecea;
+    color: var(--se-error);
+    font-size: 0.9rem;
+}
+
+/* Full-page hint while a file is dragged over the window. */
+.se-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(47, 111, 222, 0.12);
+    border: 4px dashed #2f6fde;
+    color: #2f6fde;
+    font-size: 1.5rem;
+    font-weight: 700;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+}
+.se-overlay.is-visible {
+    opacity: 1;
+}
+
+/* ----------------------------------------------------------- editor shell */
+
+#save-editor .se-editor {
+    border: 1px solid var(--se-border);
+    border-radius: 10px;
+    background: var(--se-surface);
+    overflow: hidden;
+}
+
+#save-editor .se-filebar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px 10px;
+}
+#save-editor .se-fileinfo {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+}
+#save-editor .se-filename {
+    font-family: var(--se-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+#save-editor .se-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Detected layer chain: "Base64 → GZip → UTF-8 → JSON" */
+#save-editor .se-chain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0 16px;
+    list-style: none;
+}
+#save-editor .se-chip {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    font-family: var(--se-mono);
+    font-size: 0.78rem;
+}
+#save-editor .se-chip::before {
+    content: none;
+}
+#save-editor .se-chip + .se-chip::before {
+    content: "→";
+    margin-right: 6px;
+    color: var(--se-muted);
+}
+#save-editor .se-chip {
+    color: var(--se-text);
+}
+#save-editor .se-chip:last-child {
+    color: var(--se-accent);
+    font-weight: 700;
+}
+
+#save-editor .se-notice {
+    margin: 12px 16px;
+    padding: 10px 14px;
+    border-radius: var(--se-radius);
+    background: #e8f5ec;
+    color: #1f5c38;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+#save-editor .se-notice.is-warn {
+    background: #fdf3e1;
+    color: #7a5212;
+}
+
+/* ----------------------------------------------------------- tabs */
+
+#save-editor .se-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--se-border);
+    overflow-x: auto;
+}
+#save-editor .se-tab {
+    height: auto;
+    padding: 10px 14px;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: normal;
+    line-height: 1.2;
+    text-transform: none;
+    color: var(--se-muted) !important;
+    border-bottom: 3px solid transparent;
+}
+#save-editor .se-tab:hover {
+    color: var(--se-text) !important;
+}
+#save-editor .se-tab.is-active {
+    color: var(--se-accent) !important;
+    border-bottom-color: var(--se-accent);
+}
+
+#save-editor .se-panel {
+    padding: 14px 16px 16px;
+}
+
+#save-editor .se-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+#save-editor .se-listinfo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 12px 0 6px;
+}
+
+#save-editor .se-pager {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+#save-editor .se-pagelabel {
+    min-width: 64px;
+    text-align: center;
+    font-family: var(--se-mono);
+    font-size: 0.85rem;
+}
+
+/* ----------------------------------------------------------- quick edit rows */
+
+#save-editor .se-list {
+    border-top: 1px solid var(--se-border);
+}
+
+#save-editor .se-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 38%);
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #eeeeea;
+}
+#save-editor .se-row:hover {
+    background: var(--se-surface-2);
+}
+#save-editor .se-row.is-modified {
+    background: var(--se-modified);
+}
+
+#save-editor .se-path {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+#save-editor .se-seg {
+    color: var(--se-muted);
+}
+#save-editor .se-sep {
+    margin: 0 5px;
+    color: #b5b5ae;
+}
+#save-editor .se-key {
+    font-weight: 700;
+    color: var(--se-text);
+}
+
+#save-editor .se-val {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+#save-editor .se-value,
+#save-editor .se-val .se-select {
+    flex: 1;
+    min-width: 0;
+    height: 32px;
+    font-family: var(--se-mono);
+    font-size: 0.85rem;
+}
+#save-editor textarea.se-value {
+    height: auto;
+    min-height: 64px;
+    padding: 6px 10px;
+    resize: vertical;
+}
+#save-editor .se-type-num { color: var(--se-num); font-weight: 600; }
+#save-editor .se-type-str { color: var(--se-str); }
+#save-editor .se-type-bool { color: var(--se-bool); font-weight: 600; }
+#save-editor .se-null {
+    flex: 1;
+    font-family: var(--se-mono);
+    font-size: 0.85rem;
+    color: var(--se-muted);
+    padding-left: 10px;
+}
+#save-editor .se-input.is-invalid,
+#save-editor .se-hexcell.is-invalid {
+    border-color: var(--se-error);
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+}
+
+/* Per-row undo, only shown on changed rows. */
+#save-editor .se-revert {
+    visibility: hidden;
+    flex: none;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border-radius: var(--se-radius);
+    box-shadow: none;
+    background: none;
+    font-size: 1rem;
+    letter-spacing: normal;
+    line-height: 30px;
+    color: var(--se-muted) !important;
+}
+#save-editor .se-row.is-modified .se-revert {
+    visibility: visible;
+}
+#save-editor .se-revert:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--se-text) !important;
+}
+
+#save-editor .se-empty {
+    margin: 24px 0;
+    text-align: center;
+    color: var(--se-muted);
+    font-size: 0.95rem;
+}
+
+/* ----------------------------------------------------------- JSON / text */
+
+#save-editor .se-status {
+    min-height: 1.4em;
+    margin: 8px 0;
+    font-size: 0.85rem;
+    color: var(--se-muted);
+}
+#save-editor .se-status.is-ok { color: var(--se-ok); }
+#save-editor .se-status.is-warn { color: var(--se-warn); }
+#save-editor .se-status.is-error { color: var(--se-error); font-weight: 600; }
+
+#save-editor .se-code {
+    display: block;
+    width: 100%;
+    height: 65vh;
+    min-height: 320px;
+    padding: 12px 14px;
+    border: 1px solid var(--se-border);
+    border-radius: var(--se-radius);
+    background: #fbfbfa;
+    color: var(--se-text);
+    font-family: var(--se-mono);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    white-space: pre;
+    tab-size: 2;
+    resize: vertical;
+}
+#save-editor .se-code:focus {
+    border-color: var(--se-accent);
+}
+
+/* ----------------------------------------------------------- hex view */
+
+#save-editor .se-hex {
+    margin-top: 12px;
+    padding: 8px 0;
+    border: 1px solid var(--se-border);
+    border-radius: var(--se-radius);
+    background: #fbfbfa;
+    font-family: var(--se-mono);
+    font-size: 0.82rem;
+    overflow-x: auto;
+}
+#save-editor .se-hexrow {
+    display: flex;
+    gap: 14px;
+    width: max-content;
+    padding: 0 12px;
+    line-height: 1.9;
+}
+#save-editor .se-hexoff {
+    color: var(--se-muted);
+}
+#save-editor .se-hexcells {
+    display: grid;
+    grid-template-columns: repeat(16, 2.4ch);
+    column-gap: 0.6ch;
+}
+/* A little extra gap between the two 8-byte halves. */
+#save-editor .se-hexcell:nth-child(8) {
+    margin-right: 0.6ch;
+}
+#save-editor .se-hexcell {
+    width: 2.4ch;
+    text-align: center;
+}
+#save-editor input.se-hexcell {
+    height: 1.7em;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: none;
+    font: inherit;
+    text-transform: uppercase;
+}
+#save-editor input.se-hexcell:hover {
+    border-color: var(--se-border);
+}
+#save-editor input.se-hexcell:focus {
+    border-color: var(--se-accent);
+    background: var(--se-surface);
+}
+#save-editor .se-hexcell.is-modified {
+    background: var(--se-modified);
+    color: var(--se-warn);
+    font-weight: 700;
+}
+#save-editor .se-hexcell.is-target {
+    outline: 2px solid var(--se-accent);
+    outline-offset: 1px;
+}
+#save-editor .se-hexascii {
+    white-space: pre;
+    color: var(--se-muted);
+}
+
+/* ----------------------------------------------------------- page copy (SEO sections) */
+
+/* Section titles are real headings for search engines but keep the site's .submenu look. */
+h2.submenu {
+    display: block;
+    margin: 0 0 0.25em;
+    letter-spacing: normal;
+    text-transform: none;
+    color: inherit;
+    font-size: 1.5em;
+}
+.se-howto {
+    margin: 0 0 1.5em;
+}
+.se-howto li {
+    margin-bottom: 0.4em;
+}
+h3.se-faq-q {
+    margin: 1em 10px 0;
+    font-size: 1.05em;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+/* ----------------------------------------------------------- mobile (≤736px) */
+
+@media screen and (max-width: 736px) {
+    #save-editor .se-drop {
+        min-height: 190px;
+    }
+    #save-editor .se-filebar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #save-editor .se-actions .se-btn {
+        flex: 1 1 calc(50% - 4px);
+    }
+    #save-editor .se-panel {
+        padding: 12px 10px 14px;
+    }
+    /* Stack each value under its path. */
+    #save-editor .se-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+        padding: 8px 4px;
+    }
+    #save-editor .se-value,
+    #save-editor .se-val .se-select {
+        height: 38px;
+        font-size: 16px; /* ≥16px stops iOS from zooming into the field */
+    }
+    #save-editor .se-input,
+    #save-editor .se-select {
+        font-size: 16px;
+    }
+    #save-editor .se-code {
+        height: 60vh;
+        font-size: 0.8rem;
+    }
+    /* Hex rows are wider than a phone; the ASCII column scrolls into view. */
+    #save-editor .se-hex {
+        font-size: 0.78rem;
+    }
+}

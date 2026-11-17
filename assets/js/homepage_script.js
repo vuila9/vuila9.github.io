@@ -63,10 +63,11 @@ document.addEventListener("DOMContentLoaded", function() {
             link: "projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html"
         },
         {
-            imageSrc: "assets/img/program_icons/manytools_tile.jpg",
-            titleKey: "proj.manytools.title",
-            descKey: "proj.manytools.desc",
-            link: "projects/Many_mini-tools/Many_mini-tools.html"
+            // Hub page grouping Save File Editor + Many mini-tools (like Games).
+            imageSrc: "projects/Tools/Tools_icon.svg",
+            titleKey: "proj.tools.title",
+            descKey: "proj.tools.desc",
+            link: "projects/Tools/Tools.html"
         },
         {
             imageSrc: "assets/img/program_icons/sudoku_tile.jpg",

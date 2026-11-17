@@ -24,7 +24,9 @@ The site covers my background, work experience and education, along with a growi
 | [Paint](https://vuila9.github.io/projects/MS_Paint/MS_Paint.html) | A paint program in the style of MS Paint. | JavaScript, html2canvas |
 | [Cube](https://vuila9.github.io/projects/Cube/Cube.html) | An interactive 3D object rendered in the browser. | Three.js, Blender |
 | [Terminal Simulator](https://vuila9.github.io/projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html) | A simulator for the Windows CMD and Ubuntu Terminal command consoles. | HTML, CSS, JavaScript |
-| [Many mini-tools](https://vuila9.github.io/projects/Many_mini-tools/Many_mini-tools.html) | Small tools: timer, stopwatch, text encrypt/decrypt, regex comparison, mic and webcam testers, and more. | JavaScript, Web Media APIs |
+| [Tools](https://vuila9.github.io/projects/Tools/Tools.html) | Handy browser utilities: | |
+| ↳ [Save File Editor](https://vuila9.github.io/projects/Save_Editor/Save_Editor.html) | Open, edit and re-pack .bin / .sav game saves (MessagePack, JSON, GZip, Base64, XOR) entirely in the browser. | JavaScript, Compression Streams |
+| ↳ [Many mini-tools](https://vuila9.github.io/projects/Many_mini-tools/Many_mini-tools.html) | Small tools: timer, stopwatch, text encrypt/decrypt, regex comparison, mic and webcam testers, and more. | JavaScript, Web Media APIs |
 | [Sudoku Game (v2)](https://vuila9.github.io/projects/Sudoku_JS/Sudoku_JS.html) | A Sudoku game with a built-in solver and a full GUI. | HTML, CSS, JavaScript |
 | [Sudoku Solver](https://vuila9.github.io/projects/Sudoku_Solver/Sudoku_Solver.html) | The original Python version of the Sudoku solver ([source](https://github.com/vuila9/Sudoku-Solver)). | Python |
 | [Web-based Restaurant](https://vuila9.github.io/projects/Web-based_Restaurant/Web-based_Restaurant.html) | An online restaurant with a stored order database ([source](https://github.com/vuila9/Web-Design-with-Nodejs)). | Node.js, MongoDB |
@@ -102,6 +104,8 @@ vuila9.github.io/
     ├── MS_Paint/MS_Paint.html
     ├── Cube/Cube.html
     ├── CMD_Terminal_Simulator/CMD_Terminal_Simulator.html
+    ├── Tools/Tools.html                Tools hub
+    ├── Save_Editor/Save_Editor.html
     ├── Many_mini-tools/Many_mini-tools.html
     ├── Sudoku_JS/Sudoku_JS.html
     ├── Sudoku_Solver/Sudoku_Solver.html

@@ -1,0 +1,331 @@
+<!DOCTYPE HTML>
+<html lang="en">
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
+		<!-- End Google Tag Manager -->
+		<title>Save File Editor Online - Edit .bin &amp; .sav Game Saves | Free</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<!-- ===== SEO / search & social metadata ===== -->
+		<meta name="description" content="Free online save file editor. Open a .bin, .sav or .dat game save, edit its values, convert it to JSON and download the re-packed file. Nothing is uploaded." />
+		<meta name="keywords" content="save file editor, save editor online, game save editor, bin file editor, edit .bin save file, sav file editor, save game editor, messagepack editor, msgpack to json, bin to json converter, save data editor, unity save editor" />
+		<meta name="author" content="vuila9" />
+		<meta name="robots" content="index, follow, max-image-preview:large" />
+		<link rel="canonical" href="https://vuila9.github.io/projects/Save_Editor/Save_Editor.html" />
+
+		<!-- Open Graph (link previews on Facebook, Discord, iMessage, etc.) -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="vuila9" />
+		<meta property="og:title" content="Save File Editor Online - Edit .bin & .sav Game Saves" />
+		<meta property="og:description" content="Open a game save, edit its values in a readable list, convert it to JSON, and download the re-packed file. Free, runs in your browser, nothing is uploaded." />
+		<meta property="og:url" content="https://vuila9.github.io/projects/Save_Editor/Save_Editor.html" />
+		<meta property="og:image" content="https://vuila9.github.io/projects/Save_Editor/assets/img/og-image.png" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content="Save File Editor: open, edit and re-pack .bin / .sav game saves in your browser" />
+		<meta property="og:locale" content="en_US" />
+
+		<!-- Twitter card -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="Save File Editor Online - Edit .bin & .sav Game Saves" />
+		<meta name="twitter:description" content="Open a game save, edit its values in a readable list, convert it to JSON, and download the re-packed file. Free, nothing is uploaded." />
+		<meta name="twitter:image" content="https://vuila9.github.io/projects/Save_Editor/assets/img/og-image.png" />
+
+		<!-- Structured data: a free web app, plus the FAQ shown on the page -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "WebApplication",
+			"name": "Save File Editor",
+			"alternateName": ["Online Save Editor", "Game Save Editor", "BIN Save File Editor"],
+			"url": "https://vuila9.github.io/projects/Save_Editor/Save_Editor.html",
+			"description": "Free online save file editor. Open a .bin, .sav or .dat game save, edit its values in a readable list, convert it to JSON, and download the re-packed file. Runs entirely in the browser.",
+			"image": "https://vuila9.github.io/projects/Save_Editor/assets/img/og-image.png",
+			"applicationCategory": "UtilitiesApplication",
+			"operatingSystem": "Any (modern web browser)",
+			"browserRequirements": "Requires JavaScript",
+			"isAccessibleForFree": true,
+			"featureList": [
+				"Edit .bin, .sav and .dat game save files",
+				"Decode MessagePack (binary JSON) saves",
+				"Decompress GZip, zlib and Deflate saves",
+				"Decode Base64, hex text and XOR-scrambled saves",
+				"Convert a save file to JSON",
+				"Add or remove fields in JSON mode",
+				"Hex view for unknown formats",
+				"Runs locally: files are never uploaded"
+			],
+			"author": { "@type": "Person", "name": "Khoa Xuan Nguyen", "url": "https://vuila9.github.io/" },
+			"offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+		}
+		</script>
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "FAQPage",
+			"mainEntity": [
+				{
+					"@type": "Question",
+					"name": "How do I open and edit a .bin save file?",
+					"acceptedAnswer": { "@type": "Answer", "text": "Drop the .bin file onto the Save File Editor page. It detects how the save is packed (MessagePack, JSON, GZip, Base64, XOR…) and lists every value with its path. Change the numbers, text or true/false values you want, then press Download file to get the edited save." }
+				},
+				{
+					"@type": "Question",
+					"name": "Can I convert a .bin save file to JSON?",
+					"acceptedAnswer": { "@type": "Answer", "text": "Yes. Once the save is opened, press Export JSON to download a readable .json copy, or use the JSON tab to view and edit the whole file as JSON." }
+				},
+				{
+					"@type": "Question",
+					"name": "Is my save file uploaded anywhere?",
+					"acceptedAnswer": { "@type": "Answer", "text": "No. The editor runs entirely in your browser with JavaScript. The file is read, decoded and rebuilt on your own device and never sent to a server." }
+				},
+				{
+					"@type": "Question",
+					"name": "Which save formats are supported?",
+					"acceptedAnswer": { "@type": "Answer", "text": "MessagePack (binary JSON, common in Unity and C# games), plain JSON in UTF-8 or UTF-16, and saves wrapped in GZip, zlib or Deflate compression, Base64 or hex text, single-byte XOR, or a binary header. Any other file can be edited byte by byte in the hex view." }
+				},
+				{
+					"@type": "Question",
+					"name": "Why doesn't my game load the edited save?",
+					"acceptedAnswer": { "@type": "Answer", "text": "Some games protect their saves with real encryption or a checksum, so any change makes the game reject the file. Those saves can be viewed in the hex view but not edited safely. Always keep a backup of the original save." }
+				}
+			]
+		}
+		</script>
+		<link rel="stylesheet" href="../../assets/css/main.css" />
+		<link rel="icon" href="Save_Editor_icon.svg" type="image/svg+xml">
+		<noscript><link rel="stylesheet" href="../../assets/css/noscript.css" /></noscript>
+		<link rel="stylesheet" href="../../assets/css/project_page_style.css">
+		<link rel="stylesheet" href="assets/css/Save_Editor.css">
+	</head>
+
+	<body class="is-preload">
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NXVSDNVW"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<div class="inner">
+							<a href="https://vuila9.github.io/#main">
+								<button id="home-btn">&lt;&lt;</button>
+							</a>
+							<a><h1>Save File Editor</h1></a>
+						</div>
+					</header>
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<section id="save-editor" aria-label="Save file editor">
+
+								<!-- Step 1: pick a file -->
+								<p class="se-tagline">Open, edit and re-pack <b>.bin</b>, <b>.sav</b> and <b>.dat</b> game saves. Free, and your file never leaves your device.</p>
+								<div id="se-drop" class="se-drop" tabindex="0" role="button" aria-label="Choose a save file to open">
+									<svg class="se-drop-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12-4.5 4.5M12 3l4.5 4.5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
+									<p class="se-drop-title">Drop a save file here</p>
+									<p class="se-drop-sub">.bin, .sav, .dat, .json… or <span class="se-link">browse your files</span></p>
+									<p class="se-drop-note">Your file is decoded on this device. Nothing is uploaded.</p>
+									<input id="se-file" type="file" hidden>
+								</div>
+								<div class="se-sample-line">
+									No save file handy? <button id="se-sample" class="se-linkbtn" type="button">Try a sample save</button>
+								</div>
+								<p id="se-error" class="se-error" role="alert" hidden></p>
+
+								<!-- Step 2: edit -->
+								<div id="se-editor" class="se-editor" hidden>
+									<div class="se-filebar">
+										<div class="se-fileinfo">
+											<span id="se-filename" class="se-filename"></span>
+											<span id="se-filesize" class="se-muted"></span>
+										</div>
+										<div class="se-actions">
+											<button id="se-download" class="se-btn se-btn-primary" type="button">Download file</button>
+											<button id="se-export-json" class="se-btn" type="button">Export JSON</button>
+											<button id="se-reset" class="se-btn" type="button">Undo all</button>
+											<button id="se-open" class="se-btn" type="button">Open another</button>
+										</div>
+									</div>
+									<ol id="se-chain" class="se-chain" aria-label="Detected file format, outermost layer first"></ol>
+									<p id="se-notice" class="se-notice"></p>
+
+									<div class="se-tabs" role="tablist">
+										<button class="se-tab" role="tab" data-tab="quick" type="button">Quick edit</button>
+										<button class="se-tab" role="tab" data-tab="json" type="button">JSON</button>
+										<button class="se-tab" role="tab" data-tab="text" type="button">Text</button>
+										<button class="se-tab" role="tab" data-tab="hex" type="button">Hex</button>
+									</div>
+
+									<!-- Quick edit: every value as a filterable, paginated list -->
+									<div id="se-panel-quick" class="se-panel" role="tabpanel">
+										<div class="se-toolbar">
+											<label for="se-type" class="se-toolbar-label">Show</label>
+											<!-- Option text gets live counts from Save_Editor.js (e.g. "Booleans (1,138)") -->
+											<select id="se-type" class="se-select">
+												<option value="all" data-label="All types">All types</option>
+												<option value="num" data-label="Numbers">Numbers</option>
+												<option value="bool" data-label="Booleans">Booleans</option>
+												<option value="str" data-label="Strings">Strings</option>
+												<option value="null" data-label="Null">Null</option>
+												<option value="bin" data-label="Binary">Binary</option>
+											</select>
+											<input id="se-search" class="se-input se-grow" type="text" placeholder="Search keys or values" aria-label="Search keys or values">
+											<span class="se-check">
+												<input id="se-modified-only" type="checkbox">
+												<label for="se-modified-only">Changed only</label>
+											</span>
+										</div>
+										<div class="se-listinfo">
+											<span id="se-count" class="se-muted"></span>
+											<div class="se-pager" data-pager="quick">
+												<button class="se-btn se-btn-sm" data-step="-1" type="button" aria-label="Previous page">&laquo;</button>
+												<span class="se-pagelabel"></span>
+												<button class="se-btn se-btn-sm" data-step="1" type="button" aria-label="Next page">&raquo;</button>
+											</div>
+										</div>
+										<div id="se-list" class="se-list"></div>
+									</div>
+
+									<!-- JSON: the whole document as editable text (add / remove fields here) -->
+									<div id="se-panel-json" class="se-panel" role="tabpanel">
+										<div class="se-toolbar">
+											<input id="se-json-search" class="se-input se-grow" type="text" placeholder="Find in JSON" aria-label="Find in JSON">
+											<button id="se-json-prev" class="se-btn se-btn-sm" type="button" aria-label="Previous match">&uarr;</button>
+											<button id="se-json-next" class="se-btn se-btn-sm" type="button" aria-label="Next match">&darr;</button>
+											<button id="se-json-apply" class="se-btn se-btn-primary" type="button" disabled>Apply changes</button>
+										</div>
+										<p id="se-json-status" class="se-status"></p>
+										<textarea id="se-json" class="se-code" spellcheck="false" wrap="off" aria-label="JSON document"></textarea>
+									</div>
+
+									<!-- Text: payloads that are readable but not JSON -->
+									<div id="se-panel-text" class="se-panel" role="tabpanel">
+										<textarea id="se-text" class="se-code" spellcheck="false" wrap="off" aria-label="File text"></textarea>
+									</div>
+
+									<!-- Hex: raw bytes (editable when the format is unknown) -->
+									<div id="se-panel-hex" class="se-panel" role="tabpanel">
+										<div class="se-toolbar">
+											<span id="se-hex-label" class="se-muted se-grow"></span>
+											<input id="se-hex-goto" class="se-input se-input-sm" type="text" placeholder="Go to 0x…" aria-label="Go to offset">
+											<div class="se-pager" data-pager="hex">
+												<button class="se-btn se-btn-sm" data-step="-1" type="button" aria-label="Previous page">&laquo;</button>
+												<span class="se-pagelabel"></span>
+												<button class="se-btn se-btn-sm" data-step="1" type="button" aria-label="Next page">&raquo;</button>
+											</div>
+										</div>
+										<div id="se-hex" class="se-hex"></div>
+									</div>
+								</div>
+							</section>
+
+							<div>
+								<h2 class="submenu">Online save file editor</h2>
+								<p>A free save editor that runs entirely in your browser. Drop in a game save (<code>.bin</code>, <code>.sav</code>, <code>.dat</code> or <code>.json</code>) and it works out how the file is packed: MessagePack binary JSON, compressed with GZip or zlib, Base64 or hex encoded, XOR scrambled, or JSON inside a binary wrapper. It then shows every value, like gold, gems, levels, items and unlocks, as a searchable list you can edit in place. When you're done, it packs the file back the same way and you download a drop-in replacement. You can also convert the save to JSON.</p>
+							</div>
+
+							<div>
+								<h2 class="submenu">How to edit a save file</h2>
+								<ol class="se-howto">
+									<li><span class="effect-span"><b>Back up</b> the original save file and keep the copy somewhere safe.</span></li>
+									<li><span class="effect-span"><b>Drop the file</b> onto the box above, or click it to browse. The detected format (for example <code>MessagePack</code> or <code>GZip → JSON</code>) is shown at the top.</span></li>
+									<li><span class="effect-span"><b>Find the value</b> with the search box, or use <b>Show</b> to list only numbers, booleans or strings.</span></li>
+									<li><span class="effect-span"><b>Edit it</b> right in the list. Use the <b>JSON</b> tab to add or remove fields.</span></li>
+									<li><span class="effect-span"><b>Download file</b> and replace the original save with it. Use <b>Export JSON</b> for a readable copy.</span></li>
+								</ol>
+							</div>
+
+							<div class="container">
+								<div class="submenu">FAQ</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('faq-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="faq-content">
+								<!-- Keep in sync with the FAQPage JSON-LD in <head>. -->
+								<h3 class="se-faq-q">How do I open and edit a .bin save file?</h3>
+								<p>Drop the .bin file onto the box at the top of this page. It detects how the save is packed (MessagePack, JSON, GZip, Base64, XOR…) and lists every value with its path. Change the numbers, text or true/false values you want, then press <b>Download file</b> to get the edited save.</p>
+								<h3 class="se-faq-q">Can I convert a .bin save file to JSON?</h3>
+								<p>Yes. Once the save is opened, press <b>Export JSON</b> to download a readable .json copy, or use the JSON tab to view and edit the whole file as JSON.</p>
+								<h3 class="se-faq-q">Is my save file uploaded anywhere?</h3>
+								<p>No. The editor runs entirely in your browser with JavaScript. The file is read, decoded and rebuilt on your own device and never sent to a server.</p>
+								<h3 class="se-faq-q">Which save formats are supported?</h3>
+								<p>MessagePack (binary JSON, common in Unity and C# games), plain JSON in UTF-8 or UTF-16, and saves wrapped in GZip, zlib or Deflate compression, Base64 or hex text, single-byte XOR, or a binary header. Any other file can be edited byte by byte in the hex view.</p>
+								<h3 class="se-faq-q">Why doesn't my game load the edited save?</h3>
+								<p>Some games protect their saves with real encryption or a checksum, so any change makes the game reject the file. Those saves can be viewed in the hex view but not edited safely. Always keep a backup of the original save.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('features-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<ul>
+									<li><span class="effect-span"><b>Format detection</b>:&nbsp;peels off GZip, zlib, raw Deflate, Base64 (incl. URL-safe), hex text and single-byte XOR layers in any order, then reads UTF-8 / UTF-16 text with or without a BOM.</span></li>
+									<li><span class="effect-span"><b>MessagePack</b>:&nbsp;binary "JSON" saves (common in Unity / C# games) are decoded into readable values and rebuilt on download, keeping each number's exact binary type (int8…int64, float32/float64).</span></li>
+									<li><span class="effect-span"><b>Quick edit</b>:&nbsp;every number, string and true/false value as a flat list with its full path, filterable by type, searchable, and paginated for big saves.</span></li>
+									<li><span class="effect-span"><b>JSON mode</b>:&nbsp;the whole document as text, for adding or removing fields, array items or whole sections.</span></li>
+									<li><span class="effect-span"><b>Lossless round-trip</b>:&nbsp;a custom JSON parser keeps numbers exactly as written (<code>9931676.0</code> stays a float, 64-bit IDs keep every digit), along with key order, duplicate keys, escapes and the original indentation.</span></li>
+									<li><span class="effect-span"><b>Binary wrappers</b>:&nbsp;JSON stored between a binary header and footer is found automatically, and a length field in front of it (uint16/uint32 or C#'s 7-bit varint) is updated when the JSON grows or shrinks.</span></li>
+									<li><span class="effect-span"><b>Hex view</b>:&nbsp;files with an unknown format can still be edited byte by byte.</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Limitations</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('limitations-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="limitations-content">
+								<ul>
+									<li><span class="effect-span">Saves protected by real encryption (AES, etc.) or a checksum/signature can be viewed in hex but won't load in the game after editing.</span></li>
+									<li><span class="effect-span">Other binary serializers (Unity BinaryFormatter, Protobuf…) aren't decoded into fields yet; use the hex view.</span></li>
+									<li><span class="effect-span">Compressed layers are re-compressed by the browser, so the bytes differ from the original even when the content is identical. Games read it the same.</span></li>
+									<li><span class="effect-span">Always keep a backup of the original save.</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">GitHub</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('github-content')">▼</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="github-content">
+								<a href="https://github.com/vuila9/vuila9.github.io/tree/main/projects/Save_Editor" target="_blank"><p>Source code</p></a>
+							</div>
+
+				<!--END-->
+						</div>
+					</div>
+			</div>
+
+		<!-- Scripts -->
+			<script src="../../assets/js/jquery.min.js"></script>
+			<script src="../../assets/js/browser.min.js"></script>
+			<script src="../../assets/js/breakpoints.min.js"></script>
+			<script src="../../assets/js/util.js"></script>
+			<script src="../../assets/js/main.js"></script>
+			<script src="../../assets/js/project_global_function.js"></script>
+
+			<!-- project specifics -->
+			<script src="assets/js/Save_Editor_json.js"></script>
+			<script src="assets/js/Save_Editor_msgpack.js"></script>
+			<script src="assets/js/Save_Editor_codec.js"></script>
+			<script src="assets/js/Save_Editor.js"></script>
+	</body>
+</html>
