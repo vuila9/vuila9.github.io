@@ -260,6 +260,98 @@
         return leaves;
     }
 
+    // ------------------------------------------------------------ JSON stored inside strings
+    //
+    // Some games store a whole JSON document as a *string* value, e.g.
+    //   "ab_data": "{\"rpm_old_algorithm\":{\"A\":{\"enabled\":false}, …}}"
+    // unpackEmbedded() turns such strings into real objects/arrays so they can be
+    // browsed and edited like everything else; the container keeps an `emb`
+    // record ({ fmt, lead, trail, str }) and packEmbedded() turns it back into a
+    // string when the file is built. A string is only unpacked if packing it
+    // again reproduces the original text exactly, so untouched saves stay identical.
+
+    const isContainer = node => node.t === "obj" || node.t === "arr";
+    const sizeOf = node => (node.t === "obj" ? node.entries.length : node.items.length);
+
+    function tryUnpackString(str) {
+        const v = str.v;
+        const first = v.trimStart()[0];
+        if (v.length < 2 || (first !== "{" && first !== "[")) return null;
+        let doc;
+        try { doc = parseDocument(v); } catch (err) { return null; }
+        if (!sizeOf(doc.root)) return null;
+        if (doc.lead + serialize(doc.root, doc.fmt) + doc.trail !== v) return null;
+        const root = unpackEmbedded(doc.root);   // JSON strings inside JSON strings
+        root.emb = { fmt: doc.fmt, lead: doc.lead, trail: doc.trail, str };
+        return root;
+    }
+
+    /** Replace JSON-holding string values with real containers (in place). Returns the root. */
+    function unpackEmbedded(node) {
+        if (node.t === "obj") node.entries.forEach(e => { e.v = unpackEmbedded(e.v); });
+        else if (node.t === "arr") node.items = node.items.map(unpackEmbedded);
+        else if (node.t === "str") return tryUnpackString(node) || node;
+        return node;
+    }
+
+    /**
+     * Copy of the tree with every unpacked container turned back into its
+     * string (unchanged ones reuse the original string node, so they re-encode
+     * exactly). Untouched branches are shared, not copied.
+     */
+    function packEmbedded(node) {
+        let out = node;
+        if (node.t === "obj") {
+            let changed = false;
+            const entries = node.entries.map(e => {
+                const v = packEmbedded(e.v);
+                if (v === e.v) return e;
+                changed = true;
+                return Object.assign({}, e, { v });
+            });
+            if (changed) out = Object.assign({}, node, { entries });
+        } else if (node.t === "arr") {
+            let changed = false;
+            const items = node.items.map(item => {
+                const v = packEmbedded(item);
+                if (v !== item) changed = true;
+                return v;
+            });
+            if (changed) out = Object.assign({}, node, { items });
+        }
+        if (!node.emb) return out;
+        const { fmt, lead, trail, str } = node.emb;
+        const text = lead + serialize(out, fmt) + trail;
+        if (text === str.v) return str;
+        const packed = { t: "str", v: text };
+        if (str.mp) packed.mp = str.mp;   // MessagePack string width
+        return packed;
+    }
+
+    /** After a JSON-tab edit, mark containers that were unpacked strings before (matched by key/index). */
+    function carryEmbedded(next, prev) {
+        if (!prev) return;
+        if (prev.emb && isContainer(next)) next.emb = prev.emb;
+        if (next.t === "obj" && prev.t === "obj") {
+            const before = new Map(prev.entries.map(e => [e.k, e.v]));
+            next.entries.forEach(e => carryEmbedded(e.v, before.get(e.k)));
+        } else if (next.t === "arr" && prev.t === "arr") {
+            next.items.forEach((item, idx) => carryEmbedded(item, prev.items[idx]));
+        }
+    }
+
+    /** Paths (as arrays) of every unpacked JSON string in the tree. */
+    function findEmbedded(root) {
+        const found = [];
+        const walk = (node, path) => {
+            if (node.emb) found.push(path);
+            if (node.t === "obj") node.entries.forEach(e => walk(e.v, path.concat(e.k)));
+            else if (node.t === "arr") node.items.forEach((item, idx) => walk(item, path.concat(idx)));
+        };
+        walk(root, []);
+        return found;
+    }
+
     /** Is `text` a valid JSON number literal (incl. NaN / Infinity)? */
     function isNumberLiteral(text) {
         NUMBER_RE.lastIndex = 0;
@@ -274,6 +366,10 @@
         serialize,
         quote,
         collectLeaves,
+        unpackEmbedded,
+        packEmbedded,
+        carryEmbedded,
+        findEmbedded,
         isNumberLiteral,
         PRETTY_FMT
     };

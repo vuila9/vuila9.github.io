@@ -17,6 +17,8 @@
     --se-num: #1b7f3b;
     --se-str: #a3412b;
     --se-bool: #6a3db8;
+    --se-find-all: #ffff00;      /* Chrome's find-in-page colours */
+    --se-find-current: #ff9632;
     --se-mono: ui-monospace, "Cascadia Mono", "Consolas", "Courier New", monospace;
     --se-radius: 6px;
 
@@ -134,14 +136,6 @@
 }
 
 /* ----------------------------------------------------------- drop zone */
-
-#save-editor .se-tagline {
-    margin: 0 0 14px;
-    font-size: 1.05rem;
-}
-#save-editor .se-tagline b {
-    color: inherit;
-}
 
 #save-editor .se-drop {
     display: flex;
@@ -273,7 +267,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin: 0;
+    margin: 0 0 12px;
     padding: 0 16px;
     list-style: none;
 }
@@ -299,20 +293,6 @@
 #save-editor .se-chip:last-child {
     color: var(--se-accent);
     font-weight: 700;
-}
-
-#save-editor .se-notice {
-    margin: 12px 16px;
-    padding: 10px 14px;
-    border-radius: var(--se-radius);
-    background: #e8f5ec;
-    color: #1f5c38;
-    font-size: 0.88rem;
-    line-height: 1.5;
-}
-#save-editor .se-notice.is-warn {
-    background: #fdf3e1;
-    color: #7a5212;
 }
 
 /* ----------------------------------------------------------- tabs */
@@ -505,13 +485,70 @@
     color: var(--se-text);
     font-family: var(--se-mono);
     font-size: 0.85rem;
-    line-height: 1.55;
+    line-height: 20px; /* whole pixels: keeps find highlights aligned on long files */
     white-space: pre;
     tab-size: 2;
     resize: vertical;
 }
 #save-editor .se-code:focus {
     border-color: var(--se-accent);
+}
+
+/* ----------------------------------------------------------- find highlights */
+
+/* The textarea sits transparent on top of the highlight layer, so match boxes
+   show *behind* the text and the text stays crisp. */
+#save-editor .se-code-wrap {
+    position: relative;
+    border-radius: var(--se-radius);
+    background: #fbfbfa;
+}
+#save-editor .se-code-wrap .se-code {
+    position: relative;
+    z-index: 1;
+    background: transparent;
+}
+#save-editor .se-code-hl {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    border-radius: var(--se-radius);
+    pointer-events: none;
+}
+/* Same look as the browser's own find-in-page (Ctrl+F):
+   yellow for every match, orange for the one you're on. */
+#save-editor .se-hl {
+    position: absolute;
+    background: var(--se-find-all);
+}
+#save-editor .se-hl.is-current {
+    background: var(--se-find-current);
+}
+
+/* Match counter inside the find box: "3 of 12". */
+#save-editor .se-find {
+    position: relative;
+    display: flex;
+}
+#save-editor .se-find .se-input {
+    flex: 1;
+    width: 100%;
+    padding-right: 96px;
+}
+#save-editor .se-findcount {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-family: var(--se-mono);
+    font-size: 0.78rem;
+    color: var(--se-muted);
+    white-space: nowrap;
+    pointer-events: none;
+}
+#save-editor .se-findcount.is-none {
+    color: var(--se-error);
 }
 
 /* ----------------------------------------------------------- hex view */

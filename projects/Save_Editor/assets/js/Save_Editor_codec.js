@@ -373,11 +373,13 @@
         if (doc.kind === "binary") return doc.bytes;
         if (doc.kind === "text") return encodeText(doc.text, doc.enc);
 
+        // Values shown unpacked in the editor go back to being JSON strings.
+        const root = global.SaveJson.packEmbedded(doc.root);
         let body;
         if (doc.container === "msgpack") {
-            body = global.SaveMsgpack.encode(doc.root);
+            body = global.SaveMsgpack.encode(root);
         } else {
-            const text = doc.lead + global.SaveJson.serialize(doc.root, doc.fmt) + doc.trail;
+            const text = doc.lead + global.SaveJson.serialize(root, doc.fmt) + doc.trail;
             if (!doc.embed) return encodeText(text, doc.enc);
             body = new TextEncoder().encode(text);
         }

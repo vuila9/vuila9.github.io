@@ -30,7 +30,6 @@
         filename: $("se-filename"),
         filesize: $("se-filesize"),
         chain: $("se-chain"),
-        notice: $("se-notice"),
         download: $("se-download"),
         exportJson: $("se-export-json"),
         reset: $("se-reset"),
@@ -43,6 +42,8 @@
         list: $("se-list"),
         json: $("se-json"),
         jsonSearch: $("se-json-search"),
+        jsonCount: $("se-json-count"),
+        jsonHl: $("se-json-hl"),
         jsonPrev: $("se-json-prev"),
         jsonNext: $("se-json-next"),
         jsonApply: $("se-json-apply"),
@@ -166,7 +167,12 @@
             hexBytes: null,
             unsaved: false
         });
-        if (doc.kind === "json") rebuildLeaves();
+        if (doc.kind === "json") {
+            // Strings that hold a JSON document (e.g. "ab_data": "{\"…\"}") become real,
+            // editable objects; SaveCodec.build() packs them back into strings.
+            doc.root = SaveJson.unpackEmbedded(doc.root);
+            rebuildLeaves();
+        }
 
         renderFileInfo();
         el.drop.hidden = true;
@@ -217,22 +223,6 @@
 
         el.chain.replaceChildren(...SaveCodec.describe(doc).map(label => make("li", "se-chip", label)));
 
-        // Would the untouched document be written back byte-for-byte?
-        const exact = SaveCodec.bytesEqual(SaveCodec.buildPayload(doc), doc.source);
-        const notes = {
-            json: "Edit numbers, text and true/false values in Quick edit. Use the JSON tab to add or remove fields.",
-            text: "This file is readable text but not JSON. Edit it directly in the Text tab.",
-            binary: "The format wasn't recognised, so it's shown as raw bytes. You can still edit them in the Hex tab."
-        };
-        let note = notes[doc.kind];
-        if (doc.container === "msgpack") {
-            note = "This is a MessagePack (binary JSON) save, decoded into readable values. Edit them in Quick edit, " +
-                "add or remove fields in the JSON tab, or use Export JSON for a readable copy. The binary file is rebuilt when you download.";
-        }
-        if (doc.embed && doc.embed.lengthField) note += " The length field in the binary header is updated automatically.";
-        if (doc.kind === "json" && !exact) note += " Whitespace will be tidied when saving; values are unchanged.";
-        el.notice.textContent = note;
-        el.notice.className = "se-notice" + (doc.kind === "binary" ? " is-warn" : "");
         el.exportJson.hidden = doc.kind !== "json";
     }
 
@@ -421,10 +411,26 @@
     // ================================================================ JSON tab
 
     function fillJson() {
-        if (state.jsonDirty) return;
-        el.json.value = SaveJson.serialize(state.doc.root, SaveJson.PRETTY_FMT);
-        el.jsonApply.disabled = true;
-        setJsonStatus("Add, remove or rename anything here, then press Apply changes.");
+        if (!state.jsonDirty) {
+            el.json.value = SaveJson.serialize(state.doc.root, SaveJson.PRETTY_FMT);
+            el.jsonApply.disabled = true;
+            setJsonStatus("Add, remove or rename anything here, then press Apply changes.");
+            find.lineStarts = null;
+            find.current = -1;
+        }
+        // Text may have changed (or the tab was hidden): refresh matches + highlights.
+        // If the search term changed in Quick edit meanwhile, jump to its nearest match.
+        const termChanged = find.query !== el.jsonSearch.value;
+        if (termChanged) {
+            // Start from the first line in view (setting .value parks the caret at the end).
+            find.current = -1;
+            const m = textMetrics();
+            const firstVisible = Math.min(lineStarts().length - 1, Math.max(0, Math.floor(el.json.scrollTop / m.lineHeight)));
+            const at = lineStarts()[firstVisible];
+            el.json.setSelectionRange(at, at);
+        }
+        runFind();
+        if (termChanged && find.matches.length) revealMatch();
     }
 
     function setJsonStatus(message, kind = "") {
@@ -442,8 +448,10 @@
             if (typeof err.index === "number") selectInTextarea(el.json, err.index, err.index + 1);
             return false;
         }
-        // Keep the file's own formatting style (doc.fmt). For MessagePack, carry each
-        // value's binary encoding (float vs int width, etc.) over from the old tree.
+        // Keep the file's own formatting style (doc.fmt). Re-mark values that were
+        // unpacked JSON strings so they're packed back into text, and for
+        // MessagePack carry each value's binary encoding (float vs int width, etc.).
+        SaveJson.carryEmbedded(parsed.root, state.doc.root);
         state.doc.root = state.doc.container === "msgpack"
             ? SaveMsgpack.adopt(parsed.root, state.doc.root)
             : parsed.root;
@@ -473,24 +481,196 @@
         ta.scrollLeft = Math.max(0, (from - lineStart) * charWidth - ta.clientWidth / 2);
     }
 
-    function findInJson(direction) {
-        const needle = el.jsonSearch.value.toLowerCase();
-        if (!needle) return;
-        const hay = el.json.value.toLowerCase();
-        let idx;
-        if (direction > 0) {
-            idx = hay.indexOf(needle, el.json.selectionEnd);
-            if (idx === -1) idx = hay.indexOf(needle);
-        } else {
-            idx = el.json.selectionStart > 0 ? hay.lastIndexOf(needle, el.json.selectionStart - 1) : -1;
-            if (idx === -1) idx = hay.lastIndexOf(needle);
+    // ---------------------------------------------------------------- find in JSON
+    //
+    // A <textarea> can't style part of its text, so matches are drawn as boxes in
+    // #se-json-hl, a layer *behind* the transparent textarea, lined up using the
+    // textarea's own font metrics. Only the visible lines are drawn, so it stays
+    // fast on big saves. The native (blue) selection is never used for matches.
+
+    const MAX_MATCHES = 20000;   // stop counting after this many (shown as "20000+")
+    const MAX_MARKS = 400;       // most boxes drawn at once (only visible lines anyway)
+
+    const find = {
+        query: "",          // what the matches were computed for
+        matches: [],        // start offsets, ascending
+        lengths: [],        // match lengths (case-insensitive matches can differ in rare cases)
+        current: -1,        // index into matches
+        capped: false,
+        lineStarts: null,   // offset of each line start, rebuilt lazily after edits
+        timer: 0,
+        frame: 0
+    };
+    let measureCtx = null;
+
+    const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    /** First index in sorted `arr` whose value is >= v. */
+    function lowerBound(arr, v) {
+        let lo = 0;
+        let hi = arr.length;
+        while (lo < hi) {
+            const mid = (lo + hi) >> 1;
+            if (arr[mid] < v) lo = mid + 1;
+            else hi = mid;
         }
-        if (idx === -1) {
-            setJsonStatus(`No matches for "${el.jsonSearch.value}".`, "error");
+        return lo;
+    }
+
+    function lineStarts() {
+        if (!find.lineStarts) {
+            const text = el.json.value;
+            const starts = [0];
+            for (let i = text.indexOf("\n"); i !== -1; i = text.indexOf("\n", i + 1)) starts.push(i + 1);
+            find.lineStarts = starts;
+        }
+        return find.lineStarts;
+    }
+
+    const lineOf = offset => lowerBound(lineStarts(), offset + 1) - 1;
+
+    /** Recompute all matches, keeping the "current" one near where it was. */
+    function runFind() {
+        const query = el.jsonSearch.value;
+        const anchor = find.current >= 0 ? find.matches[find.current] : el.json.selectionStart;
+        find.query = query;
+        find.matches = [];
+        find.lengths = [];
+        find.capped = false;
+        if (query) {
+            const re = new RegExp(escapeRegExp(query), "gi");
+            const text = el.json.value;
+            let m;
+            while ((m = re.exec(text))) {
+                if (find.matches.length >= MAX_MATCHES) { find.capped = true; break; }
+                find.matches.push(m.index);
+                find.lengths.push(m[0].length || 1);
+                if (!m[0].length) re.lastIndex++;
+            }
+        }
+        const n = find.matches.length;
+        find.current = n ? Math.min(lowerBound(find.matches, anchor), n - 1) : -1;
+        updateFindCount();
+        scheduleHighlights();
+    }
+
+    function updateFindCount() {
+        const n = find.matches.length;
+        el.jsonCount.classList.toggle("is-none", !!find.query && !n);
+        if (!find.query) el.jsonCount.textContent = "";
+        else if (!n) el.jsonCount.textContent = "No results";
+        else el.jsonCount.textContent = `${(find.current + 1).toLocaleString()} of ${n.toLocaleString()}${find.capped ? "+" : ""}`;
+    }
+
+    /** Move to the previous / next match (wrapping around). */
+    function stepFind(direction) {
+        if (find.query !== el.jsonSearch.value) runFind();
+        const n = find.matches.length;
+        if (!n) return;
+        find.current = (find.current + direction + n) % n;
+        revealMatch();
+    }
+
+    /** Scroll the current match into view and park the caret on it (no selection). */
+    function revealMatch() {
+        const ta = el.json;
+        const offset = find.matches[find.current];
+        ta.setSelectionRange(offset, offset);
+        const m = textMetrics();
+        const line = lineOf(offset);
+        const x = textWidth(ta.value.slice(lineStarts()[line], offset), m);
+        const top = line * m.lineHeight;
+        if (top < ta.scrollTop || top + m.lineHeight > ta.scrollTop + ta.clientHeight - m.padTop * 2) {
+            ta.scrollTop = Math.max(0, top - ta.clientHeight / 3);
+        }
+        if (x < ta.scrollLeft || x + 40 > ta.scrollLeft + ta.clientWidth - m.padLeft * 2) {
+            ta.scrollLeft = Math.max(0, x - ta.clientWidth / 3);
+        }
+        updateFindCount();
+        renderHighlights();
+    }
+
+    /** Font metrics of the textarea, so highlight boxes line up with its text. */
+    function textMetrics() {
+        const ta = el.json;
+        const cs = getComputedStyle(ta);
+        if (!measureCtx) measureCtx = document.createElement("canvas").getContext("2d");
+        measureCtx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+        const padTop = parseFloat(cs.paddingTop) || 0;
+        const padBottom = parseFloat(cs.paddingBottom) || 0;
+        // Browsers snap line boxes to device pixels, so the CSS line-height can be
+        // off by a hair — which adds up to whole lines deep in a long file. When the
+        // text overflows, derive the real line height from the scroll height instead.
+        let lineHeight = parseFloat(cs.lineHeight) || 20;
+        const lines = lineStarts().length;
+        if (ta.scrollHeight > ta.clientHeight + 1 && lines > 1) {
+            lineHeight = (ta.scrollHeight - padTop - padBottom) / lines;
+        }
+        return {
+            lineHeight,
+            padTop,
+            padLeft: parseFloat(cs.paddingLeft) || 0,
+            letterSpacing: parseFloat(cs.letterSpacing) || 0,
+            tabSize: parseInt(cs.tabSize, 10) || 8
+        };
+    }
+
+    /** Rendered width of a piece of one line (expands tabs like the textarea does). */
+    function textWidth(text, m) {
+        if (text.includes("\t")) {
+            let col = 0;
+            text = text.replace(/[^\t]*\t/g, chunk => {
+                col += chunk.length - 1;
+                const pad = m.tabSize - (col % m.tabSize);
+                col += pad;
+                return chunk.slice(0, -1) + " ".repeat(pad);
+            });
+        }
+        return measureCtx.measureText(text).width + m.letterSpacing * text.length;
+    }
+
+    function scheduleHighlights() {
+        if (find.frame) return;
+        find.frame = requestAnimationFrame(() => {
+            find.frame = 0;
+            renderHighlights();
+        });
+    }
+
+    /** Draw match boxes for the visible lines (the current match in a different colour). */
+    function renderHighlights() {
+        const layer = el.jsonHl;
+        const ta = el.json;
+        if (!find.matches.length || state.tab !== "json" || !ta.clientHeight) {
+            layer.replaceChildren();
             return;
         }
-        selectInTextarea(el.json, idx, idx + needle.length);
-        el.jsonSearch.focus();
+        const m = textMetrics();
+        const starts = lineStarts();
+        const originX = ta.clientLeft + m.padLeft - ta.scrollLeft;
+        const originY = ta.clientTop + m.padTop - ta.scrollTop;
+        const firstLine = Math.max(0, Math.floor((ta.scrollTop - m.padTop) / m.lineHeight));
+        const lastLine = Math.min(starts.length - 1, Math.ceil((ta.scrollTop + ta.clientHeight) / m.lineHeight));
+        const from = starts[firstLine];
+        const to = lastLine + 1 < starts.length ? starts[lastLine + 1] : Infinity;
+
+        const frag = document.createDocumentFragment();
+        const text = ta.value;
+        let drawn = 0;
+        for (let k = lowerBound(find.matches, from); k < find.matches.length && find.matches[k] < to && drawn < MAX_MARKS; k++, drawn++) {
+            const offset = find.matches[k];
+            const line = lineOf(offset);
+            const lineStart = starts[line];
+            const x = textWidth(text.slice(lineStart, offset), m);
+            const w = textWidth(text.slice(offset, offset + find.lengths[k]), m);
+            const box = make("div", k === find.current ? "se-hl is-current" : "se-hl");
+            box.style.left = `${originX + x}px`;
+            box.style.top = `${originY + line * m.lineHeight}px`;
+            box.style.width = `${w}px`;
+            box.style.height = `${m.lineHeight}px`;
+            frag.appendChild(box);
+        }
+        layer.replaceChildren(frag);
     }
 
     // ================================================================ hex view
@@ -729,6 +909,7 @@
     el.changedOnly.addEventListener("change", refilter);
     let searchTimer = 0;
     el.search.addEventListener("input", () => {
+        el.jsonSearch.value = el.search.value; // one search term shared by both modes
         clearTimeout(searchTimer);
         searchTimer = setTimeout(refilter, 150);
     });
@@ -757,6 +938,23 @@
         touch();
         el.jsonApply.disabled = false;
         setJsonStatus("Unapplied changes.", "warn");
+        // Text moved: re-find (debounced) so highlights and the count stay correct.
+        find.lineStarts = null;
+        if (find.query) {
+            clearTimeout(find.timer);
+            find.timer = setTimeout(runFind, 200);
+        }
+    });
+    el.json.addEventListener("scroll", scheduleHighlights);
+    if (window.ResizeObserver) new ResizeObserver(scheduleHighlights).observe(el.json);
+
+    // Ctrl/Cmd+F inside the JSON tab jumps to its find box instead of the browser's.
+    el.editor.addEventListener("keydown", e => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "f" && state.tab === "json") {
+            e.preventDefault();
+            el.jsonSearch.focus();
+            el.jsonSearch.select();
+        }
     });
     el.json.addEventListener("keydown", e => {
         // Tab inserts indentation instead of leaving the editor.
@@ -766,12 +964,28 @@
         }
     });
     el.jsonApply.addEventListener("click", applyJson);
-    el.jsonNext.addEventListener("click", () => findInJson(1));
-    el.jsonPrev.addEventListener("click", () => findInJson(-1));
+    el.jsonNext.addEventListener("click", () => stepFind(1));
+    el.jsonPrev.addEventListener("click", () => stepFind(-1));
+    // Find as you type: count every match and jump to the nearest one.
+    el.jsonSearch.addEventListener("input", () => {
+        // Shared with Quick edit, which re-filters from page 1 when shown again.
+        el.search.value = el.jsonSearch.value;
+        state.quickPage = 0;
+        clearTimeout(find.timer);
+        find.timer = setTimeout(() => {
+            runFind();
+            if (find.matches.length) revealMatch();
+        }, 120);
+    });
     el.jsonSearch.addEventListener("keydown", e => {
         if (e.key === "Enter") {
             e.preventDefault();
-            findInJson(e.shiftKey ? -1 : 1);
+            stepFind(e.shiftKey ? -1 : 1);
+        } else if (e.key === "Escape") {
+            el.jsonSearch.value = "";
+            el.search.value = "";
+            state.quickPage = 0;
+            runFind();
         }
     });
 

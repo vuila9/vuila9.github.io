@@ -130,7 +130,6 @@
 							<section id="save-editor" aria-label="Save file editor">
 
 								<!-- Step 1: pick a file -->
-								<p class="se-tagline">Open, edit and re-pack <b>.bin</b>, <b>.sav</b> and <b>.dat</b> game saves. Free, and your file never leaves your device.</p>
 								<div id="se-drop" class="se-drop" tabindex="0" role="button" aria-label="Choose a save file to open">
 									<svg class="se-drop-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0-12-4.5 4.5M12 3l4.5 4.5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
 									<p class="se-drop-title">Drop a save file here</p>
@@ -158,7 +157,6 @@
 										</div>
 									</div>
 									<ol id="se-chain" class="se-chain" aria-label="Detected file format, outermost layer first"></ol>
-									<p id="se-notice" class="se-notice"></p>
 
 									<div class="se-tabs" role="tablist">
 										<button class="se-tab" role="tab" data-tab="quick" type="button">Quick edit</button>
@@ -200,13 +198,20 @@
 									<!-- JSON: the whole document as editable text (add / remove fields here) -->
 									<div id="se-panel-json" class="se-panel" role="tabpanel">
 										<div class="se-toolbar">
-											<input id="se-json-search" class="se-input se-grow" type="text" placeholder="Find in JSON" aria-label="Find in JSON">
-											<button id="se-json-prev" class="se-btn se-btn-sm" type="button" aria-label="Previous match">&uarr;</button>
-											<button id="se-json-next" class="se-btn se-btn-sm" type="button" aria-label="Next match">&darr;</button>
+											<div class="se-find se-grow">
+												<input id="se-json-search" class="se-input" type="text" placeholder="Find in JSON (Ctrl+F)" aria-label="Find in JSON" aria-describedby="se-json-count">
+												<span id="se-json-count" class="se-findcount" aria-live="polite"></span>
+											</div>
+											<button id="se-json-prev" class="se-btn se-btn-sm" type="button" aria-label="Previous match" title="Previous match (Shift+Enter)">&uarr;</button>
+											<button id="se-json-next" class="se-btn se-btn-sm" type="button" aria-label="Next match" title="Next match (Enter)">&darr;</button>
 											<button id="se-json-apply" class="se-btn se-btn-primary" type="button" disabled>Apply changes</button>
 										</div>
 										<p id="se-json-status" class="se-status"></p>
-										<textarea id="se-json" class="se-code" spellcheck="false" wrap="off" aria-label="JSON document"></textarea>
+										<!-- Search highlights are drawn in #se-json-hl, behind the (transparent) textarea. -->
+										<div class="se-code-wrap">
+											<div id="se-json-hl" class="se-code-hl" aria-hidden="true"></div>
+											<textarea id="se-json" class="se-code" spellcheck="false" wrap="off" aria-label="JSON document"></textarea>
+										</div>
 									</div>
 
 									<!-- Text: payloads that are readable but not JSON -->
