@@ -8,13 +8,13 @@
 		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 		})(window,document,'script','dataLayer','GTM-NXVSDNVW');</script>
 		<!-- End Google Tag Manager -->
-		<title>Save File Editor Online - Edit .bin &amp; .sav Game Saves | Free</title>
+		<title>Save File Decoder - Read .bin &amp; .sav Game Saves as JSON</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 		<!-- ===== SEO / search & social metadata ===== -->
-		<meta name="description" content="Free online save file editor. Open a .bin, .sav or .dat game save, edit its values, convert it to JSON and download the re-packed file. Nothing is uploaded." />
-		<meta name="keywords" content="save file editor, save editor online, game save editor, bin file editor, edit .bin save file, sav file editor, save game editor, messagepack editor, msgpack to json, bin to json converter, save data editor, unity save editor" />
+		<meta name="description" content="Free online save file decoder. Open a .bin, .sav or .dat game save and see everything inside as readable values or JSON. Nothing is uploaded." />
+		<meta name="keywords" content="save file decoder, bin file decoder, decode .bin save file, bin to json converter, save file viewer, sav file viewer, game save decoder, messagepack decoder, msgpack to json, unity save decoder, save file editor, save editor online" />
 		<meta name="author" content="vuila9" />
 		<meta name="robots" content="index, follow, max-image-preview:large" />
 		<link rel="canonical" href="https://vuila9.github.io/projects/Save_Editor/Save_Editor.html" />
@@ -22,19 +22,19 @@
 		<!-- Open Graph (link previews on Facebook, Discord, iMessage, etc.) -->
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content="vuila9" />
-		<meta property="og:title" content="Save File Editor Online - Edit .bin & .sav Game Saves" />
-		<meta property="og:description" content="Open a game save, edit its values in a readable list, convert it to JSON, and download the re-packed file. Free, runs in your browser, nothing is uploaded." />
+		<meta property="og:title" content="Save File Decoder - Read .bin & .sav Game Saves as JSON" />
+		<meta property="og:description" content="Drop in a game save and see what's inside: every value as a searchable list, or the whole file as JSON. Free, runs in your browser, nothing is uploaded." />
 		<meta property="og:url" content="https://vuila9.github.io/projects/Save_Editor/Save_Editor.html" />
 		<meta property="og:image" content="https://vuila9.github.io/projects/Save_Editor/assets/img/og-image.png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
-		<meta property="og:image:alt" content="Save File Editor: open, edit and re-pack .bin / .sav game saves in your browser" />
+		<meta property="og:image:alt" content="Save File Decoder: read .bin / .sav game saves as JSON in your browser" />
 		<meta property="og:locale" content="en_US" />
 
 		<!-- Twitter card -->
 		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content="Save File Editor Online - Edit .bin & .sav Game Saves" />
-		<meta name="twitter:description" content="Open a game save, edit its values in a readable list, convert it to JSON, and download the re-packed file. Free, nothing is uploaded." />
+		<meta name="twitter:title" content="Save File Decoder - Read .bin & .sav Game Saves as JSON" />
+		<meta name="twitter:description" content="Drop in a game save and see what's inside: every value as a searchable list, or the whole file as JSON. Free, nothing is uploaded." />
 		<meta name="twitter:image" content="https://vuila9.github.io/projects/Save_Editor/assets/img/og-image.png" />
 
 		<!-- Structured data: a free web app, plus the FAQ shown on the page -->
@@ -42,23 +42,24 @@
 		{
 			"@context": "https://schema.org",
 			"@type": "WebApplication",
-			"name": "Save File Editor",
-			"alternateName": ["Online Save Editor", "Game Save Editor", "BIN Save File Editor"],
+			"name": "Save File Decoder",
+			"alternateName": ["Save File Viewer", "BIN to JSON Converter", "Game Save Decoder", "Save File Editor"],
 			"url": "https://vuila9.github.io/projects/Save_Editor/Save_Editor.html",
-			"description": "Free online save file editor. Open a .bin, .sav or .dat game save, edit its values in a readable list, convert it to JSON, and download the re-packed file. Runs entirely in the browser.",
+			"description": "Free online save file decoder. Open a .bin, .sav or .dat game save and see everything inside as a searchable list of values or as JSON. Runs entirely in the browser.",
 			"image": "https://vuila9.github.io/projects/Save_Editor/assets/img/og-image.png",
 			"applicationCategory": "UtilitiesApplication",
 			"operatingSystem": "Any (modern web browser)",
 			"browserRequirements": "Requires JavaScript",
 			"isAccessibleForFree": true,
 			"featureList": [
-				"Edit .bin, .sav and .dat game save files",
+				"Decode .bin, .sav and .dat game save files",
 				"Decode MessagePack (binary JSON) saves",
 				"Decompress GZip, zlib and Deflate saves",
 				"Decode Base64, hex text and XOR-scrambled saves",
 				"Convert a save file to JSON",
-				"Add or remove fields in JSON mode",
+				"Search and filter every value in the save",
 				"Hex view for unknown formats",
+				"Optional editing, with a warning for checksum-protected saves",
 				"Runs locally: files are never uploaded"
 			],
 			"author": { "@type": "Person", "name": "Khoa Xuan Nguyen", "url": "https://vuila9.github.io/" },
@@ -72,28 +73,28 @@
 			"mainEntity": [
 				{
 					"@type": "Question",
-					"name": "How do I open and edit a .bin save file?",
-					"acceptedAnswer": { "@type": "Answer", "text": "Drop the .bin file onto the Save File Editor page. It detects how the save is packed (MessagePack, JSON, GZip, Base64, XOR…) and lists every value with its path. Change the numbers, text or true/false values you want, then press Download file to get the edited save." }
+					"name": "How do I see what's inside a .bin save file?",
+					"acceptedAnswer": { "@type": "Answer", "text": "Drop the .bin file onto the Save File Decoder page. It detects how the save is packed (MessagePack, JSON, GZip, Base64, XOR…) and lists every value with its full path, which you can search and filter. The JSON tab shows the whole save as readable JSON." }
 				},
 				{
 					"@type": "Question",
 					"name": "Can I convert a .bin save file to JSON?",
-					"acceptedAnswer": { "@type": "Answer", "text": "Yes. Once the save is opened, press Export JSON to download a readable .json copy, or use the JSON tab to view and edit the whole file as JSON." }
+					"acceptedAnswer": { "@type": "Answer", "text": "Yes. Once the save is opened, press Export JSON to download a readable .json copy, or use the JSON tab to read the whole file as JSON." }
 				},
 				{
 					"@type": "Question",
 					"name": "Is my save file uploaded anywhere?",
-					"acceptedAnswer": { "@type": "Answer", "text": "No. The editor runs entirely in your browser with JavaScript. The file is read, decoded and rebuilt on your own device and never sent to a server." }
+					"acceptedAnswer": { "@type": "Answer", "text": "No. The decoder runs entirely in your browser with JavaScript. The file is read and decoded on your own device and never sent to a server." }
 				},
 				{
 					"@type": "Question",
 					"name": "Which save formats are supported?",
-					"acceptedAnswer": { "@type": "Answer", "text": "MessagePack (binary JSON, common in Unity and C# games), plain JSON in UTF-8 or UTF-16, and saves wrapped in GZip, zlib or Deflate compression, Base64 or hex text, single-byte XOR, or a binary header. Any other file can be edited byte by byte in the hex view." }
+					"acceptedAnswer": { "@type": "Answer", "text": "MessagePack (binary JSON, common in Unity and C# games), plain JSON in UTF-8 or UTF-16, and saves wrapped in GZip, zlib or Deflate compression, Base64 or hex text, single-byte XOR, or a binary header. Any other file can be inspected byte by byte in the hex view." }
 				},
 				{
 					"@type": "Question",
-					"name": "Why doesn't my game load the edited save?",
-					"acceptedAnswer": { "@type": "Answer", "text": "Some games protect their saves with real encryption or a checksum, so any change makes the game reject the file. Those saves can be viewed in the hex view but not edited safely. Always keep a backup of the original save." }
+					"name": "Can I edit the save and load it back into the game?",
+					"acceptedAnswer": { "@type": "Answer", "text": "Sometimes. You can change values and press Download file, and the decoder packs the save back the same way. But many games protect their saves with a checksum or encryption, and an edited copy is then rejected as corrupted. The decoder warns you when it finds a checksum field. Always keep a backup of the original save." }
 				}
 			]
 		}
@@ -119,7 +120,7 @@
 							<a href="https://vuila9.github.io/#main">
 								<button id="home-btn">&lt;&lt;</button>
 							</a>
-							<a><h1>Save File Editor</h1></a>
+							<a><h1>Save File Decoder</h1></a>
 						</div>
 					</header>
 
@@ -127,7 +128,7 @@
 					<div id="main">
 						<div class="inner">
 
-							<section id="save-editor" aria-label="Save file editor">
+							<section id="save-editor" aria-label="Save file decoder">
 
 								<!-- Step 1: pick a file -->
 								<div id="se-drop" class="se-drop" tabindex="0" role="button" aria-label="Choose a save file to open">
@@ -157,6 +158,8 @@
 										</div>
 									</div>
 									<ol id="se-chain" class="se-chain" aria-label="Detected file format, outermost layer first"></ol>
+									<!-- Shown only for saves with an integrity field (hash/checksum) the game verifies. -->
+									<p id="se-protect" class="se-warn" role="note" hidden></p>
 
 									<div class="se-tabs" role="tablist">
 										<button class="se-tab" role="tab" data-tab="quick" type="button">Quick edit</button>
@@ -244,18 +247,17 @@
 							</section>
 
 							<div>
-								<h2 class="submenu">Online save file editor</h2>
-								<p>A free save editor that runs entirely in your browser. Drop in a game save (<code>.bin</code>, <code>.sav</code>, <code>.dat</code> or <code>.json</code>) and it works out how the file is packed: MessagePack binary JSON, compressed with GZip or zlib, Base64 or hex encoded, XOR scrambled, or JSON inside a binary wrapper. It then shows every value, like gold, gems, levels, items and unlocks, as a searchable list you can edit in place. When you're done, it packs the file back the same way and you download a drop-in replacement. You can also convert the save to JSON.</p>
+								<h2 class="submenu">Online save file decoder</h2>
+								<p>A free save decoder that runs entirely in your browser. Drop in a game save (<code>.bin</code>, <code>.sav</code>, <code>.dat</code> or <code>.json</code>) and it works out how the file is packed: MessagePack binary JSON, compressed with GZip or zlib, Base64 or hex encoded, XOR scrambled, or JSON inside a binary wrapper. It then shows everything inside, like gold, gems, levels, items and unlocks, as a searchable list, or the whole save as readable JSON you can export. You can also change values and download a re-packed copy, though games that protect their saves with a checksum will reject edited files (the decoder warns you when it spots one).</p>
 							</div>
 
 							<div>
-								<h2 class="submenu">How to edit a save file</h2>
+								<h2 class="submenu">How to decode a save file</h2>
 								<ol class="se-howto">
-									<li><span class="effect-span"><b>Back up</b> the original save file and keep the copy somewhere safe.</span></li>
 									<li><span class="effect-span"><b>Drop the file</b> onto the box above, or click it to browse. The detected format (for example <code>MessagePack</code> or <code>GZip → JSON</code>) is shown at the top.</span></li>
-									<li><span class="effect-span"><b>Find the value</b> with the search box, or use <b>Show</b> to list only numbers, booleans or strings.</span></li>
-									<li><span class="effect-span"><b>Edit it</b> right in the list. Use the <b>JSON</b> tab to add or remove fields.</span></li>
-									<li><span class="effect-span"><b>Download file</b> and replace the original save with it. Use <b>Export JSON</b> for a readable copy.</span></li>
+									<li><span class="effect-span"><b>Find a value</b> with the search box, or use <b>Show</b> to list only numbers, booleans or strings.</span></li>
+									<li><span class="effect-span"><b>Read the whole save</b> in the <b>JSON</b> tab, or press <b>Export JSON</b> to download a readable copy.</span></li>
+									<li><span class="effect-span"><b>Optional, edit it:</b> change values in the list, then <b>Download file</b>. Back up the original first: checksum-protected saves won't load once edited.</span></li>
 								</ol>
 							</div>
 
@@ -267,16 +269,16 @@
 							</div>
 							<div class="expandable-content" id="faq-content">
 								<!-- Keep in sync with the FAQPage JSON-LD in <head>. -->
-								<h3 class="se-faq-q">How do I open and edit a .bin save file?</h3>
-								<p>Drop the .bin file onto the box at the top of this page. It detects how the save is packed (MessagePack, JSON, GZip, Base64, XOR…) and lists every value with its path. Change the numbers, text or true/false values you want, then press <b>Download file</b> to get the edited save.</p>
+								<h3 class="se-faq-q">How do I see what's inside a .bin save file?</h3>
+								<p>Drop the .bin file onto the Save File Decoder page. It detects how the save is packed (MessagePack, JSON, GZip, Base64, XOR…) and lists every value with its full path, which you can search and filter. The JSON tab shows the whole save as readable JSON.</p>
 								<h3 class="se-faq-q">Can I convert a .bin save file to JSON?</h3>
-								<p>Yes. Once the save is opened, press <b>Export JSON</b> to download a readable .json copy, or use the JSON tab to view and edit the whole file as JSON.</p>
+								<p>Yes. Once the save is opened, press <b>Export JSON</b> to download a readable .json copy, or use the JSON tab to read the whole file as JSON.</p>
 								<h3 class="se-faq-q">Is my save file uploaded anywhere?</h3>
-								<p>No. The editor runs entirely in your browser with JavaScript. The file is read, decoded and rebuilt on your own device and never sent to a server.</p>
+								<p>No. The decoder runs entirely in your browser with JavaScript. The file is read and decoded on your own device and never sent to a server.</p>
 								<h3 class="se-faq-q">Which save formats are supported?</h3>
-								<p>MessagePack (binary JSON, common in Unity and C# games), plain JSON in UTF-8 or UTF-16, and saves wrapped in GZip, zlib or Deflate compression, Base64 or hex text, single-byte XOR, or a binary header. Any other file can be edited byte by byte in the hex view.</p>
-								<h3 class="se-faq-q">Why doesn't my game load the edited save?</h3>
-								<p>Some games protect their saves with real encryption or a checksum, so any change makes the game reject the file. Those saves can be viewed in the hex view but not edited safely. Always keep a backup of the original save.</p>
+								<p>MessagePack (binary JSON, common in Unity and C# games), plain JSON in UTF-8 or UTF-16, and saves wrapped in GZip, zlib or Deflate compression, Base64 or hex text, single-byte XOR, or a binary header. Any other file can be inspected byte by byte in the hex view.</p>
+								<h3 class="se-faq-q">Can I edit the save and load it back into the game?</h3>
+								<p>Sometimes. You can change values and press Download file, and the decoder packs the save back the same way. But many games protect their saves with a checksum or encryption, and an edited copy is then rejected as corrupted. The decoder warns you when it finds a checksum field. Always keep a backup of the original save.</p>
 							</div>
 
 							<div class="container">
@@ -293,7 +295,8 @@
 									<li><span class="effect-span"><b>JSON mode</b>:&nbsp;the whole document as text, for adding or removing fields, array items or whole sections.</span></li>
 									<li><span class="effect-span"><b>Lossless round-trip</b>:&nbsp;a custom JSON parser keeps numbers exactly as written (<code>9931676.0</code> stays a float, 64-bit IDs keep every digit), along with key order, duplicate keys, escapes and the original indentation.</span></li>
 									<li><span class="effect-span"><b>Binary wrappers</b>:&nbsp;JSON stored between a binary header and footer is found automatically, and a length field in front of it (uint16/uint32 or C#'s 7-bit varint) is updated when the JSON grows or shrinks.</span></li>
-									<li><span class="effect-span"><b>Hex view</b>:&nbsp;files with an unknown format can still be edited byte by byte.</span></li>
+									<li><span class="effect-span"><b>Hex view</b>:&nbsp;files with an unknown format can still be inspected (and edited) byte by byte.</span></li>
+									<li><span class="effect-span"><b>Checksum warning</b>:&nbsp;saves with a top-level <code>hash</code> / <code>checksum</code> / <code>signature</code> fingerprint are flagged, since the game will reject an edited copy.</span></li>
 								</ul>
 							</div>
 
@@ -305,7 +308,7 @@
 							</div>
 							<div class="expandable-content" id="limitations-content">
 								<ul>
-									<li><span class="effect-span">Saves protected by real encryption (AES, etc.) or a checksum/signature can be viewed in hex but won't load in the game after editing.</span></li>
+									<li><span class="effect-span">Saves protected by a checksum/signature can be decoded and read, but won't load in the game after editing, because the decoder can't recalculate the game's fingerprint. Encrypted saves (AES, etc.) can only be viewed in hex.</span></li>
 									<li><span class="effect-span">Other binary serializers (Unity BinaryFormatter, Protobuf…) aren't decoded into fields yet; use the hex view.</span></li>
 									<li><span class="effect-span">Compressed layers are re-compressed by the browser, so the bytes differ from the original even when the content is identical. Games read it the same.</span></li>
 									<li><span class="effect-span">Always keep a backup of the original save.</span></li>

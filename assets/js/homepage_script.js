@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function() {
             link: "projects/CMD_Terminal_Simulator/CMD_Terminal_Simulator.html"
         },
         {
-            // Hub page grouping Save File Editor + Many mini-tools (like Games).
+            // Hub page grouping Save File Decoder + Many mini-tools (like Games).
             imageSrc: "projects/Tools/Tools_icon.svg",
             titleKey: "proj.tools.title",
             descKey: "proj.tools.desc",

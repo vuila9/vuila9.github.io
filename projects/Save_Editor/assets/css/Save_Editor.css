@@ -262,6 +262,28 @@
     gap: 8px;
 }
 
+/* Warning for saves with a checksum the game verifies (see findIntegrityField). */
+#save-editor .se-warn {
+    margin: 0 16px 12px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--se-warn);
+    border-radius: var(--se-radius);
+    background: #fdf3e1;
+    color: #6b4a10;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+#save-editor .se-warn b {
+    color: inherit;
+}
+#save-editor .se-warn code {
+    padding: 0 4px;
+    border-radius: 3px;
+    background: rgba(183, 121, 31, 0.15);
+    font-family: var(--se-mono);
+    font-size: 0.85em;
+}
+
 /* Detected layer chain: "Base64 → GZip → UTF-8 → JSON" */
 #save-editor .se-chain {
     display: flex;

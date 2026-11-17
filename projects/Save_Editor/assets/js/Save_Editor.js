@@ -1,5 +1,7 @@
 /*
- * Save_Editor.js — the editor UI.
+ * Save_Editor.js — UI of the "Save File Decoder" tool.
+ * (Shown to visitors as Save File Decoder; files and the URL keep the
+ * original Save_Editor name so existing links and search results still work.)
  *
  * Flow: a file is dropped / picked → SaveCodec.analyze() works out its layers
  * and payload → the payload is shown in the matching tabs:
@@ -30,6 +32,7 @@
         filename: $("se-filename"),
         filesize: $("se-filesize"),
         chain: $("se-chain"),
+        protect: $("se-protect"),
         download: $("se-download"),
         exportJson: $("se-export-json"),
         reset: $("se-reset"),
@@ -125,7 +128,7 @@
     async function loadFile(file) {
         if (!file) return;
         if (file.size > MAX_FILE_BYTES) {
-            showError(`That file is ${formatBytes(file.size)}. The editor handles files up to ${formatBytes(MAX_FILE_BYTES)}.`);
+            showError(`That file is ${formatBytes(file.size)}. The decoder handles files up to ${formatBytes(MAX_FILE_BYTES)}.`);
             return;
         }
         try {
@@ -165,7 +168,9 @@
             hexPage: 0,
             hexFocus: -1,
             hexBytes: null,
-            unsaved: false
+            unsaved: false,
+            protection: null,       // integrity field found in the save (see findIntegrityField)
+            protectionAcked: false  // user already confirmed downloading an edited protected save
         });
         if (doc.kind === "json") {
             // Strings that hold a JSON document (e.g. "ab_data": "{\"…\"}") become real,
@@ -223,7 +228,60 @@
 
         el.chain.replaceChildren(...SaveCodec.describe(doc).map(label => make("li", "se-chip", label)));
 
+        state.protection = doc.kind === "json" ? findIntegrityField(doc.root) : null;
+        renderProtectionWarning();
+
         el.exportJson.hidden = doc.kind !== "json";
+    }
+
+    // ---------------------------------------------------------------- integrity-protected saves
+    //
+    // Some games store a fingerprint of the save next to the data, e.g.
+    //   { version, salt, time, data, hash: "45-B3-3D-…" }
+    // and refuse to load the file if it no longer matches. The recipe usually
+    // involves a secret inside the game, so this editor can't recalculate it —
+    // edits download fine but the game reports the file as corrupted. Detect
+    // such a field so the user is told up front instead of finding out in-game.
+
+    const INTEGRITY_KEYS = new Set([
+        "hash", "checksum", "check_sum", "crc", "crc32", "md5", "sha1", "sha256", "sha512",
+        "signature", "sig", "digest", "hmac", "mac"
+    ]);
+    // Typical digest sizes in bytes: CRC32, MD5, SHA-1, SHA-256, SHA-512.
+    const DIGEST_BYTES = new Set([4, 16, 20, 32, 64]);
+
+    /** Does this value look like a digest (hex / Base64 text, raw bytes, or a CRC number)? */
+    function looksLikeDigest(node, key) {
+        if (node.t === "str") {
+            const hex = node.v.replace(/[-:\s]/g, "");
+            if (/^[0-9a-f]+$/i.test(hex) && DIGEST_BYTES.has(hex.length / 2)) return true;
+            const b64 = node.v.trim();
+            return /^[A-Za-z0-9+/]+={0,2}$/.test(b64) && DIGEST_BYTES.has(Math.floor((b64.replace(/=+$/, "").length * 3) / 4));
+        }
+        if (node.t === "bin") return DIGEST_BYTES.has(node.bytes.length);
+        // A bare number only counts for CRC-style keys.
+        return node.t === "num" && /^(crc|crc32|checksum|check_sum)$/i.test(key) && /^\d+$/.test(node.raw);
+    }
+
+    /** First top-level key that holds a save fingerprint, or null. */
+    function findIntegrityField(root) {
+        if (root.t !== "obj") return null;
+        const entry = root.entries.find(e => INTEGRITY_KEYS.has(e.k.toLowerCase()) && looksLikeDigest(e.v, e.k));
+        return entry ? { key: entry.k } : null;
+    }
+
+    function renderProtectionWarning() {
+        const protection = state.protection;
+        el.protect.hidden = !protection;
+        if (!protection) return;
+        const key = make("code", "", protection.key);
+        el.protect.replaceChildren(
+            make("b", "", "This save is protected by a checksum. "),
+            document.createTextNode("Its top-level "), key,
+            document.createTextNode(" field is a fingerprint of the data that the game checks when loading. " +
+                "This decoder can't recalculate it, so the game will most likely report an edited copy as corrupted. " +
+                "Keep a backup of the original.")
+        );
     }
 
     // ================================================================ tabs
@@ -804,6 +862,15 @@
         if (state.jsonDirty && !applyJson()) {
             showTab("json");
             return;
+        }
+        // Edited + checksum-protected: make sure the user knows before they swap the file in.
+        if (state.protection && isDirty() && !state.protectionAcked) {
+            const ok = window.confirm(
+                `This save has a "${state.protection.key}" checksum that this decoder can't update, ` +
+                "so the game will most likely reject the edited file as corrupted.\n\nDownload it anyway?"
+            );
+            if (!ok) return;
+            state.protectionAcked = true;
         }
         try {
             const bytes = await SaveCodec.build(state.doc);
