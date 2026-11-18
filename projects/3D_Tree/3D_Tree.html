@@ -13,8 +13,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
 		<!-- ===== SEO / search & social metadata ===== -->
-		<meta name="description" content="An interactive 3D tree created with Meshy AI. Post your memes and messages right onto it for everyone to see, on desktop or mobile." />
-		<meta name="keywords" content="3d tree, meshy ai, 3d model, low poly tree, optimized 3d model, web 3d viewer" />
+		<meta name="description" content="Pin a meme, an image or a text sign onto a 3D tree and see what everyone else has put up. A reviewed, live community board built with three.js and Cloudflare." />
+		<meta name="keywords" content="3d tree, community board, meme board, three.js, cloudflare workers, durable objects, websocket, discord moderation" />
 		<meta name="author" content="vuila9" />
 		<meta name="robots" content="index, follow" />
 		<link rel="canonical" href="https://vuila9.github.io/projects/3D_Tree/3D_Tree.html" />
@@ -22,8 +22,8 @@
 		<!-- Open Graph (link previews on Facebook, Discord, iMessage, etc.) -->
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content="vuila9" />
-		<meta property="og:title" content="3D Tree - Meshy AI model, optimized for the web" />
-		<meta property="og:description" content="A 3D tree created with Meshy AI. Post your memes and messages right onto it for everyone to see." />
+		<meta property="og:title" content="3D Tree - a community meme board shaped like a tree" />
+		<meta property="og:description" content="Pin a meme, an image or a text sign onto a 3D tree and see what everyone else has put up. Every post is reviewed before it goes up." />
 		<meta property="og:url" content="https://vuila9.github.io/projects/3D_Tree/3D_Tree.html" />
 
 		<link rel="stylesheet" href="../../assets/css/main.css" />
@@ -58,6 +58,9 @@
 					<div id="main">
 						<div class="inner">
 
+							<!-- Intro -->
+							<p class="tree-intro">Pin a meme, an image or a text sign onto a 3D tree, and see what everyone else has put up. Every post is reviewed before it goes up. This project is still a work in progress.</p>
+
 							<!-- Viewer: 16:9 on desktop, Flappy Bird portrait ratio on mobile -->
 							<div id="tree-stage">
 								<div id="tree-frame">
@@ -72,25 +75,58 @@
 								<p class="tree-hint">Drag to rotate, scroll or pinch to zoom.</p>
 							</div>
 
-							<div>
-								<span class="submenu">Description</span>
-								<p>Me messing around with Meshy AI to generate a free 3D tree model, then
-									downscaling and optimizing it so it loads smoothly in the browser, on
-									both desktop and mobile.</p>
+							<div class="container">
+								<div class="submenu">Description</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('description-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="description-content">
+								<p>3D Tree is a community notice board shaped like a tree, embedded into this portfolio through an iframe. You don't need an account. Spin the tree, zoom in on any post, and react to it with a 👍 or 👎. Anyone can submit an image or a short text sign to the Memes or Wisdom board. Each submission is sent to my Discord for review, and once I approve it, it appears on the tree for everyone at once, with no refresh needed. Posts wrap around the trunk like real posters, and the tree grows taller as more posts are added. If yours wasn't approved, you'll find out why the next time you visit.</p>
 							</div>
 
 							<div class="container">
-								<div class="submenu">Background</div>
+								<div class="submenu">How it works</div>
 								<div>
-									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('background-content')">&#9660;</button>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('how-content')">&#9660;</button>
 								</div>
 							</div>
-							<div class="expandable-content" id="background-content">
-								<p>This is a small, working slice of a much bigger project that's still in progress. The tree model was generated with Meshy AI. The original file weighed 21MB; I downscaled it to 433KB, and the difference in detail is barely noticeable.</p>
-								<p>The background is a flat 2D image generated with ChatGPT. I upscaled it with Upscayl to add detail, then scaled it back down to its current size. AI upscalers tend to leave small artifacts: over-sharpened edges, repeating textures, and odd detail in flat areas like grass and flowers. Shrinking a larger image averages several pixels into each final pixel, which smooths those artifacts out. Rendering big and scaling down (supersampling) gives a cleaner result than generating at the target size directly.</p>
-								<p>The clouds are all the same 2D WebP image. Each copy gets its own opacity and horizontal stretch, so they look like many different clouds even though there's only one.</p>
-								<p>To make this simple version feel more alive, I added a cinematic tour: the camera pans around the scene on its own, an idea borrowed from my favorite childhood game, Heroes of Might and Magic V.</p>
-								<p>There's more to come. I'm turning this into a community project where every visitor can leave something behind before they go, so stay tuned.</p>
+							<div class="expandable-content" id="how-content">
+								<p>The app runs on Cloudflare at its own address, <a href="https://pole.3d-obj.workers.dev/" target="_blank" rel="noopener noreferrer"><code>pole.3d-obj.workers.dev</code></a>; this page only embeds it. The 3D scene is built with three.js: a single tree model, with each post laid onto the trunk's curved surface so it hugs the bark. Images are resized and compressed in your browser before they're sent, which also strips their metadata, such as camera details and location.</p>
+								<p>Everything else runs on Cloudflare. Images are stored in R2, and a single Durable Object holds the boards, the review queue and the reaction counts. It also keeps a live WebSocket connection open to every viewer, so new posts, likes and edits show up on every open page within a moment.</p>
+								<p>Reviews happen on Discord. Each submission arrives in a private channel with the image, its details, and any existing posts it looks like. I approve it onto a board, or reject it with a reason, using buttons on the message. Uploads are checked for duplicates using an image fingerprint that still matches mirrored and rotated copies.</p>
+								<p>To keep things fair, every submission must pass Cloudflare Turnstile. Each visitor can have only one post waiting for review at a time, and the queue has an overall cap. Visitors are told apart by a salted, hashed IP address; no address is stored as-is. Nicknames are checked against a reserved list and a banned list. The embed only loads on approved domains.</p>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Features</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('features-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="features-content">
+								<ul>
+									<li><span class="effect-span"><b>No account needed</b>:&nbsp;browse, react and submit straight from the page.</span></li>
+									<li><span class="effect-span"><b>Real 3D posts</b>:&nbsp;images and text signs wrap around the trunk, and the tree grows to make room for more.</span></li>
+									<li><span class="effect-span"><b>Live updates</b>:&nbsp;new posts and reactions appear for everyone instantly, with a notice and a button to jump to the new post.</span></li>
+									<li><span class="effect-span"><b>Reviewed submissions</b>:&nbsp;every post is approved or rejected on Discord, and visitors are told the outcome, with a reason if rejected.</span></li>
+									<li><span class="effect-span"><b>Reactions</b>:&nbsp;👍 and 👎 on every post, or double-tap a post for a quick like, limited to once per post every 5 minutes.</span></li>
+									<li><span class="effect-span"><b>Easy to explore</b>:&nbsp;arrow keys, swipe to the next post, find a post by its ID, and a Cinematic mode that tours the tree on its own.</span></li>
+								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Future Improvements</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('future-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="future-content">
+								<ul>
+									<li><span class="effect-span"><b>More reactions</b>:&nbsp;add a few emotes alongside 👍 and 👎.</span></li>
+									<li><span class="effect-span"><b>Discord commands</b>:&nbsp;manage posts (find, delete, add context) with slash commands straight from Discord.</span></li>
+									<li><span class="effect-span"><b>Better iPhone support</b>:&nbsp;a long press on a post doesn't open its menu yet on iOS Safari.</span></li>
+								</ul>
 							</div>
 				<!--END-->
 						</div>
