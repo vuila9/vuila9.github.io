@@ -8,11 +8,13 @@
     width: 100%;
 }
 
-/* Viewer box. Desktop: 16:9, as wide as the content column allows while still
-   fitting the viewport height. */
+/* Viewer box. Desktop: 16:9, allowed to grow past the content column (the
+   centred flex parent lets it overflow evenly on both sides) up to the
+   viewport width, while still fitting the viewport height. */
 #tree-frame {
     position: relative;
-    width: min(100%, calc((100vh - 220px) * 16 / 9));
+    flex-shrink: 0;
+    width: max(100%, min(calc(100vw - 4rem), calc((100vh - 110px) * 16 / 9)));
     aspect-ratio: 16 / 9;
     background: #1f2a24;
     border-radius: 6px;
