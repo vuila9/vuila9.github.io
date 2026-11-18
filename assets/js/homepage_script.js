@@ -18,7 +18,10 @@ document.addEventListener("DOMContentLoaded", function() {
             imageSrc: "projects/3D_Tree/apple-touch-icon.png",
             titleKey: "proj.tree3d.title",
             descKey: "proj.tree3d.desc",
-            link: "projects/3D_Tree/3D_Tree.html"
+            link: "projects/3D_Tree/3D_Tree.html",
+            // Optional corner badge (i18n key). Delete this line to remove it —
+            // and the matching .tile-badge span on the static tile in index.html.
+            badgeKey: "badge.newUpdate"
         },
         {
             imageSrc: "projects/Talk2Me/Talk2Me_icon.svg",
@@ -154,6 +157,14 @@ document.addEventListener("DOMContentLoaded", function() {
             anchor.appendChild(contentDiv);
             article.appendChild(span);
             article.appendChild(anchor);
+
+            // Optional "New update"-style corner badge
+            if (data.badgeKey) {
+                const badge = document.createElement("span");
+                badge.className = "tile-badge";
+                badge.textContent = tr(data.badgeKey);
+                article.appendChild(badge);
+            }
 
             // Append the article to the section
             section.appendChild(article);

@@ -1,7 +1,7 @@
 // 3D Tree — mounts the embedded model viewer and wires up fullscreen.
 
 // Paste the embed link here. Leave empty to show the placeholder.
-const TREE_EMBED_URL = "https://pole-display.3d-obj.workers.dev/";
+const TREE_EMBED_URL = "https://pole.3d-obj.workers.dev/";
 
 (function () {
     const frame = document.getElementById("tree-frame");
@@ -15,7 +15,8 @@ const TREE_EMBED_URL = "https://pole-display.3d-obj.workers.dev/";
         iframe.src = TREE_EMBED_URL;
         iframe.title = "3D Tree model viewer";
         iframe.loading = "lazy";
-        iframe.allow = "fullscreen; autoplay; xr-spatial-tracking";
+        // clipboard-read/write lets the embed's Paste image / Copy image buttons work.
+        iframe.allow = "fullscreen; autoplay; xr-spatial-tracking; clipboard-read; clipboard-write";
         iframe.allowFullscreen = true;
         frame.insertBefore(iframe, frame.firstChild);
         placeholder.remove();

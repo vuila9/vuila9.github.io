@@ -165,7 +165,8 @@ const translations = {
         "proj.talk2me.title": "Talk2Me",
         "proj.talk2me.desc": "A live chat room embedded from its own domain - message me and I reply in real time from Discord.",
         "proj.tree3d.title": "3D Tree",
-        "proj.tree3d.desc": "A free tree model generated with Meshy AI, then downscaled and optimized so it loads smoothly in the browser.",
+        "badge.newUpdate": "New update",
+        "proj.tree3d.desc": "A 3D tree created with Meshy AI. Post your memes and messages right onto it for everyone to see.",
 
         // --- Language toggle ---
         "toggle.label": "Tiếng Việt",
@@ -282,7 +283,8 @@ const translations = {
         "proj.talk2me.title": "Talk2Me",
         "proj.talk2me.desc": "Một phòng chat trực tiếp được nhúng từ tên miền riêng - hãy nhắn tin cho tôi và tôi sẽ trả lời trực tiếp qua Discord.",
         "proj.tree3d.title": "3D Tree",
-        "proj.tree3d.desc": "Một mô hình cây miễn phí được tạo bằng Meshy AI, sau đó giảm dung lượng và tối ưu hóa để tải mượt mà trên trình duyệt.",
+        "badge.newUpdate": "Mới cập nhật",
+        "proj.tree3d.desc": "Một cây 3D được tạo bằng Meshy AI. Hãy đăng meme và lời nhắn của bạn lên cây để mọi người cùng xem.",
 
         // --- Language toggle ---
         "toggle.label": "English",
