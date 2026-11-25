@@ -52,6 +52,7 @@
       c.height = im.naturalHeight;
       c.getContext("2d").drawImage(im, 0, 0);
       IMG[key] = c;
+      if (key === "button_play") IMG.button_board = makeBoardButton(c);
       if (++loaded >= toLoad) ready = true;
     };
     im.src = ASSETS.sprites[k];
@@ -183,7 +184,7 @@
   let medalIdx = -1, scoreReveal = 0;
 
   // ---- online leaderboard (Cloudflare Worker: github.com/vuila9/Flappy-Bird-Leaderboard) ----
-  // An empty LB_API turns the leaderboard off: no requests, no trophy button.
+  // An empty LB_API turns the leaderboard off: no requests, no podium button.
   // On a localhost page it talks to the Worker running under `wrangler dev`.
   const LB_LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   const LB_API = LB_LOCAL ? "http://localhost:8787"
@@ -193,6 +194,7 @@
   // { score, tokenP, submitted, submitting, rank, at, status }
   let pendingRun = null;
   let lbOnRunUpdate = () => {};   // set by the leaderboard panel to redraw itself
+  let openHallOfFame = () => {};  // set by the leaderboard panel; the podium button calls it
 
   function lbPost(path, body) {
     return fetch(LB_API + path, {
@@ -312,23 +314,31 @@
     if (state === STATE.DEAD && deadTimer > 30) { play("swoosh"); reset(); }
   }
 
-  // Hit-test a pointer event against the on-canvas Play button (game-over panel).
-  function onPlayButton(e) {
-    const im = IMG["button_play"]; if (!im) return false;
+  // Hit-test a pointer event against the game-over buttons: "play", "board" or null.
+  function gameOverButtonAt(e) {
+    const im = IMG["button_play"]; if (!im) return null;
     const rect = cvs.getBoundingClientRect();
     const pt = (e.touches && e.touches[0]) ? e.touches[0] : e;
     const wx = (pt.clientX - rect.left) / rect.width * GW;
     const wy = (pt.clientY - rect.top) / rect.height * GH;
-    const cx = GW / 2, cy = ay(300), pad = 6;   // small pad for easier tapping
-    return wx >= cx - im.width / 2 - pad && wx <= cx + im.width / 2 + pad
-        && wy >= cy - im.height / 2 - pad && wy <= cy + im.height / 2 + pad;
+    const b = gameOverButtons(), pad = 6;   // small pad for easier tapping
+    const hit = (cx) => cx != null
+      && wx >= cx - im.width / 2 - pad && wx <= cx + im.width / 2 + pad
+      && wy >= b.y - im.height / 2 - pad && wy <= b.y + im.height / 2 + pad;
+    return hit(b.play) ? "play" : hit(b.board) ? "board" : null;
   }
 
   // Only react to taps/keys when the game has focus, so page scrolling still works.
-  // On game over, only a tap on the Play button restarts — taps elsewhere do nothing.
+  // On game over, only the buttons react: Play restarts, the podium opens the
+  // Hall of Fame (once the buttons have appeared). Taps elsewhere do nothing.
   function onTap(e) {
     e.preventDefault();
-    if (state === STATE.DEAD) { if (onPlayButton(e)) tryRestart(); return; }
+    if (state === STATE.DEAD) {
+      const btn = gameOverButtonAt(e);
+      if (btn === "play") tryRestart();
+      else if (btn === "board" && deadTimer > 20) openHallOfFame();
+      return;
+    }
     flap();
   }
   cvs.addEventListener("touchstart", onTap, { passive: false });
@@ -437,6 +447,70 @@
     const w = im.width * (scale || 1), h = im.height * (scale || 1);
     ctx.drawImage(im, cx - w / 2, cy - h / 2, w, h);
   }
+
+  // The Hall of Fame button for the game-over screen, built once from the Play
+  // button so the frame, outline and shading match exactly: the green triangle is
+  // painted over with the face colours and a podium (places 3-1-2) drawn in its
+  // place, in the same 2px "art pixels" as the sprite.
+  function makeBoardButton(play) {
+    const c = document.createElement("canvas");
+    c.width = play.width; c.height = play.height;
+    const g = c.getContext("2d");
+    g.drawImage(play, 0, 0);
+    // Bounding box of the triangle (the sprite's only green pixels).
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    let x0 = c.width, x1 = -1, y0 = c.height, y1 = -1;
+    for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+      const k = (y * c.width + x) * 4;
+      if (d[k + 3] && d[k + 1] > 120 && d[k] < 60 && d[k + 2] < 120) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+    }
+    // The face is #fafafa above y = 30 and #ededed below it.
+    if (x1 >= 0) {
+      const SPLIT = 30;
+      g.fillStyle = "#fafafa"; g.fillRect(x0, y0, x1 - x0 + 1, Math.max(0, SPLIT - y0));
+      g.fillStyle = "#ededed"; g.fillRect(x0, SPLIT, x1 - x0 + 1, Math.max(0, y1 - SPLIT + 1));
+    }
+    // Podium: one flat coral silhouette, no outlines (so no lines between the steps),
+    // 3rd place on the left, 1st in the middle, 2nd on the right, standing on the
+    // face's bottom edge. Sizes are in 2px art pixels.
+    const P = 2, FILL = "#f7714f", INK = "#fff3ec";
+    const DIGITS = {   // 3x5 pixel glyphs
+      1: [".#.", "##.", ".#.", ".#.", ".#."],
+      2: ["##.", "..#", ".#.", "#..", "###"],
+      3: ["##.", "..#", ".#.", "..#", "##."],
+    };
+    const base = 50;                 // the face's bottom edge (the tan line starts here)
+    const SIDE_W = 9 * P, MID_W = 12 * P, SIDE_H = 9 * P, MID_H = 15 * P;
+    const left = Math.round(c.width / 2 - (2 * SIDE_W + MID_W) / 2);
+    const blocks = [
+      { place: 3, x: left, w: SIDE_W, h: SIDE_H, digitTop: 2 },
+      { place: 1, x: left + SIDE_W, w: MID_W, h: MID_H, digitTop: 3 },
+      { place: 2, x: left + SIDE_W + MID_W, w: SIDE_W, h: SIDE_H, digitTop: 2 },
+    ];
+    g.fillStyle = FILL;
+    for (const b of blocks) g.fillRect(b.x, base - b.h, b.w, b.h);
+    g.fillStyle = INK;
+    for (const b of blocks) {
+      const gx = b.x + Math.round((b.w - 3 * P) / 2), gy = base - b.h + b.digitTop * P;
+      DIGITS[b.place].forEach((row, j) => {
+        for (let i = 0; i < 3; i++) if (row[i] === "#") g.fillRect(gx + i * P, gy + j * P, P, P);
+      });
+    }
+    return c;
+  }
+
+  // Game-over buttons: Play, and with a leaderboard the Hall of Fame button beside it.
+  // Returns their centres; both are the Play sprite's size.
+  const OVER_BTN_GAP = 16;
+  function gameOverButtons() {
+    const w = IMG["button_play"] ? IMG["button_play"].width : 0;
+    const off = LB_API ? (w + OVER_BTN_GAP) / 2 : 0;
+    return { y: ay(300), play: GW / 2 - off, board: LB_API ? GW / 2 + off : null };
+  }
+  // A score waiting for a submit by hand: the Hall of Fame button bobs to say so.
+  const boardPending = () => !!pendingRun && !pendingRun.submitted && !pendingRun.submitting;
 
   // Twinkling 4-point sparkles for high-tier medals (sapphire+). t = frame count.
   function drawSparkle(cx, cy, r) {
@@ -579,7 +653,13 @@
           if (medalIdx >= 4) drawSparkles(px - 66, py + 2, frames);
           drawMedalLabel(medalIdx, px - 66, py + 37);
         }
-        drawCentered("button_play", GW / 2, ay(300), 1);
+        const btn = gameOverButtons();
+        drawCentered("button_play", btn.play, btn.y, 1);
+        if (btn.board != null) {
+          // Bob gently while the last run's score is waiting to be submitted.
+          const bob = boardPending() ? Math.round(Math.abs(Math.sin(frames / 9)) * -4) : 0;
+          drawCentered("button_board", btn.board, btn.y + bob, 1);
+        }
       }
     }
     // hit flash
@@ -843,22 +923,11 @@
       else pauseGame();
     });
 
-    // ---- online leaderboard: trophy button + Hall of Fame panel ----
+    // ---- online leaderboard: Hall of Fame panel, opened from the game-over screen's
+    // podium button (drawn on the canvas, see drawGameOverButtons()).
     // Only static strings go through innerHTML; everything from the server is set
     // with textContent, so a name can never inject HTML into the page.
-    let trophy = null;
     if (LB_API) {
-      const TROPHY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
-        + '<path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63'
-        + ' 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7'
-        + 'c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>';
-      trophy = document.createElement("button");
-      trophy.type = "button";
-      trophy.className = "flappy-gear flappy-trophy";
-      trophy.setAttribute("aria-label", "Hall of Fame");
-      trophy.innerHTML = TROPHY_SVG;
-      trophy.style.display = "none";
-
       const CLOSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"'
         + ' stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>';
       const lbOverlay = document.createElement("div");
@@ -882,7 +951,6 @@
           + '</form>'
           + '<div class="flappy-lb-status" aria-live="polite"></div>'
         + '</div>';
-      frame.appendChild(trophy);
       frame.appendChild(lbOverlay);
 
       const list = lbOverlay.querySelector(".flappy-lb-list");
@@ -1077,7 +1145,7 @@
         lbOverlay.classList.remove("open");
         paused = false;
       }
-      trophy.addEventListener("click", openLb);
+      openHallOfFame = openLb;
       lbOverlay.querySelector(".flappy-lb-x").addEventListener("click", closeLb);
       lbOverlay.addEventListener("click", (e) => { if (e.target === lbOverlay) closeLb(); });
       window.addEventListener("keydown", (e) => {
@@ -1099,22 +1167,15 @@
       });
     }
 
-    // Gear (+ trophy) on menu/game-over, pause during play, none while a panel is
-    // open or the countdown is running. Guarded so the DOM is touched only on change.
-    let mode = "", trophyPending = false;
+    // Gear on menu/game-over, pause during play, none while a panel is open or the
+    // countdown is running. Guarded so the DOM is touched only on change.
+    let mode = "";
     syncChrome = function () {
-      // The trophy pulses while the last run's score is waiting for a submit by hand.
-      const pending = !!pendingRun && !pendingRun.submitted && !pendingRun.submitting;
-      if (trophy && pending !== trophyPending) {
-        trophyPending = pending;
-        trophy.classList.toggle("flappy-trophy-pending", pending);
-      }
       const next = (paused || countdown > 0) ? "none" : (state === STATE.PLAY ? "pause" : "gear");
       if (next === mode) return;
       mode = next;
       gear.style.display = next === "gear" ? "flex" : "none";
       pauseBtn.style.display = next === "pause" ? "flex" : "none";
-      if (trophy) trophy.style.display = next === "gear" ? "flex" : "none";
     };
     syncChrome();
   })();
