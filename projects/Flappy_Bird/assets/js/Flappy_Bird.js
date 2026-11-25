@@ -60,7 +60,7 @@
   // ---- user settings (persisted in localStorage) ----
   // Shown in the Options panel to confirm a deploy is live. Bump this together
   // with CACHE in sw.js so the number always matches the service-worker version.
-  const APP_VERSION = "0.40";
+  const APP_VERSION = "0.41";
 
   const settings = {
     muted: localStorage.getItem("fb_muted") === "1",
@@ -182,6 +182,29 @@
   let deadTimer = 0, flashAlpha = 0;
   let medalIdx = -1, scoreReveal = 0;
 
+  // ---- online leaderboard (Cloudflare Worker: github.com/vuila9/Flappy-Bird-Leaderboard) ----
+  // An empty LB_API turns the leaderboard off: no requests, no trophy button.
+  // On a localhost page it talks to the Worker running under `wrangler dev`.
+  const LB_LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const LB_API = LB_LOCAL ? "http://localhost:8787"
+    : "";   // after `wrangler deploy`: "https://flappy-leaderboard.<subdomain>.workers.dev"
+  let runTokenP = null;   // Promise<string|null>: the current run's token from POST /start
+  let pendingRun = null;  // { score, tokenP, submitted }: last finished run, kept until the next starts
+
+  function lbPost(path, body) {
+    return fetch(LB_API + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body || {}),
+    }).then((r) => r.json().then((data) => ({ ok: r.ok, status: r.status, data })));
+  }
+
+  // Keyboard shortcuts must not fire while the player types their name.
+  function isTyping(e) {
+    const t = e.target;
+    return !!t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
+  }
+
   // Map an original-layout y (designed for the 512-tall world) into the current
   // world: the playfield is pinned to the bottom and the extra height becomes sky
   // on top. This keeps the bird, pipe-gap band, and UI identical to the original
@@ -202,7 +225,15 @@
     initAudio();
     if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
     ensureShake();   // re-attach shake-to-pause if it was enabled in a prior session
-    if (state === STATE.READY) { state = STATE.PLAY; bird.vy = FLAP; play("wing"); }
+    if (state === STATE.READY) {
+      state = STATE.PLAY; bird.vy = FLAP; play("wing");
+      // A new run starts: drop the last run's unsubmitted score and ask the server
+      // for this run's token (it times the run with its own clock). Never blocks play.
+      pendingRun = null;
+      runTokenP = LB_API
+        ? lbPost("/start").then((r) => (r.ok ? r.data.token : null)).catch(() => null)
+        : null;
+    }
     else if (state === STATE.PLAY) { bird.vy = FLAP; bird.rot = -25; play("wing"); }
   }
 
@@ -232,8 +263,9 @@
   cvs.addEventListener("touchstart", onTap, { passive: false });
   cvs.addEventListener("mousedown", onTap);
   window.addEventListener("keydown", e => {
-    if (e.code !== "Space") return;
+    if (e.code !== "Space" || isTyping(e)) return;
     e.preventDefault();
+    if (paused) return;   // a panel is open: don't flap or restart behind it
     if (state === STATE.DEAD) tryRestart(); else flap();
   });
 
@@ -251,6 +283,10 @@
     state = STATE.DEAD; deadTimer = 0; flashAlpha = 1; play("hit");
     setTimeout(() => play("die"), 250);
     if (score > best) { best = score; localStorage.setItem("fb_best", best); }
+    // Submittable from the game-over and READY screens until the next run starts.
+    pendingRun = (score > 0 && runTokenP)
+      ? { score, tokenP: runTokenP, submitted: false, rank: null, at: Date.now() } : null;
+    runTokenP = null;
     // Medal reflects THIS run's score. Sprite indices aren't in tier order:
     // medals_0=platinum, _1=gold, _2=silver, _3=bronze (original art), and
     // _4..9 = sapphire/diamond/emerald/ruby/obsidian/radiant (generated).
@@ -537,7 +573,7 @@
     // frame so it's unreachable while active. (Real fullscreen also exits on Esc
     // natively; this additionally covers the iOS CSS fake-fullscreen.)
     window.addEventListener("keydown", function (e) {
-      if (e.code !== "Escape") return;
+      if (e.code !== "Escape" || isTyping(e)) return;
       if (document.fullscreenElement && exit) exit.call(document);
       else if (wrap.classList.contains("flappy-fake-fullscreen")) exitFakeFullscreen();
     });
@@ -723,21 +759,233 @@
     requestPause = pauseGame;   // let resize() auto-pause on a viewport reshape
     // P key toggles pause / resume during play.
     window.addEventListener("keydown", (e) => {
-      if (e.code !== "KeyP") return;
+      if (e.code !== "KeyP" || isTyping(e)) return;
       e.preventDefault();
       if (pauseOverlay.classList.contains("open")) resumeGame();
       else pauseGame();
     });
 
-    // Gear on menu/game-over, pause during play, neither while a panel is open or
-    // the countdown is running. Guarded so the DOM is touched only on change.
-    let mode = "";
+    // ---- online leaderboard: trophy button + LEADERBOARD panel ----
+    // Only static strings go through innerHTML; everything from the server is set
+    // with textContent, so a name can never inject HTML into the page.
+    let trophy = null;
+    if (LB_API) {
+      const TROPHY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'
+        + '<path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63'
+        + ' 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7'
+        + 'c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>';
+      trophy = document.createElement("button");
+      trophy.type = "button";
+      trophy.className = "flappy-gear flappy-trophy";
+      trophy.setAttribute("aria-label", "Leaderboard");
+      trophy.innerHTML = TROPHY_SVG;
+      trophy.style.display = "none";
+
+      const CLOSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"'
+        + ' stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>';
+      const lbOverlay = document.createElement("div");
+      lbOverlay.className = "flappy-settings-overlay";
+      lbOverlay.innerHTML =
+        '<div class="flappy-lb-panel" role="dialog" aria-label="Leaderboard">'
+          + '<button type="button" class="flappy-lb-x" aria-label="Close">' + CLOSE_SVG + '</button>'
+          + '<div class="flappy-lb-title">LEADERBOARD</div>'
+          + '<div class="flappy-lb-row flappy-lb-head" aria-hidden="true">'
+            + '<span>PLACE</span><span>NAME</span><span>DATE</span><span>SCORE</span></div>'
+          + '<div class="flappy-lb-body">'
+            + '<ol class="flappy-lb-list"></ol>'
+            + '<div class="flappy-lb-note"></div>'
+          + '</div>'
+          + '<div class="flappy-lb-row flappy-lb-you" hidden></div>'
+          + '<form class="flappy-lb-form" hidden>'
+            + '<input class="flappy-lb-name" maxlength="12" autocomplete="nickname"'
+            +   ' autocapitalize="characters" spellcheck="false" placeholder="YOUR NAME"'
+            +   ' aria-label="Your name">'
+            + '<button type="submit" class="flappy-lb-submit">SUBMIT</button>'
+          + '</form>'
+          + '<div class="flappy-lb-status" aria-live="polite"></div>'
+        + '</div>';
+      frame.appendChild(trophy);
+      frame.appendChild(lbOverlay);
+
+      const list = lbOverlay.querySelector(".flappy-lb-list");
+      const note = lbOverlay.querySelector(".flappy-lb-note");
+      const youRow = lbOverlay.querySelector(".flappy-lb-you");
+      const form = lbOverlay.querySelector(".flappy-lb-form");
+      const nameInput = lbOverlay.querySelector(".flappy-lb-name");
+      const submitBtn = lbOverlay.querySelector(".flappy-lb-submit");
+      const lbStatus = lbOverlay.querySelector(".flappy-lb-status");
+      const NAME_RE = /^[\p{L}\p{N} _.\-]{1,12}$/u;   // same rule as the Worker
+      // Places 1-3 wear the game's own medal art (see MEDAL_NAMES: 1=gold, 2=silver, 3=bronze).
+      const PLACE_MEDALS = { 1: "medals_1", 2: "medals_2", 3: "medals_3" };
+
+      const savedName = () => localStorage.getItem("fb_name") || "";
+      // "now", "5m ago", "2h ago", "3d ago", "4mo ago", "1y ago"
+      function ago(ms) {
+        const s = (Date.now() - ms) / 1000;
+        if (!(s >= 60)) return "now";
+        const m = s / 60; if (m < 60) return Math.floor(m) + "m ago";
+        const h = m / 60; if (h < 24) return Math.floor(h) + "h ago";
+        const d = h / 24; if (d < 30) return Math.floor(d) + "d ago";
+        if (d < 365) return Math.floor(d / 30) + "mo ago";
+        return Math.floor(d / 365) + "y ago";
+      }
+      // Fill one row's four cells: place (medal or number), name, date, score.
+      function fillRow(row, r) {
+        const place = document.createElement("span");
+        place.className = "flappy-lb-place";
+        if (PLACE_MEDALS[r.rank] && ASSETS.sprites[PLACE_MEDALS[r.rank]]) {
+          const img = document.createElement("img");
+          img.src = ASSETS.sprites[PLACE_MEDALS[r.rank]];
+          img.alt = String(r.rank);
+          place.appendChild(img);
+        } else {
+          place.textContent = r.rank == null ? "-" : String(r.rank);
+          if (r.rank >= 1000) place.classList.add("flappy-lb-place-long");
+        }
+        const name = document.createElement("span"); name.className = "flappy-lb-who"; name.textContent = r.name;
+        const when = document.createElement("span"); when.className = "flappy-lb-when"; when.textContent = r.at ? ago(r.at) : "";
+        const score = document.createElement("span"); score.className = "flappy-lb-score"; score.textContent = String(r.score);
+        row.replaceChildren(place, name, when, score);
+        row.classList.toggle("flappy-lb-podium", r.rank >= 1 && r.rank <= 3);
+      }
+      function renderTop(rows) {
+        const me = savedName().toLowerCase();
+        list.replaceChildren(...rows.map((r, i) => {
+          const li = document.createElement("li");
+          li.className = "flappy-lb-row";
+          fillRow(li, { rank: i + 1, name: r.name, score: r.score, at: r.at });
+          if (me && String(r.name).toLowerCase() === me) li.classList.add("flappy-lb-me");
+          return li;
+        }));
+      }
+      let loadSeq = 0;
+      function loadTop(fresh) {
+        const seq = ++loadSeq;           // ignore replies that arrive out of order
+        if (!list.children.length) note.textContent = "LOADING...";
+        // After a submit, skip the browser's 15 s cache so the new score shows.
+        fetch(LB_API + "/top?limit=100", { cache: fresh ? "no-store" : "default" })
+          .then((r) => r.json())
+          .then((d) => {
+            if (seq !== loadSeq) return;
+            const rows = Array.isArray(d.scores) ? d.scores : [];
+            renderTop(rows);
+            note.textContent = rows.length ? "" : "NO SCORES YET";
+          })
+          .catch(() => { if (seq === loadSeq) note.textContent = "OFFLINE"; });
+      }
+
+      // Pinned yellow row: the run you just played (its real rank once submitted, the
+      // rank it would get before that), otherwise your best under the saved name.
+      let youSeq = 0;
+      function loadYou() {
+        const seq = ++youSeq;
+        const name = savedName();
+        const validName = NAME_RE.test(name);
+        const show = (r) => {
+          if (seq !== youSeq) return;
+          youRow.hidden = !r;
+          if (r) fillRow(youRow, r);
+        };
+        const run = pendingRun;
+        if (run) {
+          const base = { name: validName ? name : "YOU", score: run.score, at: run.at };
+          if (run.rank) return show({ ...base, rank: run.rank });
+          show({ ...base, rank: null });
+          const q = "/rank?score=" + run.score + (validName ? "&name=" + encodeURIComponent(name) : "");
+          fetch(LB_API + q).then((r) => r.json())
+            .then((d) => { if (d && d.rank) show({ ...base, rank: d.rank }); })
+            .catch(() => {});
+          return;
+        }
+        if (!validName) return show(null);
+        fetch(LB_API + "/rank?name=" + encodeURIComponent(name), { cache: "no-store" })
+          .then((r) => r.json())
+          .then((d) => show(d && d.rank ? { rank: d.rank, name: d.name, score: d.score, at: d.at } : null))
+          .catch(() => show(null));
+      }
+
+      function lbIsOpen() { return lbOverlay.classList.contains("open"); }
+      function openLb() {
+        paused = true;
+        lbOverlay.classList.add("open");
+        lbStatus.textContent = "";
+        const canSubmit = !!pendingRun && !pendingRun.submitted;
+        form.hidden = !canSubmit;
+        if (canSubmit) {
+          nameInput.value = savedName();
+          submitBtn.disabled = false;
+        }
+        list.parentElement.scrollTop = 0;
+        loadTop(false);
+        loadYou();
+      }
+      function closeLb() {
+        if (document.activeElement === nameInput) nameInput.blur();   // drop the iOS keyboard
+        lbOverlay.classList.remove("open");
+        paused = false;
+      }
+      trophy.addEventListener("click", openLb);
+      lbOverlay.querySelector(".flappy-lb-x").addEventListener("click", closeLb);
+      lbOverlay.addEventListener("click", (e) => { if (e.target === lbOverlay) closeLb(); });
+      window.addEventListener("keydown", (e) => {
+        if (e.code === "Escape" && lbIsOpen()) { e.preventDefault(); closeLb(); }
+      });
+
+      // Server errors after which this run can't be submitted any more.
+      const FINAL_ERRORS = ["ALREADY SUBMITTED", "SCORE REJECTED", "RUN EXPIRED", "INVALID RUN"];
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const run = pendingRun;
+        if (!run || run.submitted || submitBtn.disabled) return;
+        const name = nameInput.value.normalize("NFKC").trim().replace(/\s+/g, " ");
+        if (!NAME_RE.test(name)) {
+          lbStatus.textContent = "LETTERS, NUMBERS, SPACE . _ - (MAX 12)";
+          return;
+        }
+        submitBtn.disabled = true;
+        lbStatus.textContent = "SUBMITTING...";
+        const token = await run.tokenP;
+        if (!token) {
+          run.submitted = true;          // the server never saw this run start
+          form.hidden = true;
+          lbStatus.textContent = "THIS RUN WASN'T REGISTERED (OFFLINE?)";
+          return;
+        }
+        localStorage.setItem("fb_name", name);
+        const r = await lbPost("/submit", { token, name, score: run.score }).catch(() => null);
+        if (r && r.ok) {
+          run.submitted = true;
+          run.rank = r.data.rank;
+          run.at = Date.now();
+          form.hidden = true;
+          lbStatus.textContent = "SAVED!";
+          loadTop(true);
+          loadYou();
+          return;
+        }
+        const err = (r && r.data && r.data.error) || "OFFLINE, TRY AGAIN";
+        lbStatus.textContent = err;
+        if (FINAL_ERRORS.includes(err)) { run.submitted = true; form.hidden = true; }
+        else submitBtn.disabled = false;
+      });
+    }
+
+    // Gear (+ trophy) on menu/game-over, pause during play, none while a panel is
+    // open or the countdown is running. Guarded so the DOM is touched only on change.
+    let mode = "", trophyPending = false;
     syncChrome = function () {
+      // The trophy pulses while the last run's score can still be submitted.
+      const pending = !!pendingRun && !pendingRun.submitted;
+      if (trophy && pending !== trophyPending) {
+        trophyPending = pending;
+        trophy.classList.toggle("flappy-trophy-pending", pending);
+      }
       const next = (paused || countdown > 0) ? "none" : (state === STATE.PLAY ? "pause" : "gear");
       if (next === mode) return;
       mode = next;
       gear.style.display = next === "gear" ? "flex" : "none";
       pauseBtn.style.display = next === "pause" ? "flex" : "none";
+      if (trophy) trophy.style.display = next === "gear" ? "flex" : "none";
     };
     syncChrome();
   })();

@@ -241,3 +241,195 @@
     visibility: hidden;
     pointer-events: none;
 }
+
+/* ---- Online leaderboard: trophy button (left of the gear) + LEADERBOARD panel.
+   Warm brown board with chunky outlined text, one bar per player; places 1-3 wear
+   the game's medals and your own row is pinned in yellow at the bottom. ---- */
+.flappy-trophy { right: calc(58px + env(safe-area-inset-right, 0px)); }
+.flappy-trophy-pending {
+    background: #f3920a;             /* orange: a score is waiting to be submitted */
+    animation: flappy-pulse 1s ease-in-out infinite;
+}
+@keyframes flappy-pulse { 50% { transform: scale(1.12); } }
+@media (prefers-reduced-motion: reduce) {
+    .flappy-trophy-pending { animation: none; }
+}
+
+.flappy-lb-panel {
+    --lb-ink: #3b2418;               /* text outline / dark edges */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(94%, 380px);
+    height: min(calc(100% - 28px), 640px);
+    box-sizing: border-box;
+    padding: 14px 8px 10px;
+    background: #b97a55;
+    border: 4px solid #543847;
+    border-radius: 16px;
+    box-shadow: 0 6px 0 #543847, 0 12px 22px rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-family: "Trebuchet MS", Verdana, Geneva, sans-serif;
+    font-weight: 800;
+    line-height: 1.2;                /* the frame sets line-height: 0 */
+    text-align: left;
+    /* chunky outlined lettering, like the reference board */
+    text-shadow: -1px -1px 0 var(--lb-ink), 1px -1px 0 var(--lb-ink),
+                 -1px 1px 0 var(--lb-ink), 1px 1px 0 var(--lb-ink), 0 2px 0 var(--lb-ink);
+}
+.flappy-lb-panel [hidden] { display: none !important; }
+
+.flappy-lb-x {                       /* pink close button hanging off the top-right corner */
+    position: absolute;
+    top: -14px;
+    right: -10px;
+    width: 46px;
+    height: 38px;
+    min-width: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: #ec3b64;
+    border: 3px solid #543847;
+    border-radius: 10px;
+    box-shadow: 0 3px 0 #543847;
+    line-height: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+.flappy-lb-x svg { width: 20px; height: 20px; filter: drop-shadow(0 1px 0 var(--lb-ink)); }
+.flappy-lb-x:active { transform: translateY(2px); box-shadow: 0 1px 0 #543847; }
+
+.flappy-lb-title {
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin: 0 0 8px;
+}
+
+/* Shared 4-column grid: PLACE | NAME | DATE | SCORE */
+.flappy-lb-row {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) 58px 42px;
+    align-items: center;
+    column-gap: 4px;
+    box-sizing: border-box;
+}
+.flappy-lb-head {
+    padding: 0 11px 6px 7px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+.flappy-lb-head span:first-child { text-align: center; margin: 0 -4px; }   /* "PLACE" overhangs its narrow column */
+.flappy-lb-head span:nth-child(3),
+.flappy-lb-head span:nth-child(4) { text-align: center; }
+
+.flappy-lb-body {                    /* the scrolling part: up to 100 players */
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 5px;
+    background: #6e4330;
+    border-radius: 10px;
+    box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.25);
+}
+.flappy-lb-list { list-style: none; margin: 0; padding: 0; }
+.flappy-lb-list .flappy-lb-row {
+    min-height: 38px;
+    margin: 0 0 5px;
+    padding: 2px 6px 2px 2px;
+    background: #8f5b3f;
+    border-radius: 10px;
+    font-size: 15px;
+}
+.flappy-lb-list .flappy-lb-row:last-child { margin-bottom: 0; }
+.flappy-lb-list .flappy-lb-podium {
+    background: #c48659;
+    box-shadow: inset 0 0 0 2px #f2b27c;
+}
+.flappy-lb-list .flappy-lb-me { box-shadow: inset 0 0 0 2px #ffd34d; }
+
+.flappy-lb-place { text-align: center; font-size: 18px; }
+.flappy-lb-place-long { font-size: 13px; letter-spacing: -0.5px; }
+.flappy-lb-place img {
+    display: block;
+    width: 30px;
+    height: 30px;
+    margin: 0 auto;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 1px 0 var(--lb-ink));
+}
+.flappy-lb-who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flappy-lb-when {
+    text-align: center;
+    font-size: 12px;
+    white-space: nowrap;
+    border-left: 2px solid rgba(59, 36, 24, 0.35);
+    padding-left: 3px;
+}
+.flappy-lb-score { text-align: right; font-size: 17px; }
+
+.flappy-lb-note { padding: 14px 0; text-align: center; font-size: 13px; letter-spacing: 1px; }
+.flappy-lb-note:empty { display: none; }
+
+.flappy-lb-you {                     /* your row, pinned under the list */
+    min-height: 42px;
+    margin-top: 8px;
+    padding: 2px 8px 2px 4px;
+    background: linear-gradient(#ffd34d, #f7a90f);
+    border: 3px solid #543847;
+    border-radius: 12px;
+    font-size: 16px;
+}
+.flappy-lb-you .flappy-lb-when { border-left-color: rgba(59, 36, 24, 0.5); }
+
+.flappy-lb-form { display: flex; gap: 6px; margin: 8px 0 0; }   /* the portfolio theme gives forms a bottom margin */
+.flappy-lb-name {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0 8px;
+    font: 800 16px "Trebuchet MS", Verdana, Geneva, sans-serif;   /* >= 16px: no iOS zoom on focus */
+    letter-spacing: 1px;
+    text-align: center;
+    text-shadow: none;
+    color: #543847;
+    background: #fff;
+    border: 3px solid #543847;
+    border-radius: 10px;
+    box-shadow: none;
+}
+.flappy-lb-name:focus { outline: 2px solid #ffd34d; outline-offset: 1px; }
+.flappy-lb-submit {
+    flex: none;
+    height: 40px;
+    min-width: 0;
+    margin: 0;
+    padding: 0 14px;
+    font: inherit;
+    font-size: 15px;
+    letter-spacing: 1px;
+    line-height: 1;
+    color: #fff;
+    background: #73bf2e;
+    border: 3px solid #543847;
+    border-radius: 10px;
+    box-shadow: 0 3px 0 #543847;
+    cursor: pointer;
+}
+.flappy-lb-submit:active { transform: translateY(2px); box-shadow: 0 1px 0 #543847; }
+.flappy-lb-submit:disabled { opacity: 0.6; cursor: default; }
+
+.flappy-lb-status {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+.flappy-lb-status:empty { display: none; }

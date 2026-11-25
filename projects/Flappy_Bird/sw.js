@@ -8,7 +8,7 @@
 // never reach an installed app because it keeps serving stale cached code.
 //
 // Bump CACHE whenever the precached file list changes.
-const CACHE = "flappy-v40";
+const CACHE = "flappy-v41";
 const ASSETS = [
   "./webapp.html",
   "./manifest.webmanifest",
@@ -34,6 +34,10 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
+  // Leave cross-origin requests (leaderboard API, Google Tag Manager) to the
+  // browser: they aren't cached here, and offline a cache miss would turn them
+  // into a confusing failure instead of a normal network error.
+  if (new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
     fetch(req)
       .then((res) => {
