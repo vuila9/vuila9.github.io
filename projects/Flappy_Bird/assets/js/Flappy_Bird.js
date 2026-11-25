@@ -61,7 +61,7 @@
   // ---- user settings (persisted in localStorage) ----
   // Shown in the Options panel to confirm a deploy is live. Bump this together
   // with CACHE in sw.js so the number always matches the service-worker version.
-  const APP_VERSION = "0.41";
+  const APP_VERSION = "0.5";
 
   const settings = {
     muted: localStorage.getItem("fb_muted") === "1",
@@ -473,15 +473,17 @@
       g.fillStyle = "#ededed"; g.fillRect(x0, SPLIT, x1 - x0 + 1, Math.max(0, y1 - SPLIT + 1));
     }
     // Podium: one flat coral silhouette, no outlines (so no lines between the steps),
-    // 3rd place on the left, 1st in the middle, 2nd on the right, standing on the
-    // face's bottom edge. Sizes are in 2px art pixels.
+    // 3rd place on the left, 1st in the middle, 2nd on the right, centred vertically
+    // on the face. Sizes are in 2px art pixels.
     const P = 2, FILL = "#f7714f", INK = "#fff3ec";
     const DIGITS = {   // 3x5 pixel glyphs
       1: [".#.", "##.", ".#.", ".#.", ".#."],
       2: ["##.", "..#", ".#.", "#..", "###"],
       3: ["##.", "..#", ".#.", "..#", "##."],
     };
-    const base = 50;                 // the face's bottom edge (the tan line starts here)
+    // The face runs from y = 10 to the tan line at 50-51. Ending the 30px podium at 46
+    // leaves 6px above it (10-15) and 6px below it (46-51, tan line included).
+    const base = 46;
     const SIDE_W = 9 * P, MID_W = 12 * P, SIDE_H = 9 * P, MID_H = 15 * P;
     const left = Math.round(c.width / 2 - (2 * SIDE_W + MID_W) / 2);
     const blocks = [
@@ -499,6 +501,24 @@
       });
     }
     return c;
+  }
+
+  // The ground as one pre-tiled strip, at least GW + 24 wide (the scroll offset runs
+  // from 0 to -24), rebuilt only when the world width changes. Drawing the 336px land
+  // tile several times side by side at fractional x left hairline joins between the
+  // copies on wide screens, where the GPU-softened edges let the green background
+  // show through as thin vertical lines. One strip has no joins in view.
+  let groundCache = null;
+  function groundStrip(land) {
+    const w = Math.ceil((GW + 24) / land.width) * land.width;
+    if (!groundCache || groundCache.width !== w) {
+      groundCache = document.createElement("canvas");
+      groundCache.width = w;
+      groundCache.height = land.height;
+      const g = groundCache.getContext("2d");
+      for (let x = 0; x < w; x += land.width) g.drawImage(land, x, 0);   // whole pixels: exact fit
+    }
+    return groundCache;
   }
 
   // Game-over buttons: Play, and with a leaderboard the Hall of Fame button beside it.
@@ -618,11 +638,12 @@
       ctx.drawImage(upIm, px, botY, PIPE_W, PH);
       if (botEnd < FLOOR_Y) ctx.drawImage(upIm, 0, upIm.height - 2, upIm.width, 2, px, botEnd, PIPE_W, FLOOR_Y - botEnd);
     }
-    // ground (tiled) — interpolate the continuous scroll, wrap at the 24px period
+    // ground — interpolate the continuous scroll, wrap at the 24px stripe period, and
+    // draw it as one solid strip (see groundStrip()) so no tile joins are on screen
     const land = IMG["land"];
     if (land) {
       const ig = groundPrev + (groundX - groundPrev) * alpha;
-      for (let x = ig % 24; x < GW; x += land.width) ctx.drawImage(land, x, FLOOR_Y);
+      ctx.drawImage(groundStrip(land), ig % 24, FLOOR_Y);
     }
     // bird
     const by = bird.py + (bird.y - bird.py) * alpha;
@@ -1015,6 +1036,22 @@
       const PLACE_MEDALS = { 1: "medals_1", 2: "medals_2", 3: "medals_3" };
 
       const savedName = () => localStorage.getItem("fb_name") || "";
+
+      // The result screen's twinkling sparkles (SPARKLES, drawSparkles()) on a medal
+      // in the list: same spots, scaled from the 44px sprite to the 24px coin, and the
+      // same twinkle (alpha = (sin(0.12 * frame + phase) + 1) / 2, ~0.87 s per cycle),
+      // done as a CSS animation offset by each sparkle's phase.
+      const COIN_PX = 24, COIN_SCALE = COIN_PX / 44;
+      function addSparkles(coin) {
+        for (const [dx, dy, phase] of SPARKLES) {
+          const s = document.createElement("span");
+          s.className = "flappy-lb-sparkle";
+          s.style.left = (COIN_PX / 2 + dx * COIN_SCALE).toFixed(1) + "px";
+          s.style.top = (COIN_PX / 2 + dy * COIN_SCALE).toFixed(1) + "px";
+          s.style.animationDelay = (-(phase + Math.PI / 2) / 7.2).toFixed(3) + "s";
+          coin.appendChild(s);
+        }
+      }
       // "now", "5m ago", "2h ago", "3d ago", "4mo ago", "1y ago"
       function ago(ms) {
         const s = (Date.now() - ms) / 1000;
@@ -1033,7 +1070,14 @@
           const img = document.createElement("img");
           img.src = ASSETS.sprites[PLACE_MEDALS[r.rank]];
           img.alt = String(r.rank);
-          place.appendChild(img);
+          // Effects follow the result screen's medal tiers: 1st gets the top tier
+          // (gloss sweep + sparkles, like emerald and up), 2nd the middle tier
+          // (sparkles, like sapphire and diamond), 3rd the plain medal.
+          const coin = document.createElement("span");
+          coin.className = "flappy-lb-coin" + (r.rank === 1 ? " flappy-lb-coin-shine" : "");
+          coin.appendChild(img);
+          if (r.rank <= 2) addSparkles(coin);
+          place.appendChild(coin);
         } else {
           place.textContent = r.rank == null ? "-" : String(r.rank);
           if (r.rank >= 1000) place.classList.add("flappy-lb-place-long");
