@@ -336,7 +336,21 @@
     background: #6e4330;
     border-radius: 10px;
     box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.25);
+    /* A thin scrollbar in the panel's colours instead of the browser's white one:
+       standard properties for Chrome/Edge/Firefox, ::-webkit-scrollbar for Safari. */
+    scrollbar-width: thin;
+    scrollbar-color: #c48659 transparent;
+    /* Drag to scroll: fingers pan it natively, a mouse via the script in Flappy_Bird.js. */
+    touch-action: pan-y;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
 }
+.flappy-lb-body.flappy-lb-dragging { cursor: grabbing; }
+.flappy-lb-body::-webkit-scrollbar { width: 6px; }
+.flappy-lb-body::-webkit-scrollbar-track { background: transparent; }
+.flappy-lb-body::-webkit-scrollbar-thumb { background: #c48659; border-radius: 3px; }
+.flappy-lb-body::-webkit-scrollbar-button { display: none; }
 .flappy-lb-list { list-style: none; margin: 0; padding: 0; }
 .flappy-lb-list .flappy-lb-row {
     min-height: 38px;

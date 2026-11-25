@@ -843,7 +843,7 @@
       else pauseGame();
     });
 
-    // ---- online leaderboard: trophy button + LEADERBOARD panel ----
+    // ---- online leaderboard: trophy button + Hall of Fame panel ----
     // Only static strings go through innerHTML; everything from the server is set
     // with textContent, so a name can never inject HTML into the page.
     let trophy = null;
@@ -855,7 +855,7 @@
       trophy = document.createElement("button");
       trophy.type = "button";
       trophy.className = "flappy-gear flappy-trophy";
-      trophy.setAttribute("aria-label", "Leaderboard");
+      trophy.setAttribute("aria-label", "Hall of Fame");
       trophy.innerHTML = TROPHY_SVG;
       trophy.style.display = "none";
 
@@ -864,9 +864,9 @@
       const lbOverlay = document.createElement("div");
       lbOverlay.className = "flappy-settings-overlay";
       lbOverlay.innerHTML =
-        '<div class="flappy-lb-panel" role="dialog" aria-label="Leaderboard">'
+        '<div class="flappy-lb-panel" role="dialog" aria-label="Hall of Fame">'
           + '<button type="button" class="flappy-lb-x" aria-label="Close">' + CLOSE_SVG + '</button>'
-          + '<div class="flappy-lb-title">LEADERBOARD</div>'
+          + '<div class="flappy-lb-title">Hall of Fame</div>'
           + '<div class="flappy-lb-row flappy-lb-head" aria-hidden="true">'
             + '<span>PLACE</span><span>NAME</span><span>DATE</span><span>SCORE</span></div>'
           + '<div class="flappy-lb-body">'
@@ -892,6 +892,53 @@
       const nameInput = lbOverlay.querySelector(".flappy-lb-name");
       const submitBtn = lbOverlay.querySelector(".flappy-lb-submit");
       const lbStatus = lbOverlay.querySelector(".flappy-lb-status");
+
+      // Hold and drag to scroll the list with a mouse, the way a finger scrolls it on a
+      // phone; a flick keeps gliding briefly. Touch and pens are left to the browser's
+      // own scrolling (touch-action: pan-y in the CSS), which already has momentum.
+      const lbBody = list.parentElement;
+      let drag = null, glide = 0;
+      lbBody.addEventListener("pointerdown", (e) => {
+        if (e.pointerType !== "mouse" || e.button !== 0) return;
+        // Leave a press on the scrollbar itself to the browser.
+        if (e.clientX - lbBody.getBoundingClientRect().left >= lbBody.clientLeft + lbBody.clientWidth) return;
+        cancelAnimationFrame(glide);
+        drag = { id: e.pointerId, y: e.clientY, top: lbBody.scrollTop, lastY: e.clientY, lastT: e.timeStamp, v: 0, moved: false };
+      });
+      lbBody.addEventListener("pointermove", (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        const dy = e.clientY - drag.y;
+        if (!drag.moved) {
+          if (Math.abs(dy) < 4) return;          // still a click, not a drag
+          drag.moved = true;
+          try { lbBody.setPointerCapture(e.pointerId); } catch {}   // keep dragging outside the list
+          lbBody.classList.add("flappy-lb-dragging");
+        }
+        lbBody.scrollTop = drag.top - dy;
+        const dt = e.timeStamp - drag.lastT;
+        if (dt > 0) drag.v = (drag.lastY - e.clientY) / dt;        // px per ms, in scroll direction
+        drag.lastY = e.clientY; drag.lastT = e.timeStamp;
+      });
+      function endDrag(e) {
+        if (!drag || e.pointerId !== drag.id) return;
+        const { moved, lastT } = drag;
+        let v = drag.v;
+        drag = null;
+        lbBody.classList.remove("flappy-lb-dragging");
+        if (!moved || e.timeStamp - lastT > 80) return;            // held still before letting go
+        let t = performance.now();
+        const step = (now) => {
+          const dt = now - t; t = now;
+          lbBody.scrollTop += v * dt;
+          v *= Math.pow(0.95, dt / 16);                            // ease out over ~half a second
+          if (Math.abs(v) > 0.02) glide = requestAnimationFrame(step);
+        };
+        glide = requestAnimationFrame(step);
+      }
+      lbBody.addEventListener("pointerup", endDrag);
+      lbBody.addEventListener("pointercancel", endDrag);
+      lbBody.addEventListener("wheel", () => cancelAnimationFrame(glide), { passive: true });
+
       // Same rules as the Worker: names already registered may be up to 12 characters
       // (they predate the limit), new ones up to 10. The Worker also checks a blocklist.
       const NAME_RE = /^[\p{L}\p{N} _.\-]{1,12}$/u;
