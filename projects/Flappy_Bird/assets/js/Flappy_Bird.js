@@ -189,7 +189,10 @@
   const LB_API = LB_LOCAL ? "http://localhost:8787"
     : "https://flappy-leaderboard.khoa-nguynxun.workers.dev";
   let runTokenP = null;   // Promise<string|null>: the current run's token from POST /start
-  let pendingRun = null;  // { score, tokenP, submitted }: last finished run, kept until the next starts
+  // The last finished run, kept until the next starts:
+  // { score, tokenP, submitted, submitting, rank, at, status }
+  let pendingRun = null;
+  let lbOnRunUpdate = () => {};   // set by the leaderboard panel to redraw itself
 
   function lbPost(path, body) {
     return fetch(LB_API + path, {
@@ -197,6 +200,68 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body || {}),
     }).then((r) => r.json().then((data) => ({ ok: r.ok, status: r.status, data })));
+  }
+
+  // Player session. The first submit registers a name and the Worker returns a signed
+  // player token for it (fb_player). While the token is live, runs that beat the
+  // session's best (fb_lb_best) are submitted automatically under that name (fb_name).
+  // Every /start renews the token; after 30 days without a run it expires, and the
+  // name stays taken, so the player picks a new one.
+  const savedPlayer = () => localStorage.getItem("fb_player") || "";
+  function playerInfo() {          // the token's payload, { n: name key, exp }, or null
+    try {
+      const body = savedPlayer().split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
+      const p = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(body), (c) => c.charCodeAt(0))));
+      return p && typeof p.n === "string" ? p : null;
+    } catch { return null; }
+  }
+  function sessionLive() {
+    const p = playerInfo();
+    return !!p && !(typeof p.exp === "number" && p.exp <= Date.now());
+  }
+  function endSession() {
+    ["fb_player", "fb_name", "fb_lb_best"].forEach((k) => localStorage.removeItem(k));
+    sessionExpired = true;
+  }
+  let sessionExpired = false;      // shows "SESSION EXPIRED" when picking a new name
+  if (savedPlayer() && !sessionLive()) endSession();
+  // The session's name as typed; falls back to the token's (lowercase) key.
+  function sessionName() {
+    const p = playerInfo(), s = localStorage.getItem("fb_name") || "";
+    return p && s.toLowerCase() !== p.n ? p.n : s;
+  }
+  const sessionBest = () => +(localStorage.getItem("fb_lb_best") || 0);
+
+  // Server errors after which a run can't be submitted any more.
+  const FINAL_ERRORS = ["ALREADY SUBMITTED", "SCORE REJECTED", "RUN EXPIRED", "INVALID RUN"];
+  // Submit `run` under `name`, with the session token while it's live, and record the
+  // outcome on the run. Used for automatic submits and the panel's SUBMIT button.
+  async function sendRun(run, name) {
+    const live = sessionLive();
+    run.submitting = true; run.status = "";
+    lbOnRunUpdate();
+    const token = await run.tokenP;
+    const r = token
+      ? await lbPost("/submit", { token, name, score: run.score, player: live ? savedPlayer() : undefined })
+          .catch(() => null)
+      : null;
+    run.submitting = false;
+    if (!token) {                  // /start failed: the server never saw this run
+      run.submitted = true; run.status = "THIS RUN WASN'T REGISTERED (OFFLINE?)";
+    } else if (r && r.ok) {
+      localStorage.setItem("fb_player", r.data.player);
+      localStorage.setItem("fb_name", name);
+      localStorage.setItem("fb_lb_best", String(r.data.best));
+      sessionExpired = false;
+      run.submitted = true; run.rank = r.data.rank; run.at = Date.now(); run.status = "SAVED!";
+    } else {
+      const err = (r && r.data && r.data.error) || "OFFLINE, TRY AGAIN";
+      // The server no longer counts this session as live: the name must be picked again.
+      if (live && (err === "NAME TAKEN" || err === "NAME LOCKED")) endSession();
+      else run.status = err;
+      if (FINAL_ERRORS.includes(err)) run.submitted = true;
+    }
+    lbOnRunUpdate();
   }
 
   // Keyboard shortcuts must not fire while the player types their name.
@@ -229,9 +294,15 @@
       state = STATE.PLAY; bird.vy = FLAP; play("wing");
       // A new run starts: drop the last run's unsubmitted score and ask the server
       // for this run's token (it times the run with its own clock). Never blocks play.
+      // A live session goes along and comes back renewed.
       pendingRun = null;
       runTokenP = LB_API
-        ? lbPost("/start").then((r) => (r.ok ? r.data.token : null)).catch(() => null)
+        ? lbPost("/start", sessionLive() ? { player: savedPlayer() } : {})
+            .then((r) => {
+              if (r.ok && r.data.player) localStorage.setItem("fb_player", r.data.player);
+              return r.ok ? r.data.token : null;
+            })
+            .catch(() => null)
         : null;
     }
     else if (state === STATE.PLAY) { bird.vy = FLAP; bird.rot = -25; play("wing"); }
@@ -285,8 +356,15 @@
     if (score > best) { best = score; localStorage.setItem("fb_best", best); }
     // Submittable from the game-over and READY screens until the next run starts.
     pendingRun = (score > 0 && runTokenP)
-      ? { score, tokenP: runTokenP, submitted: false, rank: null, at: Date.now() } : null;
+      ? { score, tokenP: runTokenP, submitted: false, submitting: false, rank: null, at: Date.now(), status: "" }
+      : null;
     runTokenP = null;
+    // With a live session there's no form: a new best goes up on its own, anything
+    // else has nothing to send.
+    if (pendingRun && sessionLive()) {
+      if (score > sessionBest()) sendRun(pendingRun, sessionName());
+      else pendingRun.submitted = true;
+    }
     // Medal reflects THIS run's score. Sprite indices aren't in tier order:
     // medals_0=platinum, _1=gold, _2=silver, _3=bronze (original art), and
     // _4..9 = sapphire/diamond/emerald/ruby/obsidian/radiant (generated).
@@ -797,7 +875,7 @@
           + '</div>'
           + '<div class="flappy-lb-row flappy-lb-you" hidden></div>'
           + '<form class="flappy-lb-form" hidden>'
-            + '<input class="flappy-lb-name" maxlength="12" autocomplete="nickname"'
+            + '<input class="flappy-lb-name" maxlength="10" autocomplete="nickname"'
             +   ' autocapitalize="characters" spellcheck="false" placeholder="YOUR NAME"'
             +   ' aria-label="Your name">'
             + '<button type="submit" class="flappy-lb-submit">SUBMIT</button>'
@@ -814,22 +892,14 @@
       const nameInput = lbOverlay.querySelector(".flappy-lb-name");
       const submitBtn = lbOverlay.querySelector(".flappy-lb-submit");
       const lbStatus = lbOverlay.querySelector(".flappy-lb-status");
-      const NAME_RE = /^[\p{L}\p{N} _.\-]{1,12}$/u;   // same rule as the Worker
+      // Same rules as the Worker: names already registered may be up to 12 characters
+      // (they predate the limit), new ones up to 10. The Worker also checks a blocklist.
+      const NAME_RE = /^[\p{L}\p{N} _.\-]{1,12}$/u;
+      const NEW_NAME_RE = /^[\p{L}\p{N} _.\-]{1,10}$/u;
       // Places 1-3 wear the game's own medal art (see MEDAL_NAMES: 1=gold, 2=silver, 3=bronze).
       const PLACE_MEDALS = { 1: "medals_1", 2: "medals_2", 3: "medals_3" };
 
       const savedName = () => localStorage.getItem("fb_name") || "";
-      // After its first submit this browser holds a server-signed player token that pins
-      // it to that name; the Worker refuses any other name with it (NAME LOCKED).
-      const savedPlayer = () => localStorage.getItem("fb_player") || "";
-      // The pinned name (lowercase key) read from the token's payload, or "" if none.
-      function lockedKey() {
-        try {
-          const body = savedPlayer().split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
-          const p = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(body), (c) => c.charCodeAt(0))));
-          return p && typeof p.n === "string" ? p.n : "";
-        } catch { return ""; }
-      }
       // "now", "5m ago", "2h ago", "3d ago", "4mo ago", "1y ago"
       function ago(ms) {
         const s = (Date.now() - ms) / 1000;
@@ -916,24 +986,45 @@
       }
 
       function lbIsOpen() { return lbOverlay.classList.contains("open"); }
+      // The form shows only while the last run still needs a submit by hand: a new
+      // player picking a name, or a session whose automatic submit failed (retry).
+      let formRun = null;              // the run the name box was last filled for
+      function renderForm() {
+        const run = pendingRun;
+        const canSubmit = !!run && !run.submitted && !run.submitting;
+        form.hidden = !canSubmit;
+        if (canSubmit) {
+          const live = sessionLive();
+          // A new player's box starts empty for each run, then keeps what they type
+          // across retries (NAME TAKEN etc.) of that run.
+          if (live) nameInput.value = sessionName();
+          else if (run !== formRun || nameInput.readOnly) nameInput.value = "";
+          formRun = run;
+          nameInput.readOnly = live;
+          nameInput.classList.toggle("flappy-lb-name-locked", live);
+          submitBtn.disabled = false;
+        }
+        lbStatus.textContent = run && run.submitting ? "SAVING..."
+          : run && run.status ? run.status
+          : !canSubmit || sessionLive() ? ""
+          : sessionExpired ? "SESSION EXPIRED: PICK A NEW NAME"
+          : "YOUR NAME CAN'T BE CHANGED LATER";
+      }
       function openLb() {
         paused = true;
         lbOverlay.classList.add("open");
-        lbStatus.textContent = "";
-        const canSubmit = !!pendingRun && !pendingRun.submitted;
-        form.hidden = !canSubmit;
-        if (canSubmit) {
-          const key = lockedKey();
-          nameInput.value = key && savedName().toLowerCase() !== key ? key : savedName();
-          nameInput.readOnly = !!key;
-          nameInput.classList.toggle("flappy-lb-name-locked", !!key);
-          if (!key) lbStatus.textContent = "YOUR NAME CAN'T BE CHANGED LATER";
-          submitBtn.disabled = false;
-        }
+        renderForm();
         list.parentElement.scrollTop = 0;
-        loadTop(false);
+        // Skip the browser's 15 s cache when the last run was just saved.
+        loadTop(!!(pendingRun && pendingRun.rank));
         loadYou();
       }
+      // A submit started, finished or failed: redraw if the panel is showing.
+      lbOnRunUpdate = () => {
+        if (!lbIsOpen()) return;
+        renderForm();
+        if (pendingRun && pendingRun.rank) { loadTop(true); loadYou(); }
+      };
       function closeLb() {
         if (document.activeElement === nameInput) nameInput.blur();   // drop the iOS keyboard
         lbOverlay.classList.remove("open");
@@ -946,47 +1037,18 @@
         if (e.code === "Escape" && lbIsOpen()) { e.preventDefault(); closeLb(); }
       });
 
-      // Server errors after which this run can't be submitted any more.
-      const FINAL_ERRORS = ["ALREADY SUBMITTED", "SCORE REJECTED", "RUN EXPIRED", "INVALID RUN"];
-      form.addEventListener("submit", async (e) => {
+      form.addEventListener("submit", (e) => {
         e.preventDefault();
         const run = pendingRun;
-        if (!run || run.submitted || submitBtn.disabled) return;
-        const name = nameInput.value.normalize("NFKC").trim().replace(/\s+/g, " ");
-        if (!NAME_RE.test(name)) {
-          lbStatus.textContent = "LETTERS, NUMBERS, SPACE . _ - (MAX 12)";
+        if (!run || run.submitted || run.submitting) return;
+        const live = sessionLive();
+        const name = live ? sessionName() : nameInput.value.normalize("NFKC").trim().replace(/\s+/g, " ");
+        if (!live && !NEW_NAME_RE.test(name)) {
+          lbStatus.textContent = "LETTERS, NUMBERS, SPACE . _ - (MAX 10)";
           return;
         }
-        submitBtn.disabled = true;
-        lbStatus.textContent = "SUBMITTING...";
-        const token = await run.tokenP;
-        if (!token) {
-          run.submitted = true;          // the server never saw this run start
-          form.hidden = true;
-          lbStatus.textContent = "THIS RUN WASN'T REGISTERED (OFFLINE?)";
-          return;
-        }
-        const player = savedPlayer() || undefined;
-        const r = await lbPost("/submit", { token, name, score: run.score, player }).catch(() => null);
-        if (r && r.ok) {
-          // Saved only on success, so a refused name never becomes the remembered one.
-          localStorage.setItem("fb_name", name);
-          if (r.data.player) localStorage.setItem("fb_player", r.data.player);
-          nameInput.readOnly = true;
-          nameInput.classList.add("flappy-lb-name-locked");
-          run.submitted = true;
-          run.rank = r.data.rank;
-          run.at = Date.now();
-          form.hidden = true;
-          lbStatus.textContent = "SAVED!";
-          loadTop(true);
-          loadYou();
-          return;
-        }
-        const err = (r && r.data && r.data.error) || "OFFLINE, TRY AGAIN";
-        lbStatus.textContent = err;
-        if (FINAL_ERRORS.includes(err)) { run.submitted = true; form.hidden = true; }
-        else submitBtn.disabled = false;
+        if (document.activeElement === nameInput) nameInput.blur();   // drop the iOS keyboard
+        sendRun(run, name);   // the fb_name/fb_player it saves are only ever accepted ones
       });
     }
 
@@ -994,8 +1056,8 @@
     // open or the countdown is running. Guarded so the DOM is touched only on change.
     let mode = "", trophyPending = false;
     syncChrome = function () {
-      // The trophy pulses while the last run's score can still be submitted.
-      const pending = !!pendingRun && !pendingRun.submitted;
+      // The trophy pulses while the last run's score is waiting for a submit by hand.
+      const pending = !!pendingRun && !pendingRun.submitted && !pendingRun.submitting;
       if (trophy && pending !== trophyPending) {
         trophyPending = pending;
         trophy.classList.toggle("flappy-trophy-pending", pending);
