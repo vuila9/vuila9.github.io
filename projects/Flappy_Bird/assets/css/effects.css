@@ -406,6 +406,8 @@
     box-shadow: none;
 }
 .flappy-lb-name:focus { outline: 2px solid #ffd34d; outline-offset: 1px; }
+.flappy-lb-name-locked { background: #f1e6c8; cursor: default; }   /* this browser's name is pinned */
+.flappy-lb-name-locked:focus { outline: none; }
 .flappy-lb-submit {
     flex: none;
     height: 40px;

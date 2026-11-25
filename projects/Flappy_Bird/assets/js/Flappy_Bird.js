@@ -819,6 +819,17 @@
       const PLACE_MEDALS = { 1: "medals_1", 2: "medals_2", 3: "medals_3" };
 
       const savedName = () => localStorage.getItem("fb_name") || "";
+      // After its first submit this browser holds a server-signed player token that pins
+      // it to that name; the Worker refuses any other name with it (NAME LOCKED).
+      const savedPlayer = () => localStorage.getItem("fb_player") || "";
+      // The pinned name (lowercase key) read from the token's payload, or "" if none.
+      function lockedKey() {
+        try {
+          const body = savedPlayer().split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
+          const p = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(body), (c) => c.charCodeAt(0))));
+          return p && typeof p.n === "string" ? p.n : "";
+        } catch { return ""; }
+      }
       // "now", "5m ago", "2h ago", "3d ago", "4mo ago", "1y ago"
       function ago(ms) {
         const s = (Date.now() - ms) / 1000;
@@ -912,7 +923,11 @@
         const canSubmit = !!pendingRun && !pendingRun.submitted;
         form.hidden = !canSubmit;
         if (canSubmit) {
-          nameInput.value = savedName();
+          const key = lockedKey();
+          nameInput.value = key && savedName().toLowerCase() !== key ? key : savedName();
+          nameInput.readOnly = !!key;
+          nameInput.classList.toggle("flappy-lb-name-locked", !!key);
+          if (!key) lbStatus.textContent = "YOUR NAME CAN'T BE CHANGED LATER";
           submitBtn.disabled = false;
         }
         list.parentElement.scrollTop = 0;
@@ -951,9 +966,14 @@
           lbStatus.textContent = "THIS RUN WASN'T REGISTERED (OFFLINE?)";
           return;
         }
-        localStorage.setItem("fb_name", name);
-        const r = await lbPost("/submit", { token, name, score: run.score }).catch(() => null);
+        const player = savedPlayer() || undefined;
+        const r = await lbPost("/submit", { token, name, score: run.score, player }).catch(() => null);
         if (r && r.ok) {
+          // Saved only on success, so a refused name never becomes the remembered one.
+          localStorage.setItem("fb_name", name);
+          if (r.data.player) localStorage.setItem("fb_player", r.data.player);
+          nameInput.readOnly = true;
+          nameInput.classList.add("flappy-lb-name-locked");
           run.submitted = true;
           run.rank = r.data.rank;
           run.at = Date.now();
