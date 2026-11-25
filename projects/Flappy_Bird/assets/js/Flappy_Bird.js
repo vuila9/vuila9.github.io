@@ -204,19 +204,25 @@
     }).then((r) => r.json().then((data) => ({ ok: r.ok, status: r.status, data })));
   }
 
-  // Player session. The first submit registers a name and the Worker returns a signed
-  // player token for it (fb_player). While the token is live, runs that beat the
-  // session's best (fb_lb_best) are submitted automatically under that name (fb_name).
-  // Every /start renews the token; after 30 days without a run it expires, and the
-  // name stays taken, so the player picks a new one.
+  // Player session. A player is a name plus a number ("Name #N"); names may repeat. The
+  // first submit registers one and the Worker returns a signed player token for it
+  // (fb_player). While the token is live, runs that beat the session's best (fb_lb_best)
+  // are submitted automatically as that player (name in fb_name). Every /start renews
+  // the token; after 30 days without a run it expires and the browser registers again
+  // (the same name is fine; it gets a new number and entry).
   const savedPlayer = () => localStorage.getItem("fb_player") || "";
-  function playerInfo() {          // the token's payload, { n: name key, exp }, or null
+  function playerInfo() {          // the token's payload, { n: name key, tag, exp }, or null
     try {
       const body = savedPlayer().split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
       const p = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(body), (c) => c.charCodeAt(0))));
-      return p && typeof p.n === "string" ? p : null;
+      if (!p || typeof p.n !== "string") return null;
+      if (!Number.isInteger(p.tag)) p.tag = 0;   // tokens from before numbers mean #0
+      return p;
     } catch { return null; }
   }
+  const sessionTag = () => { const p = playerInfo(); return p ? p.tag : null; };
+  // A player number as shown: always three digits (0 -> "000", 7 -> "007").
+  const tagDigits = (t) => String(t).padStart(3, "0");
   function sessionLive() {
     const p = playerInfo();
     return !!p && !(typeof p.exp === "number" && p.exp <= Date.now());
@@ -236,30 +242,35 @@
 
   // Server errors after which a run can't be submitted any more.
   const FINAL_ERRORS = ["ALREADY SUBMITTED", "SCORE REJECTED", "RUN EXPIRED", "INVALID RUN"];
-  // Submit `run` under `name`, with the session token while it's live, and record the
+  // Submit `run` as `name` (and, for a new player, the number they chose: `tag`, or ""
+  // for the lowest free one), with the session token while it's live, and record the
   // outcome on the run. Used for automatic submits and the panel's SUBMIT button.
-  async function sendRun(run, name) {
+  async function sendRun(run, name, tag) {
     const live = sessionLive();
+    const before = live ? playerInfo() : null;
     run.submitting = true; run.status = "";
     lbOnRunUpdate();
     const token = await run.tokenP;
-    const r = token
-      ? await lbPost("/submit", { token, name, score: run.score, player: live ? savedPlayer() : undefined })
-          .catch(() => null)
-      : null;
+    const body = { token, name, score: run.score };
+    if (live) body.player = savedPlayer();
+    else if (tag !== undefined && tag !== "") body.tag = tag;
+    const r = token ? await lbPost("/submit", body).catch(() => null) : null;
     run.submitting = false;
     if (!token) {                  // /start failed: the server never saw this run
       run.submitted = true; run.status = "THIS RUN WASN'T REGISTERED (OFFLINE?)";
     } else if (r && r.ok) {
       localStorage.setItem("fb_player", r.data.player);
-      localStorage.setItem("fb_name", name);
+      localStorage.setItem("fb_name", r.data.name);
       localStorage.setItem("fb_lb_best", String(r.data.best));
       sessionExpired = false;
-      run.submitted = true; run.rank = r.data.rank; run.at = Date.now(); run.status = "SAVED!";
+      run.submitted = true; run.rank = r.data.rank; run.at = Date.now();
+      // A session the server no longer counted as live came back as a new player.
+      const moved = before && (before.n !== r.data.name.toLowerCase() || before.tag !== r.data.tag);
+      run.status = moved || !live ? "SAVED AS " + r.data.name + " #" + tagDigits(r.data.tag) : "SAVED!";
     } else {
       const err = (r && r.data && r.data.error) || "OFFLINE, TRY AGAIN";
-      // The server no longer counts this session as live: the name must be picked again.
-      if (live && (err === "NAME TAKEN" || err === "NAME LOCKED")) endSession();
+      // The server no longer counts this session as live: pick a name again.
+      if (live && err === "NAME LOCKED") endSession();
       else run.status = err;
       if (FINAL_ERRORS.includes(err)) run.submitted = true;
     }
@@ -968,6 +979,10 @@
             + '<input class="flappy-lb-name" maxlength="10" autocomplete="nickname"'
             +   ' autocapitalize="characters" spellcheck="false" placeholder="YOUR NAME"'
             +   ' aria-label="Your name">'
+            + '<span class="flappy-lb-hash" aria-hidden="true">#</span>'
+            + '<input class="flappy-lb-num" maxlength="3" inputmode="numeric"'
+            +   ' autocomplete="off" placeholder="AUTO"'
+            +   ' aria-label="Your number, 0 to 999 (optional)">'
             + '<button type="submit" class="flappy-lb-submit">SUBMIT</button>'
           + '</form>'
           + '<div class="flappy-lb-status" aria-live="polite"></div>'
@@ -979,6 +994,7 @@
       const youRow = lbOverlay.querySelector(".flappy-lb-you");
       const form = lbOverlay.querySelector(".flappy-lb-form");
       const nameInput = lbOverlay.querySelector(".flappy-lb-name");
+      const numInput = lbOverlay.querySelector(".flappy-lb-num");
       const submitBtn = lbOverlay.querySelector(".flappy-lb-submit");
       const lbStatus = lbOverlay.querySelector(".flappy-lb-status");
 
@@ -1082,19 +1098,29 @@
           place.textContent = r.rank == null ? "-" : String(r.rank);
           if (r.rank >= 1000) place.classList.add("flappy-lb-place-long");
         }
-        const name = document.createElement("span"); name.className = "flappy-lb-who"; name.textContent = r.name;
+        // "Name #N": the name shortens with "..." if needed, the number always shows.
+        const name = document.createElement("span"); name.className = "flappy-lb-who";
+        const nameText = document.createElement("span"); nameText.className = "flappy-lb-who-name";
+        nameText.textContent = r.name;
+        name.appendChild(nameText);
+        if (Number.isInteger(r.tag)) {
+          const tag = document.createElement("span"); tag.className = "flappy-lb-tag";
+          tag.textContent = "#" + tagDigits(r.tag);
+          name.appendChild(tag);
+        }
         const when = document.createElement("span"); when.className = "flappy-lb-when"; when.textContent = r.at ? ago(r.at) : "";
         const score = document.createElement("span"); score.className = "flappy-lb-score"; score.textContent = String(r.score);
         row.replaceChildren(place, name, when, score);
         row.classList.toggle("flappy-lb-podium", r.rank >= 1 && r.rank <= 3);
       }
       function renderTop(rows) {
-        const me = savedName().toLowerCase();
+        // Your own row is the one with your session's name and number.
+        const me = sessionLive() ? playerInfo() : null;
         list.replaceChildren(...rows.map((r, i) => {
           const li = document.createElement("li");
           li.className = "flappy-lb-row";
-          fillRow(li, { rank: i + 1, name: r.name, score: r.score, at: r.at });
-          if (me && String(r.name).toLowerCase() === me) li.classList.add("flappy-lb-me");
+          fillRow(li, { rank: i + 1, name: r.name, tag: r.tag, score: r.score, at: r.at });
+          if (me && String(r.name).toLowerCase() === me.n && r.tag === me.tag) li.classList.add("flappy-lb-me");
           return li;
         }));
       }
@@ -1115,12 +1141,14 @@
       }
 
       // Pinned yellow row: the run you just played (its real rank once submitted, the
-      // rank it would get before that), otherwise your best under the saved name.
+      // rank it would get before that), otherwise your session's best.
       let youSeq = 0;
       function loadYou() {
         const seq = ++youSeq;
         const name = savedName();
-        const validName = NAME_RE.test(name);
+        const tag = sessionTag();
+        const known = sessionLive() && NAME_RE.test(name);
+        const who = known ? "&name=" + encodeURIComponent(name) + "&tag=" + tag : "";
         const show = (r) => {
           if (seq !== youSeq) return;
           youRow.hidden = !r;
@@ -1128,46 +1156,52 @@
         };
         const run = pendingRun;
         if (run) {
-          const base = { name: validName ? name : "YOU", score: run.score, at: run.at };
+          const base = known ? { name, tag, score: run.score, at: run.at } : { name: "YOU", score: run.score, at: run.at };
           if (run.rank) return show({ ...base, rank: run.rank });
           show({ ...base, rank: null });
-          const q = "/rank?score=" + run.score + (validName ? "&name=" + encodeURIComponent(name) : "");
-          fetch(LB_API + q).then((r) => r.json())
+          fetch(LB_API + "/rank?score=" + run.score + who).then((r) => r.json())
             .then((d) => { if (d && d.rank) show({ ...base, rank: d.rank }); })
             .catch(() => {});
           return;
         }
-        if (!validName) return show(null);
-        fetch(LB_API + "/rank?name=" + encodeURIComponent(name), { cache: "no-store" })
+        if (!known) return show(null);
+        fetch(LB_API + "/rank?" + who.slice(1), { cache: "no-store" })
           .then((r) => r.json())
-          .then((d) => show(d && d.rank ? { rank: d.rank, name: d.name, score: d.score, at: d.at } : null))
+          .then((d) => show(d && d.rank ? { rank: d.rank, name: d.name, tag: d.tag, score: d.score, at: d.at } : null))
           .catch(() => show(null));
       }
 
       function lbIsOpen() { return lbOverlay.classList.contains("open"); }
       // The form shows only while the last run still needs a submit by hand: a new
       // player picking a name, or a session whose automatic submit failed (retry).
+      // During a submit by hand it stays where it is with SUBMIT disabled, so a refused
+      // name doesn't make the panel shrink and grow back in a blink; an automatic
+      // submit never shows it.
       let formRun = null;              // the run the name box was last filled for
       function renderForm() {
         const run = pendingRun;
-        const canSubmit = !!run && !run.submitted && !run.submitting;
-        form.hidden = !canSubmit;
+        const busy = !!run && run.submitting;
+        const canSubmit = !!run && !run.submitted && !busy;
+        form.hidden = !(canSubmit || (busy && run.byHand));
+        submitBtn.disabled = busy;
         if (canSubmit) {
           const live = sessionLive();
-          // A new player's box starts empty for each run, then keeps what they type
-          // across retries (NAME TAKEN etc.) of that run.
-          if (live) nameInput.value = sessionName();
-          else if (run !== formRun || nameInput.readOnly) nameInput.value = "";
+          // A new player's boxes start empty for each run, then keep what they type
+          // across retries (TAG TAKEN etc.) of that run. A session shows its own name
+          // and number, read-only.
+          if (live) { nameInput.value = sessionName(); numInput.value = tagDigits(sessionTag()); }
+          else if (run !== formRun || nameInput.readOnly) { nameInput.value = ""; numInput.value = ""; }
           formRun = run;
-          nameInput.readOnly = live;
-          nameInput.classList.toggle("flappy-lb-name-locked", live);
-          submitBtn.disabled = false;
+          for (const el of [nameInput, numInput]) {
+            el.readOnly = live;
+            el.classList.toggle("flappy-lb-name-locked", live);
+          }
         }
         lbStatus.textContent = run && run.submitting ? "SAVING..."
           : run && run.status ? run.status
           : !canSubmit || sessionLive() ? ""
-          : sessionExpired ? "SESSION EXPIRED: PICK A NEW NAME"
-          : "YOUR NAME CAN'T BE CHANGED LATER";
+          : sessionExpired ? "SESSION EXPIRED: PICK A NAME AGAIN"
+          : "NUMBER OPTIONAL. CAN'T BE CHANGED LATER";
       }
       function openLb() {
         paused = true;
@@ -1185,7 +1219,9 @@
         if (pendingRun && pendingRun.rank) { loadTop(true); loadYou(); }
       };
       function closeLb() {
-        if (document.activeElement === nameInput) nameInput.blur();   // drop the iOS keyboard
+        if (document.activeElement === nameInput || document.activeElement === numInput) {
+          document.activeElement.blur();   // drop the iOS keyboard
+        }
         lbOverlay.classList.remove("open");
         paused = false;
       }
@@ -1202,12 +1238,23 @@
         if (!run || run.submitted || run.submitting) return;
         const live = sessionLive();
         const name = live ? sessionName() : nameInput.value.normalize("NFKC").trim().replace(/\s+/g, " ");
+        const tag = live ? "" : numInput.value.trim();
         if (!live && !NEW_NAME_RE.test(name)) {
           lbStatus.textContent = "LETTERS, NUMBERS, SPACE . _ - (MAX 10)";
           return;
         }
-        if (document.activeElement === nameInput) nameInput.blur();   // drop the iOS keyboard
-        sendRun(run, name);   // the fb_name/fb_player it saves are only ever accepted ones
+        if (!live && tag !== "" && !/^\d{1,3}$/.test(tag)) {
+          lbStatus.textContent = "NUMBER: 0 TO 999, OR LEAVE IT BLANK";
+          return;
+        }
+        if (document.activeElement === nameInput || document.activeElement === numInput) {
+          document.activeElement.blur();   // drop the iOS keyboard
+        }
+        // An empty number means "the lowest free one". What sendRun saves (fb_name,
+        // fb_player) is only ever what the server accepted. byHand keeps the form on
+        // screen while it saves (see renderForm()).
+        run.byHand = true;
+        sendRun(run, name, tag === "" ? "" : Number(tag));
       });
     }
 

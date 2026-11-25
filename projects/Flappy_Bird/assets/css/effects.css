@@ -421,7 +421,10 @@
     .flappy-lb-coin-shine::after { animation: none; opacity: 0; }
     .flappy-lb-sparkle { animation: none; opacity: 0.8; transform: scale(0.7); }
 }
-.flappy-lb-who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* "Name #N": the name shortens with "..." when space is tight; the number always shows. */
+.flappy-lb-who { display: flex; align-items: baseline; gap: 3px; min-width: 0; white-space: nowrap; }
+.flappy-lb-who-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.flappy-lb-tag { flex: none; font-size: 0.8em; opacity: 0.75; }
 .flappy-lb-when {
     text-align: center;
     font-size: 11px;
@@ -445,8 +448,11 @@
 }
 .flappy-lb-you .flappy-lb-when { border-left-color: rgba(59, 36, 24, 0.5); }
 
-.flappy-lb-form { display: flex; gap: 6px; margin: 6px 0 0; }   /* the portfolio theme gives forms a bottom margin */
-.flappy-lb-name {
+/* The portfolio theme (main.css) gives every form a bottom margin and overflow-x: hidden,
+   which turns overflow-y into auto: the pressed SUBMIT button's 2px shift then made the
+   form scroll and show a scrollbar. Reset both here. */
+.flappy-lb-form { display: flex; gap: 6px; margin: 6px 0 0; overflow: visible; }
+.flappy-lb-name, .flappy-lb-num {
     flex: 1;
     min-width: 0;
     height: 34px;
@@ -463,7 +469,9 @@
     border-radius: 10px;
     box-shadow: none;
 }
-.flappy-lb-name:focus { outline: 2px solid #ffd34d; outline-offset: 1px; }
+.flappy-lb-num { flex: none; width: 58px; padding: 0 4px; }   /* the optional number, 0-999 */
+.flappy-lb-hash { align-self: center; font-size: 16px; }
+.flappy-lb-name:focus, .flappy-lb-num:focus { outline: 2px solid #ffd34d; outline-offset: 1px; }
 .flappy-lb-name-locked { background: #f1e6c8; cursor: default; }   /* this browser's name is pinned */
 .flappy-lb-name-locked:focus { outline: none; }
 .flappy-lb-submit {
@@ -487,6 +495,12 @@
 .flappy-lb-submit:disabled { opacity: 0.6; cursor: default; }
 
 .flappy-lb-status {
+    /* Always two lines tall, message centred, so switching between a two-line hint and a
+       one-line "SAVING..." or error never resizes the panel. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.4em;               /* two lines at line-height 1.2 */
     margin-top: 6px;
     text-align: center;
     font-size: 12px;
