@@ -162,7 +162,54 @@
 									<li><span class="effect-span"><b>Esc</b> (keyboard): exit fullscreen.</span></li>
 									<li><span class="effect-span"><b>Frame-rate independent</b>: fixed 60Hz physics, so it plays the same on 60/120/144/280Hz displays.</span></li>
 									<li><span class="effect-span"><b>Offline playable</b>: Once loaded up the first time, the game can be fully played without internet. (only applied after adding the game as as a native app)</span></li>
+									<li><span class="effect-span"><b>Hall of Fame</b>: an online leaderboard of the top 100 players. See the Hall of Fame section below.</span></li>
 								</ul>
+							</div>
+
+							<div class="container">
+								<div class="submenu">Hall of Fame</div>
+								<div>
+									<button class="expand-collapse-button" onclick="TOGGLE_CONTENT('hall-of-fame-content')">&#9660;</button>
+								</div>
+							</div>
+							<div class="expandable-content" id="hall-of-fame-content">
+								<p>The game now has an online leaderboard, the Hall of Fame: the top 100 players, each with their best score. It's the only part of the game that uses the internet; everything else still runs right on your device.</p>
+
+								<p><b>How do I get on it?</b></p>
+								<p>When a run ends with at least 1 point, tap the podium button next to Play on the Game Over screen. Pick a name (10 characters max), and if you like a number from 0 to 999 to go with it, then press Submit. Your score shows up on the board right away, with your place.</p>
+
+								<p><b>What's the #number next to each name?</b></p>
+								<p>Names can repeat, so every player also has a number, and together they're unique: <code>Bob #000</code> and <code>Bob #007</code> are two different players. You can pick your own number when you first submit, as long as nobody with your name has it yet. Leave it blank and you get the lowest free one, so the first Bob is #000, the next #001, and so on.</p>
+
+								<p><b>Do I have to type my name every time?</b></p>
+								<p>No, only the first time. After that your device remembers you, and there's no form anymore: whenever you beat your best, the new score is sent automatically in the background. Runs that don't beat your best simply aren't sent. If a score is ever waiting for you to submit it, the podium button bobs to let you know.</p>
+
+								<p><b>Can I change my name or number later?</b></p>
+								<p>No, so choose carefully. Your name and number stay the same for as long as your device stays signed in, and nobody else can post as your exact name and number.</p>
+
+								<p><b>What if I switch phones or stop playing for a while?</b></p>
+								<p>Your device stays signed in as long as you play at least once every 30 days. If you don't, or if you clear the browser's data, use a private window, or play on a different device or browser, the game treats you as a new player. Your old entry stays on the board as it is. You can use the same name again, but you'll get a different number, so it becomes a new entry.</p>
+								<p>One catch on iPhone: if you play in a Safari tab rather than the Home Screen app, Safari itself clears a site's saved data after about a week without a visit, which signs you out early. The Home Screen app (see the setup instructions above) doesn't have that limit.</p>
+
+								<p><b>Is it fair?</b></p>
+								<ul>
+									<li><span class="effect-span">The server times every run with its own clock, so a score that couldn't be reached in the time played is rejected.</span></li>
+									<li><span class="effect-span">Each run can only be submitted once, and there's a limit on how quickly submissions can come in.</span></li>
+									<li><span class="effect-span">Offensive names, and names that pretend to be official, are blocked.</span></li>
+									<li><span class="effect-span">I can still remove anything that slips through.</span></li>
+								</ul>
+
+								<p><b>What's with the shiny medals?</b></p>
+								<p>The top three wear gold, silver, and bronze. Like the high-tier medals on the Game Over screen, first place gets the full treatment, a glossy shine and sparkles, second place sparkles, and third place keeps it classic.</p>
+
+								<p><b>What does it store about me?</b></p>
+								<p>No account, email, or password. The board keeps the name you chose, your score, and when you got it. To help stop spam it also keeps a scrambled code made from your connection, never your actual IP address.</p>
+
+								<p><b>Does it work offline?</b></p>
+								<p>The game does, the Hall of Fame doesn't. A run played without internet can't be submitted, because the server never saw it start; the game will tell you the run wasn't registered. Your best score on the device is still saved as usual.</p>
+
+								<p><b>How does it work behind the scenes?</b></p>
+								<p>This website is still a plain static page on GitHub Pages. The Hall of Fame lives on a small separate server on Cloudflare with a database behind it. When you start a run, the game quietly asks that server for a ticket stamped with the time; when you submit, the server checks the ticket and how long the run took before adding your score.</p>
 							</div>
 
 							<div class="container">
@@ -180,6 +227,7 @@
 								<p>Your high score is saved right on your device, like a note your phone keeps for the game.
 									When you beat your best, the game writes the new number down in its own little memory spot. That note stays there even after you close the game or restart your phone. So next time you play, it remembers and shows your highest score.
 									Because it's saved on your device (not online), it works without internet, and each device keeps its own record. The only way it gets forgotten is if you clear the browser's data for the site.</p>
+								<p>This is separate from the online Hall of Fame: the best score on the Game Over screen is your device's own record, while the Hall of Fame shows the best score you've submitted under your name.</p>
 							</div>
 
 							<div class="container">
