@@ -1128,8 +1128,10 @@
       function loadTop(fresh) {
         const seq = ++loadSeq;           // ignore replies that arrive out of order
         if (!list.children.length) note.textContent = "LOADING...";
-        // After a submit, skip the browser's 15 s cache so the new score shows.
-        fetch(LB_API + "/top?limit=100", { cache: fresh ? "no-store" : "default" })
+        // After a submit, skip the browser's 15 s cache so the new score shows. "reload"
+        // also refreshes the cached copy, so reopening the panel right after doesn't fall
+        // back to the list from before the submit ("no-store" left that copy in place).
+        fetch(LB_API + "/top?limit=100", { cache: fresh ? "reload" : "default" })
           .then((r) => r.json())
           .then((d) => {
             if (seq !== loadSeq) return;
@@ -1140,35 +1142,41 @@
           .catch(() => { if (seq === loadSeq) note.textContent = "OFFLINE"; });
       }
 
-      // Pinned yellow row: the run you just played (its real rank once submitted, the
-      // rank it would get before that), otherwise your session's best.
+      // Pinned yellow row. A signed-in player sees their best on the board, with its
+      // current rank and date, whatever the last run was. A player who hasn't joined yet
+      // sees the run they just played as "YOU", with the rank it would get.
       let youSeq = 0;
       function loadYou() {
         const seq = ++youSeq;
         const name = savedName();
         const tag = sessionTag();
         const known = sessionLive() && NAME_RE.test(name);
-        const who = known ? "&name=" + encodeURIComponent(name) + "&tag=" + tag : "";
         const show = (r) => {
           if (seq !== youSeq) return;
           youRow.hidden = !r;
           if (r) fillRow(youRow, r);
         };
         const run = pendingRun;
-        if (run) {
-          const base = known ? { name, tag, score: run.score, at: run.at } : { name: "YOU", score: run.score, at: run.at };
+        // The last run, as "YOU" with its projected rank (only for a player not on the board).
+        const showRun = () => {
+          if (!run) return show(null);
+          const base = { name: "YOU", score: run.score, at: run.at };
           if (run.rank) return show({ ...base, rank: run.rank });
           show({ ...base, rank: null });
-          fetch(LB_API + "/rank?score=" + run.score + who).then((r) => r.json())
+          fetch(LB_API + "/rank?score=" + run.score).then((r) => r.json())
             .then((d) => { if (d && d.rank) show({ ...base, rank: d.rank }); })
             .catch(() => {});
-          return;
-        }
-        if (!known) return show(null);
-        fetch(LB_API + "/rank?" + who.slice(1), { cache: "no-store" })
+        };
+        if (!known) return showRun();
+        // Until the server answers, show the best this device knows, without a rank.
+        if (youRow.hidden) show({ name, tag, score: sessionBest() || (run ? run.score : 0), rank: null });
+        fetch(LB_API + "/rank?name=" + encodeURIComponent(name) + "&tag=" + tag, { cache: "no-store" })
           .then((r) => r.json())
-          .then((d) => show(d && d.rank ? { rank: d.rank, name: d.name, tag: d.tag, score: d.score, at: d.at } : null))
-          .catch(() => show(null));
+          .then((d) => {
+            if (d && d.rank) show({ rank: d.rank, name: d.name, tag: d.tag, score: d.score, at: d.at });
+            else show(null);   // not on the board (e.g. its scores were hidden)
+          })
+          .catch(() => {});
       }
 
       function lbIsOpen() { return lbOverlay.classList.contains("open"); }
