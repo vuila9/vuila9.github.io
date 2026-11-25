@@ -187,7 +187,7 @@
   // On a localhost page it talks to the Worker running under `wrangler dev`.
   const LB_LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   const LB_API = LB_LOCAL ? "http://localhost:8787"
-    : "";   // after `wrangler deploy`: "https://flappy-leaderboard.<subdomain>.workers.dev"
+    : "https://flappy-leaderboard.khoa-nguynxun.workers.dev";
   let runTokenP = null;   // Promise<string|null>: the current run's token from POST /start
   let pendingRun = null;  // { score, tokenP, submitted }: last finished run, kept until the next starts
 
