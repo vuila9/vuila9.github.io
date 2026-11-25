@@ -257,11 +257,14 @@
 
 .flappy-lb-panel {
     --lb-ink: #3b2418;               /* text outline / dark edges */
+    --lb-row: 38px;                  /* list row height ...                       */
+    --lb-gap: 5px;                   /* ... and the gap between rows               */
+    --lb-rows: 10;                   /* rows visible at once; the rest scroll      */
     position: relative;
     display: flex;
     flex-direction: column;
     width: min(94%, 380px);
-    height: min(calc(100% - 28px), 640px);
+    max-height: calc(100% - 28px);   /* sized by its content, never taller than the screen */
     box-sizing: border-box;
     padding: 14px 8px 10px;
     background: #b97a55;
@@ -327,12 +330,16 @@
 .flappy-lb-head span:nth-child(4) { text-align: center; }
 
 .flappy-lb-body {                    /* the scrolling part: up to 100 players */
-    flex: 1;
+    /* Exactly --lb-rows rows tall, whatever the count, so the board keeps its size;
+       it shrinks (min-height: 0) only when the screen is too short for that. */
+    flex: 0 1 auto;
+    box-sizing: border-box;
+    height: calc(var(--lb-rows) * var(--lb-row) + (var(--lb-rows) - 1) * var(--lb-gap) + 2 * var(--lb-gap));
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-    padding: 5px;
+    padding: var(--lb-gap);
     background: #6e4330;
     border-radius: 10px;
     box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.25);
@@ -353,8 +360,8 @@
 .flappy-lb-body::-webkit-scrollbar-button { display: none; }
 .flappy-lb-list { list-style: none; margin: 0; padding: 0; }
 .flappy-lb-list .flappy-lb-row {
-    min-height: 38px;
-    margin: 0 0 5px;
+    min-height: var(--lb-row);
+    margin: 0 0 var(--lb-gap);
     padding: 2px 6px 2px 2px;
     background: #8f5b3f;
     border-radius: 10px;
